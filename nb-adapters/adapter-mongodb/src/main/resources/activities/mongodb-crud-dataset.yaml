@@ -13,40 +13,40 @@ scenarios:
     delete:   run driver=mongodb tags==block:"delete.*", cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10000000)) threads=auto errors=timer,warn
 
 bindings:
-  seq_key: Mod(<<docscount:10000000>>); ToString() -> String
-  random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
-  document_json_without_id: ModuloLineToString('<<dataset_file>>'); ReplaceRegex('^\{', '')
+  seq_key: Mod(TEMPLATE(docscount,10000000)); ToString() -> String
+  random_key: Uniform(0,TEMPLATE(docscount,10000000)); ToString() -> String
+  document_json_without_id: ModuloLineToString('TEMPLATE(dataset_file)'); ReplaceRegex('^\{', '')
 
 blocks:
   schema:
     ops:
       dummy-insert: >2
         {
-          insert: "<<collection:crud_dataset>>",
+          insert: "TEMPLATE(collection,crud_dataset)",
           documents: [ { _id: "dummyyyy" } ]
         }
 
       drop-collection: >2
         {
-          drop: "<<collection:crud_dataset>>"
+          drop: "TEMPLATE(collection,crud_dataset)"
         }      
 
       create-collection: >2
         {
-          create: "<<collection:crud_dataset>>"
+          create: "TEMPLATE(collection,crud_dataset)"
         }                 
 
       create-indexes: >2
         {
-          createIndexes: "<<collection:crud_dataset>>",
-          indexes: <<indexes:[ { key: { dummy : 1 }, name: "dummy_idx", sparse: true } ]>>
+          createIndexes: "TEMPLATE(collection,crud_dataset)",
+          indexes: TEMPLATE(indexes,[ { key: { dummy : 1 }, name: "dummy_idx", sparse: true } ])
         }        
 
   write:
     ops:
       write-docs: >2
         {
-          insert: "<<collection:crud_dataset>>",
+          insert: "TEMPLATE(collection,crud_dataset)",
           writeConcern: { w: "majority" },
           documents: [ { "_id": "{seq_key}", {document_json_without_id} } ]
         }
@@ -55,7 +55,7 @@ blocks:
     ops:
       read-docs: >2
         {
-          find: "<<collection:crud_dataset>>",
+          find: "TEMPLATE(collection,crud_dataset)",
           filter: { _id: "{random_key}" }
         }        
 
@@ -63,7 +63,7 @@ blocks:
     ops:
       update-docs: >2
         {
-          update: "<<collection:crud_dataset>>",
+          update: "TEMPLATE(collection,crud_dataset)",
           writeConcern: { w: "majority" },
           updates: [
             {
@@ -77,7 +77,7 @@ blocks:
     ops:
       delete-docs: >2
         {
-          delete: "<<collection:crud_dataset>>",
+          delete: "TEMPLATE(collection,crud_dataset)",
           deletes: [
             {
               q: { _id: "{seq_key}" },

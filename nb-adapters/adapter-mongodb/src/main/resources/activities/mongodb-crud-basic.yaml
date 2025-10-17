@@ -13,8 +13,8 @@ scenarios:
     delete:   run driver=mongodb tags==block:"delete.*", cycles===TEMPLATE(delete-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
 
 bindings:
-  seq_key: Mod(<<docscount:10000000>>); ToString() -> String
-  random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
+  seq_key: Mod(TEMPLATE(docscount,10000000)); ToString() -> String
+  random_key: Uniform(0,TEMPLATE(docscount,10000000)); ToString() -> String
 
   user_id: ToHashedUUID(); ToString() -> String
   created_on: Uniform(1262304000,1577836800) -> long
@@ -32,20 +32,20 @@ blocks:
     ops:
       dummy-insert: >2
         {
-          insert: "<<collection:crud_basic>>",
+          insert: "TEMPLATE(collection,crud_basic)",
           documents: [ { _id: "dummyyyy" } ]
         }
       drop-collection: |
         {
-          drop: "<<collection:crud_basic>>"
+          drop: "TEMPLATE(collection,crud_basic)"
         }
       create-collection: |
         {
-          create: "<<collection:crud_basic>>"
+          create: "TEMPLATE(collection,crud_basic)"
         }
       create-indexes: |
         {
-          createIndexes: "<<collection:crud_basic>>",
+          createIndexes: "TEMPLATE(collection,crud_basic)",
           indexes: [
             {
               key: { user_id: 1 },
@@ -67,7 +67,7 @@ blocks:
     ops:
       write-document: >2
         {
-          insert: "<<collection:crud_basic>>",
+          insert: "TEMPLATE(collection,crud_basic)",
           writeConcern: { w: "majority" },
           documents: [
             {
@@ -100,7 +100,7 @@ blocks:
     ops:
       read-document: >2
         {
-          find: "<<collection:crud_basic>>",
+          find: "TEMPLATE(collection,crud_basic)",
           filter: { _id: "{random_key}" }
         }        
 
@@ -108,7 +108,7 @@ blocks:
     ops:
       update-document: >2
         {
-          update: "<<collection:crud_basic>>",
+          update: "TEMPLATE(collection,crud_basic)",
           writeConcern: { w: "majority" },
           updates: [
             {
@@ -145,7 +145,7 @@ blocks:
     ops:
       delete-document: >2
         {
-          delete: "<<collection:crud_basic>>",
+          delete: "TEMPLATE(collection,crud_basic)",
           deletes: [
             {
               q: { _id: "{seq_key}" },

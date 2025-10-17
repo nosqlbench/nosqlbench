@@ -11,13 +11,13 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,TEMPLATE(docscount,10)) threads=auto errors=timer,warn
 
 bindings:
-  weighted_hosts: WeightedStrings('<<docsapi_host:stargate>>')
+  weighted_hosts: WeightedStrings('TEMPLATE(docsapi_host,stargate)')
   # http request id
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
+  token: Discard(); Token('TEMPLATE(auth_token,)','TEMPLATE(auth_uri,http://localhost:8081/v1/auth)', 'TEMPLATE(auth_uid,cassandra)', 'TEMPLATE(auth_pswd,cassandra)');
 
-  seq_key: Mod(<<docscount:10000000>>); ToString() -> String
-  random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
+  seq_key: Mod(TEMPLATE(docscount,10000000)); ToString() -> String
+  random_key: Uniform(0,TEMPLATE(docscount,10000000)); ToString() -> String
   document_json: Discard(); FirstLines('data/docsapi-dataset.json', 1000));
 
 blocks:
@@ -25,21 +25,21 @@ blocks:
     ops:
       create-namespace:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/schemas/namespaces
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(docsapi_port,8180)TEMPLATE(path_prefix,)/v2/schemas/namespaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
-            "name": "<<namespace:docs_crud_dataset>>",
-            "replicas": <<rf:1>>
+            "name": "TEMPLATE(namespace,docs_crud_dataset)",
+            "replicas": TEMPLATE(rf,1)
           }
         ok-status: ".*"
 
       delete-docs-collection:
         method: DELETE
-        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(docsapi_port,8180)TEMPLATE(path_prefix,)/v2/namespaces/TEMPLATE(namespace,docs_crud_dataset)/collections/TEMPLATE(collection,docs_collection)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -47,20 +47,20 @@ blocks:
 
       create-docs-collection:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(docsapi_port,8180)TEMPLATE(path_prefix,)/v2/namespaces/TEMPLATE(namespace,docs_crud_dataset)/collections
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
-            "name": "<<collection:docs_collection>>"
+            "name": "TEMPLATE(collection,docs_collection)"
           }
   main:
     ops:
       write-document:
         method: PUT
-        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{seq_key}
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(docsapi_port,8180)TEMPLATE(path_prefix,)/v2/namespaces/TEMPLATE(namespace,docs_crud_dataset)/collections/TEMPLATE(collection,docs_collection)/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -69,7 +69,7 @@ blocks:
 
       read-document:
         method: GET
-        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{random_key}
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(docsapi_port,8180)TEMPLATE(path_prefix,)/v2/namespaces/TEMPLATE(namespace,docs_crud_dataset)/collections/TEMPLATE(collection,docs_collection)/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -78,7 +78,7 @@ blocks:
       # TODO - what is the purpose of this? does it overwrite? is there a way to make sure it is actually overwriting existing documents?
       update-document:
         method: PUT
-        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{random_key}
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(docsapi_port,8180)TEMPLATE(path_prefix,)/v2/namespaces/TEMPLATE(namespace,docs_crud_dataset)/collections/TEMPLATE(collection,docs_collection)/{random_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -87,7 +87,7 @@ blocks:
 
       delete-document:
         method: DELETE
-        uri: <<protocol:http>>://{weighted_hosts}:<<docsapi_port:8180>><<path_prefix:>>/v2/namespaces/<<namespace:docs_crud_dataset>>/collections/<<collection:docs_collection>>/{seq_key}
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(docsapi_port,8180)TEMPLATE(path_prefix,)/v2/namespaces/TEMPLATE(namespace,docs_crud_dataset)/collections/TEMPLATE(collection,docs_collection)/{seq_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"

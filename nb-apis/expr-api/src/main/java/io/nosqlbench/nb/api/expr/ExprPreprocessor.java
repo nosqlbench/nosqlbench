@@ -48,7 +48,15 @@ public final class ExprPreprocessor {
 
     private static final String SIGIL_START = "{{";
 
-    private volatile GroovyExpressionProcessor processor;
+    private final GroovyExpressionProcessor processor;
+
+    /**
+     * Create a new expression preprocessor with its own Groovy expression processor.
+     * The lifetime of the processor is tied to this preprocessor instance.
+     */
+    public ExprPreprocessor() {
+        this.processor = new GroovyExpressionProcessor();
+    }
 
     /**
      * Render the provided source through the expression system only when a substitution sigil is
@@ -58,7 +66,7 @@ public final class ExprPreprocessor {
         if (!containsExpressions(source)) {
             return source;
         }
-        return getProcessor().process(source, sourceUri, parameters);
+        return processor.process(source, sourceUri, parameters);
     }
 
     /**
@@ -75,7 +83,7 @@ public final class ExprPreprocessor {
         if (!containsExpressions(source)) {
             return new ProcessingResult(source, new groovy.lang.Binding());
         }
-        return getProcessor().processWithContext(source, sourceUri, parameters);
+        return processor.processWithContext(source, sourceUri, parameters);
     }
 
     /**
@@ -85,19 +93,5 @@ public final class ExprPreprocessor {
      */
     public boolean containsExpressions(String source) {
         return source != null && source.contains(SIGIL_START);
-    }
-
-    private GroovyExpressionProcessor getProcessor() {
-        GroovyExpressionProcessor local = processor;
-        if (local == null) {
-            synchronized (this) {
-                local = processor;
-                if (local == null) {
-                    local = new GroovyExpressionProcessor();
-                    processor = local;
-                }
-            }
-        }
-        return local;
     }
 }

@@ -16,7 +16,7 @@ scenarios:
 
 bindings:
   sessionid: ToEpochTimeUUID()->java.util.UUID; ToString();
-  deviceid: Add(200000); Div(<<sessons_per_device:10>>); ToEpochTimeUUID()->java.util.UUID; ToString();
+  deviceid: Add(200000); Div(TEMPLATE(sessons_per_device,10)); ToEpochTimeUUID()->java.util.UUID; ToString();
   type: WeightedStrings('phone:10;computer:10;')
   os: WeightedStrings('android:6;ios:4;linux:2;osx:7;windows:3')
   osversion: WeightedStrings('nougat:3;oreo:1;jellybean:2;4:1;4c:1;5:1;5c:1;trusty:1;xenial:1;yosemite:1;el capitan:2;sierra:3;high sierra:1;7:1;10:2')
@@ -30,13 +30,13 @@ blocks:
     statements:
       drop_graph:
         type: gremlin
-        script: "system.graph('<<graphname:graph_wheels>>').ifExists().drop();"
+        script: "system.graph('TEMPLATE(graphname,graph_wheels)').ifExists().drop();"
   create_graph_classic:
     statements:
       creategraph:
         type: gremlin
         script: >-
-          system.graph('<<graphname:graph_wheels>>')
+          system.graph('TEMPLATE(graphname,graph_wheels)')
            .classicEngine()
            .create()
   create_graph:
@@ -44,12 +44,12 @@ blocks:
       creategraph:
        type: gremlin
        script: >-
-         system.graph('<<graphname:graph_wheels>>').ifNotExists().create()
+         system.graph('TEMPLATE(graphname,graph_wheels)').ifNotExists().create()
   create_schema:
     statements:
       graph_schema:
         type: gremlin
-        graphname: <<graphname:graph_wheels>>
+        graphname: TEMPLATE(graphname,graph_wheels)
         script: >-
           schema.vertexLabel('session')
            .ifNotExists()
@@ -78,7 +78,7 @@ blocks:
     statements:
       dev_mode:
        type: gremlin
-       graphname: <<graphname:graph_wheels>>
+       graphname: TEMPLATE(graphname,graph_wheels)
        script: >-
         schema.config().option('graph.schema_mode').set('Development');
   prod_mode:
@@ -87,7 +87,7 @@ blocks:
     statements:
       prod_mode:
         type: gremlin
-        graphname: <<graphname:graph_wheels>>
+        graphname: TEMPLATE(graphname,graph_wheels)
         script: >-
          schema.config().option('graph.schema_mode').set('Production');
   rampup:
@@ -97,7 +97,7 @@ blocks:
       main_add:
         type: gremlin
         diag: "{diag_one_pct}"
-        graphname: <<graphname:graph_wheels>>
+        graphname: TEMPLATE(graphname,graph_wheels)
         script: >-
           device = g.addV('device')
            .property('deviceid', '{deviceid}' as UUID)
@@ -116,7 +116,7 @@ blocks:
     statements:
       read:
         type: fluent
-        graphname: <<graphname:graph_wheels>>
+        graphname: TEMPLATE(graphname,graph_wheels)
         imports:
           - "org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__"
         fluent: >-

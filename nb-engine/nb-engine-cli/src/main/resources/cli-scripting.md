@@ -46,7 +46,8 @@ the scenario designer.
 ## Script Parameters
 
 Any arguments following a script in name=value form will be used to parameterize
-the script. Script parameters are simply macro tokens in the form &lt;&lt;NAME:default&gt;&gt;.
+the script. Script parameters are simply macro tokens that can use template expressions
+(see the workload specification documentation for full syntax).
 All such parameters in the script will be substituted before the script executes,
 so parameters may be dropped into scripts ad-hoc.
 

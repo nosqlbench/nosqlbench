@@ -1,4 +1,4 @@
-package io.nosqlbench.engine.api.activityimpl;
+package io.nosqlbench.adapters.api.activityimpl;
 
 /*
  * Copyright (c) nosqlbench
@@ -39,5 +39,11 @@ public enum Dryrun {
      * and Ops are not executed, but should processing fall through then processing
      * will proceed as for none.
      */
-    jsonnet
+    jsonnet,
+    /**
+     * Expression processing is a one time dry-run and then exit.
+     * With this value the run should exit after the first evaluation of expressions
+     * and Ops are not executed.
+     */
+    exprs
 }

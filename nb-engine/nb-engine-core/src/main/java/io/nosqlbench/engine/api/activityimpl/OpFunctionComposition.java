@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl;
  */
 
 
+import io.nosqlbench.adapters.api.activityimpl.Dryrun;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;

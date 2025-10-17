@@ -1,0 +1,411 @@
+# Comprehensive Expr API Test - All Features Combined
+# This workload demonstrates all available expression types and functions in one integrated example
+# It serves as both a test and documentation of the expr system's capabilities
+
+description: |
+  Comprehensive test workload demonstrating all expr API features:
+  - Core functions (env, prop, uuid, now, upper, lower, source)
+  - Parameter functions (param, paramOr, hasParam)
+  - Template functions (_templateSet, _templateGet, _templateAlt)
+  - Template syntaxes (TEMPLATE function, shell-style)
+  - Groovy expressions with shared context
+  - Collections (lists, maps)
+  - Control flow and conditionals
+  - String interpolation
+  - Nested expressions
+
+scenarios:
+  default:
+    # === SECTION 1: Core Utility Functions ===
+
+    # Environment variable access with fallback
+    env_test: {{= env('HOME', '/default/home') }}
+    env_missing: {{= env('NOSQLBENCH_MISSING_VAR', 'fallback_value') }}
+
+    # System property access with fallback
+    prop_test: {{= prop('java.version', 'unknown') }}
+    prop_custom: {{= prop('nb.test.property', 'default_prop_value') }}
+
+    # UUID generation
+    random_id: {{= uuid() }}
+
+    # Current timestamp
+    timestamp: {{= now() }}
+
+    # Case transformation
+    uppercase_example: {{= upper('hello world') }}
+    lowercase_example: {{= lower('HELLO WORLD') }}
+
+    # Source URI (when available)
+    source_uri: {{= source() }}
+
+    # === SECTION 2: Parameter Functions ===
+
+    # Required parameter (will use test-provided value)
+    required_mode: {{= param('mode') }}
+    required_threshold: {{= param('threshold') }}
+
+    # Optional parameter with default
+    optional_timeout: {{= paramOr('timeout', 30) }}
+    optional_retries: {{= paramOr('retries', 3) }}
+    optional_name: {{= paramOr('name', 'default-name') }}
+
+    # Check if parameter exists
+    has_mode: {{= hasParam('mode') }}
+    has_missing: {{= hasParam('nonexistent_param') }}
+
+    # === SECTION 3: Template Variable Syntaxes ===
+
+    # TEMPLATE function syntax - simple default
+    template_simple: TEMPLATE(batch_size,1000)
+    template_with_dash: TEMPLATE(connection_timeout,5000)
+
+    # TEMPLATE function syntax - set and use (lexical scoping)
+    template_set_first: TEMPLATE(shared_value,initial)
+    template_use_later: TEMPLATE(shared_value)
+
+    # Note: Required parameter syntax would error if parameter not provided
+    # So it's omitted from this test to avoid failure
+
+    # TEMPLATE function syntax - check if exists
+    template_debug_mode: TEMPLATE(debug)
+    # Note: The alternate-if-set operator is not supported in TEMPLATE function syntax
+    # Using conditional expr instead
+    template_debug_message: {{= hasParam('debug') ? 'verbose_logging_enabled' : '' }}
+
+    # TEMPLATE function syntax - with explicit default
+    template_func_default: TEMPLATE(worker_count,10)
+    template_func_no_default: TEMPLATE(worker_count)
+
+    # TEMPLATE function syntax - with computed default
+    template_with_computed_default: TEMPLATE(max_operations,100000)
+
+    # Shell-style variable syntax
+    shell_var_simple: ${target_host:localhost}
+    shell_var_port: ${target_port:9042}
+    shell_var_no_default: ${target_host}
+
+    # === SECTION 4: Groovy Expressions with Shared Context ===
+
+    # Initialize variables in shared context
+    setup: {{=
+        counter = 0
+        accumulator = 0
+        items = []
+        config = [:]
+        return "Context initialized"
+    }}
+
+    # Simple arithmetic
+    arithmetic_add: {{= 10 + 20 }}
+    arithmetic_multiply: {{= 7 * 8 }}
+    arithmetic_complex: {{= (100 + 50) * 2 / 3 }}
+
+    # String operations
+    string_concat: {{= 'Hello' + ' ' + 'World' }}
+    string_interpolation: {{= "Count is " + counter + ", Mode is " + param('mode') }}
+    string_multiline: {{= '''
+        This is a
+        multiline string
+        with counter value
+    '''.trim() }}
+
+    # === SECTION 5: Collections ===
+
+    # List operations
+    add_items: {{=
+        items.add('first')
+        items.add('second')
+        items.add('third')
+        return items.size()
+    }}
+
+    list_operations: {{=
+        fruits = ['apple', 'banana', 'cherry']
+        return fruits.join(', ')
+    }}
+
+    list_transformation: {{=
+        numbers = [1, 2, 3, 4, 5]
+        doubled = numbers.collect { it * 2 }
+        return doubled.join('-')
+    }}
+
+    list_filtering: {{=
+        values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        evens = values.findAll { it % 2 == 0 }
+        return evens.sum()
+    }}
+
+    # Map operations
+    create_map: {{=
+        config['host'] = 'localhost'
+        config['port'] = 9042
+        config['datacenter'] = 'dc1'
+        return config.size()
+    }}
+
+    map_access: {{= config['host'] + ':' + config['port'] }}
+
+    map_iteration: {{=
+        scores = [alice: 95, bob: 87, charlie: 92]
+        return scores.collect { k, v -> k + "=" + v }.join(', ')
+    }}
+
+    # === SECTION 6: Conditionals and Control Flow ===
+
+    # Ternary operator
+    ternary_example: {{= param('threshold') > 50 ? 'high' : 'low' }}
+
+    # If-else
+    conditional: {{=
+        count = param('threshold')
+        if (count > 100) {
+            return 'very high'
+        } else if (count > 50) {
+            return 'high'
+        } else {
+            return 'low'
+        }
+    }}
+
+    # Switch statement
+    switch_example: {{=
+        mode = param('mode')
+        switch(mode) {
+            case 'strict':
+                return 'strict_mode_enabled'
+            case 'permissive':
+                return 'permissive_mode_enabled'
+            default:
+                return 'default_mode'
+        }
+    }}
+
+    # === SECTION 7: Loops and Iteration ===
+
+    # For loop
+    loop_sum: {{=
+        sum = 0
+        for (i in 1..10) {
+            sum += i
+        }
+        return sum
+    }}
+
+    # Each iteration
+    loop_each: {{=
+        result = []
+        [1, 2, 3, 4, 5].each { result.add(it * it) }
+        return result.join(', ')
+    }}
+
+    # While loop
+    loop_while: {{=
+        count = 0
+        sum = 0
+        while (count < 5) {
+            count++
+            sum += count
+        }
+        return sum
+    }}
+
+    # === SECTION 8: Complex Nested Expressions ===
+
+    # Nested function calls
+    nested_functions: {{= upper(paramOr('prefix', 'default')) + '_' + upper(paramOr('suffix', 'SUFFIX')) }}
+
+    # Template syntax combined with expression (template is rewritten first, then expr evaluates)
+    template_value_set: TEMPLATE(nested_value,42)
+    template_in_expr: {{= "Value: " + paramOr('nested_value', '42') + " units" }}
+
+    # Expression inside template (expression is evaluated after template rewriting)
+    expr_in_template_setup: {{= 10 * param('threshold') }}
+    expr_in_template: TEMPLATE(computed,420)
+
+    # Complex nested - templates provide values, expressions use them
+    multiplier_template: TEMPLATE(multiplier,2)
+    complex_nested: {{=
+        base = paramOr('base', 100)
+        multiplier = paramOr('multiplier', '2').toInteger()
+        env_factor = env('FACTOR', '1').toInteger()
+        result = (base * multiplier * env_factor)
+        return "Result: " + result
+    }}
+
+    # === SECTION 9: State Accumulation ===
+
+    # Increment shared counter
+    increment1: {{=
+        counter++
+        accumulator += counter
+        return counter
+    }}
+
+    increment2: {{=
+        counter++
+        accumulator += counter
+        return counter
+    }}
+
+    increment3: {{=
+        counter++
+        accumulator += counter
+        return counter
+    }}
+
+    # Final accumulated values
+    final_counter: {{= counter }}
+    final_accumulator: {{= accumulator }}
+
+    # === SECTION 10: Advanced String Manipulation ===
+
+    # Regular expressions
+    regex_test: {{=
+        text = "The year is 2025"
+        matcher = text =~ /\d{4}/
+        return matcher ? matcher[0] : "no match"
+    }}
+
+    # String methods
+    string_methods: {{=
+        text = "  hello world  "
+        return text.trim().capitalize().replace('world', 'groovy')
+    }}
+
+    # Split and join
+    split_join: {{=
+        csv = "apple,banana,cherry"
+        parts = csv.split(',')
+        return parts.collect { it.toUpperCase() }.join(' | ')
+    }}
+
+    # === SECTION 11: Type Conversion ===
+
+    # String to number
+    str_to_int: {{= "123".toInteger() + 77 }}
+    str_to_double: {{= "3.14".toDouble() * 2 }}
+
+    # Number to string
+    num_to_str: {{= 42.toString() + " is the answer" }}
+
+    # Boolean operations
+    bool_and: {{= param('threshold') > 50 && hasParam('mode') }}
+    bool_or: {{= hasParam('missing') || hasParam('mode') }}
+    bool_not: {{= !hasParam('nonexistent') }}
+
+    # === SECTION 12: Null Handling ===
+
+    # Safe navigation operator
+    safe_nav: {{=
+        obj = null
+        return obj?.toString() ?: "null_value"
+    }}
+
+    # Elvis operator
+    elvis: {{=
+        value = null
+        return value ?: "default_value"
+    }}
+
+    # Null coalescing
+    null_coalesce: {{=
+        val1 = null
+        val2 = null
+        val3 = "found"
+        return val1 ?: val2 ?: val3
+    }}
+
+    # === SECTION 13: Functional Programming ===
+
+    # Map/Collect
+    map_example: {{=
+        [1, 2, 3, 4, 5].collect { it * it }.sum()
+    }}
+
+    # Filter/FindAll
+    filter_example: {{=
+        (1..20).findAll { it % 3 == 0 }.sum()
+    }}
+
+    # Reduce
+    reduce_example: {{=
+        [1, 2, 3, 4, 5].inject(0) { acc, val -> acc + val }
+    }}
+
+    # Any/All
+    any_example: {{=
+        [1, 2, 3, 4, 5].any { it > 3 }
+    }}
+
+    all_example: {{=
+        [1, 2, 3, 4, 5].every { it > 0 }
+    }}
+
+    # === SECTION 14: Date and Time ===
+
+    # Current time operations
+    time_operations: {{=
+        import java.time.Instant
+        import java.time.temporal.ChronoUnit
+
+        currentTime = Instant.now()
+        futureTime = currentTime.plus(1, ChronoUnit.HOURS)
+        return "Now: " + currentTime + ", Future: " + futureTime
+    }}
+
+    # === SECTION 15: Combining Everything ===
+
+    # Set timestamp and ID using expr functions (available outside Groovy)
+    current_timestamp: {{= now() }}
+    generated_id: {{= uuid() }}
+
+    # Ultimate complex expression combining all features
+    # Note: Templates are rewritten before expressions, so we use paramOr to access template values
+    ultimate_expression: {{=
+        // Get configuration from parameters and templates
+        mode = param('mode')
+        threshold = param('threshold')
+        batchSize = paramOr('batch_size', '1000').toInteger()
+        timeout = paramOr('timeout', 30)
+
+        // Initialize state
+        results = []
+        stats = [:]
+
+        // Perform calculations
+        for (i in 1..5) {
+            value = i * threshold
+            if (value > 100) {
+                results.add(value)
+            }
+        }
+
+        // Build statistics
+        stats['mode'] = mode
+        stats['count'] = results.size()
+        stats['sum'] = results.sum()
+        stats['avg'] = results.size() > 0 ? results.sum() / results.size() : 0
+        stats['batch_size'] = batchSize
+        stats['timeout'] = timeout
+
+        // Format output
+        output = [
+            "=== Comprehensive Expr Test Results ===",
+            "Mode: " + stats['mode'],
+            "Count: " + stats['count'],
+            "Sum: " + stats['sum'],
+            "Average: " + stats['avg'],
+            "Batch Size: " + stats['batch_size'],
+            "Timeout: " + stats['timeout']
+        ]
+
+        return output.join('\n')
+    }}
+
+# Test metadata
+params:
+  # These would normally be provided by the test
+  mode: strict
+  threshold: 42

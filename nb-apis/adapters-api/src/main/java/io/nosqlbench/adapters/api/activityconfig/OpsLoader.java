@@ -19,14 +19,16 @@ package io.nosqlbench.adapters.api.activityconfig;
 import com.amazonaws.util.StringInputStream;
 import com.google.gson.GsonBuilder;
 import io.nosqlbench.adapters.api.activityconfig.yaml.*;
+import io.nosqlbench.adapters.api.activityimpl.Dryrun;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.expr.ExprPreprocessor;
+import io.nosqlbench.nb.api.expr.TemplateContext;
+import io.nosqlbench.nb.api.expr.TemplateRewriter;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.nbio.ResolverChain;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
-import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.snakeyaml.engine.v2.api.Load;
@@ -75,31 +77,42 @@ public class OpsLoader {
         }
         Map<String, ?> expressionParams = params == null ? Map.of() : Map.copyOf(params);
 
-        String expressionProcessed = switch (fmt) {
-            case jsonnet -> processExpressions(evaluateJsonnet(srcuri, params), srcuri, expressionParams);
-            case yaml, json, inline, stmt -> processExpressions(sourceData, srcuri, expressionParams);
-        };
+        // Use TemplateContext to automatically manage template state lifecycle
+        try (TemplateContext ctx = TemplateContext.enter()) {
+            // PHASE 1: Rewrite TEMPLATE syntax to expr function calls
+            // This converts TEMPLATE(k,v) and ${key:value} to expr paramOr() calls
+            String templateRewritten = switch (fmt) {
+                case jsonnet -> evaluateJsonnet(srcuri, params); // Jsonnet doesn't need template rewriting
+                case yaml, json, inline, stmt -> TemplateRewriter.rewrite(sourceData);
+            };
 
-        StrInterpolator transformer = new StrInterpolator(params);
-        RawOpsDocList rawOpsDocList = switch (fmt) {
-            case jsonnet, yaml, json -> new RawOpsLoader(transformer).loadString(expressionProcessed);
-            case inline, stmt -> RawOpsDocList.forSingleStatement(transformer.apply(expressionProcessed));
-        };
-        // TODO: itemize inline to support ParamParser
+            // PHASE 2: Process expr expressions (including the rewritten template calls)
+            String expressionProcessed = processExpressions(templateRewritten, srcuri, expressionParams);
 
-        OpsDocList layered = new OpsDocList(rawOpsDocList);
-        transformer.checkpointAccesses().forEach((k, v) -> {
-            layered.addTemplateVariable(k, v);
-            params.remove(k);
-        });
+            // Load the processed content into RawOpsDocList
+            RawOpsDocList rawOpsDocList = switch (fmt) {
+                case jsonnet, yaml, json -> new RawOpsLoader().loadString(expressionProcessed);
+                case inline, stmt -> RawOpsDocList.forSingleStatement(expressionProcessed);
+            };
+            // TODO: itemize inline to support ParamParser
 
-        return layered;
+            OpsDocList layered = new OpsDocList(rawOpsDocList);
+
+            // Track template variable accesses from TemplateContext
+            Map<String, String> templateAccesses = ctx.getAccesses();
+            templateAccesses.forEach((k, v) -> {
+                layered.addTemplateVariable(k, v);
+                params.remove(k);
+            });
+
+            return layered;
+        } // TemplateContext automatically cleaned up here
     }
 
     private static String processExpressions(String source, URI srcuri, Map<String, ?> params) {
-        boolean dryrunExprs = params != null && "exprs".equals(String.valueOf(params.get("dryrun")));
+        Dryrun dryrun = parseDryrunParam(params);
 
-        if (dryrunExprs) {
+        if (dryrun == Dryrun.exprs) {
             // Use processWithContext to capture both output and binding context
             io.nosqlbench.nb.api.expr.ProcessingResult result =
                 EXPRESSION_PREPROCESSOR.processWithContext(source, srcuri, params);
@@ -150,8 +163,8 @@ public class OpsLoader {
 
         String stdoutOutput = stdoutBuffer.toString(StandardCharsets.UTF_8);
         String stderrOutput = stderrBuffer.toString(StandardCharsets.UTF_8);
-        boolean dryrunJsonnet = params != null && "jsonnet".equals(String.valueOf(params.get("dryrun")));
-        if (dryrunJsonnet) {
+        Dryrun dryrun = parseDryrunParam(params);
+        if (dryrun == Dryrun.jsonnet) {
             logger.info("dryrun=jsonnet, dumping result to stdout and stderr:");
             System.out.println(stdoutOutput);
             System.err.println(stderrOutput);
@@ -177,6 +190,27 @@ public class OpsLoader {
         logger.trace("jsonnet result:\n" + stdoutOutput);
 
         return stdoutOutput;
+    }
+
+    /**
+     * Parse the dryrun parameter from the params map and return the corresponding enum value.
+     * Returns Dryrun.none if the parameter is not present or cannot be parsed.
+     */
+    private static Dryrun parseDryrunParam(Map<String, ?> params) {
+        if (params == null) {
+            return Dryrun.none;
+        }
+        Object dryrunValue = params.get("dryrun");
+        if (dryrunValue == null) {
+            return Dryrun.none;
+        }
+        String dryrunStr = String.valueOf(dryrunValue);
+        try {
+            return Dryrun.valueOf(dryrunStr);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid dryrun value: '" + dryrunStr + "', defaulting to 'none'");
+            return Dryrun.none;
+        }
     }
 
     // TODO These should not be exception based, use explicit pattern checks instead, or tap

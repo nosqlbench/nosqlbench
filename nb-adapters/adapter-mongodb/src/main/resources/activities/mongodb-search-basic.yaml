@@ -8,17 +8,17 @@ description: |
 scenarios:
   schema:                run driver=mongodb tags==block:"schema.*" threads==1 cycles==UNDEF
   rampup-write:          run driver=mongodb tags==block:"rampup-write.*" cycles===TEMPLATE(docscount,10000000) docpadding=TEMPLATE(docpadding,0) match-ratio=TEMPLATE(match-ratio,0.01) threads=auto errors=timer,warn
-  rampup-read:           run driver=mongodb tags==block:"rampup-read.*" cycles===TEMPLATE(rampup-cycles, 10000000) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main:                  run driver=mongodb tags==block:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-eq:               run driver=mongodb tags==block:main-eq,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-lt:               run driver=mongodb tags==block:main-lt,filter:lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-and:              run driver=mongodb tags==block:main-and,filter:and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-or:               run driver=mongodb tags==block:main-or,filter:or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
-  main-or-single-match:  run driver=mongodb tags==block:main-or-single-match,filter:or-single-match cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=<<threads:auto>> errors=timer,warn
+  rampup-read:           run driver=mongodb tags==block:"rampup-read.*" cycles===TEMPLATE(rampup-cycles, 10000000) field-projection=TEMPLATE(fields,null) threads=TEMPLATE(threads,auto) errors=timer,warn
+  main:                  run driver=mongodb tags==block:main cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=TEMPLATE(threads,auto) errors=timer,warn
+  main-eq:               run driver=mongodb tags==block:main-eq,filter:eq cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=TEMPLATE(threads,auto) errors=timer,warn
+  main-lt:               run driver=mongodb tags==block:main-lt,filter:lt cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=TEMPLATE(threads,auto) errors=timer,warn
+  main-and:              run driver=mongodb tags==block:main-and,filter:and cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=TEMPLATE(threads,auto) errors=timer,warn
+  main-or:               run driver=mongodb tags==block:main-or,filter:or cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=TEMPLATE(threads,auto) errors=timer,warn
+  main-or-single-match:  run driver=mongodb tags==block:main-or-single-match,filter:or-single-match cycles===TEMPLATE(read-cycles,TEMPLATE(docscount,10000000)) field-projection=TEMPLATE(fields,null) threads=TEMPLATE(threads,auto) errors=timer,warn
 
 bindings:
-  seq_key: Mod(<<docscount:10000000>>); ToString() -> String
-  random_key: Uniform(0,<<docscount:10000000>>); ToString() -> String
+  seq_key: Mod(TEMPLATE(docscount,10000000)); ToString() -> String
+  random_key: Uniform(0,TEMPLATE(docscount,10000000)); ToString() -> String
 
   user_id: ToHashedUUID(); ToString() -> String
   created_on: Uniform(1262304000,1577836800) -> long
@@ -30,32 +30,32 @@ bindings:
   lng: Hash() -> long; Uniform(-180d, 180d)
   friend_id: Add(-1); ToHashedUUID(); ToString() -> String
 
-  match1: Identity(); CoinFunc(<<match-ratio>>, FixedValue(0), FixedValue(1000))
-  match2: Identity(); CoinFunc(<<match-ratio>>, FixedValue("true"), FixedValue("false"))
-  additional_fields: ListSizedStepped(<<docpadding:0>>,Template("\"{}\":{}",Identity(),Identity())); ToString(); ReplaceAll('\[\"', ',\"'); ReplaceAll('\[', ''); ReplaceAll('\]', '') -> String
+  match1: Identity(); CoinFunc(TEMPLATE(match-ratio), FixedValue(0), FixedValue(1000))
+  match2: Identity(); CoinFunc(TEMPLATE(match-ratio), FixedValue("true"), FixedValue("false"))
+  additional_fields: ListSizedStepped(TEMPLATE(docpadding,0),Template("\"{}\":{}",Identity(),Identity())); ToString(); ReplaceAll('\[\"', ',\"'); ReplaceAll('\[', ''); ReplaceAll('\]', '') -> String
 
 blocks:
   schema:
     ops:
       dummy-insert: |
         {
-          insert: "<<collection:search_basic>>",
+          insert: "TEMPLATE(collection,search_basic)",
           documents: [ { _id: "dummyyyy" } ]
         }
 
       drop-collection: |
         {
-          drop: "<<collection:search_basic>>"
+          drop: "TEMPLATE(collection,search_basic)"
         }       
 
       create-collection: |
         {
-          create: "<<collection:search_basic>>"
+          create: "TEMPLATE(collection,search_basic)"
         }      
 
       create-indexes: |
         {
-          createIndexes: "<<collection:search_basic>>",
+          createIndexes: "TEMPLATE(collection,search_basic)",
           indexes: [
             {
               key: { user_id: 1 },
@@ -77,7 +77,7 @@ blocks:
       ops:
         write-document:
           {
-            insert: "<<collection:search_basic>>",
+            insert: "TEMPLATE(collection,search_basic)",
             writeConcern: { w: "majority" },
             documents: [
               {
@@ -117,9 +117,9 @@ blocks:
       ops:
         read-document: |
           {
-            find: "<<collection:search_basic>>",
+            find: "TEMPLATE(collection,search_basic)",
             filter: { match1: 0 }
-          }, <<field-projection:null>>
+          }, TEMPLATE(field-projection,null)
 
   main-eq:
     params:
@@ -127,9 +127,9 @@ blocks:
     ops:
       read-document: |
         {
-          find: "<<collection:search_basic>>",
+          find: "TEMPLATE(collection,search_basic)",
           filter: { match3: true }
-        }, <<field-projection:null>>        
+        }, TEMPLATE(field-projection,null)        
 
   main-lt:
     params:
@@ -137,9 +137,9 @@ blocks:
     ops:
       read-document: |
         {
-          find: "<<collection:search_basic>>",
+          find: "TEMPLATE(collection,search_basic)",
           filter: { match1: {$lt: 1}}
-        }, <<field-projection:null>>        
+        }, TEMPLATE(field-projection,null)        
 
   main-and:
     params:
@@ -147,9 +147,9 @@ blocks:
     ops:
       read-document: |
         {
-          find: "<<collection:search_basic>>",
+          find: "TEMPLATE(collection,search_basic)",
           filter: { match1: {$lt: 1}, match2: "true"}
-        }, <<field-projection:null>>        
+        }, TEMPLATE(field-projection,null)        
 
   main-or:
     params:
@@ -157,9 +157,9 @@ blocks:
     ops:
       read-document: |
         {
-          find: "<<collection:search_basic>>",
+          find: "TEMPLATE(collection,search_basic)",
           filter: { $or: [ {match1: {$lt: 1}}, {match3: true}]}
-        }, <<field-projection:null>>        
+        }, TEMPLATE(field-projection,null)        
 
   main-or-single-match:
     params:
@@ -167,6 +167,6 @@ blocks:
     ops:
       read-document: |
         {
-          find: "<<collection:search_basic>>",
+          find: "TEMPLATE(collection,search_basic)",
           filter: { $or: [ {match1: {$lt: 1}}, {match2: "notamatch"}]}
-        }, <<field-projection:null>>
+        }, TEMPLATE(field-projection,null)

@@ -145,7 +145,9 @@ public class YamlSpecValidator implements STAssemblyValidator {
         System.out.format("%-40s", "- checking yaml->json");
 
         try {
-            List<Map<String, Object>> docmaps = new RawOpsLoader().loadStringMap(yaml);
+            // Process templates before loading
+            String processedYaml = RawOpsLoader.processTemplates(yaml, new HashMap<>());
+            List<Map<String, Object>> docmaps = new RawOpsLoader().loadStringMap(processedYaml);
             JsonElement elem = null;
             try {
                 elem = JsonParser.parseString(json);

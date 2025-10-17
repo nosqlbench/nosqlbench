@@ -202,6 +202,7 @@ public class NBCLIOptions {
     private boolean wantsListScenarios;
     private boolean wantsListScripts;
     private String wantsToCopyWorkload;
+    private String wantsToCopyDestination;
     private boolean wantsWorkloadsList;
     private final List<String> wantsToIncludePaths = new ArrayList<>();
     private int hdr_digits = 3;
@@ -702,6 +703,9 @@ public class NBCLIOptions {
                 case NBCLIOptions.COPY:
                     arglist.removeFirst();
                     this.wantsToCopyWorkload = this.readWordOrThrow(arglist, "workload to copy");
+                    if (null != arglist.peekFirst() && !arglist.peekFirst().startsWith("-")) {
+                        this.wantsToCopyDestination = arglist.removeFirst();
+                    }
                     break;
                 case NBCLIOptions.CAT:
                     arglist.removeFirst();
@@ -1064,6 +1068,10 @@ public class NBCLIOptions {
 
     public String wantsToCopyResourceNamed() {
         return this.wantsToCopyWorkload;
+    }
+
+    public Optional<String> wantsToCopyDestination() {
+        return Optional.ofNullable(this.wantsToCopyDestination);
     }
 
     public String wantsToCatResourceNamed() {

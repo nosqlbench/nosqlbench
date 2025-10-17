@@ -23,12 +23,12 @@ params:
   instrument: TEMPLATE(instrument,false)
 
 bindings:
-  machine_id: Mod(<<sources:10000>>); ToHashedUUID() -> java.util.UUID
+  machine_id: Mod(TEMPLATE(sources,10000)); ToHashedUUID() -> java.util.UUID
   sensor_name: HashedLineToString('data/variable_words.txt')
-  time: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); ToJavaInstant();
-  cell_timestamp: Mul(<<timespeed:100>>L); Div(<<sources:10000>>L); Mul(1000L)
+  time: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); ToJavaInstant();
+  cell_timestamp: Mul(TEMPLATE(timespeed,100)L); Div(TEMPLATE(sources,10000)L); Mul(1000L)
   sensor_value: Normal(0.0,5.0); Add(100.0) -> double
-  station_id: Div(<<sources:10000>>);Mod(<<stations:100>>); ToHashedUUID() -> java.util.UUID
+  station_id: Div(TEMPLATE(sources,10000));Mod(TEMPLATE(stations,100)); ToHashedUUID() -> java.util.UUID
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',800,1200)
 blocks:
   schema:
@@ -36,11 +36,11 @@ blocks:
       prepared: false
     ops:
       create_keyspace: |
-        create keyspace if not exists <<keyspace:baselines>>
-        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+        create keyspace if not exists TEMPLATE(keyspace,baselines)
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
         AND durable_writes = true;
       create_table: |
-        create table if not exists <<keyspace:baselines>>.<<table:iot>> (
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,iot) (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name
         time timestamp,      // timestamp of collection
@@ -49,10 +49,10 @@ blocks:
         data text,
         PRIMARY KEY ((machine_id, sensor_name), time)
         ) WITH CLUSTERING ORDER BY (time DESC)
-         AND compression = { 'sstable_compression' : '<<compression:LZ4Compressor>>' }
+         AND compression = { 'sstable_compression' : 'TEMPLATE(compression,LZ4Compressor)' }
          AND compaction = {
          'class': 'TimeWindowCompactionStrategy',
-         'compaction_window_size': <<expiry_minutes:60>>,
+         'compaction_window_size': TEMPLATE(expiry_minutes,60),
          'compaction_window_unit': 'MINUTES'
         };
   truncate:
@@ -60,13 +60,13 @@ blocks:
       prepared: false
     ops:
       truncate_table: |
-        truncate table <<keyspace:baselines>>.<<table:iot>>;
+        truncate table TEMPLATE(keyspace,baselines).TEMPLATE(table,iot);
   schema_astra:
     params:
       prepared: false
     ops:
       create_table_astra: |
-        create table if not exists <<keyspace:baselines>>.<<table:iot>> (
+        create table if not exists TEMPLATE(keyspace,baselines).TEMPLATE(table,iot) (
         machine_id UUID,     // source machine
         sensor_name text,    // sensor name
         time timestamp,      // timestamp of collection
@@ -77,44 +77,44 @@ blocks:
         ) WITH CLUSTERING ORDER BY (time DESC);
   rampup:
     params:
-      cl: <<write_cl:LOCAL_QUORUM>>
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
       instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
       idempotent: true
     ops:
       insert_rampup: |
-        insert into  <<keyspace:baselines>>.<<table:iot>>
+        insert into  TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp}
   verify:
     params:
       ratio: 1
-      cl: <<read_cl:LOCAL_QUORUM>>
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
       verify-fields: "*, -cell_timestamp"
       instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
     ops:
       select_verify: |
-        select * from <<keyspace:baselines>>.<<table:iot>>
+        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name} and time={time};
   main_read:
     params:
-      ratio: <<read_ratio:1>>
-      cl: <<read_cl:LOCAL_QUORUM>>
+      ratio: TEMPLATE(read_ratio,1)
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
       instrument: TEMPLATE(instrument-reads,TEMPLATE(instrument,false))
     ops:
       select_read: |
-        select * from <<keyspace:baselines>>.<<table:iot>>
+        select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         where machine_id={machine_id} and sensor_name={sensor_name}
-        limit <<limit:10>>
+        limit TEMPLATE(limit,10)
   main_write:
     params:
-      ratio: <<write_ratio:9>>
-      cl: <<write_cl:LOCAL_QUORUM>>
+      ratio: TEMPLATE(write_ratio,9)
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
       idempotent: true
       instrument: TEMPLATE(instrument-writes,TEMPLATE(instrument,false))
     ops:
       insert_main: |
-        insert into <<keyspace:baselines>>.<<table:iot>>
+        insert into TEMPLATE(keyspace,baselines).TEMPLATE(table,iot)
         (machine_id, sensor_name, time, sensor_value, station_id, data)
         values ({machine_id}, {sensor_name}, {time}, {sensor_value}, {station_id}, {data})
         using timestamp {cell_timestamp}

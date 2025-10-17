@@ -2,7 +2,7 @@ blocks:
   schema:
     ops:
       create_keyspace: |
-        create keyspace if not exists <<keyspace:baselines>>
+        create keyspace if not exists TEMPLATE(keyspace,baselines)
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
         AND durable_writes = true;
       create_table: |

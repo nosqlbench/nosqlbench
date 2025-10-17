@@ -14,74 +14,74 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
+  weighted_hosts: WeightedStrings('TEMPLATE(graphql_host,stargate)')
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
+  token: Discard(); Token('TEMPLATE(auth_token,)','TEMPLATE(auth_uri,http://localhost:8081/v1/auth)', 'TEMPLATE(auth_uid,cassandra)', 'TEMPLATE(auth_pswd,cassandra)');
 
-  seq_key: Mod(<<keycount:10000000>>); ToString() -> String
-  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
-  rw_key: <<keydist:Uniform(0,10000000)->int>>; ToString() -> String
-  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+  seq_key: Mod(TEMPLATE(keycount,10000000)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  rw_key: TEMPLATE(keydist,Uniform(0,10000000)->int); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)->int); ToString() -> String
 
 blocks:
   schema:
     ops:
       create_keyspace:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
-          {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_keyvalue>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
+          {"query":"mutation {\n  createKeyspace(name:\"TEMPLATE(keyspace,gqlcf_keyvalue)\", replicas: TEMPLATE(rf,1), ifNotExists: true)\n}"}
 
       create_table:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: |
-          {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_keyvalue>>\"\n    tableName: \"<<table:keyvalue>>\"\n    partitionKeys: [{ name: \"key\", type: { basic: TEXT } }]\n    values: [{ name: \"value\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}"}
+          {"query":"mutation {\n  createTable(\n    keyspaceName: \"TEMPLATE(keyspace,gqlcf_keyvalue)\"\n    tableName: \"TEMPLATE(table,keyvalue)\"\n    partitionKeys: [{ name: \"key\", type: { basic: TEXT } }]\n    values: [{ name: \"value\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}"}
 
   rampup:
     ops:
       rampup_insert:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlcf_keyvalue)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: |
-          {"query":"mutation {\n  insert<<table:keyvalue>>( value: {key: \"{seq_key}\", value: \"{seq_value}\",}) {value {key, value}}}"}
+          {"query":"mutation {\n  insertTEMPLATE(table,keyvalue)( value: {key: \"{seq_key}\", value: \"{seq_value}\",}) {value {key, value}}}"}
 
   main_read:
     params:
-      ratio: <<read_ratio:5>>
+      ratio: TEMPLATE(read_ratio,5)
     ops:
       main_select:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlcf_keyvalue)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: |
-          {"query":"{<<table:keyvalue>>(value: {key: \"{rw_key}\"}) {values {key, value}}}"}
+          {"query":"{TEMPLATE(table,keyvalue)(value: {key: \"{rw_key}\"}) {values {key, value}}}"}
 
   main_write:
     params:
-      ratio: <<write_ratio:5>>
+      ratio: TEMPLATE(write_ratio,5)
     ops:
       main_write:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_keyvalue>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlcf_keyvalue)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: |
-          {"query":"mutation {\n  insert<<table:keyvalue>>( value: {key: \"{rw_key}\", value: \"{rw_value}\",}) {value {key, value}}}"}
+          {"query":"mutation {\n  insertTEMPLATE(table,keyvalue)( value: {key: \"{rw_key}\", value: \"{rw_value}\",}) {value {key, value}}}"}

@@ -20,7 +20,10 @@ import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.yaml.Scenarios;
-import io.nosqlbench.adapters.api.templating.StrInterpolator;
+import io.nosqlbench.nb.api.expr.ExprPreprocessor;
+import io.nosqlbench.nb.api.expr.ProcessingResult;
+import io.nosqlbench.nb.api.expr.TemplateContext;
+import io.nosqlbench.nb.api.expr.TemplateRewriter;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.nbio.Content;
@@ -109,7 +112,7 @@ public class NBCLIScenarioPreprocessor {
 
         // This will buffer the new command before adding it to the main arg list
         LinkedList<String> buildCmdBuffer = new LinkedList<>();
-        StrInterpolator userParamsInterp = new StrInterpolator(userProvidedParams);
+        ExprPreprocessor exprPreprocessor = new ExprPreprocessor();
 
 
         // Each Scenario
@@ -181,7 +184,9 @@ public class NBCLIScenarioPreprocessor {
 
                 // here, we should actually parse the command using argv rules
 
-                cmd = userParamsInterp.apply(cmd);
+                // Rewrite TEMPLATE syntax and evaluate expressions
+                cmd = TemplateRewriter.rewrite(cmd);
+                cmd = exprPreprocessor.process(cmd, null, userProvidedParams);
                 LinkedHashMap<String, SCNamedParam> parsedStep = parseStep(cmd, stepName, scenarioName);
                 LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
                 LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
@@ -350,10 +355,15 @@ public class NBCLIScenarioPreprocessor {
                 }
 
                 Map<String, String> templates = new LinkedHashMap<>();
-                StrInterpolator templateparser = new StrInterpolator(templates);
-                try {
-                    templateparser.apply( Files.readString(yamlPath) );
-                    templates = templateparser.checkpointAccesses();
+                ExprPreprocessor templatePreprocessor = new ExprPreprocessor();
+                try (TemplateContext ctx = TemplateContext.enter()) {
+                    String yamlContent = Files.readString(yamlPath);
+                    // Rewrite TEMPLATE syntax first
+                    String rewritten = TemplateRewriter.rewrite(yamlContent);
+                    // Process with context to track template variable accesses
+                    ProcessingResult result = templatePreprocessor.processWithContext(rewritten, yamlPath.toUri(), Map.of());
+                    // Get tracked template variable accesses
+                    templates = ctx.getAccesses();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

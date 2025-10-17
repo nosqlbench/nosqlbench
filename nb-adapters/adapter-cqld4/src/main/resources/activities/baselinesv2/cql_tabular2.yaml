@@ -45,8 +45,8 @@ params:
 bindings:
   # for ramp-up and verify phases
   #
-  part_layout: Div(<<partsize:1000>>); ToString() -> String
-  clust_layout: Mod(<<partsize:1000>>); ToString() -> String
+  part_layout: Div(TEMPLATE(partsize,1000)); ToString() -> String
+  clust_layout: Mod(TEMPLATE(partsize,1000)); ToString() -> String
   # todo: update these definitions to use the simpler 10,0.1, 20, 0.2, ...
   data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9TEMPLATE(addzeroes,),11TEMPLATE(addzeroes,))
   data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18TEMPLATE(addzeroes,),22TEMPLATE(addzeroes,))

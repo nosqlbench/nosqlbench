@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityimpl;
  */
 
 
+import io.nosqlbench.adapters.api.activityimpl.Dryrun;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.activityimpl.uniform.Space;
@@ -42,7 +43,7 @@ public class OpDryrun {
             case none -> dispenser;
             case op -> new DryrunOpDispenser(adapter, pop, dispenser);
             case emit -> new ResultPrintingOpDispenser(adapter, pop, dispenser);
-            case jsonnet -> dispenser;
+            case jsonnet, exprs -> dispenser;
         };
     }
 }
