@@ -59,14 +59,7 @@ public class NBStatusComponent extends NBBaseComponent {
     }
 
     public long session_time_ms() {
-        NBInvokableState state = getComponentState();
-        long nanos = switch (state) {
-            case ERRORED -> (nanosof_error() - nanosof_start());
-            case STARTING, RUNNING -> (System.nanoTime() - nanosof_start());
-            case CLOSING -> (nanosof_close() - nanosof_start());
-            case STOPPED -> (nanosof_teardown() - nanosof_start());
-        };
-        return nanos / 1_000_000L;
+        return uptimeMillis();
     }
 
     private final static class StatusVisitor implements NBComponentTraversal.FilterVisitor {

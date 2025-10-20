@@ -175,6 +175,7 @@ public class NBBaseComponent extends NBBaseComponentMetrics implements NBCompone
         RuntimeException wrapped = new RuntimeException("While in state " + this.state + ", an error occured: " + e, e);
         logger.error(wrapped);
         this.error = wrapped;
+        this.errored_ns = System.nanoTime();
         state = NBInvokableState.ERRORED;
     }
 
