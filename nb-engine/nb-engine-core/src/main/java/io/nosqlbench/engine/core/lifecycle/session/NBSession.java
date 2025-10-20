@@ -35,6 +35,7 @@ import java.lang.management.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -50,6 +51,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
     private OperatingSystemMXBean osbean = ManagementFactory.getOperatingSystemMXBean();
 
     private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
+    private final long sessionStartNanos;
 
     public enum STATUS {
         OK,
@@ -69,6 +71,8 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             props,
             "session"
         );
+
+        this.sessionStartNanos = System.nanoTime();
 
         new NBSessionSafetyMetrics(this);
 
@@ -125,9 +129,9 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
 
         create().gauge(
             "session_time",
-            () -> (double) System.nanoTime(),
+            () -> (double) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - this.sessionStartNanos),
             MetricCategory.Core,
-            "session time in nanoseconds"
+            "elapsed session time in milliseconds"
         );
 
         bufferOrphanedMetrics = true;
@@ -183,4 +187,3 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
     }
 
 }
-
