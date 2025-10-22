@@ -23,4 +23,5 @@
 
     ./nb help commandline
     ./nb help cli-scripting
+    ./nb help commandline_reference
 

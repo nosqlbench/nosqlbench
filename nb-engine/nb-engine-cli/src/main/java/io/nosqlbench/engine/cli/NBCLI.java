@@ -498,7 +498,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             options.wantsReportSqliteTo().ifPresent(cfg -> {
                 MetricInstanceFilter filter = new MetricInstanceFilter();
                 filter.addPattern(cfg.pattern);
-                session.create().sqliteReporter(session, cfg.url, cfg.millis, filter);
+                session.create().sqliteSnapshotReporter(session, cfg.url, cfg.millis, filter, cfg.includeHistograms);
             });
 
             options.wantsReportPromPushTo().ifPresent(cfg -> {

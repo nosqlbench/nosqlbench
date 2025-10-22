@@ -1087,32 +1087,58 @@ public class NBCLIOptions {
         public String url;
         public String pattern = ".*";
         public long millis = 30000L;
+        public boolean includeHistograms = false;
 
         public SqliteConfigData(final String sqlReporterSpec) {
-            final String[] words = sqlReporterSpec.split(",");
-            switch (words.length) {
-                case 3:
-                    if (words[2] != null && !words[2].isEmpty()) {
-                        this.millis = Unit.msFor(words[2]).orElseThrow(() ->
-                            new RuntimeException("Unable to parse interval spec:" + words[2] + '\''));
-                    }
-                case 2:
-                    this.pattern = words[1].isEmpty() ? this.pattern : words[1];
-                case 1:
-                    this.url = words[0];
-                    if (this.url.isEmpty())
-                        throw new RuntimeException("You must not specify a sqlite db file here for recording data.");
-                    break;
-                default:
-                    throw new RuntimeException(
-                        NBCLIOptions.REPORT_SQLITE_TO +
-                            " options must be in either 'db,filter,interval' or 'db,filter' or 'db' format"
-                    );
+            final String[] words = sqlReporterSpec.split(",", -1);
+            if (words.length < 1 || words.length > 4) {
+                throw new RuntimeException(
+                    NBCLIOptions.REPORT_SQLITE_TO +
+                        " options must be in 'db[,filter[,interval[,options]]]' form."
+                );
+            }
+            this.url = words[0];
+            if (this.url == null || this.url.isEmpty()) {
+                throw new RuntimeException("You must not specify a sqlite db file here for recording data.");
+            }
+            if (words.length > 1 && !words[1].isEmpty()) {
+                this.pattern = words[1];
+            }
+            if (words.length > 2 && !words[2].isEmpty()) {
+                this.millis = Unit.msFor(words[2]).orElseThrow(() ->
+                    new RuntimeException("Unable to parse interval spec:" + words[2] + '\''));
+            }
+            if (words.length > 3) {
+                parseOptions(words[3]);
             }
         }
 
         public String getUrl() {
             return this.url;
+        }
+
+        private void parseOptions(String optionSpec) {
+            if (optionSpec == null || optionSpec.isBlank()) {
+                return;
+            }
+            String[] options = optionSpec.split("[;|]");
+            for (String raw : options) {
+                String option = raw.trim();
+                if (option.isEmpty()) {
+                    continue;
+                }
+                String normalized = option.toLowerCase(Locale.ROOT);
+                switch (normalized) {
+                    case "hist", "histograms", "histograms=true", "hist=true":
+                        includeHistograms = true;
+                        break;
+                    case "nohist", "no-hist", "histograms=false", "hist=false":
+                        includeHistograms = false;
+                        break;
+                    default:
+                        throw new RuntimeException("Unknown sqlite reporter option '" + option + "'");
+                }
+            }
         }
     }
 

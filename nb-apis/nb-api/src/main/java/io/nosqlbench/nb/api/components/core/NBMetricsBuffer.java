@@ -18,6 +18,7 @@ package io.nosqlbench.nb.api.components.core;
 
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.engine.metrics.reporters.ConsoleReporter;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.engine.util.Unit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,14 +60,15 @@ public class NBMetricsBuffer {
         caller.getComponentProp(NBComponentProps.SUMMARY).ifPresent(
             summary -> {
                 Config config = new Config(caller, summary);
+                MetricsView snapshot = MetricsView.capture(summaryMetrics, 0L);
                 for (PrintStream channel : config.fullChannels) {
                     try (ConsoleReporter summaryReporter = new NBCreators.ConsoleReporterBuilder(caller, channel).build()) {
-                        summaryReporter.reportOnce(summaryMetrics);
+                        summaryReporter.report(snapshot);
                     }
                 }
                 for (PrintStream channel : config.briefChannels) {
                     try (ConsoleReporter summaryReporter = new NBCreators.ConsoleReporterBuilder(caller, channel).build()) {
-                        summaryReporter.reportCountsOnce(summaryMetrics);
+                        summaryReporter.reportCounts(snapshot);
                     }
                 }
 

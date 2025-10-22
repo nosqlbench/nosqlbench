@@ -16,242 +16,331 @@
 
 package io.nosqlbench.nb.api.engine.metrics.reporters;
 
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.*;
-import io.nosqlbench.nb.api.labels.NBLabels;
+import com.codahale.metrics.MetricAttribute;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.components.core.NBFinders;
-import io.nosqlbench.nb.api.components.core.PeriodicTaskComponent;
-import io.nosqlbench.nb.api.engine.metrics.instruments.*;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.MeterSample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.MetricFamily;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.MetricType;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.PointSample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.RateStatistics;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.Sample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummarySample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummaryStatistics;
+import io.nosqlbench.nb.api.labels.NBLabels;
 
 import java.io.PrintStream;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-public class ConsoleReporter extends PeriodicTaskComponent {
+/**
+ * Console reporter that renders metrics snapshots supplied by the {@link io.nosqlbench.nb.api.engine.metrics.MetricsSnapshotScheduler}.
+ */
+public class ConsoleReporter extends MetricsSnapshotReporterBase {
+
     private static final int CONSOLE_WIDTH = 80;
 
     private final PrintStream output;
     private final Locale locale = Locale.US;
-    private final Clock clock = Clock.defaultClock();
     private final DateFormat dateFormat;
     private final Set<MetricAttribute> disabledMetricAttributes;
     private final String rateUnit;
     private final long rateFactor;
     private final String durationUnit = TimeUnit.NANOSECONDS.toString().toLowerCase(Locale.US);
     private final long durationFactor = TimeUnit.NANOSECONDS.toNanos(1);
+    private final boolean oneLastTime;
 
-    public ConsoleReporter(NBComponent node, NBLabels extraLabels, long millis, boolean oneLastTime,
-                           PrintStream output, Set<MetricAttribute> disabledMetricAttributes) {
-        super(node, extraLabels, millis, "REPORT-CONSOLE", FirstReport.OnInterval, LastReport.OnInterrupt);
+    private volatile MetricsView lastView;
+
+    public ConsoleReporter(NBComponent node,
+                           NBLabels extraLabels,
+                           long intervalMillis,
+                           boolean oneLastTime,
+                           PrintStream output,
+                           Set<MetricAttribute> disabledMetricAttributes) {
+        super(node, extraLabels, intervalMillis);
         this.output = output;
-        this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-            DateFormat.MEDIUM,
-            locale);
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        this.disabledMetricAttributes = disabledMetricAttributes;
+        this.oneLastTime = oneLastTime;
+        this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM, locale);
+        this.dateFormat.setTimeZone(TimeZone.getDefault());
+        this.disabledMetricAttributes = disabledMetricAttributes != null ? disabledMetricAttributes : Set.of();
         String s = TimeUnit.NANOSECONDS.toString().toLowerCase(Locale.US);
-        rateUnit = s.substring(0, s.length() - 1);
+        this.rateUnit = s.substring(0, s.length() - 1);
         this.rateFactor = TimeUnit.NANOSECONDS.toSeconds(1);
     }
 
     @Override
-    protected void task() {
-        report();
+    public void onMetricsSnapshot(MetricsView view) {
+        this.lastView = view;
+        renderSnapshot(view, view.capturedAtEpochMillis());
     }
 
-    public void report() {
-        report(NBFinders.allMetricsWithType(NBMetricGauge.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricCounter.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricHistogram.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricMeter.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricTimer.class, getParent())
-        );
+    public void report(MetricsView view) {
+        renderSnapshot(view, System.currentTimeMillis());
     }
 
-    public void report(List<NBMetricGauge> gauges,
-                       List<NBMetricCounter> counters,
-                       List<NBMetricHistogram> histograms,
-                       List<NBMetricMeter> meters,
-                       List<NBMetricTimer> timers) {
-        final String dateTime = dateFormat.format(new Date(clock.getTime()));
+    public void reportCounts(MetricsView view) {
+        renderCounts(view, view.capturedAtEpochMillis());
+    }
+
+    private void renderSnapshot(MetricsView view, long epochMillis) {
+        final String dateTime = dateFormat.format(new Date(epochMillis));
         printWithBanner(dateTime, '=');
         output.println();
 
-        if (!gauges.isEmpty()) {
+        Map<String, List<MetricFamily>> grouped = groupFamilies(view);
+
+        if (!grouped.getOrDefault("gauge", List.of()).isEmpty()) {
             printWithBanner("-- Gauges", '-');
-            for (NBMetricGauge gauge : gauges) {
-                output.println(gauge.getLabels().linearizeAsMetrics());
-                printGauge(gauge);
-            }
+            grouped.get("gauge").forEach(this::printGaugeFamily);
             output.println();
         }
 
-        if (!counters.isEmpty()) {
+        if (!grouped.getOrDefault("counter", List.of()).isEmpty()) {
             printWithBanner("-- Counters", '-');
-            for (NBMetricCounter counter : counters) {
-                output.println(counter.getLabels().linearizeAsMetrics());
-                printCounter(counter);
-            }
+            grouped.get("counter").forEach(this::printCounterFamily);
             output.println();
         }
 
-        if (!histograms.isEmpty()) {
-            printWithBanner("-- Histograms", '-');
-            for (NBMetricHistogram histogram : histograms) {
-                output.println(histogram.getLabels().linearizeAsMetrics());
-                printHistogram(histogram);
-            }
-            output.println();
-        }
-
-        if (!meters.isEmpty()) {
+        if (!grouped.getOrDefault("meter", List.of()).isEmpty()) {
             printWithBanner("-- Meters", '-');
-            for (NBMetricMeter meter : meters) {
-                output.println(meter.getLabels().linearizeAsMetrics());
-                printMeter(meter);
-            }
+            grouped.get("meter").forEach(this::printMeterFamily);
             output.println();
         }
 
-        if (!timers.isEmpty()) {
-            printWithBanner("-- Timers", '-');
-            for (NBMetricTimer timer : timers) {
-                output.println(timer.getLabels().linearizeAsMetrics());
-                printTimer(timer);
-            }
+        if (!grouped.getOrDefault("summary", List.of()).isEmpty()) {
+            printWithBanner("-- Summaries", '-');
+            grouped.get("summary").forEach(this::printSummaryFamily);
             output.println();
         }
 
+        if (!grouped.getOrDefault("other", List.of()).isEmpty()) {
+            printWithBanner("-- Other Metrics", '-');
+            grouped.get("other").forEach(this::printGenericFamily);
+            output.println();
+        }
+
+    }
+
+    private void renderCounts(MetricsView view, long epochMillis) {
+        final String dateTime = dateFormat.format(new Date(epochMillis));
+        printWithBanner(dateTime, '=');
+        output.println();
+
+        boolean printed = false;
+        for (MetricFamily family : view.families()) {
+            for (Sample sample : family.samples()) {
+                Long count = extractCount(family, sample);
+                if (count != null) {
+                    if (!printed) {
+                        printWithBanner("-- Counts", '-');
+                        printed = true;
+                    }
+                    output.println(formatSampleHeader(family, sample));
+                    output.printf(locale, "             count = %d%n", count);
+                }
+            }
+        }
+        if (!printed) {
+            output.println("no countable metrics available");
+        }
         output.println();
         output.flush();
     }
 
-    private void printMeter(Meter meter) {
-        printIfEnabled(MetricAttribute.COUNT, String.format(locale, "             count = %d", meter.getCount()));
-        printIfEnabled(MetricAttribute.MEAN_RATE, String.format(locale, "         mean rate = %2.2f events/%s", convertRate(meter.getMeanRate()), getRateUnit()));
-        printIfEnabled(MetricAttribute.M1_RATE, String.format(locale, "     1-minute rate = %2.2f events/%s", convertRate(meter.getOneMinuteRate()), getRateUnit()));
-        printIfEnabled(MetricAttribute.M5_RATE, String.format(locale, "     5-minute rate = %2.2f events/%s", convertRate(meter.getFiveMinuteRate()), getRateUnit()));
-        printIfEnabled(MetricAttribute.M15_RATE, String.format(locale, "    15-minute rate = %2.2f events/%s", convertRate(meter.getFifteenMinuteRate()), getRateUnit()));
+    private Map<String, List<MetricFamily>> groupFamilies(MetricsView view) {
+        Map<String, List<MetricFamily>> grouped = new HashMap<>();
+        for (MetricFamily family : view.families()) {
+            String classification = classifyFamily(family);
+            grouped.computeIfAbsent(classification, ignored -> new ArrayList<>()).add(family);
+        }
+        return grouped;
     }
 
-    private void printCounter(Counter counter) {
-        output.printf(locale, "             count = %d%n", counter.getCount());
+    private String classifyFamily(MetricFamily family) {
+        if (family.type() == MetricType.GAUGE) {
+            boolean hasMeterSamples = family.samples().stream().anyMatch(MeterSample.class::isInstance);
+            return hasMeterSamples ? "meter" : "gauge";
+        }
+        if (family.type() == MetricType.SUMMARY) {
+            return "summary";
+        }
+        if (family.type() == MetricType.COUNTER) {
+            return "counter";
+        }
+        return "other";
     }
 
-    private void printGauge(Gauge<?> gauge) {
-        output.printf(locale, "             value = %s%n", gauge.getValue());
+    private void printGaugeFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof PointSample pointSample) {
+                output.println(formatSampleHeader(family, sample));
+                printGauge(pointSample);
+            }
+        }
     }
 
-    private void printHistogram(Histogram histogram) {
-        printIfEnabled(MetricAttribute.COUNT, String.format(locale, "             count = %d", histogram.getCount()));
-        Snapshot snapshot = histogram.getSnapshot();
-        printIfEnabled(MetricAttribute.MIN, String.format(locale, "               min = %d", snapshot.getMin()));
-        printIfEnabled(MetricAttribute.MAX, String.format(locale, "               max = %d", snapshot.getMax()));
-        printIfEnabled(MetricAttribute.MEAN, String.format(locale, "              mean = %2.2f", snapshot.getMean()));
-        printIfEnabled(MetricAttribute.STDDEV, String.format(locale, "            stddev = %2.2f", snapshot.getStdDev()));
-        printIfEnabled(MetricAttribute.P50, String.format(locale, "            median = %2.2f", snapshot.getMedian()));
-        printIfEnabled(MetricAttribute.P75, String.format(locale, "              75%% <= %2.2f", snapshot.get75thPercentile()));
-        printIfEnabled(MetricAttribute.P95, String.format(locale, "              95%% <= %2.2f", snapshot.get95thPercentile()));
-        printIfEnabled(MetricAttribute.P98, String.format(locale, "              98%% <= %2.2f", snapshot.get98thPercentile()));
-        printIfEnabled(MetricAttribute.P99, String.format(locale, "              99%% <= %2.2f", snapshot.get99thPercentile()));
-        printIfEnabled(MetricAttribute.P999, String.format(locale, "            99.9%% <= %2.2f", snapshot.get999thPercentile()));
+    private void printCounterFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof PointSample pointSample) {
+                output.println(formatSampleHeader(family, sample));
+                printCounter(pointSample);
+            }
+        }
     }
 
-    private void printTimer(Timer timer) {
-        final Snapshot snapshot = timer.getSnapshot();
-        printIfEnabled(MetricAttribute.COUNT, String.format(locale, "             count = %d", timer.getCount()));
-        printIfEnabled(MetricAttribute.MEAN_RATE, String.format(locale, "         mean rate = %2.2f calls/%s", convertRate(timer.getMeanRate()), getRateUnit()));
-        printIfEnabled(MetricAttribute.M1_RATE, String.format(locale, "     1-minute rate = %2.2f calls/%s", convertRate(timer.getOneMinuteRate()), getRateUnit()));
-        printIfEnabled(MetricAttribute.M5_RATE, String.format(locale, "     5-minute rate = %2.2f calls/%s", convertRate(timer.getFiveMinuteRate()), getRateUnit()));
-        printIfEnabled(MetricAttribute.M15_RATE, String.format(locale, "    15-minute rate = %2.2f calls/%s", convertRate(timer.getFifteenMinuteRate()), getRateUnit()));
-
-        printIfEnabled(MetricAttribute.MIN, String.format(locale, "               min = %2.2f %s", convertDuration(snapshot.getMin()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.MAX, String.format(locale, "               max = %2.2f %s", convertDuration(snapshot.getMax()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.MEAN, String.format(locale, "              mean = %2.2f %s", convertDuration(snapshot.getMean()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.STDDEV, String.format(locale, "            stddev = %2.2f %s", convertDuration(snapshot.getStdDev()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.P50, String.format(locale, "            median = %2.2f %s", convertDuration(snapshot.getMedian()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.P75, String.format(locale, "              75%% <= %2.2f %s", convertDuration(snapshot.get75thPercentile()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.P95, String.format(locale, "              95%% <= %2.2f %s", convertDuration(snapshot.get95thPercentile()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.P98, String.format(locale, "              98%% <= %2.2f %s", convertDuration(snapshot.get98thPercentile()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.P99, String.format(locale, "              99%% <= %2.2f %s", convertDuration(snapshot.get99thPercentile()), getDurationUnit()));
-        printIfEnabled(MetricAttribute.P999, String.format(locale, "            99.9%% <= %2.2f %s", convertDuration(snapshot.get999thPercentile()), getDurationUnit()));
+    private void printMeterFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof MeterSample meterSample) {
+                output.println(formatSampleHeader(family, sample));
+                printMeter(meterSample);
+            }
+        }
     }
 
-    private void printWithBanner(String s, char c) {
-        output.print(s);
+    private void printSummaryFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof SummarySample summarySample) {
+                output.println(formatSampleHeader(family, sample));
+                printSummary(summarySample);
+            }
+        }
+    }
+
+    private void printGenericFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof PointSample pointSample) {
+                output.println(formatSampleHeader(family, sample));
+                printGauge(pointSample);
+            }
+        }
+    }
+
+    private void printMeter(MeterSample sample) {
+        printIfEnabled(MetricAttribute.COUNT, String.format(locale, "             count = %d", sample.count()));
+        printIfEnabled(MetricAttribute.MEAN_RATE, String.format(locale, "         mean rate = %2.2f events/%s", convertRate(sample.meanRate()), getRateUnit()));
+        printIfEnabled(MetricAttribute.M1_RATE, String.format(locale, "     1-minute rate = %2.2f events/%s", convertRate(sample.oneMinuteRate()), getRateUnit()));
+        printIfEnabled(MetricAttribute.M5_RATE, String.format(locale, "     5-minute rate = %2.2f events/%s", convertRate(sample.fiveMinuteRate()), getRateUnit()));
+        printIfEnabled(MetricAttribute.M15_RATE, String.format(locale, "    15-minute rate = %2.2f events/%s", convertRate(sample.fifteenMinuteRate()), getRateUnit()));
+    }
+
+    private void printCounter(PointSample sample) {
+        output.printf(locale, "             count = %d%n", (long) sample.value());
+    }
+
+    private void printGauge(PointSample sample) {
+        output.printf(locale, "             value = %s%n", sample.value());
+    }
+
+    private void printSummary(SummarySample sample) {
+        SummaryStatistics stats = sample.statistics();
+        printIfEnabled(MetricAttribute.COUNT, String.format(locale, "             count = %d", stats.count()));
+        printIfEnabled(MetricAttribute.MIN, String.format(locale, "               min = %2.2f", stats.min()));
+        printIfEnabled(MetricAttribute.MAX, String.format(locale, "               max = %2.2f", stats.max()));
+        printIfEnabled(MetricAttribute.MEAN, String.format(locale, "              mean = %2.2f", stats.mean()));
+        printIfEnabled(MetricAttribute.STDDEV, String.format(locale, "            stddev = %2.2f", stats.stddev()));
+        printIfEnabled(MetricAttribute.P50, String.format(locale, "            median = %2.2f", quantileValue(sample, 0.5d)));
+        printIfEnabled(MetricAttribute.P75, String.format(locale, "              75%% <= %2.2f", quantileValue(sample, 0.75d)));
+        printIfEnabled(MetricAttribute.P95, String.format(locale, "              95%% <= %2.2f", quantileValue(sample, 0.95d)));
+        printIfEnabled(MetricAttribute.P98, String.format(locale, "              98%% <= %2.2f", quantileValue(sample, 0.98d)));
+        printIfEnabled(MetricAttribute.P99, String.format(locale, "              99%% <= %2.2f", quantileValue(sample, 0.99d)));
+        printIfEnabled(MetricAttribute.P999, String.format(locale, "            99.9%% <= %2.2f", quantileValue(sample, 0.999d)));
+
+        RateStatistics rates = sample.rates();
+        if (rates != null) {
+            printIfEnabled(MetricAttribute.MEAN_RATE, String.format(locale, "         mean rate = %2.2f calls/%s", convertRate(rates.mean()), getRateUnit()));
+            printIfEnabled(MetricAttribute.M1_RATE, String.format(locale, "     1-minute rate = %2.2f calls/%s", convertRate(rates.oneMinute()), getRateUnit()));
+            printIfEnabled(MetricAttribute.M5_RATE, String.format(locale, "     5-minute rate = %2.2f calls/%s", convertRate(rates.fiveMinute()), getRateUnit()));
+            printIfEnabled(MetricAttribute.M15_RATE, String.format(locale, "    15-minute rate = %2.2f calls/%s", convertRate(rates.fifteenMinute()), getRateUnit()));
+        }
+    }
+
+    private void printWithBanner(String text, char bannerChar) {
+        output.print(text);
         output.print(' ');
-        for (int i = 0; i < (CONSOLE_WIDTH - s.length() - 1); i++) {
-            output.print(c);
+        for (int i = 0; i < (CONSOLE_WIDTH - text.length() - 1); i++) {
+            output.print(bannerChar);
         }
         output.println();
     }
 
-    /**
-     * Print only if the attribute is enabled
-     *
-     * @param type
-     *     Metric attribute
-     * @param status
-     *     Status to be logged
-     */
-    private void printIfEnabled(MetricAttribute type, String status) {
-        if (getDisabledMetricAttributes().contains(type)) {
-            return;
+    private void printIfEnabled(MetricAttribute attribute, String status) {
+        if (!disabledMetricAttributes.contains(attribute)) {
+            output.println(status);
         }
-
-        output.println(status);
     }
 
-    private Set<MetricAttribute> getDisabledMetricAttributes() {
-        return disabledMetricAttributes;
-    }
-
-    protected String getRateUnit() {
-        return rateUnit;
-    }
-
-    protected double convertRate(double rate) {
+    private double convertRate(double rate) {
         return rate * rateFactor;
     }
 
-    protected String getDurationUnit() {
-        return durationUnit;
+    private String getRateUnit() {
+        return rateUnit;
     }
 
-    protected double convertDuration(double duration) {
+    private double convertDuration(double duration) {
         return duration / durationFactor;
     }
 
-    public void reportOnce(List<NBMetric> summaryMetrics) {
-        List<NBMetricGauge> gauges = new ArrayList<>();
-        List<NBMetricCounter> counters = new ArrayList<>();
-        List<NBMetricHistogram> histograms = new ArrayList<>();
-        List<NBMetricMeter> meters = new ArrayList<>();
-        List<NBMetricTimer> timers = new ArrayList<>();
-        for (NBMetric metric : summaryMetrics) {
-            if (metric instanceof NBMetricGauge) {
-                gauges.add((NBMetricGauge) metric);
-            }
-            if (metric instanceof NBMetricCounter) {
-                counters.add((NBMetricCounter) metric);
-            }
-            if (metric instanceof NBMetricHistogram) {
-                histograms.add((NBMetricHistogram) metric);
-            }
-            if (metric instanceof NBMetricMeter) {
-                meters.add((NBMetricMeter) metric);
-            }
-            if (metric instanceof NBMetricTimer) {
-                timers.add((NBMetricTimer) metric);
-            }
-        }
-        report(gauges, counters, histograms, meters, timers);
+    private double quantileValue(SummarySample sample, double quantile) {
+        return sample.quantiles().getOrDefault(quantile, Double.NaN);
     }
 
-    public void reportCountsOnce(List<NBMetric> summaryMetrics) {
-        // TODO: implement counts only renderer
-        // TODO: resolve ambiguity around reporting counts only or reporting nothing for short sessions
+    private String formatSampleHeader(MetricFamily family, Sample sample) {
+        String baseName = (family.originalName() == null || family.originalName().isBlank())
+            ? family.familyName()
+            : family.originalName();
+        if (sample.labels().isEmpty()) {
+            return baseName;
+        }
+        Map<String, String> labelMap = new HashMap<>(sample.labels().asMap());
+        labelMap.remove("name");
+        labelMap.remove("unit");
+        if (labelMap.isEmpty()) {
+            return baseName;
+        }
+        StringBuilder sb = new StringBuilder(baseName);
+        sb.append('{');
+        labelMap.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .forEach(entry -> sb.append(entry.getKey())
+                .append("=\"")
+                .append(entry.getValue())
+                .append("\","));
+        sb.setLength(sb.length() - 1);
+        sb.append('}');
+        return sb.toString();
     }
+
+    private Long extractCount(MetricFamily family, Sample sample) {
+        if (sample instanceof MeterSample meterSample) {
+            return meterSample.count();
+        }
+        if (sample instanceof SummarySample summarySample) {
+            return summarySample.statistics().count();
+        }
+        if (family.type() == MetricType.COUNTER && sample instanceof PointSample pointSample) {
+            return (long) Math.round(pointSample.value());
+        }
+        return null;
+    }
+
+    @Override
+    protected void teardown() {
+        if (oneLastTime && lastView != null) {
+            renderSnapshot(lastView, System.currentTimeMillis());
+        }
+        output.flush();
+        super.teardown();
+    }
+
 }
