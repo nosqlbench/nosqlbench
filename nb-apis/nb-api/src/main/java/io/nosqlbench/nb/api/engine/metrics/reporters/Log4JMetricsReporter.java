@@ -28,6 +28,12 @@ import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.RateStatistics;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.Sample;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummarySample;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummaryStatistics;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricMeter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.Marker;
 
@@ -83,12 +89,12 @@ public class Log4JMetricsReporter extends MetricsSnapshotReporterBase {
         }
     }
 
-    public void report(List<io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge> gauges,
-                       List<io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter> counters,
-                       List<io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram> histograms,
-                       List<io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricMeter> meters,
-                       List<io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer> timers) {
-        ArrayList<io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric> combined = new ArrayList<>(
+    public void report(List<NBMetricGauge> gauges,
+                       List<NBMetricCounter> counters,
+                       List<NBMetricHistogram> histograms,
+                       List<NBMetricMeter> meters,
+                       List<NBMetricTimer> timers) {
+        ArrayList<NBMetric> combined = new ArrayList<>(
             gauges.size() + counters.size() + histograms.size() + meters.size() + timers.size()
         );
         combined.addAll(gauges);

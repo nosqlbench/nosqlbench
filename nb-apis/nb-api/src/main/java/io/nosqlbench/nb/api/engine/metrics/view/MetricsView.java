@@ -44,14 +44,35 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
- * {@code MetricsView} captures a single, immutable OpenMetrics-aligned representation of a collection of
- * {@link NBMetric} instances. Each metric is normalised into one or more {@link MetricFamily metric families}
- * so that downstream reporters can render the data according to the OpenMetrics text or protobuf formats without
- * re-reading live instruments.
+ * Immutable snapshot used by the metrics pipeline to serialise live instruments into OpenMetrics-aligned structures.
  *
- * <p>The intent is to preserve the semantics of OpenMetrics without spending cycles serialising to text until a
- * specific reporting channel is ready. Metric names, label identifiers, and sample names are sanitised so that
- * they comply with the identifier grammar defined in the OpenMetrics specification.</p>
+ * <p>A {@code MetricsView} is produced by {@link MetricsView#capture(Collection, long)} (usually from the
+ * {@link MetricsSnapshotScheduler}) and consumed by reporters such as CSV,
+ * Prometheus, SQLite, Log4J, etc. It normalises instrumentation into {@link MetricFamily metric families} so that
+ * OpenMetrics concepts—names, samples, units, labels, and types—are preserved even if the originating instruments
+ * differ in their native representations.</p>
+ *
+ * <pre>
+ * NBMetric instruments (gauges, counters, timers, histograms…)
+ *            │
+ *            ▼
+ *     MetricsView.capture(...)   ──►   MetricFamily (type, help, unit, labels)
+ *                                        ├─ Sample: {@link PointSample gauge} / {@link MeterSample meter}
+ *                                        └─ Sample: {@link SummarySample summary} with quantiles & rates
+ *
+ * Reporter (Console, CSV, SQLite, Prometheus, …) consumes the immutable view and renders/export data.
+ * </pre>
+ *
+ * <p>Key properties:</p>
+ * <ul>
+ *   <li>Immutable – families and samples are defensive copies so reporters cannot mutate live instruments.</li>
+ *   <li>OpenMetrics-friendly – names/labels are sanitised, counters get {@code _total} suffixes, timers and histograms
+ *       are expressed as summary samples with quantiles and rates.</li>
+ *   <li>Aggregation-aware – {@link #combine(Collection)} merges multiple views, preserving sample semantics while
+ *       adding capture windows, counts, quantiles, and rate statistics.</li>
+ *   <li>Captures timing metadata – each view records {@link #capturedAt()} and the sampling window so cadenced
+ *       reporters can compute rates or alignment.</li>
+ * </ul>
  */
 public final class MetricsView {
 

@@ -35,10 +35,34 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A scheduler that captures an immutable metrics snapshot on a fixed interval and
- * delivers it to all registered snapshot consumers. A single scheduler instance
-+ * is associated with the root component of a session; all downstream reporting
- * channels must register with it so they see the same pulse of metrics.
+ * Coordinates metric sampling across a component tree so every reporting channel receives consistent
+ * {@link MetricsView} snapshots.
+ *
+ * <p>The scheduler lives at the session root and captures immutable snapshots on a base cadence. Reporters register
+ * interest at specific cadences; the scheduler aggregates finer-grained snapshots to satisfy slower intervals.</p>
+ *
+ * <pre>
+ * Metrics Sources (root component) ── capture() ──► MetricsSnapshotScheduler (base interval)
+ *                                                   │
+ *                                                   ├─► ScheduleNode 100 ms ──► Console, CSV, SQLite…
+ *                                                   └─► ScheduleNode 300 ms ──► Log4J, Prometheus…
+ * </pre>
+ *
+ * <p>Cadence rules:</p>
+ * <ul>
+ *   <li>The first registration sets the base interval.</li>
+ *   <li>Every subsequent interval must be an exact multiple of the base.</li>
+ *   <li>Slower buckets accumulate and combine snapshots from faster ones before emitting.</li>
+ * </ul>
+ *
+ * <p>At runtime you can adjust the schedule simply by registering new reporters:</p>
+ * <ul>
+ *   <li>Registering a faster cadence (&lt; current base) rebuilds the scheduler and aligns all existing consumers to the new base.</li>
+ *   <li>Registering or removing slower cadences (multiples of the base) updates the aggregation tree on the fly.</li>
+ *   <li>Consumers may unregister when they no longer need snapshots; idle cadences are automatically pruned.</li>
+ * </ul>
+ *
+ * <p>All concrete reporters extend {@link MetricsSnapshotReporterBase}, which handles registration and lifecycle wiring so the reporter only needs to format/output each snapshot.</p>
  */
 public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskComponent {
 

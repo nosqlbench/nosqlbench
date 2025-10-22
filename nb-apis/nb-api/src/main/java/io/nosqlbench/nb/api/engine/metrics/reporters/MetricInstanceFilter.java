@@ -26,18 +26,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+/**
+ * Tri-state metric filter used by reporters to include/exclude metrics by name, labels, or instance handle.
+ *
+ * <p>By default all metrics are included (allow-all). Setting {@link #defaultAccept(boolean) defaultAccept(false)} flips
+ * the default to deny unless explicitly included. Clauses:</p>
+ *
+ * <ul>
+ *   <li>{@code add(metric)} – include a specific metric instance.</li>
+ *   <li>{@code exclude(metric)} – exclude a specific metric instance.</li>
+ *   <li>{@code addPattern("name")} – include a metric name/regex.</li>
+ *   <li>{@code addPattern("!name")} – exclude a metric name/regex (leading {@code !} or {@code -}).</li>
+ *   <li>{@code addPattern("activity=write;name=op_rate")} – include by labels.</li>
+ *   <li>{@code addPattern("!activity=read")} – exclude by labels.</li>
+ * </ul>
+ *
+ * <p>The filter caches evaluation results for hot paths and clears the cache whenever clauses change.</p>
+ */
 public class MetricInstanceFilter implements MetricFilter {
 
     private static final Set<Character> REGEX_META_CHARS = Set.of('.', '^', '$', '*', '+', '?', '(', ')', '[', ']', '{', '}', '|', '\\');
+    private static final int CACHE_LIMIT = 4096;
 
-    private final List<Metric> included = new ArrayList<>();
-    private final List<Pattern> includedPatterns = new ArrayList<>();
-    private final List<Map<String, Pattern>> labelPatternSets = new ArrayList<>();
+    private enum ClauseType { INCLUDE, EXCLUDE }
+
+    private record MetricClause(ClauseType type, Metric metric) { }
+
+    private record PatternClause(ClauseType type, Pattern pattern) { }
+
+    private record LabelPatternClause(ClauseType type, Map<String, Pattern> patterns) { }
+
+    private final List<MetricClause> metricClauses = new ArrayList<>();
+    private final List<PatternClause> nameClauses = new ArrayList<>();
+    private final List<LabelPatternClause> labelClauses = new ArrayList<>();
+    private final ConcurrentHashMap<String, Boolean> memoizedMatches = new ConcurrentHashMap<>();
+    private boolean defaultAccept = true;
 
     public MetricInstanceFilter add(Metric metric) {
-        this.included.add(metric);
+        metricClauses.add(new MetricClause(ClauseType.INCLUDE, metric));
+        memoizedMatches.clear();
+        return this;
+    }
+
+    public MetricInstanceFilter exclude(Metric metric) {
+        metricClauses.add(new MetricClause(ClauseType.EXCLUDE, metric));
+        memoizedMatches.clear();
         return this;
     }
 
@@ -49,14 +85,38 @@ public class MetricInstanceFilter implements MetricFilter {
         if (trimmed.isEmpty()) {
             return this;
         }
+        ClauseType clauseType = ClauseType.INCLUDE;
+        if (trimmed.startsWith("!") || trimmed.startsWith("-")) {
+            clauseType = ClauseType.EXCLUDE;
+            trimmed = trimmed.substring(1).trim();
+        }
+        if (trimmed.isEmpty()) {
+            return this;
+        }
         if (trimmed.contains("=")) {
-            Map<String, Pattern> labelPatterns = parseLabelPattern(trimmed);
-            if (!labelPatterns.isEmpty()) {
-                labelPatternSets.add(labelPatterns);
+            Map<String, Pattern> patterns = parseLabelPattern(trimmed);
+            if (!patterns.isEmpty()) {
+                labelClauses.add(new LabelPatternClause(clauseType, patterns));
             }
         } else {
-            includedPatterns.add(compileSmart(trimmed));
+            nameClauses.add(new PatternClause(clauseType, compileSmart(trimmed)));
         }
+        memoizedMatches.clear();
+        return this;
+    }
+
+    public MetricInstanceFilter excludePattern(String patternSpec) {
+        return addPattern("!" + patternSpec);
+    }
+
+    /**
+     * Sets the default result when no inclusive clause matches. By default the filter is permissive (accept all unless
+     * excluded). Calling {@code defaultAccept(false)} switches to a deny-by-default posture where only explicit include
+     * clauses are admitted.
+     */
+    public MetricInstanceFilter defaultAccept(boolean accept) {
+        this.defaultAccept = accept;
+        memoizedMatches.clear();
         return this;
     }
 
@@ -75,34 +135,106 @@ public class MetricInstanceFilter implements MetricFilter {
     }
 
     private boolean evaluate(String name, Metric metric, NBLabels labels) {
-        boolean hasCriteria = !included.isEmpty() || !includedPatterns.isEmpty() || !labelPatternSets.isEmpty();
-        if (!hasCriteria) {
+        if (metricClauses.isEmpty() && nameClauses.isEmpty() && labelClauses.isEmpty()) {
             return true;
         }
-        if (!included.isEmpty() && metric != null && included.stream().anyMatch(m -> m == metric)) {
-            return true;
+        String key = cacheKey(name, metric, labels);
+        Boolean cached = memoizedMatches.get(key);
+        if (cached != null) {
+            return cached;
         }
-        if (!includedPatterns.isEmpty() && name != null) {
-            for (Pattern pattern : includedPatterns) {
-                if (pattern.matcher(name).matches()) {
-                    return true;
+
+        boolean matchedInclude = false;
+        boolean matchedExclude = false;
+
+        if (metric != null) {
+            for (MetricClause clause : metricClauses) {
+                if (clause.metric() == metric) {
+                    if (clause.type() == ClauseType.EXCLUDE) {
+                        matchedExclude = true;
+                    } else {
+                        matchedInclude = true;
+                    }
                 }
             }
         }
-        if (!labelPatternSets.isEmpty() && labels != null) {
+
+        if (name != null) {
+            for (PatternClause clause : nameClauses) {
+                if (clause.pattern().matcher(name).matches()) {
+                    if (clause.type() == ClauseType.EXCLUDE) {
+                        matchedExclude = true;
+                    } else {
+                        matchedInclude = true;
+                    }
+                }
+            }
+        }
+
+        if (!labelClauses.isEmpty() && labels != null) {
             Map<String, String> labelMap = labels.asMap();
-            for (Map<String, Pattern> labelPatterns : labelPatternSets) {
-                if (matchesAllLabelPatterns(labelPatterns, labelMap)) {
-                    return true;
+            for (LabelPatternClause clause : labelClauses) {
+                if (matchesAllLabelPatterns(clause.patterns(), labelMap)) {
+                    if (clause.type() == ClauseType.EXCLUDE) {
+                        matchedExclude = true;
+                    } else {
+                        matchedInclude = true;
+                    }
                 }
             }
         }
-        return false;
+
+        if (matchedExclude) {
+            memoize(key, false);
+            return false;
+        }
+
+        boolean result;
+        if (hasIncludeClauses()) {
+            result = matchedInclude;
+        } else {
+            result = defaultAccept;
+        }
+        memoize(key, result);
+        return result;
     }
 
-    private boolean matchesAllLabelPatterns(Map<String, Pattern> patterns, Map<String, String> labels) {
+    private void memoize(String key, boolean value) {
+        if (memoizedMatches.size() >= CACHE_LIMIT) {
+            memoizedMatches.clear();
+        }
+        memoizedMatches.put(key, value);
+    }
+
+    private boolean hasIncludeClauses() {
+        return metricClauses.stream().anyMatch(clause -> clause.type() == ClauseType.INCLUDE)
+            || nameClauses.stream().anyMatch(clause -> clause.type() == ClauseType.INCLUDE)
+            || labelClauses.stream().anyMatch(clause -> clause.type() == ClauseType.INCLUDE);
+    }
+
+    private String cacheKey(String name, Metric metric, NBLabels labels) {
+        String identity;
+        if (name != null) {
+            identity = name;
+        } else if (metric != null) {
+            identity = metric.getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(metric));
+        } else {
+            identity = "<anon>";
+        }
+        String labelIdentity;
+        if (labelClauses.isEmpty()) {
+            labelIdentity = "<labels-na>";
+        } else if (labels != null) {
+            labelIdentity = labels.linearizeAsMetrics();
+        } else {
+            labelIdentity = "<no-labels>";
+        }
+        return identity + '|' + labelIdentity;
+    }
+
+    private boolean matchesAllLabelPatterns(Map<String, Pattern> patterns, Map<String, String> labelMap) {
         for (Map.Entry<String, Pattern> entry : patterns.entrySet()) {
-            String value = labels.get(entry.getKey());
+            String value = labelMap.get(entry.getKey());
             if (value == null || !entry.getValue().matcher(value).matches()) {
                 return false;
             }
