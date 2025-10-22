@@ -439,6 +439,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         if (options.wantsTopicalHelp()) {
             String topic = options.wantsTopicalHelpFor();
 
+            if ("topics".equalsIgnoreCase(topic)) {
+                List<String> topics = MarkdownFinder.listRootTopics();
+                topics.forEach(System.out::println);
+                return NBCLI.EXIT_OK;
+            }
+
             Optional<? extends NBHelpTopic> infoFor = NBJavaCommandLoader.getInfoFor(topic);
 
             infoFor.ifPresent(info -> {
@@ -498,7 +504,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             options.wantsReportSqliteTo().ifPresent(cfg -> {
                 MetricInstanceFilter filter = new MetricInstanceFilter();
                 filter.addPattern(cfg.pattern);
-                session.create().sqliteReporter(session, cfg.url, cfg.millis, filter);
+                session.create().sqliteSnapshotReporter(session, cfg.url, cfg.millis, filter, cfg.includeHistograms);
             });
 
             options.wantsReportPromPushTo().ifPresent(cfg -> {

@@ -59,6 +59,13 @@ that will be (over)written with execution details.
 ${PROG} --session-name testsession42
 ~~~
 
+## SQLite Metrics Archive
+
+Each session automatically writes metrics snapshots to an SQLite database in the logs directory.
+The file is named `<session>_metrics.db`, and a `metrics.db` symlink mirrors the active session file
+the same way `session.log` does. If you need additional SQLite outputs with different locations or
+cadences, use the `--report-sqlite-to` option to add them.
+
 ## Metric Name
 
 If you need to see what metrics are available for a particular activity type,
@@ -123,4 +130,3 @@ scenario from other snippets, control activity sequencing and concurrency, etc. 
 not replace what is possible for direct scripting, but it does allow for many custom
 test scenarios without it. If you want to do more advanced scripting, please consult
 the scenario designers guide.
-

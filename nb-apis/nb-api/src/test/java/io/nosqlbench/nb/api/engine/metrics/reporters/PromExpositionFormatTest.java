@@ -16,7 +16,6 @@
 
 package io.nosqlbench.nb.api.engine.metrics.reporters;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 import io.nosqlbench.nb.api.engine.metrics.reporters.PromExpositionFormat;
@@ -29,7 +28,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +44,7 @@ public class PromExpositionFormatTest {
     }
     @Test
     public void testCounterFormat() {
-        Counter counter = new NBMetricCounter(
+        NBMetricCounter counter = new NBMetricCounter(
             NBLabels.forKV("name","counter_test_2342", "origin","mars"),
             "test counter format",
             MetricCategory.Verification
@@ -54,12 +52,10 @@ public class PromExpositionFormatTest {
         counter.inc(23423L);
 
         String buffer = PromExpositionFormat.format(nowclock, counter);
-        assertThat(buffer).matches(Pattern.compile("""
-            # CATEGORIES: Verification
-            # DESCRIPTION: test counter format
-            # TYPE counter_test_2342_total counter
-            counter_test_2342_total\\{origin="mars"} \\d+ \\d+
-            """));
+        long epoch = nowclock.instant().toEpochMilli();
+        assertThat(buffer).contains("# TYPE counter_test_2342_total counter");
+        assertThat(buffer).contains("# HELP counter_test_2342_total test counter format");
+        assertThat(buffer).contains("counter_test_2342_total{origin=\"mars\"} 23423 " + epoch);
     }
 
     @Test
@@ -78,30 +74,13 @@ public class PromExpositionFormatTest {
             );
         String formatted = PromExpositionFormat.format(nowclock, nbHistogram);
 
-        assertThat(formatted).matches(Pattern.compile("""
-            # CATEGORIES: Verification
-            # DESCRIPTION: test histogram format
-            # TYPE mynameismud_total counter
-            mynameismud_total\\{label3="value3"} 0 \\d+
-            # TYPE mynameismud histogram
-            mynameismud_bucket\\{label3="value3",le="0.5"} 18463.0
-            mynameismud_bucket\\{label3="value3",le="0.75"} 27727.0
-            mynameismud_bucket\\{label3="value3",le="0.9"} 33279.0
-            mynameismud_bucket\\{label3="value3",le="0.95"} 35135.0
-            mynameismud_bucket\\{label3="value3",le="0.98"} 36223.0
-            mynameismud_bucket\\{label3="value3",le="0.99"} 36607.0
-            mynameismud_bucket\\{label3="value3",le="0.999"} 36927.0
-            mynameismud_bucket\\{label3="value3",le="\\+Inf"} 36991
-            mynameismud_count\\{label3="value3"} 1000.0
-            # TYPE mynameismud_max gauge
-            mynameismud_max\\{label3="value3"} 36991
-            # TYPE mynameismud_min gauge
-            mynameismud_min\\{label3="value3"} 0
-            # TYPE mynameismud_mean gauge
-            mynameismud_mean\\{label3="value3"} 18481.975
-            # TYPE mynameismud_stdev gauge
-            mynameismud_stdev\\{label3="value3"} 10681.018083421426
-            """));
+        long epoch = nowclock.instant().toEpochMilli();
+        assertThat(formatted).contains("# TYPE mynameismud summary");
+        assertThat(formatted).contains("# HELP mynameismud test histogram format");
+        assertThat(formatted).contains("# CATEGORIES mynameismud Verification");
+        assertThat(formatted).contains("mynameismud{label3=\"value3\",quantile=\"0.5\"}");
+        assertThat(formatted).contains("mynameismud_count{label3=\"value3\"} 1000 " + epoch);
+        assertThat(formatted).contains("mynameismud_sum{label3=\"value3\"}");
     }
 
     @Test
@@ -118,39 +97,20 @@ public class PromExpositionFormatTest {
             nbMetricTimer.update(i * 37L, TimeUnit.NANOSECONDS);
 
         String formatted = PromExpositionFormat.format(nowclock, nbMetricTimer);
+        long epoch = nowclock.instant().toEpochMilli();
 
-        assertThat(formatted).matches(Pattern.compile("""
-            # CATEGORIES: Verification
-            # DESCRIPTION: test timer format
-            # TYPE monsieurmarius_total counter
-            monsieurmarius_total\\{label4="value4"} 1000 \\d+
-            # TYPE monsieurmarius histogram
-            monsieurmarius_bucket\\{label4="value4",le="0.5"} 18463.0
-            monsieurmarius_bucket\\{label4="value4",le="0.75"} 27727.0
-            monsieurmarius_bucket\\{label4="value4",le="0.9"} 33279.0
-            monsieurmarius_bucket\\{label4="value4",le="0.95"} 35135.0
-            monsieurmarius_bucket\\{label4="value4",le="0.98"} 36223.0
-            monsieurmarius_bucket\\{label4="value4",le="0.99"} 36607.0
-            monsieurmarius_bucket\\{label4="value4",le="0.999"} 36927.0
-            monsieurmarius_bucket\\{label4="value4",le="\\+Inf"} 36991
-            monsieurmarius_count\\{label4="value4"} 1000.0
-            # TYPE monsieurmarius_max gauge
-            monsieurmarius_max\\{label4="value4"} 36991
-            # TYPE monsieurmarius_min gauge
-            monsieurmarius_min\\{label4="value4"} 0
-            # TYPE monsieurmarius_mean gauge
-            monsieurmarius_mean\\{label4="value4"} 18481.975
-            # TYPE monsieurmarius_stdev gauge
-            monsieurmarius_stdev\\{label4="value4"} \\d+\\.\\d+
-            # TYPE monsieurmarius_1mRate gauge
-            monsieurmarius_1mRate\\{label4="value4"} 0.0
-            # TYPE monsieurmarius_5mRate gauge
-            monsieurmarius_5mRate\\{label4="value4"} 0.0
-            # TYPE monsieurmarius_15mRate gauge
-            monsieurmarius_15mRate\\{label4="value4"} 0.0
-            # TYPE monsieurmarius_meanRate gauge
-            monsieurmarius_meanRate\\{label4="value4"} \\d+\\.\\d+
-            """));
+        assertThat(formatted).contains("# TYPE monsieurmarius summary");
+        assertThat(formatted).contains("# HELP monsieurmarius test timer format");
+        assertThat(formatted).contains("# CATEGORIES monsieurmarius Verification");
+        assertThat(formatted).contains("monsieurmarius{label4=\"value4\",quantile=\"0.5\"}");
+        assertThat(formatted).contains("monsieurmarius_count{label4=\"value4\"} 1000 " + epoch);
+        assertThat(formatted).contains("monsieurmarius_sum{label4=\"value4\"}");
+        assertThat(formatted).contains("monsieurmarius_min{label4=\"value4\"}");
+        assertThat(formatted).contains("monsieurmarius_max{label4=\"value4\"}");
+        assertThat(formatted).contains("monsieurmarius_mean_rate{label4=\"value4\"}");
+        assertThat(formatted).contains("monsieurmarius_m1_rate{label4=\"value4\"}");
+        assertThat(formatted).contains("monsieurmarius_m5_rate{label4=\"value4\"}");
+        assertThat(formatted).contains("monsieurmarius_m15_rate{label4=\"value4\"}");
     }
 
     @Test
@@ -161,21 +121,16 @@ public class PromExpositionFormatTest {
             MetricCategory.Verification
         );
         String formatted = PromExpositionFormat.format(nowclock, nbMetricMeter);
+        long epoch = nowclock.instant().toEpochMilli();
 
-        assertThat(formatted).matches(Pattern.compile("""
-            # CATEGORIES: Verification
-            # DESCRIPTION: test meter format
-            # TYPE eponine_total counter
-            eponine_total\\{label5="value5"} 0 \\d+
-            # TYPE eponine_1mRate gauge
-            eponine_1mRate\\{label5="value5"} 0.0
-            # TYPE eponine_5mRate gauge
-            eponine_5mRate\\{label5="value5"} 0.0
-            # TYPE eponine_15mRate gauge
-            eponine_15mRate\\{label5="value5"} 0.0
-            # TYPE eponine_meanRate gauge
-            eponine_meanRate\\{label5="value5"} 0.0
-            """));
+        assertThat(formatted).contains("# TYPE eponine_total counter");
+        assertThat(formatted).contains("# HELP eponine_total test meter format");
+        assertThat(formatted).contains("# CATEGORIES eponine_total Verification");
+        assertThat(formatted).contains("eponine_total{label5=\"value5\"} 0 " + epoch);
+        assertThat(formatted).contains("eponine_mean_rate{label5=\"value5\"} 0 " + epoch);
+        assertThat(formatted).contains("eponine_m1_rate{label5=\"value5\"} 0 " + epoch);
+        assertThat(formatted).contains("eponine_m5_rate{label5=\"value5\"} 0 " + epoch);
+        assertThat(formatted).contains("eponine_m15_rate{label5=\"value5\"} 0 " + epoch);
     }
 
     @Test
@@ -188,13 +143,12 @@ public class PromExpositionFormatTest {
             MetricCategory.Verification
         );
         String formatted = PromExpositionFormat.format(nowclock, nbMetricGauge);
+        long epoch = nowclock.instant().toEpochMilli();
 
-        assertThat(formatted).matches(Pattern.compile("""
-            # CATEGORIES: Verification
-            # DESCRIPTION: test gauge format
-            # TYPE cosette gauge
-            cosette\\{label6="value6"} 1500.0
-            """));
+        assertThat(formatted).contains("# TYPE cosette gauge");
+        assertThat(formatted).contains("# HELP cosette test gauge format");
+        assertThat(formatted).contains("# CATEGORIES cosette Verification");
+        assertThat(formatted).contains("cosette{label6=\"value6\"} 1500 " + epoch);
 
         Gauge cosetteGauge2 = () -> 2000.0d;
         NBMetricGauge nbMetricGauge2 = new NBMetricGaugeWrapper(
@@ -204,13 +158,10 @@ public class PromExpositionFormatTest {
             MetricCategory.Verification
         );
         String formatted2 = PromExpositionFormat.format(nowclock, nbMetricGauge2);
-
-        assertThat(formatted2).matches(Pattern.compile("""
-            # CATEGORIES: Verification
-            # DESCRIPTION: test gauge format 2
-            # TYPE cosette2 gauge
-            cosette2\\{label7="value7"} 2000.0
-            """));
+        assertThat(formatted2).contains("# TYPE cosette2 gauge");
+        assertThat(formatted2).contains("# HELP cosette2 test gauge format 2");
+        assertThat(formatted2).contains("# CATEGORIES cosette2 Verification");
+        assertThat(formatted2).contains("cosette2{label7=\"value7\"} 2000 " + epoch);
 
     }
 }

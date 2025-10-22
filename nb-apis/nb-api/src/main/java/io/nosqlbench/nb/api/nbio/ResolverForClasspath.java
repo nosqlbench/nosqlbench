@@ -64,26 +64,42 @@ public class ResolverForClasspath implements ContentResolver {
             return null;
         }
         URI resolved = URI.create(url.toExternalForm());
-        if (resolved.getScheme().equals("file")) {
+        String scheme = resolved.getScheme();
+        if (scheme == null || scheme.isEmpty() || scheme.equals("file")) {
             Path current = Paths.get("").toAbsolutePath();
-            Path logical = Path.of(resolved.getPath());
+            Path logical = scheme == null || scheme.isEmpty()
+                ? Path.of(resolved.getPath())
+                : Path.of(resolved);
             Path relativePath = current.relativize(logical);
             return relativePath;
         }
 
-        FileSystem fs;
-        try {
-            fs = FileSystems.getFileSystem(resolved);
-        } catch (FileSystemNotFoundException notfound) {
+        if ("jar".equalsIgnoreCase(scheme)) {
             try {
-                fs = FileSystems.newFileSystem(resolved, Map.of());
+                FileSystem fs;
+                try {
+                    fs = FileSystems.getFileSystem(resolved);
+                } catch (FileSystemNotFoundException notfound) {
+                    fs = FileSystems.newFileSystem(resolved, Map.of());
+                }
+
+                String spec = resolved.getSchemeSpecificPart();
+                int bang = spec.indexOf("!/");
+                String entry = bang >= 0 ? spec.substring(bang + 1) : "";
+                if (entry.isEmpty()) {
+                    entry = "/";
+                }
+                return fs.getPath(entry);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        Path fspath = Path.of(resolved);
-        return fspath;
+        try {
+            return Path.of(resolved);
+        } catch (Exception e) {
+            throw new RuntimeException("Unsupported classpath URL scheme: " + resolved, e);
+        }
     }
 
     @Override

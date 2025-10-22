@@ -91,7 +91,13 @@ public class DiagDriverAdapter extends BaseDriverAdapter<DiagOp, DiagSpace> impl
                     return Optional.empty();
                 }
             },
-            stmt -> Optional.of(NBParams.one(stmt).getMap())
+            stmt -> {
+                try {
+                    return Optional.of(NBParams.one(stmt).getMap());
+                } catch (RuntimeException rte) {
+                    return Optional.of(Map.of("stmt", stmt));
+                }
+            }
         );
     }
 

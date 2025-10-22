@@ -219,8 +219,19 @@ public class NBCreators {
         base.addListener(histoStatsLogger);
     }
 
-    public SqliteReporter sqliteReporter(NBComponent component, String url, long millis, MetricInstanceFilter filter) {
-        return new SqliteReporter(component, url, millis, filter);
+    public SqliteSnapshotReporter sqliteSnapshotReporter(NBComponent component,
+                                                         String url,
+                                                         long millis,
+                                                         MetricInstanceFilter filter) {
+        return sqliteSnapshotReporter(component, url, millis, filter, false);
+    }
+
+    public SqliteSnapshotReporter sqliteSnapshotReporter(NBComponent component,
+                                                         String url,
+                                                         long millis,
+                                                         MetricInstanceFilter filter,
+                                                         boolean includeHistograms) {
+        return new SqliteSnapshotReporter(component, url, millis, filter, includeHistograms);
     }
 
     public static class Log4jReporterBuilder {
