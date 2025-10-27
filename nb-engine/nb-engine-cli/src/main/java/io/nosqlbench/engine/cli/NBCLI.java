@@ -182,6 +182,11 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig); // THIS should be the first time log4j2 is invoked!
 
+        // Add shutdown handler to timestamp symlinks when session ends
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            NBCLI.loggerConfig.timestampSymlinksOnShutdown();
+        }, "symlink-timestamp-shutdown"));
+
         NBCLI.logger = LogManager.getLogger("NBCLI"); // TODO: Detect if the logger config was already initialized (error)
         NBCLI.loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
         if (NBCLI.logger.isInfoEnabled())

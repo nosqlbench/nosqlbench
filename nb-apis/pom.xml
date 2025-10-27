@@ -35,6 +35,7 @@
     <module>adapters-api</module>
     <module>expr-api</module>
     <module>nb-api</module>
+    <module>nb-mql-api</module>
     <module>nb-apis-all</module>
   </modules>
 
