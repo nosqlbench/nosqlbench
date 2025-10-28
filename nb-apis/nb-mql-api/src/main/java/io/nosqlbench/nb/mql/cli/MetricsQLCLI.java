@@ -37,6 +37,7 @@ import picocli.CommandLine.Command;
     subcommands = {
         SessionCLI.class,
         SummaryCLI.class,
+        MetricsCLI.class,
         InstantCLI.class,
         RangeCLI.class,
         RateCLI.class,

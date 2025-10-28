@@ -16,10 +16,9 @@
 
 package io.nosqlbench.nb.mql.cli;
 
-import io.nosqlbench.nb.mql.commands.SummaryCommand;
+import io.nosqlbench.nb.mql.commands.MetricsCommand;
 import io.nosqlbench.nb.mql.format.OutputFormat;
 import io.nosqlbench.nb.mql.format.ResultFormatter;
-import io.nosqlbench.nb.mql.format.SummaryMarkdownFormatter;
 import io.nosqlbench.nb.mql.query.QueryResult;
 import io.nosqlbench.nb.mql.schema.MetricsDatabaseReader;
 import picocli.CommandLine;
@@ -33,15 +32,15 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
- * CLI for summary command.
- * Displays database overview and metrics inventory.
+ * CLI for metrics command.
+ * Lists all metrics with their label sets in tree view.
  */
 @Command(
-    name = "summary",
-    description = "Display overview of metrics in the database",
+    name = "metrics",
+    description = "List all metrics with their label sets in tree view",
     mixinStandardHelpOptions = true
 )
-public class SummaryCLI implements Callable<Integer> {
+public class MetricsCLI implements Callable<Integer> {
 
     @Option(
         names = {"-d", "--db"},
@@ -49,6 +48,13 @@ public class SummaryCLI implements Callable<Integer> {
         defaultValue = "logs/metrics.db"
     )
     private Path databasePath;
+
+    @Option(
+        names = {"--group-by"},
+        description = "Group by: name (default) or labelset",
+        defaultValue = "name"
+    )
+    private String groupBy;
 
     @Option(
         names = {"--keep-labels"},
@@ -67,21 +73,15 @@ public class SummaryCLI implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         try (Connection conn = MetricsDatabaseReader.connect(databasePath)) {
-            SummaryCommand command = new SummaryCommand();
+            MetricsCommand command = new MetricsCommand();
 
             Map<String, Object> params = new LinkedHashMap<>();
+            params.put("group-by", groupBy);
             params.put("keep-labels", keepLabels);
 
             QueryResult result = command.execute(conn, params);
 
-            // Use custom markdown formatter for summary command
-            ResultFormatter formatter;
-            if (format == OutputFormat.MARKDOWN) {
-                formatter = new SummaryMarkdownFormatter();
-            } else {
-                formatter = format.createFormatter();
-            }
-
+            ResultFormatter formatter = format.createFormatter();
             System.out.println(formatter.format(result));
 
             return 0;
@@ -98,7 +98,7 @@ public class SummaryCLI implements Callable<Integer> {
      * Main method for standalone execution.
      */
     public static void main(String[] args) {
-        int exitCode = new CommandLine(new SummaryCLI()).execute(args);
+        int exitCode = new CommandLine(new MetricsCLI()).execute(args);
         System.exit(exitCode);
     }
 }

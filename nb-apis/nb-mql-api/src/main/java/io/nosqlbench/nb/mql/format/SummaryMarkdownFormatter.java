@@ -58,7 +58,10 @@ public class SummaryMarkdownFormatter implements ResultFormatter {
             } else if ("ERRORS".equals(sectionName)) {
                 renderErrorsSection(md, sectionRows);
             } else if ("ALL METRICS".equals(sectionName)) {
-                renderAllMetricsTree(md, sectionRows);
+                renderAllMetricsTree(md, sectionRows, sections.getOrDefault("LABEL SET", new ArrayList<>()));
+            } else if ("LABEL SET".equals(sectionName)) {
+                // Skip - rendered with ALL METRICS
+                continue;
             } else {
                 renderGenericSection(md, sectionName, sectionRows);
             }
@@ -157,11 +160,20 @@ public class SummaryMarkdownFormatter implements ResultFormatter {
         md.append("\n");
     }
 
-    private void renderAllMetricsTree(StringBuilder md, List<Map<String, Object>> rows) {
+    private void renderAllMetricsTree(StringBuilder md, List<Map<String, Object>> rows, List<Map<String, Object>> labelSetRows) {
         md.append("## 📋 Metrics Inventory\n\n");
 
+        // View 1: Metrics with their label sets
+        md.append("### View by Metric\n\n");
         md.append("```\n");
-        md.append("Metrics Database\n");
+
+        // Group label sets by metric
+        Map<String, List<String>> metricToLabelSets = new LinkedHashMap<>();
+        for (Map<String, Object> labelRow : labelSetRows) {
+            String metricName = (String) labelRow.get("metric");
+            String labels = (String) labelRow.get("value");
+            metricToLabelSets.computeIfAbsent(metricName, k -> new ArrayList<>()).add(labels);
+        }
 
         for (int i = 0; i < rows.size(); i++) {
             Map<String, Object> row = rows.get(i);
@@ -171,22 +183,108 @@ public class SummaryMarkdownFormatter implements ResultFormatter {
             boolean isLast = (i == rows.size() - 1);
             String prefix = isLast ? "└── " : "├── ";
 
-            md.append(prefix).append(name).append("\n");
+            // Parse details to extract type, samples, label_sets, range
+            Map<String, String> detailMap = parseDetails(details);
+            String type = detailMap.getOrDefault("type", "UNKNOWN");
+            String samples = detailMap.getOrDefault("samples", "0");
+            String labelSets = detailMap.getOrDefault("label_sets", "0");
+            String range = detailMap.getOrDefault("range", "[]");
 
-            if (details != null && !details.isEmpty()) {
+            // Format metric name with aligned columns
+            md.append(String.format("%-4s%-30s type=%-10s samples=%-6s label_sets=%-4s range=%s\n",
+                prefix, name, type, samples, labelSets, range));
+
+            // Show actual label sets as sub-items
+            List<String> metricLabelSets = metricToLabelSets.get(name);
+            if (metricLabelSets != null && !metricLabelSets.isEmpty()) {
                 String detailPrefix = isLast ? "    " : "│   ";
-                // Parse details and format as tree branches
-                // Handle range=[min, max] specially to keep it on one line
-                String[] parts = details.split(", (?![^\\[]*\\])");
-                for (int j = 0; j < parts.length; j++) {
-                    boolean isLastDetail = (j == parts.length - 1);
-                    String branchPrefix = isLastDetail ? "└── " : "├── ";
-                    md.append(detailPrefix).append(branchPrefix).append(parts[j]).append("\n");
+                for (int j = 0; j < metricLabelSets.size(); j++) {
+                    boolean isLastLabel = (j == metricLabelSets.size() - 1);
+                    String branchPrefix = isLastLabel ? "└── " : "├── ";
+                    md.append(String.format("%s%s%s\n", detailPrefix, branchPrefix, metricLabelSets.get(j)));
                 }
             }
         }
 
         md.append("```\n\n");
+
+        // View 2: Label sets with metrics that use them
+        if (!labelSetRows.isEmpty()) {
+            md.append("### View by Label Set\n\n");
+            md.append("```\n");
+
+            // Check if rows are already in tree format (value column contains tree characters)
+            boolean isPreformatted = labelSetRows.stream()
+                .anyMatch(row -> {
+                    String value = (String) row.get("value");
+                    return value != null && (value.contains("├──") || value.contains("└──") || value.contains("│"));
+                });
+
+            if (isPreformatted) {
+                // Rows are already formatted as a tree, render them as-is
+                for (Map<String, Object> labelRow : labelSetRows) {
+                    String value = (String) labelRow.get("value");
+                    String metric = (String) labelRow.get("metric");
+
+                    // If value contains tree structure, use it
+                    if (value != null && !value.isEmpty()) {
+                        md.append(value);
+                        // Only append metric name if it's not empty and not already in the tree
+                        if (metric != null && !metric.isEmpty() && !value.contains(metric)) {
+                            md.append(metric);
+                        }
+                        md.append("\n");
+                    }
+                }
+            } else {
+                // Original grouping logic for flat label sets
+                Map<String, List<String>> labelSetToMetrics = new LinkedHashMap<>();
+                for (Map<String, Object> labelRow : labelSetRows) {
+                    String metricName = (String) labelRow.get("metric");
+                    String labels = (String) labelRow.get("value");
+                    labelSetToMetrics.computeIfAbsent(labels, k -> new ArrayList<>()).add(metricName);
+                }
+
+                int labelSetIndex = 0;
+                for (Map.Entry<String, List<String>> entry : labelSetToMetrics.entrySet()) {
+                    String labelSet = entry.getKey();
+                    List<String> metrics = entry.getValue();
+
+                    boolean isLastLabelSet = (labelSetIndex == labelSetToMetrics.size() - 1);
+                    String prefix = isLastLabelSet ? "└── " : "├── ";
+
+                    md.append(String.format("%s%s\n", prefix, labelSet));
+
+                    String detailPrefix = isLastLabelSet ? "    " : "│   ";
+                    for (int i = 0; i < metrics.size(); i++) {
+                        boolean isLastMetric = (i == metrics.size() - 1);
+                        String branchPrefix = isLastMetric ? "└── " : "├── ";
+                        md.append(String.format("%s%s%s\n", detailPrefix, branchPrefix, metrics.get(i)));
+                    }
+
+                    labelSetIndex++;
+                }
+            }
+
+            md.append("```\n\n");
+        }
+    }
+
+    private Map<String, String> parseDetails(String details) {
+        Map<String, String> result = new HashMap<>();
+        if (details == null || details.isEmpty()) {
+            return result;
+        }
+
+        // Parse "type=COUNTER, samples=25, label_sets=5, range=[0.0, 11000.0]"
+        String[] parts = details.split(", (?![^\\[]*\\])");
+        for (String part : parts) {
+            String[] kv = part.split("=", 2);
+            if (kv.length == 2) {
+                result.put(kv[0], kv[1]);
+            }
+        }
+        return result;
     }
 
     private void renderGenericSection(StringBuilder md, String sectionName, List<Map<String, Object>> rows) {
