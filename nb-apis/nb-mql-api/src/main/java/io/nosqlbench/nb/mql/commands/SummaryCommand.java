@@ -93,9 +93,12 @@ public class SummaryCommand implements MetricsQueryCommand {
         String keepLabelsParam = (String) params.getOrDefault("keep-labels", "activity,session");
         Set<String> keepLabels = parseKeepLabels(keepLabelsParam);
 
+        // Parse condense parameter (default true)
+        boolean condense = (boolean) params.getOrDefault("condense", true);
+
         // First, find common labels to elide from display (excluding kept labels)
         Map<String, String> commonLabels = findCommonLabels(conn, keepLabels);
-        addAllMetrics(conn, rows, commonLabels);
+        addAllMetrics(conn, rows, commonLabels, condense);
 
         long executionTime = System.currentTimeMillis() - startTime;
 
@@ -150,9 +153,10 @@ public class SummaryCommand implements MetricsQueryCommand {
             String sql = """
                 SELECT
                   SUM(sv.value) as total_value,
-                  COUNT(DISTINCT sv.label_set_id) as label_sets
-                FROM sample_value sv
-                JOIN sample_name sn ON sv.sample_name_id = sn.id
+                  COUNT(DISTINCT mi.label_set_id) as label_sets
+                FROM metric_instance mi
+                JOIN sample_name sn ON mi.sample_name_id = sn.id
+                JOIN sample_value sv ON sv.metric_instance_id = mi.id
                 WHERE sn.sample LIKE ?
                   AND sv.timestamp_ms = (SELECT MAX(timestamp_ms) FROM sample_value)
                 """;
@@ -184,8 +188,9 @@ public class SummaryCommand implements MetricsQueryCommand {
             SELECT
               SUM(CASE WHEN sn.sample LIKE '%result%' THEN sv.value ELSE 0 END) as results,
               SUM(CASE WHEN sn.sample LIKE '%error%' THEN sv.value ELSE 0 END) as errors
-            FROM sample_value sv
-            JOIN sample_name sn ON sv.sample_name_id = sn.id
+            FROM metric_instance mi
+            JOIN sample_name sn ON mi.sample_name_id = sn.id
+            JOIN sample_value sv ON sv.metric_instance_id = mi.id
             WHERE sv.timestamp_ms = (SELECT MAX(timestamp_ms) FROM sample_value)
             """;
 
@@ -212,9 +217,10 @@ public class SummaryCommand implements MetricsQueryCommand {
             SELECT
               lv.value as activity,
               SUM(sv.value) as total
-            FROM sample_value sv
-            JOIN sample_name sn ON sv.sample_name_id = sn.id
-            JOIN label_set_membership lsm ON sv.label_set_id = lsm.label_set_id
+            FROM metric_instance mi
+            JOIN sample_name sn ON mi.sample_name_id = sn.id
+            JOIN sample_value sv ON sv.metric_instance_id = mi.id
+            JOIN label_set_membership lsm ON mi.label_set_id = lsm.label_set_id
             JOIN label_key lk ON lsm.label_key_id = lk.id
             JOIN label_value lv ON lsm.label_value_id = lv.id
             WHERE lk.name = 'activity'
@@ -242,8 +248,9 @@ public class SummaryCommand implements MetricsQueryCommand {
             SELECT
               sn.sample,
               SUM(sv.value) as total_errors
-            FROM sample_value sv
-            JOIN sample_name sn ON sv.sample_name_id = sn.id
+            FROM metric_instance mi
+            JOIN sample_name sn ON mi.sample_name_id = sn.id
+            JOIN sample_value sv ON sv.metric_instance_id = mi.id
             WHERE sn.sample LIKE '%error%'
               AND sv.timestamp_ms = (SELECT MAX(timestamp_ms) FROM sample_value)
             GROUP BY sn.sample
@@ -264,7 +271,7 @@ public class SummaryCommand implements MetricsQueryCommand {
         }
     }
 
-    private void addAllMetrics(Connection conn, List<Map<String, Object>> rows, Map<String, String> commonLabels) throws SQLException {
+    private void addAllMetrics(Connection conn, List<Map<String, Object>> rows, Map<String, String> commonLabels, boolean condense) throws SQLException {
         // Add common labels header if any exist
         if (!commonLabels.isEmpty()) {
             String commonLabelsStr = formatLabelsAsString(commonLabels);
@@ -277,13 +284,14 @@ public class SummaryCommand implements MetricsQueryCommand {
             SELECT
               mf.name AS metric_name,
               mf.type AS metric_type,
-              COUNT(DISTINCT sv.label_set_id) AS unique_label_sets,
+              COUNT(DISTINCT mi.label_set_id) AS unique_label_sets,
               COUNT(*) AS total_samples,
               MIN(sv.value) AS min_value,
               MAX(sv.value) AS max_value
             FROM metric_family mf
             JOIN sample_name sn ON sn.metric_family_id = mf.id
-            JOIN sample_value sv ON sv.sample_name_id = sn.id
+            JOIN metric_instance mi ON mi.sample_name_id = sn.id
+            JOIN sample_value sv ON sv.metric_instance_id = mi.id
             GROUP BY mf.id, mf.name, mf.type
             ORDER BY mf.name
             """;
@@ -313,7 +321,7 @@ public class SummaryCommand implements MetricsQueryCommand {
         }
 
         // Convert to display tree and render once for all metrics
-        DisplayTree displayTree = DisplayTree.fromLabelSetTree(canonicalTree);
+        DisplayTree displayTree = DisplayTree.fromLabelSetTree(canonicalTree, condense);
         List<String> lines = displayTree.render(true);
         for (String line : lines) {
             rows.add(createRow("LABEL SET", "", line, ""));
@@ -329,8 +337,8 @@ public class SummaryCommand implements MetricsQueryCommand {
               SELECT DISTINCT ls.id, ls.hash
               FROM metric_family mf
               JOIN sample_name sn ON sn.metric_family_id = mf.id
-              JOIN sample_value sv ON sv.sample_name_id = sn.id
-              JOIN label_set ls ON sv.label_set_id = ls.id
+              JOIN metric_instance mi ON mi.sample_name_id = sn.id
+              JOIN label_set ls ON mi.label_set_id = ls.id
               WHERE mf.name = ?
             )
             SELECT
@@ -455,7 +463,7 @@ public class SummaryCommand implements MetricsQueryCommand {
             LEFT JOIN label_set_membership lsm ON lsm.label_set_id = ls.id
             LEFT JOIN label_key lk ON lk.id = lsm.label_key_id
             LEFT JOIN label_value lv ON lv.id = lsm.label_value_id
-            WHERE ls.id IN (SELECT DISTINCT label_set_id FROM sample_value)
+            WHERE ls.id IN (SELECT DISTINCT label_set_id FROM metric_instance)
             GROUP BY ls.id
             """;
 

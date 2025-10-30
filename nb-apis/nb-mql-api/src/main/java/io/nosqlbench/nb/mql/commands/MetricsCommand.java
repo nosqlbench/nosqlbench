@@ -73,6 +73,9 @@ public class MetricsCommand implements MetricsQueryCommand {
         String keepLabelsParam = (String) params.getOrDefault("keep-labels", "activity,session");
         Set<String> keepLabels = parseKeepLabels(keepLabelsParam);
 
+        // Parse condense parameter (default true)
+        boolean condense = (boolean) params.getOrDefault("condense", true);
+
         // First, collect all label sets to find common labels (excluding kept labels)
         Map<String, String> commonLabels = findCommonLabels(conn, keepLabels);
 
@@ -86,7 +89,7 @@ public class MetricsCommand implements MetricsQueryCommand {
         if ("name".equals(groupBy)) {
             addMetricsWithLabelSets(conn, rows, commonLabels);
         } else if ("labelset".equals(groupBy)) {
-            addLabelSetsWithMetrics(conn, rows, commonLabels);
+            addLabelSetsWithMetrics(conn, rows, commonLabels, condense);
         }
 
         long executionTime = System.currentTimeMillis() - startTime;
@@ -100,11 +103,11 @@ public class MetricsCommand implements MetricsQueryCommand {
         String metricsSql = """
             SELECT
               mf.name, mf.type,
-              COUNT(DISTINCT sv.label_set_id) as label_set_count,
-              COUNT(*) as sample_count
+              COUNT(DISTINCT mi.label_set_id) as label_set_count,
+              COUNT(DISTINCT mi.id) as sample_count
             FROM metric_family mf
             JOIN sample_name sn ON sn.metric_family_id = mf.id
-            JOIN sample_value sv ON sv.sample_name_id = sn.id
+            JOIN metric_instance mi ON mi.sample_name_id = sn.id
             GROUP BY mf.id
             ORDER BY mf.name
             """;
@@ -135,8 +138,8 @@ public class MetricsCommand implements MetricsQueryCommand {
               SELECT DISTINCT ls.id, ls.hash
               FROM metric_family mf
               JOIN sample_name sn ON sn.metric_family_id = mf.id
-              JOIN sample_value sv ON sv.sample_name_id = sn.id
-              JOIN label_set ls ON sv.label_set_id = ls.id
+              JOIN metric_instance mi ON mi.sample_name_id = sn.id
+              JOIN label_set ls ON mi.label_set_id = ls.id
               WHERE mf.name = ?
             )
             SELECT
@@ -208,7 +211,7 @@ public class MetricsCommand implements MetricsQueryCommand {
         return sb.toString();
     }
 
-    private void addLabelSetsWithMetrics(Connection conn, List<Map<String, Object>> rows, Map<String, String> commonLabels) throws SQLException {
+    private void addLabelSetsWithMetrics(Connection conn, List<Map<String, Object>> rows, Map<String, String> commonLabels, boolean condense) throws SQLException {
         // Get all unique label sets
         String labelSetsSql = """
             SELECT DISTINCT
@@ -249,8 +252,8 @@ public class MetricsCommand implements MetricsQueryCommand {
             }
         }
 
-        // Convert to display tree for condensed rendering
-        DisplayTree displayTree = DisplayTree.fromLabelSetTree(canonicalTree);
+        // Convert to display tree for rendering
+        DisplayTree displayTree = DisplayTree.fromLabelSetTree(canonicalTree, condense);
 
         // Render the display tree
         List<String> lines = displayTree.render(true); // true for colorized output
@@ -264,10 +267,10 @@ public class MetricsCommand implements MetricsQueryCommand {
         List<String> metrics = new ArrayList<>();
         String metricsSql = """
             SELECT DISTINCT mf.name
-            FROM sample_value sv
-            JOIN sample_name sn ON sv.sample_name_id = sn.id
+            FROM metric_instance mi
+            JOIN sample_name sn ON mi.sample_name_id = sn.id
             JOIN metric_family mf ON sn.metric_family_id = mf.id
-            WHERE sv.label_set_id = ?
+            WHERE mi.label_set_id = ?
             ORDER BY mf.name
             """;
 
@@ -286,10 +289,10 @@ public class MetricsCommand implements MetricsQueryCommand {
                                       int labelSetId, String labelSetName) throws SQLException {
         String metricsSql = """
             SELECT DISTINCT mf.name
-            FROM sample_value sv
-            JOIN sample_name sn ON sv.sample_name_id = sn.id
+            FROM metric_instance mi
+            JOIN sample_name sn ON mi.sample_name_id = sn.id
             JOIN metric_family mf ON sn.metric_family_id = mf.id
-            WHERE sv.label_set_id = ?
+            WHERE mi.label_set_id = ?
             ORDER BY mf.name
             """;
 

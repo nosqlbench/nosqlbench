@@ -52,9 +52,9 @@ class TopKCommandTest {
             assertTrue(result.columns().contains("value"));
             assertTrue(result.columns().contains("labels"));
 
-            // First row should have highest value (11000)
+            // First row should have highest value (11010)
             double firstValue = (double) result.rows().get(0).get("value");
-            assertEquals(11000.0, firstValue, 0.1, "Top value should be 11000");
+            assertEquals(11010.0, firstValue, 0.1, "Top value should be 11010");
 
             System.out.println("\n=== TopK Query: Top 3 ===");
             System.out.println(new TableFormatter().format(result));
@@ -77,7 +77,7 @@ class TopKCommandTest {
             assertEquals(1, result.rowCount(), "Should return top 1");
 
             double value = (double) result.rows().get(0).get("value");
-            assertEquals(11000.0, value, 0.1);
+            assertEquals(11010.0, value, 0.1);
 
             System.out.println("\n=== TopK Query: Top 1 ===");
             System.out.println(new TableFormatter().format(result));
@@ -98,8 +98,8 @@ class TopKCommandTest {
             );
             QueryResult result = command.execute(conn, params);
 
-            // Should return 3 rows (only 3 label sets with status=200)
-            assertEquals(3, result.rowCount(), "Should return 3 (all status=200)");
+            // Should return 5 rows (limited by n=5, all have status=200 - there are 9 total)
+            assertEquals(5, result.rowCount(), "Should return 5 (limited by n)");
 
             // All should have status=200
             for (Map<String, Object> row : result.rows()) {

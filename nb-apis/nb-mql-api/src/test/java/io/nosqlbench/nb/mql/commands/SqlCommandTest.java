@@ -188,8 +188,9 @@ class SqlCommandTest {
                   sn.sample,
                   sv.value,
                   datetime(sv.timestamp_ms/1000, 'unixepoch') as captured_at
-                FROM sample_value sv
-                JOIN sample_name sn ON sv.sample_name_id = sn.id
+                FROM metric_instance mi
+                JOIN sample_name sn ON mi.sample_name_id = sn.id
+                JOIN sample_value sv ON sv.metric_instance_id = mi.id
                 WHERE sv.timestamp_ms = (SELECT MAX(timestamp_ms) FROM sample_value)
                 ORDER BY sn.sample, sv.value DESC
                 """;

@@ -146,10 +146,10 @@ public class SqlCommand implements MetricsQueryCommand {
               sql --query "SELECT name, type, unit FROM metric_family ORDER BY name"
 
               # Get sample counts by metric
-              sql --query "SELECT sn.sample, COUNT(*) as count FROM sample_value sv JOIN sample_name sn ON sv.sample_name_id = sn.id GROUP BY sn.sample"
+              sql --query "SELECT sn.sample, COUNT(*) as count FROM metric_instance mi JOIN sample_name sn ON mi.sample_name_id = sn.id JOIN sample_value sv ON sv.metric_instance_id = mi.id GROUP BY sn.sample"
 
               # Custom time-series query
-              sql --query "SELECT datetime(timestamp_ms/1000, 'unixepoch') as time, value FROM sample_value WHERE sample_name_id = 1 ORDER BY timestamp_ms"
+              sql --query "SELECT datetime(sv.timestamp_ms/1000, 'unixepoch') as time, sv.value FROM metric_instance mi JOIN sample_value sv ON sv.metric_instance_id = mi.id WHERE mi.sample_name_id = 1 ORDER BY sv.timestamp_ms"
 
               # Schema inspection
               sql --query "PRAGMA table_info(sample_value)"

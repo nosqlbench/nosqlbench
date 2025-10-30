@@ -57,9 +57,9 @@ class SessionCommandTest {
             int snapshots = (int) row.get("total_snapshots");
             assertEquals(5, snapshots, "Should have 5 snapshots");
 
-            // Should have 35 total samples
+            // Should have 135 total samples (27 metrics × 5 snapshots)
             int samples = (int) row.get("total_samples");
-            assertEquals(35, samples, "Should have 35 samples");
+            assertEquals(135, samples, "Should have 135 samples");
 
             System.out.println("\n=== Session Command ===");
             System.out.println(new TableFormatter().format(result));

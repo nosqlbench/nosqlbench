@@ -127,23 +127,23 @@ class RangeCommandTest {
             Map<String, Object> params = Map.of(
                 "metric", "api_requests_total",
                 "window", "1h",  // Get all 5 snapshots
-                "labels", Map.of("method", "GET", "endpoint", "/users", "status", "200")
+                "labels", Map.of("method", "GET", "endpoint", "/api/users", "status", "200")
             );
             QueryResult result = command.execute(conn, params);
 
             // Should return 5 snapshots
             assertEquals(5, result.rowCount(), "Should return all 5 snapshots");
 
-            // Verify values are monotonically increasing: 0, 1000, 2200, 5500, 11000
+            // Verify values are monotonically increasing: 600, 700, 800, 900, 1000
             List<Double> values = result.rows().stream()
                 .map(row -> (Double) row.get("value"))
                 .toList();
 
-            assertEquals(0.0, values.get(0), 0.01);
-            assertEquals(1000.0, values.get(1), 0.01);
-            assertEquals(2200.0, values.get(2), 0.01);
-            assertEquals(5500.0, values.get(3), 0.01);
-            assertEquals(11000.0, values.get(4), 0.01);
+            assertEquals(600.0, values.get(0), 0.01);
+            assertEquals(700.0, values.get(1), 0.01);
+            assertEquals(800.0, values.get(2), 0.01);
+            assertEquals(900.0, values.get(3), 0.01);
+            assertEquals(1000.0, values.get(4), 0.01);
 
             System.out.println("\n=== Range Query Examples DB ===");
             System.out.println(new TableFormatter().format(result));

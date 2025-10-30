@@ -64,6 +64,13 @@ public class MetricsCLI implements Callable<Integer> {
     private String keepLabels;
 
     @Option(
+        names = {"--no-condense"},
+        description = "Disable tree condensation. Shows each metric instance separately with full label sets instead of condensing siblings with common patterns (default: false, condensation enabled)",
+        defaultValue = "false"
+    )
+    private boolean noCondense;
+
+    @Option(
         names = {"-f", "--format"},
         description = "Output format: table, json, jsonl, csv, tsv, markdown",
         defaultValue = "table"
@@ -78,6 +85,7 @@ public class MetricsCLI implements Callable<Integer> {
             Map<String, Object> params = new LinkedHashMap<>();
             params.put("group-by", groupBy);
             params.put("keep-labels", keepLabels);
+            params.put("condense", !noCondense); // invert flag: --no-condense means condense=false
 
             QueryResult result = command.execute(conn, params);
 

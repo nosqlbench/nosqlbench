@@ -284,7 +284,8 @@ public class MetricsReporterIntegrationTest {
         try (PreparedStatement ps = connection.prepareStatement("""
             SELECT sv.value
             FROM sample_value sv
-            INNER JOIN sample_name sn ON sn.id = sv.sample_name_id
+            INNER JOIN metric_instance mi ON mi.id = sv.metric_instance_id
+            INNER JOIN sample_name sn ON sn.id = mi.sample_name_id
             WHERE sn.sample = ?
             ORDER BY sv.timestamp_ms
         """)) {

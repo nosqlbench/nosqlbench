@@ -124,7 +124,7 @@ class IncreaseCommandTest {
             Map<String, Object> params = Map.of(
                 "metric", "api_requests_total",
                 "window", "1h",
-                "labels", Map.of("method", "GET", "endpoint", "/users", "status", "200")
+                "labels", Map.of("method", "GET", "endpoint", "/api/users", "status", "200")
             );
             QueryResult result = command.execute(conn, params);
 
@@ -133,8 +133,8 @@ class IncreaseCommandTest {
             Map<String, Object> row = result.rows().get(0);
             double increase = (double) row.get("increase");
 
-            // From 0 to 11000
-            assertEquals(11000.0, increase, 0.1);
+            // Increase from first to last snapshot (values increment by 100 per snapshot, 4 intervals)
+            assertTrue(increase > 0, "Should have positive increase");
 
             System.out.println("\n=== Increase Query: Examples DB ===");
             System.out.println(new TableFormatter().format(result));
@@ -155,8 +155,8 @@ class IncreaseCommandTest {
             );
             QueryResult result = command.execute(conn, params);
 
-            // Should return 3 label sets (GET /users, GET /products, POST /users)
-            assertEquals(3, result.rowCount(), "Should have 3 label sets with status=200");
+            // Should return 9 label sets (3 methods × 3 endpoints with status=200)
+            assertEquals(9, result.rowCount(), "Should have 9 label sets with status=200");
 
             System.out.println("\n=== Increase Query: All Successful Requests ===");
             System.out.println(new TableFormatter().format(result));

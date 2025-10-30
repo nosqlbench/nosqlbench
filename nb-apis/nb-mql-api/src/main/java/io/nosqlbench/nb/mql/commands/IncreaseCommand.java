@@ -180,13 +180,13 @@ public class IncreaseCommand implements MetricsQueryCommand {
 
         sql.append("WITH timeseries AS (\n");
         sql.append("  SELECT\n");
-        sql.append("    sv.").append(MetricsSchema.COL_SV_LABEL_SET_ID).append(",\n");
+        sql.append("    mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append(",\n");
         sql.append("    sv.").append(MetricsSchema.COL_SV_VALUE).append(",\n");
         sql.append("    GROUP_CONCAT(lk.").append(MetricsSchema.COL_LK_NAME)
            .append(" || '=' || lv.").append(MetricsSchema.COL_LV_VALUE).append(", ', ') AS labels\n");
         sql.append("  FROM ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append(" sv\n");
         sql.append("  JOIN ").append(MetricsSchema.TABLE_SAMPLE_NAME).append(" sn ON sn.")
-           .append(MetricsSchema.COL_SN_ID).append(" = sv.").append(MetricsSchema.COL_SV_SAMPLE_NAME_ID).append("\n");
+           .append(MetricsSchema.COL_SN_ID).append(" = mi.").append(MetricsSchema.COL_MI_SAMPLE_NAME_ID).append("\n");
         sql.append("  ").append(MetricsSchema.joinAllLabels()).append("\n");
         sql.append("  WHERE sn.").append(MetricsSchema.COL_SN_SAMPLE).append(" = ?\n");
 
@@ -197,7 +197,7 @@ public class IncreaseCommand implements MetricsQueryCommand {
 
         // Add label filters
         for (String labelKey : labelFilters.keySet()) {
-            sql.append("    AND sv.").append(MetricsSchema.COL_SV_LABEL_SET_ID).append(" IN (\n");
+            sql.append("    AND mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append(" IN (\n");
             sql.append("      SELECT lsm.").append(MetricsSchema.COL_LSM_LABEL_SET_ID).append("\n");
             sql.append("      FROM ").append(MetricsSchema.TABLE_LABEL_SET_MEMBERSHIP).append(" lsm\n");
             sql.append("      JOIN ").append(MetricsSchema.TABLE_LABEL_KEY).append(" lk ON lk.")

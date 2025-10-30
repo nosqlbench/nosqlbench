@@ -300,6 +300,65 @@ public class TestDatabaseGenerator {
     }
 
     /**
+     * Generate examples.db
+     *
+     * API request metrics for testing TopK, Range, Increase, Rate queries.
+     *
+     * Schema:
+     * - Metrics: api_requests_total (COUNTER)
+     * - Labels: method={GET,POST,PUT}, status={200,404,500}, endpoint={/api/users,/api/orders,/api/products}
+     * - Time range: 5 snapshots over 2 minutes
+     * - Values: Vary from 1000 to 11000 across label combinations
+     *
+     * Purpose: Test complex queries with multiple dimensions and TopK
+     */
+    public static void generateExamples(Path outputPath, NBComponent parent) throws Exception {
+        String jdbcUrl = "jdbc:sqlite:" + outputPath.toAbsolutePath();
+
+        try (SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
+                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), NBLabels.forKV())) {
+
+            long baseTime = 1729681200000L;
+            long intervalMs = 30000L;
+
+            // Generate 5 snapshots
+            for (int i = 0; i < 5; i++) {
+                List<NBMetricCounter> counters = new ArrayList<>();
+
+                // Create counters for different method/status/endpoint combinations
+                String[] methods = {"GET", "POST", "PUT"};
+                String[] statuses = {"200", "404", "500"};
+                String[] endpoints = {"/api/users", "/api/orders", "/api/products"};
+
+                int value = 600;
+                for (String method : methods) {
+                    for (String status : statuses) {
+                        for (String endpoint : endpoints) {
+                            NBMetricCounter counter = new NBMetricCounter(
+                                NBLabels.forKV(
+                                    "name", "api_requests_total",
+                                    "method", method,
+                                    "status", status,
+                                    "endpoint", endpoint
+                                ),
+                                "counter",
+                                MetricCategory.Core
+                            );
+                            counter.inc(value + (i * 100)); // Increment over time
+                            counters.add(counter);
+                            value += 385; // Vary values across combinations (top will be ~11000)
+                        }
+                    }
+                }
+
+                MetricsView view = MetricsView.capture(counters, intervalMs);
+                reporter.onMetricsSnapshot(view);
+                Thread.sleep(100);
+            }
+        }
+    }
+
+    /**
      * Main method to generate all test databases.
      * Run this to regenerate test data after schema changes.
      */
@@ -322,6 +381,9 @@ public class TestDatabaseGenerator {
 
         generateRateCalculations(testDataDir.resolve("rate_calculations.db"), root);
         System.out.println("✓ Generated rate_calculations.db");
+
+        generateExamples(testDataDir.resolve("examples.db"), root);
+        System.out.println("✓ Generated examples.db");
 
         System.out.println("\nAll test databases generated successfully!");
         System.out.println("Location: " + testDataDir.toAbsolutePath());

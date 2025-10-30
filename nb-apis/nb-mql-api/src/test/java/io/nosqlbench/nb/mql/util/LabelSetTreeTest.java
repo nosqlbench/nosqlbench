@@ -248,4 +248,33 @@ class LabelSetTreeTest {
         Map<String, String> disjointLabels = Map.of("host", "server1");
         assertFalse(parent.isProperSubsetOf(disjointLabels));
     }
+
+    @Test
+    void testCondenseOption() {
+        LabelSetTree tree = new LabelSetTree();
+
+        // Add label sets that would benefit from condensation
+        tree.addLabelSet(Map.of("session", "abc", "activity", "read"), List.of("ops_complete"));
+        tree.addLabelSet(Map.of("session", "abc", "activity", "write"), List.of("ops_complete"));
+        tree.addLabelSet(Map.of("session", "abc", "activity", "delete"), List.of("ops_complete"));
+
+        // Test with condensation enabled (default)
+        DisplayTree condensedTree = DisplayTree.fromLabelSetTree(tree, true);
+        List<String> condensedLines = condensedTree.render(false);
+
+        // Test with condensation disabled
+        DisplayTree nonCondensedTree = DisplayTree.fromLabelSetTree(tree, false);
+        List<String> nonCondensedLines = nonCondensedTree.render(false);
+
+        System.out.println("\n=== Condensed Tree (condense=true) ===");
+        condensedLines.forEach(System.out::println);
+
+        System.out.println("\n=== Non-Condensed Tree (condense=false) ===");
+        nonCondensedLines.forEach(System.out::println);
+
+        // Verify that condensed tree is more compact
+        // (it should have fewer lines due to condensation)
+        assertTrue(condensedLines.size() <= nonCondensedLines.size(),
+            "Condensed tree should have fewer or equal lines than non-condensed tree");
+    }
 }

@@ -218,9 +218,11 @@ public class AggregateCommand implements MetricsQueryCommand {
         }
         sql.append("\n");
 
-        sql.append("  FROM ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append(" sv\n");
+        sql.append("  FROM ").append(MetricsSchema.TABLE_METRIC_INSTANCE).append(" mi\n");
         sql.append("  JOIN ").append(MetricsSchema.TABLE_SAMPLE_NAME).append(" sn ON sn.")
-           .append(MetricsSchema.COL_SN_ID).append(" = sv.").append(MetricsSchema.COL_SV_SAMPLE_NAME_ID).append("\n");
+           .append(MetricsSchema.COL_SN_ID).append(" = mi.").append(MetricsSchema.COL_MI_SAMPLE_NAME_ID).append("\n");
+        sql.append("  JOIN ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append(" sv ON sv.")
+           .append(MetricsSchema.COL_SV_METRIC_INSTANCE_ID).append(" = mi.").append(MetricsSchema.COL_MI_ID).append("\n");
 
         if (useLatestOnly) {
             sql.append("  CROSS JOIN (SELECT MAX(").append(MetricsSchema.COL_SV_TIMESTAMP_MS).append(") AS max_ts FROM ")
@@ -232,7 +234,7 @@ public class AggregateCommand implements MetricsQueryCommand {
             String labelName = groupByLabels.get(i);
             sql.append("  JOIN ").append(MetricsSchema.TABLE_LABEL_SET_MEMBERSHIP).append(" lsm").append(i)
                .append(" ON lsm").append(i).append(".").append(MetricsSchema.COL_LSM_LABEL_SET_ID)
-               .append(" = sv.").append(MetricsSchema.COL_SV_LABEL_SET_ID).append("\n");
+               .append(" = mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append("\n");
             sql.append("  JOIN ").append(MetricsSchema.TABLE_LABEL_KEY).append(" lk").append(i)
                .append(" ON lk").append(i).append(".").append(MetricsSchema.COL_LK_ID)
                .append(" = lsm").append(i).append(".").append(MetricsSchema.COL_LSM_LABEL_KEY_ID)
@@ -254,7 +256,7 @@ public class AggregateCommand implements MetricsQueryCommand {
         // Add label filters
         int filterIdx = 0;
         for (String labelKey : labelFilters.keySet()) {
-            sql.append("    AND sv.").append(MetricsSchema.COL_SV_LABEL_SET_ID).append(" IN (\n");
+            sql.append("    AND mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append(" IN (\n");
             sql.append("      SELECT lsm.").append(MetricsSchema.COL_LSM_LABEL_SET_ID).append("\n");
             sql.append("      FROM ").append(MetricsSchema.TABLE_LABEL_SET_MEMBERSHIP).append(" lsm\n");
             sql.append("      JOIN ").append(MetricsSchema.TABLE_LABEL_KEY).append(" lk ON lk.")

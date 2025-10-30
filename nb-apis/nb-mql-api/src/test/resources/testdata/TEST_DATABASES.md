@@ -36,8 +36,10 @@ Test basic counter queries, instant values, simple rate calculations, and time-s
 ```sql
 SELECT sv.value, lv.value as activity
 FROM sample_value sv
-JOIN sample_name sn ON sv.sample_name_id = sn.id
-JOIN label_set_membership lsm ON sv.label_set_id = lsm.label_set_id
+JOIN metric_instance mi ON sv.metric_instance_id = mi.id
+JOIN sample_name sn ON mi.sample_name_id = sn.id
+JOIN label_set ls ON mi.label_set_id = ls.id
+JOIN label_set_membership lsm ON ls.id = lsm.label_set_id
 JOIN label_key lk ON lsm.label_key_id = lk.id
 JOIN label_value lv ON lsm.label_value_id = lv.id
 WHERE sn.sample = 'activity_ops_total'
@@ -95,7 +97,8 @@ Test complex label filtering, multi-dimensional aggregations, grouping operation
 ```sql
 SELECT lv.value as env, COUNT(*) as sample_count
 FROM sample_value sv
-JOIN label_set_membership lsm ON sv.label_set_id = lsm.label_set_id
+JOIN metric_instance mi ON sv.metric_instance_id = mi.id
+JOIN label_set_membership lsm ON mi.label_set_id = lsm.label_set_id
 JOIN label_key lk ON lsm.label_key_id = lk.id
 JOIN label_value lv ON lsm.label_value_id = lv.id
 WHERE lk.name = 'env'
@@ -105,7 +108,7 @@ Expected: `{prod: 48, staging: 48}`
 
 **Unique Label Sets:**
 ```sql
-SELECT COUNT(DISTINCT label_set_id) FROM sample_value;
+SELECT COUNT(DISTINCT label_set_id) FROM metric_instance;
 ```
 Expected: `24`
 
@@ -158,8 +161,9 @@ Distribution within each snapshot:
 SELECT sq.quantile_value
 FROM sample_quantile sq
 JOIN sample_value sv ON sq.sample_value_id = sv.id
-JOIN sample_name sn ON sv.sample_name_id = sn.id
-JOIN label_set_membership lsm ON sv.label_set_id = lsm.label_set_id
+JOIN metric_instance mi ON sv.metric_instance_id = mi.id
+JOIN sample_name sn ON mi.sample_name_id = sn.id
+JOIN label_set_membership lsm ON mi.label_set_id = lsm.label_set_id
 JOIN label_key lk ON lsm.label_key_id = lk.id
 JOIN label_value lv ON lsm.label_value_id = lv.id
 WHERE sn.sample = 'operation_latency_ms'
@@ -231,8 +235,9 @@ Test rate() and increase() commands with predictable, mathematically known patte
 ```sql
 SELECT MAX(sv.value) - MIN(sv.value) as total_increase
 FROM sample_value sv
-JOIN sample_name sn ON sv.sample_name_id = sn.id
-JOIN label_set_membership lsm ON sv.label_set_id = lsm.label_set_id
+JOIN metric_instance mi ON sv.metric_instance_id = mi.id
+JOIN sample_name sn ON mi.sample_name_id = sn.id
+JOIN label_set_membership lsm ON mi.label_set_id = lsm.label_set_id
 JOIN label_key lk ON lsm.label_key_id = lk.id
 JOIN label_value lv ON lsm.label_value_id = lv.id
 WHERE sn.sample = 'counter_total'
@@ -245,7 +250,8 @@ Expected: `1190`
 ```sql
 SELECT lv.value as pattern, COUNT(*) as snapshots
 FROM sample_value sv
-JOIN label_set_membership lsm ON sv.label_set_id = lsm.label_set_id
+JOIN metric_instance mi ON sv.metric_instance_id = mi.id
+JOIN label_set_membership lsm ON mi.label_set_id = lsm.label_set_id
 JOIN label_key lk ON lsm.label_key_id = lk.id
 JOIN label_value lv ON lsm.label_value_id = lv.id
 WHERE lk.name = 'pattern'
@@ -262,6 +268,60 @@ Expected: `{linear: 120, exponential: 120, step: 120}`
 
 ---
 
+## examples.db
+
+### Purpose
+Test TopK queries, range queries, increase/rate calculations, and example documentation tests with realistic API request data.
+
+### Schema
+- **Metric Family**: `api_requests_total`
+- **Sample**: `api_requests_total` (COUNTER)
+- **Type**: COUNTER
+
+### Label Dimensions
+- `method`: {GET, POST, PUT}
+- `status`: {200, 404, 500}
+- `endpoint`: {/api/users, /api/orders, /api/products}
+
+### Data Characteristics
+- **Snapshots**: 5 (30 seconds apart)
+- **Label Combinations**: 27 (3 methods × 3 statuses × 3 endpoints)
+- **Total Samples**: 135
+- **Growth Pattern**: Each combination grows linearly, with values ranging from 1000 to 11000+ across combinations
+- **MetricsQL Specs**: Each metric instance has a spec like `api_requests_total{endpoint="/api/users",method="GET",status="200"}`
+
+### Expected Query Results
+
+**TopK Query (top 3 by value):**
+```sql
+SELECT mi.spec, sv.value
+FROM metric_instance mi
+JOIN sample_value sv ON sv.metric_instance_id = mi.id
+WHERE sv.timestamp_ms = (SELECT MAX(timestamp_ms) FROM sample_value)
+ORDER BY sv.value DESC
+LIMIT 3;
+```
+Expected: Top 3 metric instances with highest values (around 11000+)
+
+**Range Query (all snapshots for specific metric):**
+```sql
+SELECT mi.spec, sv.value, datetime(sv.timestamp_ms / 1000, 'unixepoch') as time
+FROM metric_instance mi
+JOIN sample_value sv ON sv.metric_instance_id = mi.id
+WHERE mi.spec LIKE 'api_requests_total{endpoint="/api/users",method="GET",status="200"}'
+ORDER BY sv.timestamp_ms;
+```
+Expected: 5 time-series points showing growth
+
+### Use Cases
+- Testing TopK queries with many label combinations
+- Range queries over multiple snapshots
+- Increase and rate calculations with realistic API metrics
+- Example documentation tests
+- Filtering by status codes (e.g., errors vs success)
+
+---
+
 ## Schema Reference
 
 All databases share this schema (created by `SqliteSnapshotReporter`):
@@ -269,16 +329,25 @@ All databases share this schema (created by `SqliteSnapshotReporter`):
 ```
 metric_family (id, name, help, unit, type)
     └─ sample_name (id, metric_family_id, sample)
-        └─ sample_value (id, sample_name_id, label_set_id, timestamp_ms, value, count, sum, min, max, mean, stddev)
-             ├─ sample_quantile (sample_value_id, quantile, quantile_value)
-             ├─ sample_rate (sample_value_id, rate_type, rate_value)
-             └─ sample_histogram (sample_value_id, start_seconds, interval_seconds, max_value, histogram_base64)
+        └─ metric_instance (id, sample_name_id, label_set_id, spec) [UNIQUE(sample_name_id, label_set_id)]
+            └─ sample_value (id, metric_instance_id, timestamp_ms, value)
+                 ├─ sample_quantile (sample_value_id, quantile, quantile_value)
+                 ├─ sample_rate (sample_value_id, rate_type, rate_value)
+                 └─ sample_histogram (sample_value_id, start_seconds, interval_seconds, max_value, histogram_base64)
 
 label_key (id, name)
 label_value (id, value)
 label_set (id, hash)
 label_set_membership (label_set_id, label_key_id, label_value_id)
 ```
+
+### Key Schema Features
+
+- **metric_instance table**: Materializes unique combinations of (sample_name_id, label_set_id), representing distinct metric instances
+  - **spec column**: Contains the fully MetricsQL/PromQL-compliant metric specifier in the form `metric_family{label1="value1",label2="value2"}` with labels sorted alphabetically
+  - Example: `api_requests_total{endpoint="/api/users",method="GET",status="200"}`
+- **Simplified sample_value**: Now only stores (metric_instance_id, timestamp_ms, value) - all label information accessed through metric_instance
+- **Efficient queries**: The metric_instance table enables direct filtering by metric identity without joining through samples, and the spec column provides instant access to human-readable metric identifiers
 
 ## Regenerating Test Databases
 
@@ -306,5 +375,5 @@ Connection conn = MetricsDatabaseReader.connect(dbPath);
 
 ---
 
-*Generated: 2025-10-23*
-*Schema Version: OpenMetrics-aligned (SqliteSnapshotReporter)*
+*Generated: 2025-10-29*
+*Schema Version: OpenMetrics-aligned (SqliteSnapshotReporter) with metric_instance table*

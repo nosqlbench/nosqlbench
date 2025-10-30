@@ -63,25 +63,46 @@ public class DisplayTree {
     }
 
     private final DisplayNode root;
+    private final boolean condenseTree;
+
+    /**
+     * Create a DisplayTree from a canonical LabelSetTree with default condensation enabled.
+     */
+    public static DisplayTree fromLabelSetTree(LabelSetTree canonicalTree) {
+        return fromLabelSetTree(canonicalTree, true);
+    }
 
     /**
      * Create a DisplayTree from a canonical LabelSetTree.
+     *
+     * @param canonicalTree The canonical tree to convert
+     * @param condenseTree If true (default), apply condensation algorithms to merge
+     *                     siblings with common patterns. If false, preserve the original
+     *                     structure without condensation, showing each metric instance
+     *                     separately with full label sets.
      */
-    public static DisplayTree fromLabelSetTree(LabelSetTree canonicalTree) {
-        DisplayTree displayTree = new DisplayTree();
+    public static DisplayTree fromLabelSetTree(LabelSetTree canonicalTree, boolean condenseTree) {
+        DisplayTree displayTree = new DisplayTree(condenseTree);
         displayTree.buildFrom(canonicalTree.root());
 
-        // Post-process: condense siblings with same metrics but different single label value
-        displayTree.condenseSiblingsWithSameMetrics(displayTree.root);
+        if (condenseTree) {
+            // Post-process: condense siblings with same metrics but different single label value
+            displayTree.condenseSiblingsWithSameMetrics(displayTree.root);
 
-        // Final consolidation: merge siblings with identical label sets
-        displayTree.consolidateIdenticalLabelSets(displayTree.root);
+            // Final consolidation: merge siblings with identical label sets
+            displayTree.consolidateIdenticalLabelSets(displayTree.root);
+        }
 
         return displayTree;
     }
 
     private DisplayTree() {
+        this(true);
+    }
+
+    private DisplayTree(boolean condenseTree) {
         this.root = new DisplayNode(Collections.emptyMap());
+        this.condenseTree = condenseTree;
     }
 
     public DisplayNode root() {
@@ -488,6 +509,18 @@ public class DisplayTree {
     }
 
     /**
+     * Colorize tree branch characters in a prefix string while leaving spaces unchanged.
+     */
+    private String colorizePrefixBranches(String prefix) {
+        // Replace branch patterns with colorized versions
+        String result = prefix;
+        result = result.replace("└── ", AnsiColors.colorizeTreeBranch("└── "));
+        result = result.replace("├── ", AnsiColors.colorizeTreeBranch("├── "));
+        result = result.replace("│   ", AnsiColors.colorizeTreeBranch("│   "));
+        return result;
+    }
+
+    /**
      * Recursively render a display node.
      */
     private void renderNode(DisplayNode node, String prefix, boolean isLast, boolean isRoot,
@@ -495,20 +528,26 @@ public class DisplayTree {
         // Render this node's labels (skip for root)
         if (!isRoot) {
             String labelStr = formatLabels(node.labels);
-            if (colorize) {
-                labelStr = AnsiColors.colorizeLabel(labelStr);
-            }
-            lines.add(prefix + labelStr);
+            // Colorize both prefix (which may contain branch chars) and label
+            String prefixStr = colorize ? colorizePrefixBranches(prefix) : prefix;
+            String colorizedLabel = colorize ? AnsiColors.colorizeLabel(labelStr) : labelStr;
+            lines.add(prefixStr + colorizedLabel);
         }
 
-        // Calculate prefix for children
+        // Calculate prefix for children - this is the indentation WITHOUT the branch character
         String childPrefix;
         if (isRoot) {
             childPrefix = "";
         } else {
             String connector = isLast ? "    " : "│   ";
-            childPrefix = prefix.replaceFirst("└── $", connector)
-                               .replaceFirst("├── $", connector);
+            // Remove the last branch characters (with trailing space) and replace with connector
+            if (prefix.endsWith("└── ")) {
+                childPrefix = prefix.substring(0, prefix.length() - 4) + connector;
+            } else if (prefix.endsWith("├── ")) {
+                childPrefix = prefix.substring(0, prefix.length() - 4) + connector;
+            } else {
+                childPrefix = prefix + connector;
+            }
         }
 
         // Render metrics and children
@@ -524,7 +563,8 @@ public class DisplayTree {
             String branch = isRoot ? "" : (isLastItem ? "└── " : "├── ");
             String branchStr = colorize ? AnsiColors.colorizeTreeBranch(branch) : branch;
             String metricStr = colorize ? AnsiColors.colorizeMetric(sortedMetrics.get(i)) : sortedMetrics.get(i);
-            lines.add(childPrefix + branchStr + metricStr);
+            String prefixStr = colorize ? colorizePrefixBranches(childPrefix) : childPrefix;
+            lines.add(prefixStr + branchStr + metricStr);
         }
 
         // Then children
@@ -532,8 +572,8 @@ public class DisplayTree {
             int itemIndex = sortedMetrics.size() + i;
             boolean isLastItem = (itemIndex == totalItems - 1);
             String branch = isRoot ? "" : (isLastItem ? "└── " : "├── ");
-            String branchStr = colorize ? AnsiColors.colorizeTreeBranch(branch) : branch;
-            renderNode(children.get(i), childPrefix + branchStr, isLastItem, false, lines, colorize);
+            // Pass uncolorized branch to child (colors applied when rendering label)
+            renderNode(children.get(i), childPrefix + branch, isLastItem, false, lines, colorize);
         }
     }
 }

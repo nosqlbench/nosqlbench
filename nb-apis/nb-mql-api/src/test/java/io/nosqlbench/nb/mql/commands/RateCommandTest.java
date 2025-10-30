@@ -154,7 +154,7 @@ class RateCommandTest {
             Map<String, Object> params = Map.of(
                 "metric", "api_requests_total",
                 "window", "1h",
-                "labels", Map.of("method", "GET", "endpoint", "/users", "status", "200")
+                "labels", Map.of("method", "GET", "endpoint", "/api/users", "status", "200")
             );
             QueryResult result = command.execute(conn, params);
 

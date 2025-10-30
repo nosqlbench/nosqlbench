@@ -193,9 +193,7 @@ public class QuantileCommand implements MetricsQueryCommand {
         sql.append("FROM ").append(MetricsSchema.TABLE_SAMPLE_QUANTILE).append(" sq\n");
         sql.append("JOIN ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append(" sv ON sq.")
            .append(MetricsSchema.COL_SQ_SAMPLE_VALUE_ID).append(" = sv.").append(MetricsSchema.COL_SV_ID).append("\n");
-        sql.append("JOIN ").append(MetricsSchema.TABLE_SAMPLE_NAME).append(" sn ON sv.")
-           .append(MetricsSchema.COL_SV_SAMPLE_NAME_ID).append(" = sn.").append(MetricsSchema.COL_SN_ID).append("\n");
-        sql.append("").append(MetricsSchema.joinAllLabels()).append("\n");
+        sql.append("").append(MetricsSchema.joinAllLabelsWithSampleName()).append("\n");
         sql.append("WHERE sn.").append(MetricsSchema.COL_SN_SAMPLE).append(" = ?\n");
         sql.append("  AND sq.").append(MetricsSchema.COL_SQ_QUANTILE).append(" = ?\n");
 
@@ -206,7 +204,7 @@ public class QuantileCommand implements MetricsQueryCommand {
 
         // Add label filters
         for (String labelKey : labelFilters.keySet()) {
-            sql.append("  AND sv.").append(MetricsSchema.COL_SV_LABEL_SET_ID).append(" IN (\n");
+            sql.append("  AND mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append(" IN (\n");
             sql.append("    SELECT lsm.").append(MetricsSchema.COL_LSM_LABEL_SET_ID).append("\n");
             sql.append("    FROM ").append(MetricsSchema.TABLE_LABEL_SET_MEMBERSHIP).append(" lsm\n");
             sql.append("    JOIN ").append(MetricsSchema.TABLE_LABEL_KEY).append(" lk ON lk.")
