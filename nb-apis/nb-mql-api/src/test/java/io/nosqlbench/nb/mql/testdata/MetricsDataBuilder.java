@@ -199,6 +199,7 @@ public class MetricsDataBuilder {
             NBMetricCounter counter = new NBMetricCounter(
                 NBLabels.forMap(fullLabels),
                 "counter",
+                "operations",
                 MetricCategory.Core
             );
             counter.inc(value);
@@ -214,6 +215,7 @@ public class MetricsDataBuilder {
                 nbLabels,
                 new DeltaHdrHistogramReservoir(nbLabels, 3),
                 "timer",
+                "nanoseconds",
                 MetricCategory.Core
             );
 

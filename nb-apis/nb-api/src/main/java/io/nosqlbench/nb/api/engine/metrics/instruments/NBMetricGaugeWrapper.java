@@ -24,9 +24,10 @@ public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
     private final Gauge<Double> gauge;
     private final NBLabels labels;
     private final String description;
+    private final String unit;
     private final MetricCategory[] categories;
 
-    public NBMetricGaugeWrapper(NBLabels labels, Gauge<Double> gauge, String description, MetricCategory... categories) {
+    public NBMetricGaugeWrapper(NBLabels labels, Gauge<Double> gauge, String description, String unit, MetricCategory... categories) {
         this.gauge = gauge;
         if (gauge.getValue() instanceof Double d) {
         } else {
@@ -34,6 +35,7 @@ public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
         }
         this.labels = labels;
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
     }
 
@@ -55,6 +57,11 @@ public class NBMetricGaugeWrapper implements NBMetricGauge, NBMetric {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override

@@ -47,6 +47,7 @@ public class PromExpositionFormatTest {
         NBMetricCounter counter = new NBMetricCounter(
             NBLabels.forKV("name","counter_test_2342", "origin","mars"),
             "test counter format",
+            "operations",
             MetricCategory.Verification
         );
         counter.inc(23423L);
@@ -70,6 +71,7 @@ public class PromExpositionFormatTest {
             NBLabels.forKV("name","mynameismud","label3", "value3"),
             hdr,
             "test histogram format",
+            "nanoseconds",
             MetricCategory.Verification
             );
         String formatted = PromExpositionFormat.format(nowclock, nbHistogram);
@@ -91,6 +93,7 @@ public class PromExpositionFormatTest {
             NBLabels.forKV("name","monsieurmarius","label4", "value4"),
             hdr,
             "test timer format",
+            "nanoseconds",
             MetricCategory.Verification
         );
         for (long i = 0; 1000 > i; i++)
@@ -118,6 +121,7 @@ public class PromExpositionFormatTest {
         NBMetricMeter nbMetricMeter = new NBMetricMeter(
             NBLabels.forKV("name","eponine","label5", "value5"),
             "test meter format",
+            "operations",
             MetricCategory.Verification
         );
         String formatted = PromExpositionFormat.format(nowclock, nbMetricMeter);
@@ -140,6 +144,7 @@ public class PromExpositionFormatTest {
             NBLabels.forKV("name","cosette","label6", "value6"),
             cosetteGauge,
             "test gauge format",
+            "",
             MetricCategory.Verification
         );
         String formatted = PromExpositionFormat.format(nowclock, nbMetricGauge);
@@ -155,6 +160,7 @@ public class PromExpositionFormatTest {
             NBLabels.forKV("name","cosette2","label7", "value7"),
             cosetteGauge2,
             "test gauge format 2",
+            "",
             MetricCategory.Verification
         );
         String formatted2 = PromExpositionFormat.format(nowclock, nbMetricGauge2);

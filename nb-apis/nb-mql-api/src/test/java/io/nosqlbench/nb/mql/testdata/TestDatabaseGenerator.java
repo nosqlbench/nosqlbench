@@ -81,6 +81,7 @@ public class TestDatabaseGenerator {
                 NBMetricCounter readCounter = new NBMetricCounter(
                     NBLabels.forKV("name", "activity_ops", "activity", "read", "host", "server1"),
                     "ops",
+                    "operations",
                     MetricCategory.Core
                 );
                 readCounter.inc(i * 10); // 0, 10, 20, ..., 90
@@ -89,6 +90,7 @@ public class TestDatabaseGenerator {
                 NBMetricCounter writeCounter = new NBMetricCounter(
                     NBLabels.forKV("name", "activity_ops", "activity", "write", "host", "server1"),
                     "ops",
+                    "operations",
                     MetricCategory.Core
                 );
                 writeCounter.inc(i * 15); // 0, 15, 30, ..., 135
@@ -161,6 +163,7 @@ public class TestDatabaseGenerator {
                                         "env", env
                                     ),
                                     "requests",
+                                    "operations",
                                     MetricCategory.Core
                                 );
 
@@ -229,6 +232,7 @@ public class TestDatabaseGenerator {
                         labels,
                         new DeltaHdrHistogramReservoir(labels, 3),
                         "latency",
+                        "nanoseconds",
                         MetricCategory.Core
                     );
 
@@ -307,6 +311,7 @@ public class TestDatabaseGenerator {
                 NBMetricCounter linearCounter = new NBMetricCounter(
                     NBLabels.forKV("name", "patterns", "pattern", "linear"),
                     "counter",
+                    "operations",
                     MetricCategory.Core
                 );
                 linearCounter.inc(i * 10);
@@ -317,6 +322,7 @@ public class TestDatabaseGenerator {
                 NBMetricCounter expCounter = new NBMetricCounter(
                     NBLabels.forKV("name", "patterns", "pattern", "exponential"),
                     "counter",
+                    "operations",
                     MetricCategory.Core
                 );
                 expCounter.inc((long) exponentialValue);
@@ -327,6 +333,7 @@ public class TestDatabaseGenerator {
                 NBMetricCounter stepCounter = new NBMetricCounter(
                     NBLabels.forKV("name", "patterns", "pattern", "step"),
                     "counter",
+                    "operations",
                     MetricCategory.Core
                 );
                 stepCounter.inc(stepValue);
@@ -392,6 +399,7 @@ public class TestDatabaseGenerator {
                                     "endpoint", endpoint
                                 ),
                                 "counter",
+                                "operations",
                                 MetricCategory.Core
                             );
                             counter.inc(value + (i * 100)); // Increment over time

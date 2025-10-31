@@ -33,6 +33,7 @@ public class WindowSummaryGauge implements NBMetricGauge, DoubleConsumer {
     private final Stat stat;
     private final StatBucket stats;
     private final String description;
+    private final String unit;
     private final MetricCategory[] categories;
     private final int window;
 
@@ -44,6 +45,11 @@ public class WindowSummaryGauge implements NBMetricGauge, DoubleConsumer {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override
@@ -60,11 +66,12 @@ public class WindowSummaryGauge implements NBMetricGauge, DoubleConsumer {
     }
 
 
-    public WindowSummaryGauge(int window, NBLabels labels, Stat stat, String description,
+    public WindowSummaryGauge(int window, NBLabels labels, Stat stat, String description, String unit,
                               MetricCategory... categories) {
         this.labels = labels;
         this.stat = stat;
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
         this.window = window;
         this.stats = new StatBucket(window);

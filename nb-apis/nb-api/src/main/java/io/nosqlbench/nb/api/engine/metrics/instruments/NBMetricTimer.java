@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHistogramAttachment, TimerAttachment, NBMetric {
     private final DeltaHdrHistogramReservoir deltaHdrHistogramReservoir;
     private final String description;
+    private final String unit;
     private final MetricCategory[] categories;
     private long cacheExpiry;
     private List<Timer> mirrors;
@@ -38,10 +39,12 @@ public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHi
         final NBLabels labels,
         final DeltaHdrHistogramReservoir deltaHdrHistogramReservoir,
         String description,
+        String unit,
         MetricCategory... categories
     ) {
         super(deltaHdrHistogramReservoir);
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
         this.labels = labels;
         this.deltaHdrHistogramReservoir = deltaHdrHistogramReservoir;
@@ -69,7 +72,7 @@ public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHi
     public synchronized NBMetricTimer attachHdrDeltaHistogram() {
         if (null == mirrors) this.mirrors = new CopyOnWriteArrayList<>();
         final DeltaHdrHistogramReservoir sameConfigReservoir = deltaHdrHistogramReservoir.copySettings();
-        final NBMetricTimer mirror = new NBMetricTimer(labels, sameConfigReservoir, description, categories);
+        final NBMetricTimer mirror = new NBMetricTimer(labels, sameConfigReservoir, description, unit, categories);
         this.mirrors.add(mirror);
         return mirror;
     }
@@ -109,6 +112,11 @@ public class NBMetricTimer extends Timer implements DeltaSnapshotter, HdrDeltaHi
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override

@@ -23,11 +23,13 @@ public class NBMetricCounter extends Counter implements NBMetric {
 
     private final NBLabels labels;
     private String description;
+    private String unit;
     private MetricCategory[] categories;
 
-    public NBMetricCounter(final NBLabels labels, String description, MetricCategory... categories) {
+    public NBMetricCounter(final NBLabels labels, String description, String unit, MetricCategory... categories) {
         this.labels = labels;
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
     }
 
@@ -44,6 +46,11 @@ public class NBMetricCounter extends Counter implements NBMetric {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override

@@ -215,7 +215,7 @@ public final class MetricsView {
         NBLabels labels = metric.getLabels();
         String rawName = labels.valueOfOptional("name").orElse(metric.getHandle());
         String description = Optional.ofNullable(metric.getDescription()).orElse("");
-        String unit = labels.valueOfOptional("unit").orElse("");
+        String unit = Optional.ofNullable(metric.getUnit()).orElse("");
         MetricCategory[] categories = metric.getCategories();
         MetricType type;
 

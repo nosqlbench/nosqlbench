@@ -149,8 +149,7 @@ public class InstantCommand implements MetricsQueryCommand {
         sql.append("    GROUP_CONCAT(lk.").append(MetricsSchema.COL_LK_NAME).append(" || '=' || lv.").append(MetricsSchema.COL_LV_VALUE).append(", ', ') AS labels,\n");
         sql.append("    mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append("\n");
         sql.append("  FROM ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append(" sv\n");
-        sql.append("  JOIN ").append(MetricsSchema.TABLE_SAMPLE_NAME).append(" sn ON sn.").append(MetricsSchema.COL_SN_ID).append(" = mi.").append(MetricsSchema.COL_MI_SAMPLE_NAME_ID).append("\n");
-        sql.append("  ").append(MetricsSchema.joinAllLabels()).append("\n");
+        sql.append("  ").append(MetricsSchema.joinAllLabelsWithSampleName()).append("\n");
         sql.append("  CROSS JOIN latest_snapshot\n");
         sql.append("  WHERE sn.").append(MetricsSchema.COL_SN_SAMPLE).append(" = ?\n");
         sql.append("    AND sv.").append(MetricsSchema.COL_SV_TIMESTAMP_MS).append(" = latest_snapshot.max_ts\n");

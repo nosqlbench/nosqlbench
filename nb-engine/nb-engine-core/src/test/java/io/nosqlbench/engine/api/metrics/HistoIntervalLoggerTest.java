@@ -54,6 +54,7 @@ public class HistoIntervalLoggerTest {
                 significantDigits
             ),
             "test basic logger",
+            "nanoseconds",
             MetricCategory.Verification
         );
 

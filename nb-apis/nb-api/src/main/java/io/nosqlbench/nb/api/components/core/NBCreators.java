@@ -68,7 +68,9 @@ public class NBCreators {
         NBMetricTimer timer = new NBMetricTimer(
             labels,
             new DeltaHdrHistogramReservoir(labels, hdrdigits),
-            description, category
+            description,
+            "nanoseconds",
+            category
         );
         base.addComponentMetric(timer, category, description);
         return timer;
@@ -76,7 +78,7 @@ public class NBCreators {
 
     public Meter meter(String metricFamilyName, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().andPairs("name", metricFamilyName);
-        NBMetricMeter meter = new NBMetricMeter(labels, description, category);
+        NBMetricMeter meter = new NBMetricMeter(labels, description, "operations", category);
         base.addComponentMetric(meter, category, description);
         return meter;
     }
@@ -84,20 +86,20 @@ public class NBCreators {
 
     public NBMetricCounter counter(String metricFamilyName, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().andPairs("name", metricFamilyName);
-        NBMetricCounter counter = new NBMetricCounter(labels, description, category);
+        NBMetricCounter counter = new NBMetricCounter(labels, description, "operations", category);
         base.addComponentMetric(counter, category, description);
         return counter;
     }
 
 
     public NBFunctionGauge gauge(String metricFamilyName, Supplier<Double> valueSource, MetricCategory category, String description) {
-        NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName, description, category);
+        NBFunctionGauge gauge = new NBFunctionGauge(base, valueSource, metricFamilyName, description, "", category);
         base.addComponentMetric(gauge, category, description);
         return gauge;
     }
 
     public NBVariableGauge variableGauge(String metricFamilyName, double initialValue, MetricCategory category, String description, NBLabels additionalLabels) {
-        NBVariableGauge gauge = new NBVariableGauge(base, metricFamilyName, initialValue, additionalLabels, description, category);
+        NBVariableGauge gauge = new NBVariableGauge(base, metricFamilyName, initialValue, additionalLabels, description, "", category);
         base.addComponentMetric(gauge, category, description);
         return gauge;
     }
@@ -120,6 +122,7 @@ public class NBCreators {
                 base.getLabels().and(NBLabels.forKV("name", name + "_w" + window, "stat", stat)),
                 stat,
                 description,
+                "",
                 category
             );
             base.addComponentMetric(anyGauge, category, description);
@@ -133,7 +136,7 @@ public class NBCreators {
         DoubleSummaryStatistics reservoir = new DoubleSummaryStatistics();
         DoubleSummaryGauge anyGauge = null;
         for (DoubleSummaryGauge.Stat stat : stats) {
-            anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name", name, "stat", stat)), stat, reservoir, description, category);
+            anyGauge = new DoubleSummaryGauge(base.getLabels().and(NBLabels.forKV("name", name, "stat", stat)), stat, reservoir, description, "", category);
             base.addComponentMetric(anyGauge, category, description);
         }
         return anyGauge;
@@ -145,7 +148,7 @@ public class NBCreators {
 
     public NBMetricHistogram histogram(String metricFamilyName, int hdrdigits, MetricCategory category, String description) {
         NBLabels labels = base.getLabels().andPairs("name", metricFamilyName);
-        NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits), description, category);
+        NBMetricHistogram histogram = new NBMetricHistogram(labels, new DeltaHdrHistogramReservoir(labels, hdrdigits), description, "", category);
         base.addComponentMetric(histogram, category, description);
         return histogram;
     }
