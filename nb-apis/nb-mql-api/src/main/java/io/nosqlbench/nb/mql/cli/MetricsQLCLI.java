@@ -36,6 +36,7 @@ import picocli.CommandLine.Command;
     version = "1.0.0",
     subcommands = {
         SessionCLI.class,
+        MetadataCLI.class,
         SummaryCLI.class,
         MetricsCLI.class,
         InstantCLI.class,

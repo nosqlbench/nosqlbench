@@ -35,12 +35,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Session command - Display session time information.
+ * Session command - Display session time information and metadata.
  *
  * Usage: session
  *
  * Shows timing information about the metrics session including first/last snapshots,
- * duration, and snapshot cadence. Useful for understanding the data timeline.
+ * duration, and snapshot cadence. Also displays session metadata such as NoSQLBench
+ * version, command-line arguments, and hardware information.
  */
 public class SessionCommand implements MetricsQueryCommand {
 
@@ -51,7 +52,7 @@ public class SessionCommand implements MetricsQueryCommand {
 
     @Override
     public String getDescription() {
-        return "Display session time information and snapshot cadence";
+        return "Display session time information, snapshot cadence, and session metadata (version, command-line, hardware)";
     }
 
     @Override
@@ -78,6 +79,9 @@ public class SessionCommand implements MetricsQueryCommand {
         columns.add("total_snapshots");
         columns.add("total_samples");
         columns.add("avg_interval");
+        columns.add("nb_version");
+        columns.add("nb_commandline");
+        columns.add("nb_hardware");
 
         List<Map<String, Object>> rows = new ArrayList<>();
 
@@ -101,6 +105,12 @@ public class SessionCommand implements MetricsQueryCommand {
                 row.put("total_samples", totalSamples);
                 row.put("avg_interval", formatDuration(avgIntervalMs));
 
+                // Query session metadata
+                Map<String, String> metadata = querySessionMetadata(conn);
+                row.put("nb_version", metadata.getOrDefault("nb.version", "N/A"));
+                row.put("nb_commandline", metadata.getOrDefault("nb.commandline", "N/A"));
+                row.put("nb_hardware", metadata.getOrDefault("nb.hardware", "N/A"));
+
                 rows.add(row);
             }
         }
@@ -119,7 +129,7 @@ public class SessionCommand implements MetricsQueryCommand {
     public String getUsageExamples() {
         return """
             Examples:
-              # Show session information
+              # Show session information (includes metadata: version, command-line, hardware)
               session
 
               # JSON format for scripting
@@ -127,7 +137,46 @@ public class SessionCommand implements MetricsQueryCommand {
 
               # Markdown for documentation
               session --format markdown
+
+            Output includes:
+              - Session timing: first/last snapshot, duration, cadence
+              - NoSQLBench version used for the session
+              - Full command-line invocation
+              - Hardware/system summary
             """;
+    }
+
+    /**
+     * Query session metadata from the label_metadata table.
+     * Returns a map of metadata key-value pairs, typically including:
+     * - nb.version: NoSQLBench version
+     * - nb.commandline: Command-line arguments
+     * - nb.hardware: Hardware/system information
+     */
+    private Map<String, String> querySessionMetadata(Connection conn) throws SQLException {
+        Map<String, String> metadata = new LinkedHashMap<>();
+
+        String metadataSQL = """
+            SELECT metadata_key, metadata_value
+            FROM label_metadata
+            WHERE label_set_id = (
+              SELECT MIN(id) FROM label_set
+              WHERE hash LIKE '%session=%'
+            )
+            ORDER BY metadata_key
+            """;
+
+        try (PreparedStatement ps = conn.prepareStatement(metadataSQL);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                metadata.put(rs.getString("metadata_key"), rs.getString("metadata_value"));
+            }
+        } catch (SQLException e) {
+            // If label_metadata table doesn't exist or has no data, just return empty map
+            // This maintains backward compatibility with older database files
+        }
+
+        return metadata;
     }
 
     private String formatDuration(long millis) {

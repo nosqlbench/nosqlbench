@@ -77,6 +77,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
     private final PreparedStatement insertLabelValue;
     private final PreparedStatement insertLabelSet;
     private final PreparedStatement insertLabelSetMembership;
+    private final PreparedStatement insertLabelMetadata;
     private final PreparedStatement selectMetricFamilyByName;
     private final PreparedStatement selectSampleNameByFamilyAndSample;
     private final PreparedStatement selectMetricInstanceByNaturalKey;
@@ -160,6 +161,10 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
             """, Statement.RETURN_GENERATED_KEYS);
             this.insertLabelSetMembership = connection.prepareStatement("""
                 INSERT OR IGNORE INTO label_set_membership(label_set_id, label_key_id, label_value_id)
+                VALUES (?, ?, ?)
+            """);
+            this.insertLabelMetadata = connection.prepareStatement("""
+                INSERT OR IGNORE INTO label_metadata(label_set_id, metadata_key, metadata_value)
                 VALUES (?, ?, ?)
             """);
             this.selectMetricFamilyByName = connection.prepareStatement("""
@@ -321,6 +326,20 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                     FOREIGN KEY(sample_value_id) REFERENCES sample_value(id)
                 )
             """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS label_metadata (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    label_set_id INTEGER NOT NULL,
+                    metadata_key TEXT NOT NULL,
+                    metadata_value TEXT NOT NULL,
+                    UNIQUE(label_set_id, metadata_key, metadata_value),
+                    FOREIGN KEY(label_set_id) REFERENCES label_set(id)
+                )
+            """);
+            stmt.execute("""
+                CREATE INDEX IF NOT EXISTS idx_label_metadata_label_set
+                ON label_metadata(label_set_id)
+            """);
         }
         connection.commit();
     }
@@ -355,6 +374,30 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 logger.error("Failed to rollback after error.", rollback);
             }
             throw new RuntimeException("Unable to write metrics snapshot to SQLite.", e);
+        }
+    }
+
+    @Override
+    public void onSessionMetadata(NBLabels labels, Map<String, String> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+        try {
+            int labelSetId = resolveLabelSetId(labels);
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                insertLabelMetadata.setInt(1, labelSetId);
+                insertLabelMetadata.setString(2, entry.getKey());
+                insertLabelMetadata.setString(3, entry.getValue());
+                insertLabelMetadata.executeUpdate();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollback) {
+                logger.error("Failed to rollback after error storing session metadata.", rollback);
+            }
+            logger.warn("Unable to write session metadata to SQLite.", e);
         }
     }
 

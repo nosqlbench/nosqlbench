@@ -480,14 +480,18 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
-        Map<String, String> props = Map.of(
-            "summary", options.getReportSummaryTo(),
-            "logsdir", options.getLogsDirectory().toString(),
-            "progress", options.getProgressSpec(),
-            "prompush_cache", "prompush_cache.txt",
-            "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs()),
-            "advisor", String.valueOf(options.getAdvisor())
-        );
+        Map<String, String> props = new LinkedHashMap<>();
+        props.put("summary", options.getReportSummaryTo());
+        props.put("logsdir", options.getLogsDirectory().toString());
+        props.put("progress", options.getProgressSpec());
+        props.put("prompush_cache", "prompush_cache.txt");
+        props.put("heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs()));
+        props.put("advisor", String.valueOf(options.getAdvisor()));
+
+        // Add session metadata for SQLite metrics storage
+        props.put("nb.version", version);
+        props.put("nb.commandline", String.join(" ", args));
+        props.put("nb.hardware", SystemId.getHostSummary());
 
         try (
             NBSession session = new NBSession(

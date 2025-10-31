@@ -20,6 +20,7 @@ import io.nosqlbench.nb.mql.format.TableFormatter;
 import io.nosqlbench.nb.mql.query.QueryResult;
 import io.nosqlbench.nb.mql.schema.MetricsDatabaseReader;
 import io.nosqlbench.nb.mql.testdata.TestDatabaseLoader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("mql")
 class SessionCommandTest {
 
     @Test
@@ -42,14 +44,17 @@ class SessionCommandTest {
             // Should return 1 row with session info
             assertEquals(1, result.rowCount());
 
-            // Verify columns
-            assertEquals(6, result.columns().size());
+            // Verify columns (now includes session metadata)
+            assertEquals(9, result.columns().size());
             assertTrue(result.columns().contains("first_snapshot"));
             assertTrue(result.columns().contains("last_snapshot"));
             assertTrue(result.columns().contains("duration"));
             assertTrue(result.columns().contains("total_snapshots"));
             assertTrue(result.columns().contains("total_samples"));
             assertTrue(result.columns().contains("avg_interval"));
+            assertTrue(result.columns().contains("nb_version"));
+            assertTrue(result.columns().contains("nb_commandline"));
+            assertTrue(result.columns().contains("nb_hardware"));
 
             Map<String, Object> row = result.rows().get(0);
 

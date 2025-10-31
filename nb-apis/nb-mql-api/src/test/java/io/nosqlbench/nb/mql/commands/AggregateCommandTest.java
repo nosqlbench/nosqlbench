@@ -21,6 +21,7 @@ import io.nosqlbench.nb.mql.query.InvalidQueryException;
 import io.nosqlbench.nb.mql.query.QueryResult;
 import io.nosqlbench.nb.mql.schema.MetricsDatabaseReader;
 import io.nosqlbench.nb.mql.testdata.TestDatabaseLoader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -30,6 +31,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("mql")
 class AggregateCommandTest {
 
     @Test

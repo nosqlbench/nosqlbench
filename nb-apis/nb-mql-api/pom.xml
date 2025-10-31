@@ -47,6 +47,13 @@
             <artifactId>sqlite-jdbc</artifactId>
         </dependency>
 
+        <!-- ANTLR4 runtime for MetricsQL parser -->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.13.1</version>
+        </dependency>
+
         <!-- CLI framework (picocli) - inherited from parent -->
         <dependency>
             <groupId>info.picocli</groupId>
@@ -109,6 +116,51 @@
         </testResources>
 
         <plugins>
+            <!-- ANTLR4 Maven Plugin for MetricsQL parser generation -->
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.13.2</version>
+                <configuration>
+                    <sourceDirectory>src/main/java/io/nosqlbench/nb/mql/grammars</sourceDirectory>
+                    <arguments>
+                        <argument>-package</argument>
+                        <argument>io.nosqlbench.nb.mql.generated</argument>
+                        <argument>-visitor</argument>
+                    </arguments>
+                    <outputDirectory>src/main/java/io/nosqlbench/nb/mql/generated</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>antlr</id>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Clean plugin to remove generated ANTLR files -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/java/io/nosqlbench/nb/mql/generated</directory>
+                            <includes>
+                                <include>**/*.java</include>
+                                <include>**/*.interp</include>
+                                <include>**/*.tokens</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                    <followSymLinks>false</followSymLinks>
+                </configuration>
+            </plugin>
+
             <!-- Maven Assembly Plugin for standalone JAR -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -133,7 +185,34 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Surefire Plugin - Configure test exclusions -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>mql</excludedGroups>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Profile to run comprehensive MQL tests (integration, boundary, command tests) -->
+        <profile>
+            <id>test-mql</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- When profile active, include all tests (override default exclusions) -->
+                            <excludedGroups combine.self="override"></excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

@@ -349,17 +349,32 @@ label_set_membership (label_set_id, label_key_id, label_value_id)
 - **Simplified sample_value**: Now only stores (metric_instance_id, timestamp_ms, value) - all label information accessed through metric_instance
 - **Efficient queries**: The metric_instance table enables direct filtering by metric identity without joining through samples, and the spec column provides instant access to human-readable metric identifiers
 
+## Session Metadata
+
+All test databases include session metadata in the `label_metadata` table (added Oct 2025):
+
+| Metadata Key | Example Value |
+|--------------|---------------|
+| `nb.version` | `5.25.0-TEST` |
+| `nb.commandline` | `nb5 mql test simple_counter` |
+| `nb.hardware` | `Test harness - 4-core 8GB` |
+
+This metadata is automatically stored for each test scenario and can be queried using the `session` or `metadata` commands.
+
 ## Regenerating Test Databases
 
 To regenerate all test databases (e.g., after schema changes):
 
 ```bash
+# From the nosqlbench project root directory
 mvn exec:java -pl nb-apis/nb-mql-api \
   -Dexec.mainClass="io.nosqlbench.nb.mql.testdata.TestDatabaseGenerator" \
   -Dexec.classpathScope=test
 ```
 
-The generator will overwrite existing databases in `src/test/resources/testdata/`.
+**Important**: This command must be run from the `nosqlbench` project root directory (not from `nb-apis/nb-mql-api`).
+
+The generator will overwrite existing databases in `nb-apis/nb-mql-api/src/test/resources/testdata/`.
 
 ## Using in Tests
 
@@ -375,5 +390,16 @@ Connection conn = MetricsDatabaseReader.connect(dbPath);
 
 ---
 
-*Generated: 2025-10-29*
-*Schema Version: OpenMetrics-aligned (SqliteSnapshotReporter) with metric_instance table*
+## Recent Changes
+
+**2025-10-31**: Added session metadata support to all test database generators. Each database now includes:
+- `label_metadata` table for storing session context
+- Three metadata keys: `nb.version`, `nb.commandline`, `nb.hardware`
+- Metadata linked to session label sets via `label_set_id` foreign key
+
+**2025-10-29**: Initial test databases with OpenMetrics-aligned schema and `metric_instance` table.
+
+---
+
+*Last Regenerated: 2025-10-31*
+*Schema Version: OpenMetrics-aligned (SqliteSnapshotReporter) with metric_instance table and session metadata*

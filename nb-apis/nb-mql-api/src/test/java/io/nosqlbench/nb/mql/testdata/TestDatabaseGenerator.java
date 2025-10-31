@@ -57,8 +57,18 @@ public class TestDatabaseGenerator {
     public static void generateSimpleCounter(Path outputPath, NBComponent parent) throws Exception {
         String jdbcUrl = "jdbc:sqlite:" + outputPath.toAbsolutePath();
 
+        NBLabels sessionLabels = NBLabels.forKV("session", "simple_counter_test");
+
         try (SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
-                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), NBLabels.forKV())) {
+                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), sessionLabels)) {
+
+            // Add session metadata
+            Map<String, String> metadata = Map.of(
+                "nb.version", "5.25.0-TEST",
+                "nb.commandline", "nb5 mql test simple_counter",
+                "nb.hardware", "Test harness - 4-core 8GB"
+            );
+            reporter.onSessionMetadata(sessionLabels, metadata);
 
             // Base timestamp: 2025-10-23 10:00:00 UTC
             long baseTime = 1729681200000L;
@@ -114,8 +124,18 @@ public class TestDatabaseGenerator {
     public static void generateMultiDimensional(Path outputPath, NBComponent parent) throws Exception {
         String jdbcUrl = "jdbc:sqlite:" + outputPath.toAbsolutePath();
 
+        NBLabels sessionLabels = NBLabels.forKV("session", "multi_dimensional_test");
+
         try (SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
-                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), NBLabels.forKV())) {
+                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), sessionLabels)) {
+
+            // Add session metadata
+            Map<String, String> metadata = Map.of(
+                "nb.version", "5.25.0-TEST",
+                "nb.commandline", "nb5 mql test multi_dimensional",
+                "nb.hardware", "Test harness - 4-core 8GB"
+            );
+            reporter.onSessionMetadata(sessionLabels, metadata);
 
             long baseTime = 1729681200000L;
             long intervalMs = 30000L;
@@ -178,8 +198,18 @@ public class TestDatabaseGenerator {
     public static void generateLatencyTimers(Path outputPath, NBComponent parent) throws Exception {
         String jdbcUrl = "jdbc:sqlite:" + outputPath.toAbsolutePath();
 
+        NBLabels sessionLabels = NBLabels.forKV("session", "latency_timers_test");
+
         try (SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
-                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), NBLabels.forKV())) {
+                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), sessionLabels)) {
+
+            // Add session metadata
+            Map<String, String> metadata = Map.of(
+                "nb.version", "5.25.0-TEST",
+                "nb.commandline", "nb5 mql test latency_timers",
+                "nb.hardware", "Test harness - 4-core 8GB"
+            );
+            reporter.onSessionMetadata(sessionLabels, metadata);
 
             long baseTime = 1729681200000L;
             long intervalMs = 30000L;
@@ -253,8 +283,18 @@ public class TestDatabaseGenerator {
     public static void generateRateCalculations(Path outputPath, NBComponent parent) throws Exception {
         String jdbcUrl = "jdbc:sqlite:" + outputPath.toAbsolutePath();
 
+        NBLabels sessionLabels = NBLabels.forKV("session", "rate_calculations_test");
+
         try (SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
-                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), NBLabels.forKV())) {
+                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), sessionLabels)) {
+
+            // Add session metadata
+            Map<String, String> metadata = Map.of(
+                "nb.version", "5.25.0-TEST",
+                "nb.commandline", "nb5 mql test rate_calculations",
+                "nb.hardware", "Test harness - 4-core 8GB"
+            );
+            reporter.onSessionMetadata(sessionLabels, metadata);
 
             long baseTime = 1729681200000L;
             long intervalMs = 30000L;
@@ -315,8 +355,18 @@ public class TestDatabaseGenerator {
     public static void generateExamples(Path outputPath, NBComponent parent) throws Exception {
         String jdbcUrl = "jdbc:sqlite:" + outputPath.toAbsolutePath();
 
+        NBLabels sessionLabels = NBLabels.forKV("session", "examples_test");
+
         try (SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
-                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), NBLabels.forKV())) {
+                parent, jdbcUrl, 30000L, new MetricInstanceFilter(), sessionLabels)) {
+
+            // Add session metadata
+            Map<String, String> metadata = Map.of(
+                "nb.version", "5.25.0-TEST",
+                "nb.commandline", "nb5 mql test examples",
+                "nb.hardware", "Test harness - 4-core 8GB"
+            );
+            reporter.onSessionMetadata(sessionLabels, metadata);
 
             long baseTime = 1729681200000L;
             long intervalMs = 30000L;
@@ -361,14 +411,22 @@ public class TestDatabaseGenerator {
     /**
      * Main method to generate all test databases.
      * Run this to regenerate test data after schema changes.
+     *
+     * <p><strong>IMPORTANT</strong>: Must be run from the nosqlbench project root directory:</p>
+     * <pre>
+     * mvn exec:java -pl nb-apis/nb-mql-api \
+     *   -Dexec.mainClass="io.nosqlbench.nb.mql.testdata.TestDatabaseGenerator" \
+     *   -Dexec.classpathScope=test
+     * </pre>
      */
     public static void main(String[] args) throws Exception {
-        Path testDataDir = Path.of("nb-apis/nb-mql-api/src/test/resources/testdata");
+        Path testDataDir = Path.of("src/test/resources/testdata").toAbsolutePath().normalize();
 
         // Create a minimal NBComponent for the reporter
         NBComponent root = new NBBaseComponent(null, NBLabels.forKV("generator", "testdata"));
 
         System.out.println("Generating test databases...");
+        System.out.println("Output directory: " + testDataDir);
 
         generateSimpleCounter(testDataDir.resolve("simple_counter.db"), root);
         System.out.println("✓ Generated simple_counter.db");

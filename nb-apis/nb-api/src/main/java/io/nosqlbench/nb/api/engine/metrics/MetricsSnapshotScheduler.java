@@ -70,6 +70,20 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
 
     public interface MetricsSnapshotConsumer {
         void onMetricsSnapshot(MetricsView view);
+
+        /**
+         * Called to provide session-level metadata associated with a label set.
+         * This metadata persists across the session and can include information like:
+         * - NoSQLBench version
+         * - Command-line arguments
+         * - Hardware/system information
+         *
+         * @param labels The labels identifying the context for this metadata
+         * @param metadata Key-value pairs of metadata to store
+         */
+        default void onSessionMetadata(NBLabels labels, Map<String, String> metadata) {
+            // Default no-op for implementations that don't need metadata storage
+        }
     }
 
     private static final ConcurrentHashMap<NBComponent, MetricsSnapshotScheduler> schedulers =

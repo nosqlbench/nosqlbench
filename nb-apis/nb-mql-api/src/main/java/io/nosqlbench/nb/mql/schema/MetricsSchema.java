@@ -20,6 +20,38 @@ package io.nosqlbench.nb.mql.schema;
  * Schema constants for NoSQLBench SQLite metrics database.
  * This schema is defined and created by SqliteSnapshotReporter in nb-api.
  * These constants provide a read-only view for query operations.
+ *
+ * <h2>Schema Overview</h2>
+ * <ul>
+ *   <li><b>metric_family</b> - Top-level metric families (e.g., "patterns")</li>
+ *   <li><b>sample_name</b> - Individual sample names (e.g., "patterns_total")</li>
+ *   <li><b>metric_instance</b> - Unique combinations of sample_name + label_set</li>
+ *   <li><b>sample_value</b> - Time-series data points</li>
+ *   <li><b>label_set</b> - Normalized label sets with hash-based deduplication</li>
+ *   <li><b>label_key/label_value</b> - Normalized label keys and values</li>
+ *   <li><b>label_set_membership</b> - Many-to-many: label_set → label_key/value pairs</li>
+ *   <li><b>label_metadata</b> - Session metadata associated with label sets (version, command-line, hardware)</li>
+ * </ul>
+ *
+ * <h2>Session Metadata</h2>
+ * The label_metadata table stores textual metadata associated with label sets.
+ * NoSQLBench automatically stores session information:
+ * <ul>
+ *   <li><b>nb.version</b> - NoSQLBench version</li>
+ *   <li><b>nb.commandline</b> - Full command-line invocation</li>
+ *   <li><b>nb.hardware</b> - Hardware/system summary</li>
+ * </ul>
+ *
+ * <h2>Example Query: Get Session Metadata</h2>
+ * <pre>
+ * SELECT
+ *   ls.hash AS label_set,
+ *   lm.metadata_key,
+ *   lm.metadata_value
+ * FROM label_metadata lm
+ * JOIN label_set ls ON ls.id = lm.label_set_id
+ * ORDER BY ls.hash, lm.metadata_key
+ * </pre>
  */
 public class MetricsSchema {
 
@@ -93,6 +125,13 @@ public class MetricsSchema {
     public static final String COL_LSM_LABEL_SET_ID = "label_set_id";
     public static final String COL_LSM_LABEL_KEY_ID = "label_key_id";
     public static final String COL_LSM_LABEL_VALUE_ID = "label_value_id";
+
+    // label_metadata table (session metadata storage)
+    public static final String TABLE_LABEL_METADATA = "label_metadata";
+    public static final String COL_LM_ID = "id";
+    public static final String COL_LM_LABEL_SET_ID = "label_set_id";
+    public static final String COL_LM_METADATA_KEY = "metadata_key";
+    public static final String COL_LM_METADATA_VALUE = "metadata_value";
 
     // Common SQL fragments for building queries
 
