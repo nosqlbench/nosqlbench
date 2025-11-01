@@ -101,7 +101,7 @@ jobs:
           path: build-docs
 
       - name: download exported_docs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: exported-docs
           path: build-docs
@@ -136,7 +136,7 @@ jobs:
           path: javadocs
 
       - name: download javadocs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: javadocs
           path: javadocs
