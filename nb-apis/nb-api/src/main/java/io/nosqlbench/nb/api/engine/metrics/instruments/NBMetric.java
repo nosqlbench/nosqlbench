@@ -26,5 +26,14 @@ public interface NBMetric extends Metric, NBLabeledElement {
     String typeName();
 
     String getDescription();
+
+    /**
+     * Returns the unit of measurement for this metric.
+     * Units should follow OpenMetrics conventions (e.g., "seconds", "bytes", "operations", "percent").
+     *
+     * @return the unit of measurement, or empty string if dimensionless
+     */
+    String getUnit();
+
     MetricCategory[] getCategories();
 }

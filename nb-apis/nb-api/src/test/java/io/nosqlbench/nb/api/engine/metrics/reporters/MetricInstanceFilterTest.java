@@ -31,6 +31,7 @@ class MetricInstanceFilterTest {
         return new NBMetricCounter(
             NBLabels.forKV("name", name, "activity", activity, "scenario", "scenario"),
             "counter",
+            "operations",
             MetricCategory.Core
         );
     }

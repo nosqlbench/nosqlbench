@@ -169,7 +169,10 @@ public class ContainerActivitiesController extends NBBaseComponent {
 
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
         if (null == runtimeInfo) {
-            throw new RuntimeException("could not stop missing activity:" + activityDef);
+            String availableActivities = activityInfoMap.isEmpty()
+                ? "No activities are running"
+                : "Available activities: " + String.join(", ", activityInfoMap.keySet());
+            throw new RuntimeException("could not stop missing activity:" + activityDef + ". " + availableActivities);
         }
 
         scenariologger.debug("STOP {}", activityDef.getAlias());
@@ -179,7 +182,10 @@ public class ContainerActivitiesController extends NBBaseComponent {
     public boolean awaitAllThreadsOnline(ActivityDef activityDef, long timeoutMs) {
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
         if (null == runtimeInfo) {
-            throw new RuntimeException("could not stop missing activity:" + activityDef);
+            String availableActivities = activityInfoMap.isEmpty()
+                ? "No activities are running"
+                : "Available activities: " + String.join(", ", activityInfoMap.keySet());
+            throw new RuntimeException("could not await threads for missing activity:" + activityDef + ". " + availableActivities);
         }
 
         scenariologger.debug("STOP {}", activityDef.getAlias());
@@ -243,7 +249,10 @@ public class ContainerActivitiesController extends NBBaseComponent {
         ActivityRuntimeInfo runtimeInfo = this.activityInfoMap.get(activityDef.getAlias());
 
         if (null == runtimeInfo) {
-            throw new RuntimeException("could not force stop missing activity:" + activityDef);
+            String availableActivities = activityInfoMap.isEmpty()
+                ? "No activities are running"
+                : "Available activities: " + String.join(", ", activityInfoMap.keySet());
+            throw new RuntimeException("could not force stop missing activity:" + activityDef + ". " + availableActivities);
         }
         scenariologger.debug("FORCE STOP {}", activityDef.getAlias());
 
@@ -409,7 +418,10 @@ public class ContainerActivitiesController extends NBBaseComponent {
     public boolean awaitActivity(ActivityDef activityDef, long timeoutMs) {
         ActivityRuntimeInfo ari = this.activityInfoMap.get(activityDef.getAlias());
         if (null == ari) {
-            throw new RuntimeException("Could not await missing activity: " + activityDef.getAlias());
+            String availableActivities = activityInfoMap.isEmpty()
+                ? "No activities are running"
+                : "Available activities: " + String.join(", ", activityInfoMap.keySet());
+            throw new RuntimeException("Could not await missing activity: " + activityDef.getAlias() + ". " + availableActivities);
         }
         scenariologger.debug("AWAIT/before alias={}", activityDef.getAlias());
         ExecutionResult result = null;

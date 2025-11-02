@@ -39,11 +39,11 @@ public class MetricsViewTest {
 
     @Test
     public void testCombineCountersAggregatesValuesAndIntervals() {
-        NBMetricCounter counter1 = new NBMetricCounter(labels("counter_metric"), "counter", MetricCategory.Core);
+        NBMetricCounter counter1 = new NBMetricCounter(labels("counter_metric"), "counter", "operations", MetricCategory.Core);
         counter1.inc(5);
         MetricsView view1 = MetricsView.capture(List.of(counter1), 1_000L);
 
-        NBMetricCounter counter2 = new NBMetricCounter(labels("counter_metric"), "counter", MetricCategory.Core);
+        NBMetricCounter counter2 = new NBMetricCounter(labels("counter_metric"), "counter", "operations", MetricCategory.Core);
         counter2.inc(7);
         MetricsView view2 = MetricsView.capture(List.of(counter2), 2_000L);
 
@@ -59,8 +59,8 @@ public class MetricsViewTest {
 
     @Test
     public void testCombineGaugesUsesWeightedAverage() {
-        NBMetricGaugeWrapper gauge1 = new NBMetricGaugeWrapper(labels("gauge_metric"), () -> 10.0d, "gauge", MetricCategory.Core);
-        NBMetricGaugeWrapper gauge2 = new NBMetricGaugeWrapper(labels("gauge_metric"), () -> 20.0d, "gauge", MetricCategory.Core);
+        NBMetricGaugeWrapper gauge1 = new NBMetricGaugeWrapper(labels("gauge_metric"), () -> 10.0d, "gauge", "", MetricCategory.Core);
+        NBMetricGaugeWrapper gauge2 = new NBMetricGaugeWrapper(labels("gauge_metric"), () -> 20.0d, "gauge", "", MetricCategory.Core);
 
         MetricsView view1 = MetricsView.capture(List.of(gauge1), 1_000L);
         MetricsView view2 = MetricsView.capture(List.of(gauge2), 2_000L);
@@ -75,14 +75,14 @@ public class MetricsViewTest {
     @Test
     public void testCombineSummariesAggregatesStatistics() {
         DeltaHdrHistogramReservoir reservoir1 = new DeltaHdrHistogramReservoir(labels("hist_metric"), 3);
-        NBMetricHistogram histogram1 = new NBMetricHistogram(labels("hist_metric"), reservoir1, "hist", MetricCategory.Core);
+        NBMetricHistogram histogram1 = new NBMetricHistogram(labels("hist_metric"), reservoir1, "hist", "nanoseconds", MetricCategory.Core);
         histogram1.update(10);
         histogram1.update(20);
         histogram1.update(30);
         MetricsView view1 = MetricsView.capture(List.of(histogram1), 1_000L);
 
         DeltaHdrHistogramReservoir reservoir2 = new DeltaHdrHistogramReservoir(labels("hist_metric"), 3);
-        NBMetricHistogram histogram2 = new NBMetricHistogram(labels("hist_metric"), reservoir2, "hist", MetricCategory.Core);
+        NBMetricHistogram histogram2 = new NBMetricHistogram(labels("hist_metric"), reservoir2, "hist", "nanoseconds", MetricCategory.Core);
         histogram2.update(40);
         histogram2.update(50);
         MetricsView view2 = MetricsView.capture(List.of(histogram2), 1_000L);
@@ -105,7 +105,7 @@ public class MetricsViewTest {
 
     @Test
     public void testWindowStartMatchesInterval() {
-        NBMetricCounter counter = new NBMetricCounter(labels("counter_metric_single"), "counter", MetricCategory.Core);
+        NBMetricCounter counter = new NBMetricCounter(labels("counter_metric_single"), "counter", "operations", MetricCategory.Core);
         counter.inc(3);
         MetricsView view = MetricsView.capture(List.of(counter), 1_500L);
 

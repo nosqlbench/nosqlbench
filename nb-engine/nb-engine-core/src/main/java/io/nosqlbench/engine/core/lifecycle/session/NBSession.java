@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.lang.management.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -213,6 +214,9 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
                 includeHistograms
             );
 
+            // Send session metadata to the reporter
+            sendSessionMetadata(sessionSqliteReporter);
+
             sessionSqliteShutdownHook = new Thread(() -> {
                 try {
                     sessionSqliteReporter.close();
@@ -240,6 +244,27 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             logger.debug("Symbolic links are not supported; skipping metrics symlink creation.");
         } catch (IOException e) {
             logger.warn("Unable to update metrics symlink '{}' -> '{}'", linkPath, target, e);
+        }
+    }
+
+    private void sendSessionMetadata(SqliteSnapshotReporter reporter) {
+        Map<String, String> metadata = new LinkedHashMap<>();
+
+        // Add NoSQLBench version
+        getComponentProp("nb.version").ifPresent(version ->
+            metadata.put("nb.version", version));
+
+        // Add command-line
+        getComponentProp("nb.commandline").ifPresent(cmdline ->
+            metadata.put("nb.commandline", cmdline));
+
+        // Add hardware/system info
+        getComponentProp("nb.hardware").ifPresent(hardware ->
+            metadata.put("nb.hardware", hardware));
+
+        // Send metadata with session labels
+        if (!metadata.isEmpty()) {
+            reporter.onSessionMetadata(getLabels(), metadata);
         }
     }
 

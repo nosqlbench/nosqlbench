@@ -24,10 +24,12 @@ public class NBMetricMeter extends Meter implements NBMetric {
     private final NBLabels labels;
     private final MetricCategory[] categories;
     private final String description;
+    private final String unit;
 
-    public NBMetricMeter(NBLabels labels, String description, MetricCategory... categories) {
+    public NBMetricMeter(NBLabels labels, String description, String unit, MetricCategory... categories) {
         this.labels = labels;
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
     }
 
@@ -44,6 +46,11 @@ public class NBMetricMeter extends Meter implements NBMetric {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override

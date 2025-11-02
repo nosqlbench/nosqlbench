@@ -32,6 +32,7 @@ public class DoubleSummaryGauge implements NBMetricGauge, DoubleConsumer {
     private final Stat stat;
     private final DoubleSummaryStatistics stats;
     private final String description;
+    private final String unit;
     private final MetricCategory[] categories;
 
     @Override
@@ -42,6 +43,11 @@ public class DoubleSummaryGauge implements NBMetricGauge, DoubleConsumer {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override
@@ -57,19 +63,21 @@ public class DoubleSummaryGauge implements NBMetricGauge, DoubleConsumer {
         Sum
     }
 
-    public DoubleSummaryGauge(NBLabels labels, Stat stat, DoubleSummaryStatistics stats, String description, MetricCategory... categories) {
+    public DoubleSummaryGauge(NBLabels labels, Stat stat, DoubleSummaryStatistics stats, String description, String unit, MetricCategory... categories) {
         this.labels = labels;
         this.stat = stat;
         this.stats = stats;
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
     }
 
-    public DoubleSummaryGauge(NBLabels labels, Stat stat,String description, MetricCategory... categories) {
+    public DoubleSummaryGauge(NBLabels labels, Stat stat,String description, String unit, MetricCategory... categories) {
         this.labels = labels;
         this.stat = stat;
         this.stats = new DoubleSummaryStatistics();
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
     }
 

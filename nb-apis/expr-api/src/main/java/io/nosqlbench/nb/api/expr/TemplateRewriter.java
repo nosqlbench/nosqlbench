@@ -57,10 +57,9 @@ public final class TemplateRewriter {
     private static final Pattern TEMPLATE_FUNCTION_PATTERN =
         Pattern.compile("TEMPLATE\\(");
 
-    // Pattern for shell-style variable syntax: ${key:default} or ${key}
-    // Captures: (1) key, (2) default value (optional, after colon)
-    private static final Pattern SHELL_VAR_PATTERN =
-        Pattern.compile("\\$\\{([^:}]+)(?::([^}]*))?\\}");
+    // Pattern for shell-style variable syntax START: ${
+    private static final Pattern SHELL_VAR_START_PATTERN =
+        Pattern.compile("\\$\\{");
 
     /**
      * Rewrite TEMPLATE variables to expr function calls.
@@ -203,31 +202,95 @@ public final class TemplateRewriter {
      *   <li>{@code ${key:default}} → {@code paramOr('key', 'default')}</li>
      * </ul>
      *
+     * <p>This method manually parses shell variables to correctly handle nested
+     * expressions like {@code ${key:{{=expr}}}} that contain `}` characters.</p>
+     *
      * @param source the source text
      * @return the text with shell-style syntax rewritten to expr calls
      */
     private static String rewriteShellVars(String source) {
-        Matcher matcher = SHELL_VAR_PATTERN.matcher(source);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder result = new StringBuilder();
+        int pos = 0;
 
-        while (matcher.find()) {
-            String key = matcher.group(1).trim();
-            String defaultValue = matcher.group(2);
+        Matcher matcher = SHELL_VAR_START_PATTERN.matcher(source);
+        while (matcher.find(pos)) {
+            // Append text before ${
+            result.append(source, pos, matcher.start());
 
+            // Find the matching closing brace, accounting for nested {{ }} expressions
+            int startPos = matcher.end(); // Position after "${"
+            int braceDepth = 0; // Track nesting of {{ }} expressions
+            int endPos = startPos;
+            boolean foundColon = false;
+            int colonPos = -1;
+
+            while (endPos < source.length()) {
+                char c = source.charAt(endPos);
+
+                // Check for start of expr reference {{
+                if (endPos < source.length() - 1 && c == '{' && source.charAt(endPos + 1) == '{') {
+                    braceDepth++;
+                    endPos += 2;
+                    continue;
+                }
+
+                // Check for end of expr reference }}
+                if (endPos < source.length() - 1 && c == '}' && source.charAt(endPos + 1) == '}') {
+                    braceDepth--;
+                    endPos += 2;
+                    continue;
+                }
+
+                // Only recognize : and } when not inside an expr reference
+                if (braceDepth == 0) {
+                    if (c == ':' && colonPos == -1) {
+                        foundColon = true;
+                        colonPos = endPos;
+                    } else if (c == '}') {
+                        // Found the closing brace
+                        break;
+                    }
+                }
+
+                endPos++;
+            }
+
+            if (endPos >= source.length() || source.charAt(endPos) != '}') {
+                // Unmatched braces - skip this occurrence
+                result.append(source, matcher.start(), endPos);
+                pos = endPos;
+                continue;
+            }
+
+            // Extract key and default value
+            String key;
+            String defaultValue = null;
+
+            if (foundColon && colonPos != -1) {
+                key = source.substring(startPos, colonPos).trim();
+                defaultValue = source.substring(colonPos + 1, endPos).trim();
+            } else {
+                key = source.substring(startPos, endPos).trim();
+            }
+
+            // Generate the replacement
             String replacement;
-            if (defaultValue == null || defaultValue.trim().isEmpty()) {
+            if (defaultValue == null || defaultValue.isEmpty()) {
                 // ${key} with no default - use UNSET:key
                 replacement = String.format("{{= paramOr('%s', 'UNSET:%s') }}", key, key);
             } else {
                 // ${key:default} with default value
                 replacement = String.format("{{= paramOr('%s', %s) }}",
-                    key, quoteValue(defaultValue.trim()));
+                    key, quoteValue(defaultValue));
             }
 
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+            result.append(replacement);
+            pos = endPos + 1; // Skip past the closing }
         }
-        matcher.appendTail(sb);
-        return sb.toString();
+
+        // Append any remaining text
+        result.append(source.substring(pos));
+        return result.toString();
     }
 
     /**
@@ -238,7 +301,7 @@ public final class TemplateRewriter {
      *   <li>Numeric literals (integers, floats) are returned unquoted</li>
      *   <li>Boolean literals are returned unquoted</li>
      *   <li>Expr function calls (containing parentheses) are returned unquoted</li>
-     *   <li>Expr references (already using {{}} syntax) are returned unquoted</li>
+     *   <li>Expr references (already using {{}} syntax) are unwrapped to avoid nesting</li>
      *   <li>VirtData binding chains (containing ->) are quoted as strings</li>
      *   <li>All other strings are single-quoted with proper escaping</li>
      * </ul>
@@ -251,6 +314,20 @@ public final class TemplateRewriter {
             return "''";
         }
 
+        // Check if it contains VirtData binding chain syntax (->)
+        // This should be treated as a string, not an expression
+        if (value.contains("->")) {
+            return "'" + value.replace("'", "\\'") + "'";
+        }
+
+        // Check if it contains expr references - unwrap to avoid nested delimiters
+        // Transform {{=expression}} to just expression
+        boolean hadExprReference = value.contains("{{") && value.contains("}}");
+        if (hadExprReference) {
+            value = unwrapExprReference(value);
+            // Continue with other checks to see if unwrapped value needs quoting
+        }
+
         // Check if it's a numeric literal (integer or float)
         if (value.matches("^-?\\d+(\\.\\d+)?$")) {
             return value;
@@ -261,23 +338,67 @@ public final class TemplateRewriter {
             return value;
         }
 
-        // Check if it contains VirtData binding chain syntax (->)
-        // This should be treated as a string, not an expression
-        if (value.contains("->")) {
-            return "'" + value.replace("'", "\\'") + "'";
-        }
-
         // Check if it contains function call syntax (likely an expr function)
         if (value.contains("(") && value.contains(")")) {
             return value;
         }
 
-        // Check if it's already an expr reference
-        if (value.contains("{{") || value.contains("}}")) {
+        // If we unwrapped an expr reference, check if the result needs quoting
+        if (hadExprReference) {
+            // Check if it looks like a simple identifier (variable name)
+            // Simple identifiers: letters, numbers, underscores - no spaces or special chars
+            if (value.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
+                return value;
+            }
+
+            // Check if it looks like an expression with operators
+            // If it contains expr operators, treat it as an expression (don't quote)
+            if (value.matches(".*[+\\-*/|&<>=!].*")) {
+                return value;
+            }
+
+            // Otherwise (mixed text like "prefix name suffix"), quote it
+            return "'" + value.replace("'", "\\'") + "'";
+        }
+
+        // For values that didn't have expr references, quote them as strings
+        return "'" + value.replace("'", "\\'") + "'";
+    }
+
+    /**
+     * Unwrap expr references to avoid nested delimiters.
+     *
+     * <p>Transforms {@code {{=expression}}} to {@code expression} to prevent
+     * creating nested delimiters when used inside another expr context.</p>
+     *
+     * <p>This method handles both single and multiple expr references:</p>
+     * <ul>
+     *   <li>{@code {{=base_vectors}}} → {@code base_vectors}</li>
+     *   <li>{@code {{= paramOr('x', 10) }}} → {@code paramOr('x', 10)}</li>
+     *   <li>{@code {{=x}} + {{=y}}} → {@code x + y}</li>
+     *   <li>{@code prefix {{=x}} suffix} → {@code prefix x suffix}</li>
+     * </ul>
+     *
+     * @param value the value potentially containing expr delimiters
+     * @return the value with all {{...}} expressions unwrapped
+     */
+    private static String unwrapExprReference(String value) {
+        if (value == null || !value.contains("{{")) {
             return value;
         }
 
-        // Otherwise, quote it as a string and escape any single quotes
-        return "'" + value.replace("'", "\\'") + "'";
+        // Pattern to match {{= ... }} or {{ ... }}
+        Pattern exprPattern = Pattern.compile("\\{\\{\\s*=?\\s*(.+?)\\s*\\}\\}", Pattern.DOTALL);
+        Matcher matcher = exprPattern.matcher(value);
+
+        StringBuffer result = new StringBuffer();
+        while (matcher.find()) {
+            // Extract just the expression content, removing the delimiters
+            String expression = matcher.group(1).trim();
+            matcher.appendReplacement(result, Matcher.quoteReplacement(expression));
+        }
+        matcher.appendTail(result);
+
+        return result.toString();
     }
 }

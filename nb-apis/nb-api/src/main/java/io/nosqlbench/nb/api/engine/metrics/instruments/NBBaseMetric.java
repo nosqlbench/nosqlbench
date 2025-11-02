@@ -21,11 +21,13 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 public class NBBaseMetric implements NBMetric {
     private final NBLabels labels;
     private String description;
+    private String unit;
     private MetricCategory[] categories;
 
-    public NBBaseMetric(NBLabels labels, String description, MetricCategory... categories) {
+    public NBBaseMetric(NBLabels labels, String description, String unit, MetricCategory... categories) {
         this.labels = labels;
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
     }
     @Override
@@ -41,6 +43,11 @@ public class NBBaseMetric implements NBMetric {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override

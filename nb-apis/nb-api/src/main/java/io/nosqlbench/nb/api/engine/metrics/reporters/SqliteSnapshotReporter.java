@@ -39,6 +39,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -67,6 +68,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
 
     private final PreparedStatement insertMetricFamily;
     private final PreparedStatement insertSampleFamily;
+    private final PreparedStatement insertMetricInstance;
     private final PreparedStatement insertSample;
     private final PreparedStatement insertSampleQuantile;
     private final PreparedStatement insertSampleRate;
@@ -75,8 +77,10 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
     private final PreparedStatement insertLabelValue;
     private final PreparedStatement insertLabelSet;
     private final PreparedStatement insertLabelSetMembership;
+    private final PreparedStatement insertLabelMetadata;
     private final PreparedStatement selectMetricFamilyByName;
     private final PreparedStatement selectSampleNameByFamilyAndSample;
+    private final PreparedStatement selectMetricInstanceByNaturalKey;
     private final PreparedStatement selectLabelSetByHash;
     private final PreparedStatement selectLabelKeyByName;
     private final PreparedStatement selectLabelValueByValue;
@@ -87,6 +91,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
     private final Map<String, Integer> labelKeyCache = new LinkedHashMap<>();
     private final Map<String, Integer> labelValueCache = new LinkedHashMap<>();
     private final Map<Map<String, String>, Integer> labelSetCache = new LinkedHashMap<>();
+    private final Map<String, Integer> metricInstanceCache = new LinkedHashMap<>();
 
     public SqliteSnapshotReporter(NBComponent parent,
                                   String jdbcUrl,
@@ -118,9 +123,13 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 INSERT OR IGNORE INTO sample_name(metric_family_id, sample)
                 VALUES (?, ?)
             """, Statement.RETURN_GENERATED_KEYS);
+            this.insertMetricInstance = connection.prepareStatement("""
+                INSERT OR IGNORE INTO metric_instance(sample_name_id, sample_name, label_set_id, spec)
+                VALUES (?, ?, ?, ?)
+            """, Statement.RETURN_GENERATED_KEYS);
             this.insertSample = connection.prepareStatement("""
-                INSERT INTO sample_value(sample_name_id, label_set_id, timestamp_ms, value, count, sum, min, max, mean, stddev)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO sample_value(metric_instance_id, timestamp_ms, value)
+                VALUES (?, ?, ?)
             """);
             this.insertSampleQuantile = connection.prepareStatement("""
                 INSERT INTO sample_quantile(sample_value_id, quantile, quantile_value)
@@ -154,11 +163,18 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 INSERT OR IGNORE INTO label_set_membership(label_set_id, label_key_id, label_value_id)
                 VALUES (?, ?, ?)
             """);
+            this.insertLabelMetadata = connection.prepareStatement("""
+                INSERT OR IGNORE INTO label_metadata(label_set_id, metadata_key, metadata_value)
+                VALUES (?, ?, ?)
+            """);
             this.selectMetricFamilyByName = connection.prepareStatement("""
                 SELECT id FROM metric_family WHERE name=?
             """);
             this.selectSampleNameByFamilyAndSample = connection.prepareStatement("""
                 SELECT id FROM sample_name WHERE metric_family_id=? AND sample=?
+            """);
+            this.selectMetricInstanceByNaturalKey = connection.prepareStatement("""
+                SELECT id FROM metric_instance WHERE sample_name_id=? AND label_set_id=?
             """);
             this.selectLabelSetByHash = connection.prepareStatement("""
                 SELECT id FROM label_set WHERE hash=?
@@ -170,7 +186,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 SELECT id FROM label_value WHERE value=?
             """);
             this.selectSampleValueByNaturalKey = connection.prepareStatement("""
-                SELECT id FROM sample_value WHERE sample_name_id=? AND label_set_id=? AND timestamp_ms=?
+                SELECT id FROM sample_value WHERE metric_instance_id=? AND timestamp_ms=?
             """);
         } catch (SQLException e) {
             throw new RuntimeException("Unable to initialise SQLite snapshot reporter.", e);
@@ -263,20 +279,28 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 )
             """);
             stmt.execute("""
-                CREATE TABLE IF NOT EXISTS sample_value (
+                CREATE TABLE IF NOT EXISTS metric_instance (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     sample_name_id INTEGER NOT NULL,
+                    sample_name TEXT NOT NULL,
                     label_set_id INTEGER NOT NULL,
-                    timestamp_ms INTEGER NOT NULL,
-                    value REAL,
-                    count INTEGER,
-                    sum REAL,
-                    min REAL,
-                    max REAL,
-                    mean REAL,
-                    stddev REAL,
+                    spec TEXT NOT NULL,
+                    UNIQUE(sample_name_id, label_set_id),
                     FOREIGN KEY(sample_name_id) REFERENCES sample_name(id),
                     FOREIGN KEY(label_set_id) REFERENCES label_set(id)
+                )
+            """);
+            stmt.execute("""
+                CREATE INDEX IF NOT EXISTS idx_metric_instance_sample_name
+                ON metric_instance(sample_name)
+            """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS sample_value (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    metric_instance_id INTEGER NOT NULL,
+                    timestamp_ms INTEGER NOT NULL,
+                    value REAL,
+                    FOREIGN KEY(metric_instance_id) REFERENCES metric_instance(id)
                 )
             """);
             stmt.execute("""
@@ -307,6 +331,20 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                     FOREIGN KEY(sample_value_id) REFERENCES sample_value(id)
                 )
             """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS label_metadata (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    label_set_id INTEGER NOT NULL,
+                    metadata_key TEXT NOT NULL,
+                    metadata_value TEXT NOT NULL,
+                    UNIQUE(label_set_id, metadata_key, metadata_value),
+                    FOREIGN KEY(label_set_id) REFERENCES label_set(id)
+                )
+            """);
+            stmt.execute("""
+                CREATE INDEX IF NOT EXISTS idx_label_metadata_label_set
+                ON label_metadata(label_set_id)
+            """);
         }
         connection.commit();
     }
@@ -324,7 +362,8 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                     }
                     int sampleNameId = resolveSampleNameId(familyId, sample.sampleName());
                     int labelSetId = resolveLabelSetId(sample.labels());
-                    long sampleId = insertSampleRow(sampleNameId, labelSetId, epochMillis, sample);
+                    int metricInstanceId = resolveMetricInstanceId(sampleNameId, sample.sampleName(), labelSetId, family.familyName(), sample.labels());
+                    long sampleId = insertSampleRow(metricInstanceId, epochMillis, sample);
                     if (sample instanceof SummarySample summarySample) {
                         writeSummaryDetails(sampleId, summarySample);
                     } else if (sample instanceof MeterSample meterSample) {
@@ -340,6 +379,30 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 logger.error("Failed to rollback after error.", rollback);
             }
             throw new RuntimeException("Unable to write metrics snapshot to SQLite.", e);
+        }
+    }
+
+    @Override
+    public void onSessionMetadata(NBLabels labels, Map<String, String> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+        try {
+            int labelSetId = resolveLabelSetId(labels);
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                insertLabelMetadata.setInt(1, labelSetId);
+                insertLabelMetadata.setString(2, entry.getKey());
+                insertLabelMetadata.setString(3, entry.getValue());
+                insertLabelMetadata.executeUpdate();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollback) {
+                logger.error("Failed to rollback after error storing session metadata.", rollback);
+            }
+            logger.warn("Unable to write session metadata to SQLite.", e);
         }
     }
 
@@ -391,6 +454,68 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    private int resolveMetricInstanceId(int sampleNameId, String sampleName, int labelSetId, String familyName, NBLabels labels) throws SQLException {
+        String cacheKey = sampleNameId + ":" + labelSetId;
+        return metricInstanceCache.computeIfAbsent(cacheKey, key -> {
+            try {
+                // Generate MetricsQL spec: metric_family{label1="value1",label2="value2"}
+                String spec = generateMetricsQLSpec(familyName, labels);
+
+                insertMetricInstance.setInt(1, sampleNameId);
+                insertMetricInstance.setString(2, sampleName);
+                insertMetricInstance.setInt(3, labelSetId);
+                insertMetricInstance.setString(4, spec);
+                insertMetricInstance.executeUpdate();
+                Integer id = selectLastInsertedId(insertMetricInstance);
+                if (id == null) {
+                    selectMetricInstanceByNaturalKey.setInt(1, sampleNameId);
+                    selectMetricInstanceByNaturalKey.setInt(2, labelSetId);
+                    try (ResultSet rs = selectMetricInstanceByNaturalKey.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getInt(1);
+                        }
+                    }
+                    throw new RuntimeException("Unable to resolve metric instance id for sample_name_id=" + sampleNameId + ", label_set_id=" + labelSetId);
+                }
+                return id;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    /**
+     * Generate a MetricsQL/PromQL-compliant metric specifier.
+     * Format: metric_family{label1="value1",label2="value2"}
+     * Labels are sorted alphabetically by key and exclude name/unit labels.
+     */
+    private String generateMetricsQLSpec(String familyName, NBLabels labels) {
+        Map<String, String> labelMap = new LinkedHashMap<>(labels.asMap());
+        labelMap.remove("name");
+        labelMap.remove("unit");
+
+        if (labelMap.isEmpty()) {
+            return familyName + "{}";
+        }
+
+        // Sort labels alphabetically for consistent output
+        List<Map.Entry<String, String>> sortedLabels = labelMap.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .toList();
+
+        StringBuilder sb = new StringBuilder(familyName).append("{");
+        boolean first = true;
+        for (Map.Entry<String, String> entry : sortedLabels) {
+            if (!first) {
+                sb.append(",");
+            }
+            sb.append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
+            first = false;
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     private int resolveLabelSetId(NBLabels labels) throws SQLException {
@@ -478,23 +603,14 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
         });
     }
 
-    private long insertSampleRow(int sampleNameId,
-                                 int labelSetId,
+    private long insertSampleRow(int metricInstanceId,
                                  long epochMillis,
                                  Sample sample) throws SQLException {
         Double primaryValue = primaryValue(sample);
-        SummaryStatistics summaryStatistics = (sample instanceof SummarySample ss) ? ss.statistics() : null;
 
-        insertSample.setInt(1, sampleNameId);
-        insertSample.setInt(2, labelSetId);
-        insertSample.setLong(3, epochMillis);
-        insertSample.setObject(4, primaryValue);
-        insertSample.setObject(5, (summaryStatistics != null) ? summaryStatistics.count() : null);
-        insertSample.setObject(6, (sample instanceof SummarySample ss) ? ss.sum() : null);
-        insertSample.setObject(7, (summaryStatistics != null) ? summaryStatistics.min() : null);
-        insertSample.setObject(8, (summaryStatistics != null) ? summaryStatistics.max() : null);
-        insertSample.setObject(9, (summaryStatistics != null) ? summaryStatistics.mean() : null);
-        insertSample.setObject(10, (summaryStatistics != null) ? summaryStatistics.stddev() : null);
+        insertSample.setInt(1, metricInstanceId);
+        insertSample.setLong(2, epochMillis);
+        insertSample.setObject(3, primaryValue);
         insertSample.executeUpdate();
 
         long id;
@@ -502,9 +618,8 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
             if (rs.next()) {
                 id = rs.getLong(1);
             } else {
-                selectSampleValueByNaturalKey.setInt(1, sampleNameId);
-                selectSampleValueByNaturalKey.setInt(2, labelSetId);
-                selectSampleValueByNaturalKey.setLong(3, epochMillis);
+                selectSampleValueByNaturalKey.setInt(1, metricInstanceId);
+                selectSampleValueByNaturalKey.setLong(2, epochMillis);
                 try (ResultSet data = selectSampleValueByNaturalKey.executeQuery()) {
                     if (data.next()) {
                         id = data.getLong(1);
@@ -639,6 +754,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
         try {
             insertMetricFamily.close();
             insertSampleFamily.close();
+            insertMetricInstance.close();
             insertSample.close();
             insertSampleQuantile.close();
             insertSampleRate.close();
@@ -647,6 +763,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
             }
             selectMetricFamilyByName.close();
             selectSampleNameByFamilyAndSample.close();
+            selectMetricInstanceByNaturalKey.close();
             selectLabelSetByHash.close();
             selectLabelKeyByName.close();
             selectLabelValueByValue.close();

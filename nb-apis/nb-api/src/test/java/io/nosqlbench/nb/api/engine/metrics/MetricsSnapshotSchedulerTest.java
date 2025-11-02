@@ -46,7 +46,7 @@ public class MetricsSnapshotSchedulerTest {
     }
 
     private MetricsView counterView(long value, long interval) {
-        NBMetricCounter counter = new NBMetricCounter(counterLabels(), "counter", MetricCategory.Core);
+        NBMetricCounter counter = new NBMetricCounter(counterLabels(), "counter", "operations", MetricCategory.Core);
         counter.inc(value);
         return MetricsView.capture(List.of(counter), interval);
     }

@@ -485,4 +485,42 @@ public class NBLoggerConfig extends ConfigurationFactory {
 
 
     }
+
+    /**
+     * Update modification time on symlinks to reflect shutdown time.
+     * Called by shutdown hook to touch symlinks so their mtime shows when the session ended.
+     * Updates symlinks for: scenario.log, status.log, runtime.log, verify.log, metrics.db, heartbeat.log
+     */
+    public void timestampSymlinksOnShutdown() {
+        if (loggerDir == null) {
+            return;
+        }
+
+        // List of symlinks to update
+        String[] symlinks = {
+            "scenario.log",
+            "status.log",
+            "runtime.log",
+            "verify.log",
+            "metrics.db",
+            "heartbeat.log"
+        };
+
+        for (String linkName : symlinks) {
+            try {
+                Path linkPath = loggerDir.resolve(linkName);
+
+                if (!Files.exists(linkPath, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                    continue;  // Symlink doesn't exist, skip
+                }
+
+                // Update the modification time of the symlink itself (not the target file)
+                Files.setLastModifiedTime(linkPath,
+                    java.nio.file.attribute.FileTime.from(java.time.Instant.now()));
+
+            } catch (IOException | UnsupportedOperationException e) {
+                // Silently ignore - symlinks may not be supported or may have issues during shutdown
+            }
+        }
+    }
 }

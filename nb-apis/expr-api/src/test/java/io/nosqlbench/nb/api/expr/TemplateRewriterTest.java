@@ -219,6 +219,64 @@ class TemplateRewriterTest {
         assertEquals("rampup: run cycles==={{= paramOr('rampup-cycles', 10) }}", output);
     }
 
+    // ==================== Nested Expression References ====================
+
+    @Test
+    void testTemplateFunctionWithNestedExprReference() {
+        String input = "index_cycles: TEMPLATE(index_cycles,{{=base_vectors}})";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("index_cycles: {{= paramOr('index_cycles', base_vectors) }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionWithNestedExprReferenceWithSpaces() {
+        String input = "count: TEMPLATE(count,{{= default_count }})";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("count: {{= paramOr('count', default_count) }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionWithNestedExprFunctionCall() {
+        String input = "value: TEMPLATE(val,{{= paramOr('x', 100) }})";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("value: {{= paramOr('val', paramOr('x', 100)) }}", output);
+    }
+
+    @Test
+    void testShellVarWithNestedExprReference() {
+        String input = "cycles: ${cycles:{{=base_cycles}}}";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("cycles: {{= paramOr('cycles', base_cycles) }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionWithMultipleNestedExprs() {
+        String input = "sum: TEMPLATE(sum,{{=x}} + {{=y}})";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("sum: {{= paramOr('sum', x + y) }}", output);
+    }
+
+    @Test
+    void testTemplateFunctionWithExprInMiddle() {
+        String input = "msg: TEMPLATE(msg,prefix {{=name}} suffix)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("msg: {{= paramOr('msg', 'prefix name suffix') }}", output);
+    }
+
+    @Test
+    void testShellVarWithMultipleNestedExprs() {
+        String input = "result: ${result:{{=a}} * {{=b}}}";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("result: {{= paramOr('result', a * b) }}", output);
+    }
+
     // ==================== Preserve Non-Template Content ====================
 
     @Test
