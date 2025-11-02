@@ -72,7 +72,7 @@ jobs:
         continue-on-error: false
 
       - name: upload javadoc
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: javadocs
           path: target/nosqlbench-*-javadoc.jar
@@ -83,7 +83,7 @@ jobs:
 
       - name: upload docs artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: exported-docs
           path: exported_docs.zip
@@ -101,7 +101,7 @@ jobs:
           path: build-docs
 
       - name: download exported_docs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: exported-docs
           path: build-docs
@@ -136,7 +136,7 @@ jobs:
           path: javadocs
 
       - name: download javadocs
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: javadocs
           path: javadocs
