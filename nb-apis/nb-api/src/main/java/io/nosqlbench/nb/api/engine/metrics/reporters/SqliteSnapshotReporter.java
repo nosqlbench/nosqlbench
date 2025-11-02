@@ -124,8 +124,8 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 VALUES (?, ?)
             """, Statement.RETURN_GENERATED_KEYS);
             this.insertMetricInstance = connection.prepareStatement("""
-                INSERT OR IGNORE INTO metric_instance(sample_name_id, label_set_id, spec)
-                VALUES (?, ?, ?)
+                INSERT OR IGNORE INTO metric_instance(sample_name_id, sample_name, label_set_id, spec)
+                VALUES (?, ?, ?, ?)
             """, Statement.RETURN_GENERATED_KEYS);
             this.insertSample = connection.prepareStatement("""
                 INSERT INTO sample_value(metric_instance_id, timestamp_ms, value)
@@ -282,12 +282,17 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 CREATE TABLE IF NOT EXISTS metric_instance (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     sample_name_id INTEGER NOT NULL,
+                    sample_name TEXT NOT NULL,
                     label_set_id INTEGER NOT NULL,
                     spec TEXT NOT NULL,
                     UNIQUE(sample_name_id, label_set_id),
                     FOREIGN KEY(sample_name_id) REFERENCES sample_name(id),
                     FOREIGN KEY(label_set_id) REFERENCES label_set(id)
                 )
+            """);
+            stmt.execute("""
+                CREATE INDEX IF NOT EXISTS idx_metric_instance_sample_name
+                ON metric_instance(sample_name)
             """);
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS sample_value (
@@ -357,7 +362,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                     }
                     int sampleNameId = resolveSampleNameId(familyId, sample.sampleName());
                     int labelSetId = resolveLabelSetId(sample.labels());
-                    int metricInstanceId = resolveMetricInstanceId(sampleNameId, labelSetId, family.familyName(), sample.labels());
+                    int metricInstanceId = resolveMetricInstanceId(sampleNameId, sample.sampleName(), labelSetId, family.familyName(), sample.labels());
                     long sampleId = insertSampleRow(metricInstanceId, epochMillis, sample);
                     if (sample instanceof SummarySample summarySample) {
                         writeSummaryDetails(sampleId, summarySample);
@@ -451,7 +456,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
         });
     }
 
-    private int resolveMetricInstanceId(int sampleNameId, int labelSetId, String familyName, NBLabels labels) throws SQLException {
+    private int resolveMetricInstanceId(int sampleNameId, String sampleName, int labelSetId, String familyName, NBLabels labels) throws SQLException {
         String cacheKey = sampleNameId + ":" + labelSetId;
         return metricInstanceCache.computeIfAbsent(cacheKey, key -> {
             try {
@@ -459,8 +464,9 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 String spec = generateMetricsQLSpec(familyName, labels);
 
                 insertMetricInstance.setInt(1, sampleNameId);
-                insertMetricInstance.setInt(2, labelSetId);
-                insertMetricInstance.setString(3, spec);
+                insertMetricInstance.setString(2, sampleName);
+                insertMetricInstance.setInt(3, labelSetId);
+                insertMetricInstance.setString(4, spec);
                 insertMetricInstance.executeUpdate();
                 Integer id = selectLastInsertedId(insertMetricInstance);
                 if (id == null) {

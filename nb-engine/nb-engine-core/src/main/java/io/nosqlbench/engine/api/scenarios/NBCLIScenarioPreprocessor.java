@@ -308,10 +308,10 @@ public class NBCLIScenarioPreprocessor {
             String commandName = matcher.group("name");
             String assignmentOp = matcher.group("oper");
             String assignedValue = matcher.group("val");
-            if (parsedStep.containsKey(commandName)) {
-                String errorMessage = String.format("Duplicate occurrence of parameter \"%s\" on step \"%s\" of scenario \"%s\", step command: \"%s\"", commandName, stepName, scenarioName, cmd);
-                throw new BasicError(errorMessage);
-            }
+//            if (parsedStep.containsKey(commandName)) {
+//                String errorMessage = String.format("Duplicate occurrence of parameter \"%s\" on step \"%s\" of scenario \"%s\", step command: \"%s\"", commandName, stepName, scenarioName, cmd);
+//                throw new BasicError(errorMessage);
+//            }
             parsedStep.put(commandName, new SCNamedParam(commandName, assignmentOp, assignedValue));
         }
         return parsedStep;

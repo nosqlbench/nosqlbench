@@ -32,13 +32,16 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * Metrics command - List all metrics with their label sets in tree view.
+ * Enhanced Metrics command - Comprehensive metrics inventory with session context.
  *
- * Usage: metrics [--group-by name|labelset]
+ * Usage: metrics [--keep-labels activity,session] [--condense]
  *
- * Displays metrics inventory with two view options:
- * - name (default): Group by metric name, showing label sets under each metric
- * - labelset: Group by label set, showing which metrics use each label combination
+ * Displays a complete metrics report in three sections:
+ * 1. Session Metadata - Version, command line, hardware from label_metadata
+ * 2. Metrics Summary - Each metric with type, samples, label_sets, and value range
+ * 3. Label Set Tree - Advanced tree rendering organized by label sets
+ *
+ * This combines the best features of the former 'metrics' and 'summary' commands.
  */
 public class MetricsCommand implements MetricsQueryCommand {
 
@@ -49,7 +52,7 @@ public class MetricsCommand implements MetricsQueryCommand {
 
     @Override
     public String getDescription() {
-        return "List all metrics with their label sets in tree view";
+        return "Display comprehensive metrics inventory with session context and label set tree";
     }
 
     @Override
@@ -58,81 +61,183 @@ public class MetricsCommand implements MetricsQueryCommand {
 
         validate(params);
 
-        String groupBy = (String) params.getOrDefault("group-by", "name");
-
         long startTime = System.currentTimeMillis();
 
         List<String> columns = new ArrayList<>();
-        columns.add("group");
+        columns.add("section");
         columns.add("item");
+        columns.add("value");
         columns.add("details");
 
         List<Map<String, Object>> rows = new ArrayList<>();
 
-        // Parse keep-labels parameter
+        // Parse parameters
         String keepLabelsParam = (String) params.getOrDefault("keep-labels", "activity,session");
         Set<String> keepLabels = parseKeepLabels(keepLabelsParam);
-
-        // Parse condense parameter (default true)
         boolean condense = (boolean) params.getOrDefault("condense", true);
 
-        // First, collect all label sets to find common labels (excluding kept labels)
-        Map<String, String> commonLabels = findCommonLabels(conn, keepLabels);
+        // Section 1: Session Metadata
+        addSessionMetadata(conn, rows);
 
-        // Add common labels header if any exist
+        // Section 2: Metrics Summary
+        Map<String, String> commonLabels = findCommonLabels(conn, keepLabels);
         if (!commonLabels.isEmpty()) {
             String commonLabelsStr = formatLabelsAsString(commonLabels);
             String colorizedLabels = AnsiColors.colorizeCommonLabel(commonLabelsStr);
-            rows.add(createRow("COMMON LABELS", colorizedLabels, "These labels are present in all metrics and elided from individual entries"));
+            rows.add(createRow("COMMON LABELS", colorizedLabels, "",
+                "These labels are present in all metrics and elided from individual entries"));
         }
+        addMetricsSummary(conn, rows);
 
-        if ("name".equals(groupBy)) {
-            addMetricsWithLabelSets(conn, rows, commonLabels);
-        } else if ("labelset".equals(groupBy)) {
-            addLabelSetsWithMetrics(conn, rows, commonLabels, condense);
-        }
+        // Section 3: Label Set Tree
+        addLabelSetTree(conn, rows, commonLabels, condense);
 
         long executionTime = System.currentTimeMillis() - startTime;
 
-        String sql = "-- Multiple queries for metrics inventory (group-by=" + groupBy + ")";
+        String sql = "-- Multiple queries for comprehensive metrics inventory";
         return new QueryResult(columns, rows, sql, executionTime);
     }
 
-    private void addMetricsWithLabelSets(Connection conn, List<Map<String, Object>> rows, Map<String, String> commonLabels) throws SQLException {
-        // Get all metrics
-        String metricsSql = """
-            SELECT
-              mf.name, mf.type,
-              COUNT(DISTINCT mi.label_set_id) as label_set_count,
-              COUNT(DISTINCT mi.id) as sample_count
-            FROM metric_family mf
-            JOIN sample_name sn ON sn.metric_family_id = mf.id
-            JOIN metric_instance mi ON mi.sample_name_id = sn.id
-            GROUP BY mf.id
-            ORDER BY mf.name
+    /**
+     * Add session metadata from label_metadata table (nb.version, nb.commandline, nb.hardware).
+     */
+    private void addSessionMetadata(Connection conn, List<Map<String, Object>> rows) throws SQLException {
+        String sql = """
+            SELECT DISTINCT
+              lm.metadata_key,
+              lm.metadata_value
+            FROM label_metadata lm
+            WHERE lm.metadata_key IN ('nb.version', 'nb.commandline', 'nb.hardware')
+            ORDER BY lm.metadata_key
             """;
 
-        try (PreparedStatement ps = conn.prepareStatement(metricsSql);
+        boolean hasMetadata = false;
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                String name = rs.getString("name");
-                String type = rs.getString("type");
-                int labelSetCount = rs.getInt("label_set_count");
-                int sampleCount = rs.getInt("sample_count");
+                if (!hasMetadata) {
+                    hasMetadata = true;
+                }
+                String key = rs.getString("metadata_key");
+                String value = rs.getString("metadata_value");
 
-                String details = String.format("type=%s, samples=%d, label_sets=%d",
-                    type, sampleCount, labelSetCount);
-
-                rows.add(createRow(name, "METRIC", details));
-
-                // Get label sets for this metric
-                getLabelSetsForMetric(conn, rows, name, commonLabels);
+                // Format the key nicely (nb.version -> Version)
+                String displayKey = formatMetadataKey(key);
+                rows.add(createRow("SESSION", displayKey, value, ""));
             }
+        }
+
+        // Add a blank row after session metadata if we had any
+        if (hasMetadata) {
+            rows.add(createRow("", "", "", ""));
         }
     }
 
-    private void getLabelSetsForMetric(Connection conn, List<Map<String, Object>> rows, String metricName, Map<String, String> commonLabels) throws SQLException {
+    /**
+     * Format metadata key for display (nb.version -> Version, nb.commandline -> Command Line).
+     */
+    private String formatMetadataKey(String key) {
+        if (key.startsWith("nb.")) {
+            String stripped = key.substring(3);
+            // Convert camelCase or lowercase to Title Case
+            if (stripped.equals("commandline")) {
+                return "Command Line";
+            } else if (stripped.equals("hardware")) {
+                return "Hardware";
+            } else if (stripped.equals("version")) {
+                return "Version";
+            }
+            // Fallback: capitalize first letter
+            return stripped.substring(0, 1).toUpperCase() + stripped.substring(1);
+        }
+        return key;
+    }
+
+    /**
+     * Add metrics summary with type, samples, label_sets, and value range.
+     */
+    private void addMetricsSummary(Connection conn, List<Map<String, Object>> rows) throws SQLException {
+        String metricSql = """
+            SELECT
+              mf.name AS metric_name,
+              mf.type AS metric_type,
+              mf.unit AS metric_unit,
+              COUNT(DISTINCT mi.label_set_id) AS unique_label_sets,
+              COUNT(*) AS total_samples,
+              MIN(sv.value) AS min_value,
+              MAX(sv.value) AS max_value
+            FROM metric_family mf
+            JOIN sample_name sn ON sn.metric_family_id = mf.id
+            JOIN metric_instance mi ON mi.sample_name_id = sn.id
+            JOIN sample_value sv ON sv.metric_instance_id = mi.id
+            GROUP BY mf.id, mf.name, mf.type, mf.unit
+            ORDER BY mf.name
+            """;
+
+        try (PreparedStatement ps = conn.prepareStatement(metricSql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String name = rs.getString("metric_name");
+                String type = rs.getString("metric_type");
+                String unit = rs.getString("metric_unit");
+                int labelSets = rs.getInt("unique_label_sets");
+                int samples = rs.getInt("total_samples");
+                double min = rs.getDouble("min_value");
+                double max = rs.getDouble("max_value");
+
+                String unitDisplay = (unit == null || unit.isEmpty()) ? "" : " " + unit;
+                String details = String.format("type=%s, samples=%d, label_sets=%d, range=[%.1f, %.1f]%s",
+                    type, samples, labelSets, min, max, unitDisplay);
+
+                rows.add(createRow("METRICS", name, "", details));
+            }
+        }
+
+        // Add a blank row after metrics summary
+        rows.add(createRow("", "", "", ""));
+    }
+
+    /**
+     * Add label set tree from all metrics (like SummaryCommand's addAllMetrics).
+     */
+    private void addLabelSetTree(Connection conn, List<Map<String, Object>> rows,
+                                  Map<String, String> commonLabels, boolean condense) throws SQLException {
+        // Build one canonical tree for ALL metrics
+        LabelSetTree canonicalTree = new LabelSetTree();
+
+        // Get all metrics
+        String metricSql = """
+            SELECT DISTINCT mf.name
+            FROM metric_family mf
+            JOIN sample_name sn ON sn.metric_family_id = mf.id
+            JOIN metric_instance mi ON mi.sample_name_id = sn.id
+            ORDER BY mf.name
+            """;
+
+        try (PreparedStatement ps = conn.prepareStatement(metricSql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String metricName = rs.getString("name");
+                addMetricToTree(conn, canonicalTree, metricName, commonLabels);
+            }
+        }
+
+        // Convert to display tree and render
+        DisplayTree displayTree = DisplayTree.fromLabelSetTree(canonicalTree, condense);
+        List<String> lines = displayTree.render(true); // true for colorized output
+        for (String line : lines) {
+            rows.add(createRow("LABEL SETS", line, "", ""));
+        }
+    }
+
+    /**
+     * Add a metric and its label sets to the shared canonical tree.
+     */
+    private void addMetricToTree(Connection conn, LabelSetTree canonicalTree, String metricName,
+                                  Map<String, String> commonLabels) throws SQLException {
         String labelSetSql = """
             WITH metric_label_sets AS (
               SELECT DISTINCT ls.id, ls.hash
@@ -150,7 +255,6 @@ public class MetricsCommand implements MetricsQueryCommand {
             LEFT JOIN label_key lk ON lk.id = lsm.label_key_id
             LEFT JOIN label_value lv ON lv.id = lsm.label_value_id
             GROUP BY mls.id, mls.hash
-            ORDER BY labels
             """;
 
         try (PreparedStatement ps = conn.prepareStatement(labelSetSql)) {
@@ -160,150 +264,17 @@ public class MetricsCommand implements MetricsQueryCommand {
                 while (rs.next()) {
                     String labels = rs.getString("labels");
 
-                    // Format in MetricsQL/PromQL syntax: metric_name{label="value",label2="value2"}
-                    String metricsqlFormat = formatAsMetricsQL(metricName, labels, commonLabels);
+                    // Parse labels to map
+                    Map<String, String> labelMap = parseLabelsToMap(labels);
 
-                    rows.add(createRow(metricName, metricsqlFormat, ""));
-                }
-            }
-        }
-    }
+                    // Elide common labels
+                    labelMap.entrySet().removeIf(entry ->
+                        commonLabels.containsKey(entry.getKey()) &&
+                        commonLabels.get(entry.getKey()).equals(entry.getValue())
+                    );
 
-    /**
-     * Format metric with labels in PromQL/MetricsQL syntax, eliding common labels.
-     * Examples:
-     *   api_requests_total{method="GET",endpoint="/users",status="200"}
-     *   api_latency{endpoint="/api"}
-     *   simple_counter{}
-     */
-    private String formatAsMetricsQL(String metricName, String labels, Map<String, String> commonLabels) {
-        if (labels == null || labels.isEmpty()) {
-            return metricName + "{}";
-        }
-
-        // Convert "key=value, key2=value2" to 'key="value",key2="value2"'
-        // But elide any labels that are common
-        String[] pairs = labels.split(", ");
-        StringBuilder sb = new StringBuilder();
-        sb.append(metricName).append("{");
-
-        boolean first = true;
-        for (String pair : pairs) {
-            String[] kv = pair.split("=", 2);
-            if (kv.length == 2) {
-                String key = kv[0];
-                String value = kv[1];
-
-                // Skip if this label is in common labels
-                if (commonLabels.containsKey(key) && commonLabels.get(key).equals(value)) {
-                    continue;
-                }
-
-                if (!first) {
-                    sb.append(",");
-                }
-                sb.append(key).append("=\"").append(value).append("\"");
-                first = false;
-            }
-        }
-
-        sb.append("}");
-        return sb.toString();
-    }
-
-    private void addLabelSetsWithMetrics(Connection conn, List<Map<String, Object>> rows, Map<String, String> commonLabels, boolean condense) throws SQLException {
-        // Get all unique label sets
-        String labelSetsSql = """
-            SELECT DISTINCT
-              ls.id, ls.hash,
-              GROUP_CONCAT(lk.name || '=' || lv.value, ', ') as labels
-            FROM label_set ls
-            LEFT JOIN label_set_membership lsm ON lsm.label_set_id = ls.id
-            LEFT JOIN label_key lk ON lk.id = lsm.label_key_id
-            LEFT JOIN label_value lv ON lv.id = lsm.label_value_id
-            WHERE ls.id IN (SELECT DISTINCT label_set_id FROM sample_value)
-            GROUP BY ls.id, ls.hash
-            """;
-
-        // Build canonical label set tree
-        LabelSetTree canonicalTree = new LabelSetTree();
-
-        try (PreparedStatement ps = conn.prepareStatement(labelSetsSql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                int labelSetId = rs.getInt("id");
-                String labels = rs.getString("labels");
-
-                // Parse labels to map
-                Map<String, String> labelMap = parseLabelsToMap(labels);
-
-                // Elide common labels
-                labelMap.entrySet().removeIf(entry ->
-                    commonLabels.containsKey(entry.getKey()) &&
-                    commonLabels.get(entry.getKey()).equals(entry.getValue())
-                );
-
-                // Collect metrics for this label set
-                List<String> metrics = getMetricsForLabelSetList(conn, labelSetId);
-
-                // Add to canonical tree
-                canonicalTree.addLabelSet(labelMap, metrics);
-            }
-        }
-
-        // Convert to display tree for rendering
-        DisplayTree displayTree = DisplayTree.fromLabelSetTree(canonicalTree, condense);
-
-        // Render the display tree
-        List<String> lines = displayTree.render(true); // true for colorized output
-        for (String line : lines) {
-            rows.add(createRow(line, "", ""));
-        }
-    }
-
-
-    private List<String> getMetricsForLabelSetList(Connection conn, int labelSetId) throws SQLException {
-        List<String> metrics = new ArrayList<>();
-        String metricsSql = """
-            SELECT DISTINCT mf.name
-            FROM metric_instance mi
-            JOIN sample_name sn ON mi.sample_name_id = sn.id
-            JOIN metric_family mf ON sn.metric_family_id = mf.id
-            WHERE mi.label_set_id = ?
-            ORDER BY mf.name
-            """;
-
-        try (PreparedStatement ps = conn.prepareStatement(metricsSql)) {
-            ps.setInt(1, labelSetId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    metrics.add(rs.getString("name"));
-                }
-            }
-        }
-        return metrics;
-    }
-
-    private void getMetricsForLabelSet(Connection conn, List<Map<String, Object>> rows,
-                                      int labelSetId, String labelSetName) throws SQLException {
-        String metricsSql = """
-            SELECT DISTINCT mf.name
-            FROM metric_instance mi
-            JOIN sample_name sn ON mi.sample_name_id = sn.id
-            JOIN metric_family mf ON sn.metric_family_id = mf.id
-            WHERE mi.label_set_id = ?
-            ORDER BY mf.name
-            """;
-
-        try (PreparedStatement ps = conn.prepareStatement(metricsSql)) {
-            ps.setInt(1, labelSetId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    String metricName = rs.getString("name");
-                    // Use empty group to indicate this is a child of the label set
-                    rows.add(createRow("", metricName, ""));
+                    // Add to shared canonical tree with metric name
+                    canonicalTree.addLabelSet(labelMap, List.of(metricName));
                 }
             }
         }
@@ -355,7 +326,7 @@ public class MetricsCommand implements MetricsQueryCommand {
             LEFT JOIN label_set_membership lsm ON lsm.label_set_id = ls.id
             LEFT JOIN label_key lk ON lk.id = lsm.label_key_id
             LEFT JOIN label_value lv ON lv.id = lsm.label_value_id
-            WHERE ls.id IN (SELECT DISTINCT label_set_id FROM sample_value)
+            WHERE ls.id IN (SELECT DISTINCT label_set_id FROM metric_instance)
             GROUP BY ls.id
             """;
 
@@ -432,97 +403,41 @@ public class MetricsCommand implements MetricsQueryCommand {
             .orElse("{}");
     }
 
-    /**
-     * Remove common labels from a label string and return the remaining labels.
-     */
-    private String elideCommonLabels(String labels, Map<String, String> commonLabels) {
-        if (labels == null || labels.isEmpty() || commonLabels.isEmpty()) {
-            return labels;
-        }
-
-        Map<String, String> labelMap = parseLabelsToMap(labels);
-
-        // Remove common labels
-        commonLabels.forEach((key, value) -> {
-            if (labelMap.containsKey(key) && labelMap.get(key).equals(value)) {
-                labelMap.remove(key);
-            }
-        });
-
-        // Format remaining labels
-        if (labelMap.isEmpty()) {
-            return "";
-        }
-
-        return labelMap.entrySet().stream()
-            .map(e -> e.getKey() + "=" + e.getValue())
-            .reduce((a, b) -> a + ", " + b)
-            .orElse("");
-    }
-
-    /**
-     * Format labels in PromQL style with curly braces and quoted values.
-     * Input: "key=value, key2=value2" or empty/null
-     * Output: {key="value",key2="value2"} or {}
-     */
-    private String formatLabelsAsPromQL(String labels) {
-        if (labels == null || labels.isEmpty()) {
-            return "{}";
-        }
-
-        // Parse "key=value, key2=value2" format
-        String[] pairs = labels.split(", ");
-        StringBuilder sb = new StringBuilder("{");
-
-        boolean first = true;
-        for (String pair : pairs) {
-            String[] kv = pair.split("=", 2);
-            if (kv.length == 2) {
-                if (!first) {
-                    sb.append(",");
-                }
-                sb.append(kv[0]).append("=\"").append(kv[1]).append("\"");
-                first = false;
-            }
-        }
-
-        sb.append("}");
-        return sb.toString();
-    }
-
-    private Map<String, Object> createRow(String group, String item, String details) {
+    private Map<String, Object> createRow(String section, String item, String value, String details) {
         Map<String, Object> row = new LinkedHashMap<>();
-        row.put("group", group);
+        row.put("section", section);
         row.put("item", item);
+        row.put("value", value);
         row.put("details", details);
         return row;
     }
 
     @Override
     public void validate(Map<String, Object> params) throws InvalidQueryException {
-        if (params.containsKey("group-by")) {
-            String groupBy = (String) params.get("group-by");
-            if (!"name".equals(groupBy) && !"labelset".equals(groupBy)) {
-                throw new InvalidQueryException(
-                    "Invalid group-by value: " + groupBy + "\n" +
-                    "Valid values: name, labelset"
-                );
-            }
-        }
+        // No required parameters
     }
 
     @Override
     public String getUsageExamples() {
         return """
             Examples:
-              # List metrics grouped by name (default)
+              # Show comprehensive metrics inventory
               metrics
 
-              # List metrics grouped by label set
-              metrics --group-by labelset
+              # Keep specific labels (don't elide)
+              metrics --keep-labels activity,session
 
-              # Markdown format for reports
+              # Keep all labels (no elision)
+              metrics --keep-labels '*'
+
+              # Disable sibling condensation
+              metrics --no-condense
+
+              # Markdown format for documentation
               metrics --format markdown
+
+              # Use at end of session for complete report
+              nb5 run.yaml && nb5 mql metrics
             """;
     }
 

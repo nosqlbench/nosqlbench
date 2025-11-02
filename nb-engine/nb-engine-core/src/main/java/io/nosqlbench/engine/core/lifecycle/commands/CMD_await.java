@@ -39,7 +39,19 @@ public class CMD_await extends NBBaseCommand {
 
     @Override
     public Object invoke(NBCommandParams params, PrintWriter stdout, PrintWriter stderr, Reader stdin, ContainerActivitiesController controller) {
-        controller.await(params);
+        // Extract the activity name from the 'activity' parameter
+        String activityName = params.maybeGet("activity").orElseThrow(
+            () -> new RuntimeException("The await command requires an 'activity' parameter")
+        );
+
+        // Extract optional timeout parameter (default to Long.MAX_VALUE)
+        long timeoutMs = params.maybeGet("s")
+            .or(() -> params.maybeGet("seconds"))
+            .map(s -> Unit.msFor(s).orElseThrow(() ->
+                new RuntimeException("Invalid timeout value: " + s)))
+            .orElse(Long.MAX_VALUE);
+
+        controller.awaitActivity(activityName, timeoutMs);
         return null;
     }
 }

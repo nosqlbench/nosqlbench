@@ -83,6 +83,7 @@ public class MetricsSchema {
     // metric_instance columns
     public static final String COL_MI_ID = "id";
     public static final String COL_MI_SAMPLE_NAME_ID = "sample_name_id";
+    public static final String COL_MI_SAMPLE_NAME = "sample_name";  // Denormalized for query performance
     public static final String COL_MI_LABEL_SET_ID = "label_set_id";
     public static final String COL_MI_SPEC = "spec";
 

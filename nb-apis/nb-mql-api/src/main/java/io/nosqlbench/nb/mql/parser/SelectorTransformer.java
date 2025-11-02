@@ -67,28 +67,27 @@ public class SelectorTransformer {
         sql.append("  FROM ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append("\n");
         sql.append("),\n");
 
-        // Main query CTE
+        // Main query CTE - optimized to filter early using metric_instance foreign keys
         sql.append("labeled_samples AS (\n");
         sql.append("  SELECT\n");
         sql.append("    sv.").append(MetricsSchema.COL_SV_TIMESTAMP_MS).append(",\n");
         sql.append("    sv.").append(MetricsSchema.COL_SV_VALUE).append(",\n");
-        sql.append("    sn.").append(MetricsSchema.COL_SN_SAMPLE).append(",\n");
         sql.append("    mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append(",\n");
         sql.append("    GROUP_CONCAT(lk.").append(MetricsSchema.COL_LK_NAME)
            .append(" || '=' || lv.").append(MetricsSchema.COL_LV_VALUE)
            .append(", ', ') AS labels\n");
         sql.append("  FROM ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append(" sv\n");
 
-        // Join with metric_instance and sample_name
+        // Join with metric_instance - filter using foreign keys before expensive label joins
         sql.append("  JOIN ").append(MetricsSchema.TABLE_METRIC_INSTANCE).append(" mi ON\n");
         sql.append("    mi.").append(MetricsSchema.COL_MI_ID)
            .append(" = sv.").append(MetricsSchema.COL_SV_METRIC_INSTANCE_ID).append("\n");
-        sql.append("  JOIN ").append(MetricsSchema.TABLE_SAMPLE_NAME).append(" sn ON\n");
-        sql.append("    sn.").append(MetricsSchema.COL_SN_ID)
-           .append(" = mi.").append(MetricsSchema.COL_MI_SAMPLE_NAME_ID).append("\n");
 
-        // Join with label set for label concatenation
-        sql.append("  JOIN ").append(MetricsSchema.TABLE_LABEL_SET).append(" ls ON\n");
+        // Cross join with latest snapshot
+        sql.append("  CROSS JOIN latest_snapshot\n");
+
+        // Join with labels for display (GROUP_CONCAT) - JOINs must come before WHERE
+        sql.append("  LEFT JOIN ").append(MetricsSchema.TABLE_LABEL_SET).append(" ls ON\n");
         sql.append("    ls.").append(MetricsSchema.COL_LS_ID)
            .append(" = mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append("\n");
         sql.append("  LEFT JOIN ").append(MetricsSchema.TABLE_LABEL_SET_MEMBERSHIP).append(" lsm ON\n");
@@ -101,22 +100,32 @@ public class SelectorTransformer {
         sql.append("    lv.").append(MetricsSchema.COL_LV_ID)
            .append(" = lsm.").append(MetricsSchema.COL_LSM_LABEL_VALUE_ID).append("\n");
 
-        // Cross join with latest snapshot
-        sql.append("  CROSS JOIN latest_snapshot\n");
-
-        // WHERE clause
-        sql.append("  WHERE sn.").append(MetricsSchema.COL_SN_SAMPLE).append(" = ?\n");
+        // WHERE clause - filter directly by sample_name (denormalized in metric_instance)
+        sql.append("  WHERE mi.sample_name = ?\n");
         parameters.add(metricName);
 
         sql.append("    AND sv.").append(MetricsSchema.COL_SV_TIMESTAMP_MS)
            .append(" = latest_snapshot.max_ts\n");
 
-        // Add label filters
+        // Add label filters using EXISTS for better performance
         for (LabelMatcher matcher : labelMatchers) {
-            sql.append("    AND ");
+            sql.append("    AND EXISTS (\n");
+            sql.append("      SELECT 1 FROM ").append(MetricsSchema.TABLE_LABEL_SET_MEMBERSHIP)
+               .append(" lsm\n");
+            sql.append("      JOIN ").append(MetricsSchema.TABLE_LABEL_KEY)
+               .append(" lk ON lk.").append(MetricsSchema.COL_LK_ID)
+               .append(" = lsm.").append(MetricsSchema.COL_LSM_LABEL_KEY_ID).append("\n");
+            sql.append("      JOIN ").append(MetricsSchema.TABLE_LABEL_VALUE)
+               .append(" lv ON lv.").append(MetricsSchema.COL_LV_ID)
+               .append(" = lsm.").append(MetricsSchema.COL_LSM_LABEL_VALUE_ID).append("\n");
+            sql.append("      WHERE lsm.").append(MetricsSchema.COL_LSM_LABEL_SET_ID)
+               .append(" = mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append("\n");
+            sql.append("        AND ");
+
             SQLFragment matcherSQL = matcher.toSQL();
             sql.append(matcherSQL.getSql()).append("\n");
             parameters.addAll(matcherSQL.getParameters());
+            sql.append("    )\n");
         }
 
         // Group by to get label concatenation

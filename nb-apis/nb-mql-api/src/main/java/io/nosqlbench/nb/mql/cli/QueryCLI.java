@@ -16,15 +16,14 @@
 
 package io.nosqlbench.nb.mql.cli;
 
-import io.nosqlbench.nb.mql.commands.MetricsCommand;
-import io.nosqlbench.nb.mql.format.MetricsMarkdownFormatter;
+import io.nosqlbench.nb.mql.commands.QueryCommand;
 import io.nosqlbench.nb.mql.format.OutputFormat;
-import io.nosqlbench.nb.mql.format.ResultFormatter;
 import io.nosqlbench.nb.mql.query.QueryResult;
 import io.nosqlbench.nb.mql.schema.MetricsDatabaseReader;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -33,15 +32,20 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
- * CLI for metrics command.
- * Displays comprehensive metrics inventory with session context and label set tree.
+ * CLI for query command - executes arbitrary MetricsQL expressions.
  */
 @Command(
-    name = "metrics",
-    description = "Display comprehensive metrics inventory with session context and label set tree",
+    name = "query",
+    description = "Execute arbitrary MetricsQL queries",
     mixinStandardHelpOptions = true
 )
-public class MetricsCLI implements Callable<Integer> {
+public class QueryCLI implements Callable<Integer> {
+
+    @Parameters(
+        index = "0",
+        description = "MetricsQL expression to execute (e.g., 'rate(http_requests[5m])')"
+    )
+    private String expression;
 
     @Option(
         names = {"-d", "--db"},
@@ -51,54 +55,36 @@ public class MetricsCLI implements Callable<Integer> {
     private Path databasePath;
 
     @Option(
-        names = {"--group-by"},
-        description = "Group by: name (default) or labelset",
-        defaultValue = "name"
-    )
-    private String groupBy;
-
-    @Option(
-        names = {"--keep-labels"},
-        description = "Labels to keep (not elide) even if common. Use '*' for all labels, or comma/tab-separated label names (default: activity,session)",
-        defaultValue = "activity,session"
-    )
-    private String keepLabels;
-
-    @Option(
-        names = {"--no-condense"},
-        description = "Disable tree condensation. Shows each metric instance separately with full label sets instead of condensing siblings with common patterns (default: false, condensation enabled)",
-        defaultValue = "false"
-    )
-    private boolean noCondense;
-
-    @Option(
         names = {"-f", "--format"},
         description = "Output format: table, json, jsonl, csv, tsv, markdown",
         defaultValue = "table"
     )
     private OutputFormat format = OutputFormat.TABLE;
 
+    @Option(
+        names = {"--explain"},
+        description = "Show the SQL query instead of executing"
+    )
+    private boolean explain = false;
+
     @Override
     public Integer call() throws Exception {
         try (Connection conn = MetricsDatabaseReader.connect(databasePath)) {
-            MetricsCommand command = new MetricsCommand();
+            QueryCommand command = new QueryCommand();
 
             Map<String, Object> params = new LinkedHashMap<>();
-            params.put("group-by", groupBy);
-            params.put("keep-labels", keepLabels);
-            params.put("condense", !noCondense); // invert flag: --no-condense means condense=false
+            params.put("expression", expression);
 
             QueryResult result = command.execute(conn, params);
 
-            // Use custom markdown formatter for metrics command
-            ResultFormatter formatter;
-            if (format == OutputFormat.MARKDOWN) {
-                formatter = new MetricsMarkdownFormatter();
+            if (explain) {
+                System.out.println("-- Generated SQL from MetricsQL expression:");
+                System.out.println("-- " + expression);
+                System.out.println();
+                System.out.println(result.executedSQL());
             } else {
-                formatter = format.createFormatter();
+                System.out.println(format.createFormatter().format(result));
             }
-
-            System.out.println(formatter.format(result));
 
             return 0;
         } catch (Exception e) {
@@ -114,7 +100,7 @@ public class MetricsCLI implements Callable<Integer> {
      * Main method for standalone execution.
      */
     public static void main(String[] args) {
-        int exitCode = new CommandLine(new MetricsCLI()).execute(args);
+        int exitCode = new CommandLine(new QueryCLI()).execute(args);
         System.exit(exitCode);
     }
 }

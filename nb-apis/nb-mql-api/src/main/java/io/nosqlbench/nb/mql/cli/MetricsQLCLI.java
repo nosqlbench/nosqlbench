@@ -35,6 +35,7 @@ import picocli.CommandLine.Command;
     mixinStandardHelpOptions = true,
     version = "1.0.0",
     subcommands = {
+        QueryCLI.class,
         SessionCLI.class,
         MetadataCLI.class,
         SummaryCLI.class,
@@ -48,8 +49,6 @@ import picocli.CommandLine.Command;
         RatioCLI.class,
         TopKCLI.class,
         SqlCLI.class
-        // All commands implemented except:
-        // BinaryOpCLI.class (optional - advanced arithmetic)
     }
 )
 public class MetricsQLCLI implements Runnable {

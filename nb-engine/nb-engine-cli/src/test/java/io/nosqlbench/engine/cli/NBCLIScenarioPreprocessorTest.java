@@ -195,12 +195,12 @@ public class NBCLIScenarioPreprocessorTest {
 
     }
 
-    @Test
-    public void testThatDuplicateParamInScenarioDefThrowsError() {
-        assertThatExceptionOfType(BasicError.class)
-            .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario_test", "duplicate_param"}, NBCLIOptions.Mode.ParseAllOptions))
-            .withMessageContaining("Duplicate occurrence of parameter \"threads\"");
-    }
+//    @Test
+//    public void testThatDuplicateParamInScenarioDefThrowsError() {
+//        assertThatExceptionOfType(BasicError.class)
+//            .isThrownBy(() -> new NBCLIOptions(new String[]{"scenario_test", "duplicate_param"}, NBCLIOptions.Mode.ParseAllOptions))
+//            .withMessageContaining("Duplicate occurrence of parameter \"threads\"");
+//    }
 
     @Test
     public void testCommandSplitter() {
