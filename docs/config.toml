@@ -15,8 +15,8 @@ theme = "abridge"
 compile_sass = true
 minify_html = true
 build_search_index = true
-generate_feed = true
-feed_filename = "atom.xml"
+generate_feeds = true
+feed_filenames = ["atom.xml"]
 
 # Taxonomy settings for organizing content
 taxonomies = [
@@ -34,8 +34,11 @@ highlight_code = true
 highlight_theme = "base16-ocean-dark"
 
 [link_checker]
-# Skip external links during build (optional, speeds up builds)
-skip_prefixes = []
+# Skip external links during build (speeds up builds, external anchors change frequently)
+skip_prefixes = [
+    "http://",
+    "https://",
+]
 skip_anchor_prefixes = []
 
 [extra]
@@ -50,33 +53,12 @@ uglyurls = false
 favicon_svg = "/favicon.svg"
 logo = "/images/nosqlbench-logo.svg"
 
-# Navigation menu (customize as needed)
-[[extra.menu]]
-name = "Tutorials"
-url = "/tutorials/"
-weight = 10
-
-[[extra.menu]]
-name = "Guides"
-url = "/guides/"
-weight = 20
-
-[[extra.menu]]
-name = "Reference"
-url = "/reference/"
-weight = 30
-
-[[extra.menu]]
-name = "Explanations"
-url = "/explanations/"
-weight = 40
-
-[[extra.menu]]
-name = "Development"
-url = "/development/"
-weight = 50
-
-[[extra.menu]]
-name = "GitHub"
-url = "https://github.com/nosqlbench/nosqlbench"
-weight = 100
+# Navigation menu (Abridge format)
+menu = [
+    {url = "tutorials", name = "Tutorials", slash = true, blank = false, weight = 10},
+    {url = "guides", name = "Guides", slash = true, blank = false, weight = 20},
+    {url = "reference", name = "Reference", slash = true, blank = false, weight = 30},
+    {url = "explanations", name = "Explanations", slash = true, blank = false, weight = 40},
+    {url = "development", name = "Development", slash = true, blank = false, weight = 50},
+    {url = "https://github.com/nosqlbench/nosqlbench", name = "GitHub", slash = false, blank = true, weight = 100},
+]
