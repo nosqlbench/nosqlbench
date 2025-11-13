@@ -1,0 +1,26 @@
+# Zola build output
+public/
+
+# Test artifacts
+test-output/
+
+# Node modules (if using npm for any tooling)
+node_modules/
+
+# Environment files
+.env
+
+# Build artifacts
+build/
+storage/
+
+# Editor files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.log
+apps.log
