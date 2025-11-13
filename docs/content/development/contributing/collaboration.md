@@ -21,7 +21,7 @@ follow the community guidelines in this section and you'll be making changes in 
 ## Big Ideas
 
 Ideas which require a degree of planning and design work should be discussed with the community
-and maintainers in [discussions](https://nosqlbench.io/discussions). There is an *idea* category
+and maintainers in [discussions](https://github.com/nosqlbench/nosqlbench/discussions). There is an *idea* category
 that is already used for this. This is to ensure that everyone is on the same page about how
 something will work before work starts in earnest. Big ideas are **awesome**, but the hardest
 work of landing them successfully is in building consensus for how they should fundamentally work.

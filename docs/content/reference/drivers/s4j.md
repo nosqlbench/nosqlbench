@@ -267,7 +267,7 @@ blocks:
 
 ## 4.3. S4J Named Scenario {#43-s4j-named-scenario}
 
-For workload execution convenience, NB engine has the concept of **named scenario** ([doc](https://docs.nosqlbench.io/workloads-101/11-named-scenarios/)).
+For workload execution convenience, NB engine has the concept of **named scenario** ([doc](../../tutorials/workload-basics/11-named-scenarios/)).
 
 For NB S4R adapter, the following yaml file is used to define the named scenarios: [nbs4j_msg_proc_named.yaml](scenarios/nbs4j_msg_proc_named.yaml)
 

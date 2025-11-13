@@ -66,7 +66,7 @@ $ <nb_cmd> run driver=amqp -vv cycles=200 strict_msg_error_handling=0 \
 
 ### 2.1.1. Named Scenarios {#211-named-scenarios}
 
-For workload execution convenience, NB engine has the concept of **named scenario** ([doc](https://docs.nosqlbench.io/workloads-101/11-named-scenarios/)).
+For workload execution convenience, NB engine has the concept of **named scenario** ([doc](../../tutorials/workload-basics/11-named-scenarios/)).
 
 For NB AMQP adapter, the following yaml file is used to define the named scenarios: [nbamqp_msg_proc_named.yaml](scenarios/nbamqp_msg_proc_named.yaml)
 

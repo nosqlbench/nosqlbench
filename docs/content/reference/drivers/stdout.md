@@ -67,7 +67,7 @@ activity types.
 
 This activity type uses the uniform yaml configuration format.
 For more details on this format, please refer to the
-[Standard YAML Format](http://docs.nosqlbench.io/user-guide/standard_yaml/)
+[Workload YAML Specification](../../workload-yaml/)
 
 ## Configuration Parameters
 
