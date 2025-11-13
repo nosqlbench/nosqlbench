@@ -2,7 +2,7 @@
 title = "Performance Factoring"
 description = "Systematic methods for identifying and measuring performance factors"
 weight = 40
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

@@ -2,7 +2,7 @@
 title = "Contributing"
 description = "How to contribute to NoSQLBench"
 weight = 10
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "development"

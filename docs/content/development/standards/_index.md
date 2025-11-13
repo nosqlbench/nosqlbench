@@ -2,7 +2,7 @@
 title = "Project Standards"
 description = "Coding standards and project conventions"
 weight = 30
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "development"

@@ -2,7 +2,7 @@
 title = "Workload Tutorials"
 description = "Tutorials for specific workload types and scenarios"
 weight = 15
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "tutorials"

@@ -3,7 +3,7 @@ title = "Getting Started"
 description = "Your first steps with NoSQLBench - installation, setup, and running your first workload"
 weight = 1
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "tutorials"

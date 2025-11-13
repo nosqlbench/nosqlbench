@@ -2,7 +2,7 @@
 title = "Advanced Topics"
 description = "Advanced testing techniques and power-user features"
 weight = 50
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

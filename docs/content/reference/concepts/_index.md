@@ -2,7 +2,7 @@
 title = "Concepts Reference"
 description = "Reference documentation for key NoSQLBench concepts and terminology"
 weight = 60
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

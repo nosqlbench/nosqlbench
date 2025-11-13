@@ -2,7 +2,7 @@
 title = "Workload Design"
 description = "How to design and configure effective workloads"
 weight = 10
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

@@ -2,7 +2,7 @@
 title = "Workload Basics"
 description = "Learn how to build workloads to simulate real-world data and access patterns"
 weight = 20
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "tutorials"

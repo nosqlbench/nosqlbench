@@ -2,7 +2,7 @@
 title = "Command Line Interface"
 description = "NoSQLBench command line options and scripting reference"
 weight = 20
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

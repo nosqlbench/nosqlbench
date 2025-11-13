@@ -3,7 +3,7 @@ title = "How-To Guides"
 description = "Practical guides for accomplishing specific tasks with NoSQLBench"
 weight = 20
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

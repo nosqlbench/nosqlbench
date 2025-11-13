@@ -3,7 +3,7 @@ title = "Development"
 description = "Contributing to NoSQLBench and understanding the codebase"
 weight = 50
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "development"

@@ -2,7 +2,7 @@
 title = "Configuration Techniques"
 description = "Advanced configuration management for NoSQLBench scenarios"
 weight = 50
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

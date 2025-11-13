@@ -2,7 +2,7 @@
 title = "Core Concepts"
 description = "Fundamental concepts in NoSQLBench"
 weight = 10
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "explanations"

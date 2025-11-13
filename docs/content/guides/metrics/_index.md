@@ -2,7 +2,7 @@
 title = "Metrics and Analysis"
 description = "How to collect, export, and analyze NoSQLBench metrics"
 weight = 30
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

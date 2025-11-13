@@ -3,7 +3,7 @@ title = "Workload YAML Specification"
 description = "Complete specification for NoSQLBench workload definition format"
 weight = 40
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

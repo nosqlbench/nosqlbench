@@ -3,7 +3,7 @@ title = "Reference"
 description = "Technical specifications and API documentation"
 weight = 30
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

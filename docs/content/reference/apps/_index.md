@@ -3,7 +3,7 @@ title = "Built-in Applications"
 description = "Reference documentation for NoSQLBench built-in command-line applications"
 weight = 30
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

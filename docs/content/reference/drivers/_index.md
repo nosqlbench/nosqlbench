@@ -3,7 +3,7 @@ title = "Driver Documentation"
 description = "Reference documentation for NoSQLBench database drivers and adapters"
 weight = 20
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

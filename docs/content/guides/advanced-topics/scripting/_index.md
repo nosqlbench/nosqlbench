@@ -2,7 +2,7 @@
 title = "Scenario Scripting"
 description = "JavaScript-based scenario automation and control"
 weight = 10
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

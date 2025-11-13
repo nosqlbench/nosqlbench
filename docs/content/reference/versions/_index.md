@@ -2,7 +2,7 @@
 title = "Version Information"
 description = "NoSQLBench version details and release information"
 weight = 70
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

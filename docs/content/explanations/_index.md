@@ -3,7 +3,7 @@ title = "Explanations"
 description = "Conceptual understanding of NoSQLBench architecture and design"
 weight = 40
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "explanations"

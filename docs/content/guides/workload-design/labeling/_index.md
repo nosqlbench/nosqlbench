@@ -2,7 +2,7 @@
 title = "Labeling System"
 description = "Organize and track test results with labels and metadata"
 weight = 40
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

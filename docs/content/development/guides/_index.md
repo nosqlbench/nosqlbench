@@ -2,7 +2,7 @@
 title = "Developer Guides"
 description = "Step-by-step guides for NoSQLBench development"
 weight = 20
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "development"

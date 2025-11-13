@@ -3,7 +3,7 @@ title = "Tutorials"
 description = "Step-by-step learning guides for getting started with NoSQLBench"
 weight = 10
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "tutorials"

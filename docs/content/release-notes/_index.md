@@ -3,7 +3,7 @@ title = "Release Notes"
 description = "NoSQLBench version history and release notes"
 weight = 60
 sort_by = "date"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 topic = "releases"

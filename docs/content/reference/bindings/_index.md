@@ -3,7 +3,7 @@ title = "Binding Functions Reference"
 description = "Complete reference documentation for all virtdata binding functions"
 weight = 10
 sort_by = "weight"
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "reference"

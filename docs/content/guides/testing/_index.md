@@ -2,7 +2,7 @@
 title = "Testing Strategies"
 description = "Guides for different types of performance testing"
 weight = 20
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

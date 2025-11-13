@@ -2,7 +2,7 @@
 title = "Troubleshooting"
 description = "Common problems and how to solve them"
 weight = 40
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "guides"

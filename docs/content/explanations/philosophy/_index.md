@@ -2,7 +2,7 @@
 title = "Philosophy & Design"
 description = "NoSQLBench philosophy and design principles"
 weight = 20
-template = "section.html"
+template = "pages.html"
 
 [extra]
 quadrant = "explanations"
