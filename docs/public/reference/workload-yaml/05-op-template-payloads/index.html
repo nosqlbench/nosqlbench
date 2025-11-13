@@ -1,0 +1,253 @@
+<!doctype html><html lang=en><head><script integrity=sha384-pb++s6uBRKaQv+iAXpgA/H3IlpLZdO14tTwuCI7uXmz4aaZdByoCcM+6BhynMq/1 src=https://docs.nosqlbench.io/js/theme.min.js></script><link href="https://docs.nosqlbench.io/abridge.css?h=17d1d14ae374495df55a" rel=stylesheet><meta charset=utf-8><meta content="ie=edge" http-equiv=x-ua-compatible><meta content="width=device-width,initial-scale=1" name=viewport><meta content=https://docs.nosqlbench.io name=base><meta content=True name=HandheldFriendly><meta content=yes name=mobile-web-app-capable><meta content=yes name=apple-mobile-web-app-capable><meta content=default name=apple-mobile-web-app-status-bar-style><link href=https://docs.nosqlbench.io/favicon.svg rel=icon type=image/svg+xml><link title="NoSQLBench Documentation Atom Feed" href=https://docs.nosqlbench.io/atom.xml rel=alternate type=application/atom+xml><meta content="index, follow" name=robots><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name=googlebot><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name=bingbot><title>Op Template Payloads | NoSQLBench Documentation</title><meta content="NoSQLBench Team" name=author><meta content="NoSQLBench Documentation" name=copyright><meta content="Auto-generated reference documentation for Op Template Payloads" name=description><link href=https://docs.nosqlbench.io/reference/workload-yaml/05-op-template-payloads/ rel=canonical><meta content=https://docs.nosqlbench.io/reference/workload-yaml/05-op-template-payloads/ property=og:url><meta content=https://docs.nosqlbench.io/reference/workload-yaml/05-op-template-payloads/ name=twitter:url><meta content="Auto-generated reference documentation for Op Template Payloads" property=og:description><meta content="Auto-generated reference documentation for Op Template Payloads" name=twitter:description><meta content="Op Template Payloads | NoSQLBench Documentation" property=og:title><meta content="Op Template Payloads | NoSQLBench Documentation" name=twitter:title><meta content=summary name=twitter:card><meta content="NoSQLBench Documentation" property=og:site_name><meta content=en_US property=og:locale><meta content=website property=og:type><meta content=2025-11-13 property=og:updated_time><script src="https://docs.nosqlbench.io/js/theme_button.js?h=12a31e87fcbe7a55e953" defer integrity=sha384-UBxLGgFVZtEgNzOU3WqKoFT1oILftGjShFO4WIs1dO/jK7SNyz7BMYCYt5PffTxe></script><script src="https://docs.nosqlbench.io/js/email.js?h=ee3dd742e11c5014fdef" defer integrity=sha384-y0LUfjslyVLYZvCOyhELpvKivlXAq27Vnbed54glXoe/pZSYS/Pfqghp/sQt1xcV></script><script src="https://docs.nosqlbench.io/js/codecopy.js?h=0a54f99e682443925d3a" defer integrity=sha384-qssVvPpQgISh4PFkSBGTgXEMzuFO8Hat5m1MsdkpannoByWSTpLfBe4iEVl3+RiP></script><script src="https://docs.nosqlbench.io/js/elasticlunr.min.js?h=4f648b9e42abdef9c436" defer integrity=sha384-Q8viz7rndi8MSNDtItDgVWNSrCumjepopRMlz2nElkWPRXDQAcfiZGJbrCJVXdtw></script><script src="https://docs.nosqlbench.io/search_index.en.js?h=e2df0fd710d0c807a7aa" defer integrity=sha384-nyOftseEtxo2Pc23RFR1hxsCZHtUr0xOCP7JVJ8oGIs+cnDq6GZkzCq2hWZ2cJIh></script><script src="https://docs.nosqlbench.io/js/searchjava.js?h=36b818b07e8b2b318967" defer integrity=sha384-i6K7Uy98ZLnOwn6no8sDUTeBitDmiLHOKxkcJYbjgu6vQ3hdyMQPzmeuX04BRs8J></script><noscript><link href=https://docs.nosqlbench.io/nojs.css rel=stylesheet></noscript><body><header><nav><div><big><a title="NoSQLBench Documentation" href=https://docs.nosqlbench.io></a></big></div><div><div><ul><li><a href=https://docs.nosqlbench.io/tutorials/> Tutorials </a><li><a href=https://docs.nosqlbench.io/guides/> Guides </a><li><a href=https://docs.nosqlbench.io/reference/> Reference </a><li><a href=https://docs.nosqlbench.io/explanations/> Explanations </a><li><a href=https://docs.nosqlbench.io/development/> Development </a><li><a href=https://github.com/nosqlbench/nosqlbench target=_blank> GitHub </a><li><i class="js svgs adjust" id=mode type=reset></i></ul></div><div><div><form autocomplete=off class=js id=searchbox name=goSearch><div class=searchd><input id=searchinput placeholder=Search title=Search><button class="svgs svgm search" title=Search></button></div><div class=results><div id=suggestions></div></div></form></div></div></div></nav></header><main><article><h1><a href=https://docs.nosqlbench.io/reference/workload-yaml/05-op-template-payloads/>Op Template Payloads</a></h1><h1 id=op-template-payloads>Op Template Payloads</h1><p>Payloads in NoSQLBench op templates can be of any type that you can create from bindings, string templates, data structure, or any combination thereof. Yet, the recipe format for these bindings is simple and direct. If you know what you want the op to do, then one of the supported forms here should get you there.<p>The payload of an operation is handled as any content which is assigned to the <code>op</code> field in the uniform op structure.<h2 id=assigned-ops-as-string>assigned ops as string</h2><p>When you are using the command, it is possible to specify <code>op=...</code> instead of providing a workload path. When you do that, a workload description is automatically derived for you on-the-fly.<p><code>nb run driver=stdout op='cycle number {{NumberNameToString}'</code><p>The equivalent structure has the same effect as if you had created a workload description like this:<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>: "</span><span style=color:#a3be8c>cycle number '{{NumberNameToString}}'</span><span>"
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": "</span><span style=color:#a3be8c>cycle number '{{NumberNameToString}}'</span><span>"
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>cycle number '{{NumberNameToString}}'</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>"
+</span><span>  }
+</span><span>]
+</span></code></pre><h2 id=assigned-ops-as-a-list-of-strings>assigned ops as a list of strings</h2><p>If the value type of the top-level ops field is in list form, then each value is processed individually.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  - "</span><span style=color:#a3be8c>even cycle '{{NumberNameToString}}'</span><span>"
+</span><span>  - "</span><span style=color:#a3be8c>odd  cycle '{{NumberNameToString}}'</span><span>"
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": [
+</span><span>    "</span><span style=color:#a3be8c>even cycle '{{NumberNameToString}}'</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>odd  cycle '{{NumberNameToString}}'</span><span>"
+</span><span>  ]
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>even cycle '{{NumberNameToString}}'</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>"
+</span><span>  },
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt2</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>stmt2</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>odd  cycle '{{NumberNameToString}}'</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt2</span><span>"
+</span><span>  }
+</span><span>]
+</span></code></pre><h2 id=assigned-ops-as-a-map-of-strings>assigned ops as a map of strings</h2><p>A more preferable way to add ops to a structure is in map form. This is also covered elsewhere, but it is important for examples further below so we’ll refresh it here:<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>myop1</span><span>: "</span><span style=color:#a3be8c>even cycle '{{NumberNameToString}}'</span><span>"
+</span><span>  </span><span style=color:#bf616a>myop2</span><span>: "</span><span style=color:#a3be8c>odd  cycle '{{NumberNameToString}}'</span><span>"
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>myop1</span><span>": "</span><span style=color:#a3be8c>even cycle '{{NumberNameToString}}'</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>myop2</span><span>": "</span><span style=color:#a3be8c>odd  cycle '{{NumberNameToString}}'</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>myop1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>myop1</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>even cycle '{{NumberNameToString}}'</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>myop1</span><span>"
+</span><span>  },
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>myop2</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>myop2</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>odd  cycle '{{NumberNameToString}}'</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>myop2</span><span>"
+</span><span>  }
+</span><span>]
+</span></code></pre><h2 id=assigned-op-payload-as-a-simple-map-of-op-fields>assigned op payload as a simple map of op fields</h2><p>When your operation takes on a non-statement form, you simply provide a map structure at the top-level of the op:<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>op1</span><span>:
+</span><span>    </span><span style=color:#bf616a>opfield1</span><span>: </span><span style=color:#a3be8c>opvalue1
+</span><span>    </span><span style=color:#bf616a>opfield2</span><span>: </span><span style=color:#a3be8c>opvalue2
+</span><span>
+</span><span>
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>op1</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>opfield1</span><span>": "</span><span style=color:#a3be8c>opvalue1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>opfield2</span><span>": "</span><span style=color:#a3be8c>opvalue2</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>opfield1</span><span>": "</span><span style=color:#a3be8c>opvalue1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>opfield2</span><span>": "</span><span style=color:#a3be8c>opvalue2</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>  }
+</span><span>]
+</span></code></pre><h2 id=assigned-op-payload-as-an-array-of-values>assigned op payload as an array of values</h2><p>When your operation takes on a non-statement form, you simply provide a map structure at the top-level of the op. Notice that the structurally normalized form shows the field values moved underneath the canonical ‘op’ field by default. This is because the structurally normalized op template form <em>always</em> has a map in the op field. The structural short-hand for creating an op template that is list based simply moves any list entries at the op template level down in the named ‘op’ field for you.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>op1</span><span>:
+</span><span>    - </span><span style=color:#a3be8c>opvalue1
+</span><span>    - </span><span style=color:#a3be8c>opvalue2
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>op1</span><span>": [
+</span><span>      "</span><span style=color:#a3be8c>opvalue1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>opvalue2</span><span>"
+</span><span>    ]
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": [
+</span><span>        "</span><span style=color:#a3be8c>opvalue1</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>opvalue2</span><span>"
+</span><span>      ]
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>  }
+</span><span>]
+</span></code></pre><h2 id=op-payload-with-structured-value-types>op payload with structured value types</h2><p>From the examples above, it’s clear that you can use string and maps in your op fields. Here, we show how you can use arbitrary levels of structured types based on commodity collection types like List and Map for Java and JSON objects and arrays.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>op1</span><span>:
+</span><span>    </span><span style=color:#bf616a>index_map</span><span>:
+</span><span>      </span><span style=color:#bf616a>username</span><span>: </span><span style=color:#a3be8c>user_index
+</span><span>      </span><span style=color:#bf616a>geocode</span><span>: </span><span style=color:#a3be8c>georef_v23
+</span><span>    </span><span style=color:#bf616a>rollups</span><span>:
+</span><span>      - </span><span style=color:#a3be8c>by_username/@4h
+</span><span>      - </span><span style=color:#a3be8c>by_session_len/@1h
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>op1</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>index_map</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>username</span><span>": "</span><span style=color:#a3be8c>user_index</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>geocode</span><span>": "</span><span style=color:#a3be8c>georef_v23</span><span>"
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>rollups</span><span>": [
+</span><span>        "</span><span style=color:#a3be8c>by_username/@4h</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>by_session_len/@1h</span><span>"
+</span><span>      ]
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>index_map</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>username</span><span>": "</span><span style=color:#a3be8c>user_index</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>geocode</span><span>": "</span><span style=color:#a3be8c>georef_v23</span><span>"
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>rollups</span><span>": [
+</span><span>        "</span><span style=color:#a3be8c>by_username/@4h</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>by_session_len/@1h</span><span>"
+</span><span>      ]
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>  }
+</span><span>]
+</span><span>
+</span></code></pre><h2 id=binding-points-at-any-position-in-op-field-data>Binding Points at any position in op field data</h2><p>You can use either named binding points references like <code>{userid}</code> or binding definitions such as <code>{{Template('user-{}',ToString())}}</code>. The only exception to this rule is that you may not (yet) use dynamic values for keys within your structure.<h3 id=groovy-expression-preprocessing>Groovy Expression Preprocessing</h3><p>Before a workload file is parsed as YAML or JSON, any segment wrapped in <code>{{= ... }}</code> is executed as a Groovy expression. The expressions run in a per-file context that includes helper functions contributed via the expression SPI. Nosqlbench ships the following helpers by default:<ul><li><code>param(name)</code>, <code>paramOr(name, default)</code>, and <code>hasParam(name)</code> expose workload parameters.<li><code>env(name, default?)</code> and <code>prop(name, default?)</code> read environment variables and JVM properties.<li><code>uuid()</code> and <code>now()</code> provide ephemeral identifiers and timestamps.</ul><p>The resulting value replaces the expression marker before YAML loading continues. For example:<pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>report</span><span>:
+</span><span>    </span><span style=color:#bf616a>stmt</span><span>: "</span><span style=color:#a3be8c>threshold is {{= paramOr('threshold', 'unset') }}</span><span>"
+</span><span>  </span><span style=color:#bf616a>environment</span><span>:
+</span><span>    </span><span style=color:#bf616a>stmt</span><span>: "</span><span style=color:#a3be8c>running on {{= env('HOSTNAME', 'local') }}</span><span>"
+</span></code></pre><h4 id=memoized-locals>Memoized locals</h4><p>You can also capture expression results into workload-local variables without colliding with other template state:<ul><li><code>{{name = expr}}</code> overwrites the memoized value each time the sigil is evaluated.<li><code>{{name == expr}}</code> sets the memoized value only if it has not been set already, ignoring subsequent evaluations.<li><code>{{name === expr}}</code> sets the memoized value once and raises an error if the lvar was already defined.</ul><p>Values are stored in the Groovy binding under the safe namespace <code>__expr_lvar_&LTname></code> and can be reused later with dereference sigils:<ul><li><code>{{@name}}</code> requires that the value has been set previously.<li><code>{{@name?}}</code> returns the value or an empty string when the variable was never set.<li><code>{{@name!}}</code> requires that the value was set and is non-null.</ul><p>Additional functions can be made available by adding your own <code>ExprFunctionProvider</code> implementation to the classpath. To see the functions that are currently available in your runtime, run <code>nb --list-exprs</code>.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>bindings</span><span>:
+</span><span>  </span><span style=color:#bf616a>user_index</span><span>: </span><span style=color:#a3be8c>Mod(1000L); ToString();
+</span><span>
+</span><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>op1</span><span>:
+</span><span>    </span><span style=color:#bf616a>index_map</span><span>:
+</span><span>      </span><span style=color:#bf616a>username</span><span>: "</span><span style=color:#a3be8c>{user_index}</span><span>"
+</span><span>      </span><span style=color:#bf616a>geocode</span><span>: "</span><span style=color:#a3be8c>{{Template('georef_v{}',HashRange(0,23))}}</span><span>"
+</span><span>    </span><span style=color:#bf616a>rollups</span><span>:
+</span><span>      - </span><span style=color:#a3be8c>by_username/@4h
+</span><span>      - </span><span style=color:#a3be8c>by_session_len/@1h
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>user_index</span><span>": "</span><span style=color:#a3be8c>Mod(1000L); ToString();</span><span>"
+</span><span>  },
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>op1</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>index_map</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>username</span><span>": "</span><span style=color:#a3be8c>{user_index}</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>geocode</span><span>": "</span><span style=color:#a3be8c>{{Template('georef_v{}',HashRange(0,23))}}</span><span>"
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>rollups</span><span>": [
+</span><span>        "</span><span style=color:#a3be8c>by_username/@4h</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>by_session_len/@1h</span><span>"
+</span><span>      ]
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>user_index</span><span>": "</span><span style=color:#a3be8c>Mod(1000L); ToString();</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>index_map</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>username</span><span>": "</span><span style=color:#a3be8c>{user_index}</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>geocode</span><span>": "</span><span style=color:#a3be8c>{{Template('georef_v{}',HashRange(0,23))}}</span><span>"
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>rollups</span><span>": [
+</span><span>        "</span><span style=color:#a3be8c>by_username/@4h</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>by_session_len/@1h</span><span>"
+</span><span>      ]
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>  }
+</span><span>]
+</span></code></pre><nav><div><a href=https://docs.nosqlbench.io/reference/workload-yaml/04-op-template-basics/>‹ Op Templates</a></div><div><a href=https://docs.nosqlbench.io/reference/workload-yaml/06-op-template-variations/> Op Template Variations ›</a></div></nav></article></main><footer><div class=c><nav class=tpad><div></div></nav><p>© <span id=year>2025</span> NoSQLBench Documentation<p>Powered by <a href=https://www.getzola.org/ target=_blank>Zola</a> & <a href=https://github.com/jieiku/abridge/ target=_blank>Abridge</a></div></footer><span class=topout> <span class=topleft> </span><a title="Back to Top" class=top href=#><i class="svgs svgh angu"></i></a> </span>

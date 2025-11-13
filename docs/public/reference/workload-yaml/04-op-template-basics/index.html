@@ -1,0 +1,266 @@
+<!doctype html><html lang=en><head><script integrity=sha384-pb++s6uBRKaQv+iAXpgA/H3IlpLZdO14tTwuCI7uXmz4aaZdByoCcM+6BhynMq/1 src=https://docs.nosqlbench.io/js/theme.min.js></script><link href="https://docs.nosqlbench.io/abridge.css?h=17d1d14ae374495df55a" rel=stylesheet><meta charset=utf-8><meta content="ie=edge" http-equiv=x-ua-compatible><meta content="width=device-width,initial-scale=1" name=viewport><meta content=https://docs.nosqlbench.io name=base><meta content=True name=HandheldFriendly><meta content=yes name=mobile-web-app-capable><meta content=yes name=apple-mobile-web-app-capable><meta content=default name=apple-mobile-web-app-status-bar-style><link href=https://docs.nosqlbench.io/favicon.svg rel=icon type=image/svg+xml><link title="NoSQLBench Documentation Atom Feed" href=https://docs.nosqlbench.io/atom.xml rel=alternate type=application/atom+xml><meta content="index, follow" name=robots><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name=googlebot><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name=bingbot><title>Op Templates | NoSQLBench Documentation</title><meta content="NoSQLBench Team" name=author><meta content="NoSQLBench Documentation" name=copyright><meta content="Auto-generated reference documentation for Op Templates" name=description><link href=https://docs.nosqlbench.io/reference/workload-yaml/04-op-template-basics/ rel=canonical><meta content=https://docs.nosqlbench.io/reference/workload-yaml/04-op-template-basics/ property=og:url><meta content=https://docs.nosqlbench.io/reference/workload-yaml/04-op-template-basics/ name=twitter:url><meta content="Auto-generated reference documentation for Op Templates" property=og:description><meta content="Auto-generated reference documentation for Op Templates" name=twitter:description><meta content="Op Templates | NoSQLBench Documentation" property=og:title><meta content="Op Templates | NoSQLBench Documentation" name=twitter:title><meta content=summary name=twitter:card><meta content="NoSQLBench Documentation" property=og:site_name><meta content=en_US property=og:locale><meta content=website property=og:type><meta content=2025-11-13 property=og:updated_time><script src="https://docs.nosqlbench.io/js/theme_button.js?h=12a31e87fcbe7a55e953" defer integrity=sha384-UBxLGgFVZtEgNzOU3WqKoFT1oILftGjShFO4WIs1dO/jK7SNyz7BMYCYt5PffTxe></script><script src="https://docs.nosqlbench.io/js/email.js?h=ee3dd742e11c5014fdef" defer integrity=sha384-y0LUfjslyVLYZvCOyhELpvKivlXAq27Vnbed54glXoe/pZSYS/Pfqghp/sQt1xcV></script><script src="https://docs.nosqlbench.io/js/codecopy.js?h=0a54f99e682443925d3a" defer integrity=sha384-qssVvPpQgISh4PFkSBGTgXEMzuFO8Hat5m1MsdkpannoByWSTpLfBe4iEVl3+RiP></script><script src="https://docs.nosqlbench.io/js/elasticlunr.min.js?h=4f648b9e42abdef9c436" defer integrity=sha384-Q8viz7rndi8MSNDtItDgVWNSrCumjepopRMlz2nElkWPRXDQAcfiZGJbrCJVXdtw></script><script src="https://docs.nosqlbench.io/search_index.en.js?h=e2df0fd710d0c807a7aa" defer integrity=sha384-nyOftseEtxo2Pc23RFR1hxsCZHtUr0xOCP7JVJ8oGIs+cnDq6GZkzCq2hWZ2cJIh></script><script src="https://docs.nosqlbench.io/js/searchjava.js?h=36b818b07e8b2b318967" defer integrity=sha384-i6K7Uy98ZLnOwn6no8sDUTeBitDmiLHOKxkcJYbjgu6vQ3hdyMQPzmeuX04BRs8J></script><noscript><link href=https://docs.nosqlbench.io/nojs.css rel=stylesheet></noscript><body><header><nav><div><big><a title="NoSQLBench Documentation" href=https://docs.nosqlbench.io></a></big></div><div><div><ul><li><a href=https://docs.nosqlbench.io/tutorials/> Tutorials </a><li><a href=https://docs.nosqlbench.io/guides/> Guides </a><li><a href=https://docs.nosqlbench.io/reference/> Reference </a><li><a href=https://docs.nosqlbench.io/explanations/> Explanations </a><li><a href=https://docs.nosqlbench.io/development/> Development </a><li><a href=https://github.com/nosqlbench/nosqlbench target=_blank> GitHub </a><li><i class="js svgs adjust" id=mode type=reset></i></ul></div><div><div><form autocomplete=off class=js id=searchbox name=goSearch><div class=searchd><input id=searchinput placeholder=Search title=Search><button class="svgs svgm search" title=Search></button></div><div class=results><div id=suggestions></div></div></form></div></div></div></nav></header><main><article><h1><a href=https://docs.nosqlbench.io/reference/workload-yaml/04-op-template-basics/>Op Templates</a></h1><h1 id=op-templates>Op Templates</h1><p>Op templates are the recipes provided by users for an operation. These hold examples of payload data, metadata that configures the driver, timeout settings and so on.<p>The field name used in workload templates to represent operations can often be symbolic to users. For this reason, several names are allowed: ops, op, operations, statements, statement. It doesn’t matter whether the value is provided as a map, list, or scalar. These all allow for the same level of templating. Map forms are preferred, since they include naming in a more streamlined structure. When you use list form, you have to provide the name as a separate field.<p>A name is automatically provided by the API when there is one missing.<h3 id=a-single-un-named-op-template>a single un-named op template</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>op</span><span>: </span><span style=color:#a3be8c>select * from bar.table;
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h3 id=un-named-op-templates-as-a-list-of-strings>un-named op templates as a list of strings</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  - </span><span style=color:#a3be8c>select * from bar.table;
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": [
+</span><span>    "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>  ]
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h3 id=named-op-templates-as-a-list-of-maps-with-name-stmt-as-first-entry>named op templates as a list of maps with name-stmt as first entry</h3><p>This form will take the first key and value of the map as the name and statement for the op template.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  - </span><span style=color:#bf616a>op1</span><span>: </span><span style=color:#a3be8c>select * from bar.table;
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": [
+</span><span>    {
+</span><span>      "</span><span style=color:#a3be8c>op1</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    }
+</span><span>  ]
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h3 id=op-templates-as-a-list-of-maps-with-name-field>op templates as a list of maps with name field</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  - </span><span style=color:#bf616a>name</span><span>: </span><span style=color:#a3be8c>op1
+</span><span>    </span><span style=color:#bf616a>op</span><span>: </span><span style=color:#a3be8c>select * from bar.table;
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": [
+</span><span>    {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    }
+</span><span>  ]
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h3 id=named-op-templates-as-a-map-of-strings>named op templates as a map of strings</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>op1</span><span>: </span><span style=color:#a3be8c>select * from bar.table;
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>op1</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h3 id=named-op-templates-as-a-map-of-maps>named op templates as a map of maps</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>op1</span><span>:
+</span><span>    </span><span style=color:#bf616a>stmt</span><span>: </span><span style=color:#a3be8c>select * from bar.table;
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>op1</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h1 id=op-template-properties>Op Template Properties</h1><p>All the forms above merely show how you can structure op templates into common collection forms and have them be interpreted in a flexible yet obvious way.<p>However, all the properties described in <a href=https://docs.nosqlbench.io/reference/workload-yaml/04-op-template-basics/templated_workloads.md>templated_workloads.md</a> can be attached directly to op templates too. This section contains a few examples to illustrate this at work.<h2 id=detailed-op-template-example>detailed op template example</h2><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>ops</span><span>:
+</span><span>  </span><span style=color:#bf616a>op1</span><span>:
+</span><span>    </span><span style=color:#bf616a>name</span><span>: </span><span style=color:#a3be8c>special-op-name
+</span><span>    </span><span style=color:#bf616a>op</span><span>: </span><span style=color:#a3be8c>select * from ks1.tb1;
+</span><span>    </span><span style=color:#bf616a>bindings</span><span>:
+</span><span>      </span><span style=color:#bf616a>binding1</span><span>: </span><span style=color:#a3be8c>NumberNameToString();
+</span><span>    </span><span style=color:#bf616a>tags</span><span>:
+</span><span>      </span><span style=color:#bf616a>block</span><span>: </span><span style=color:#a3be8c>schema
+</span><span>    </span><span style=color:#bf616a>params</span><span>:
+</span><span>      </span><span style=color:#bf616a>prepared</span><span>: </span><span style=color:#d08770>false
+</span><span>    </span><span style=color:#bf616a>description</span><span>: </span><span style=color:#a3be8c>This is just an example operation
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>op1</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>binding1</span><span>": "</span><span style=color:#a3be8c>NumberNameToString();</span><span>"
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>description</span><span>": "</span><span style=color:#a3be8c>This is just an example operation</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>select * from ks1.tb1;</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>params</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>prepared</span><span>": </span><span style=color:#d08770>false
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>block</span><span>":"</span><span style=color:#a3be8c>schema</span><span>"
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>binding1</span><span>": "</span><span style=color:#a3be8c>NumberNameToString();</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>description</span><span>": "</span><span style=color:#a3be8c>This is just an example operation</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from ks1.tb1;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>params</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>prepared</span><span>": </span><span style=color:#d08770>false
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block0</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h1 id=property-layering>Property Layering</h1><p>Properties that are provided at the top (doc) level become defaults for each nested layer (block or ops). Each named binding, param, or tag is automatically assigned to any contained layers which do not have one of the same name. When two layers contain the same named binding, param or tag, the inner-most scope decides the value seen at the op level.<h2 id=block-level-defaults-and-overrides>block-level defaults and overrides</h2><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>tags</span><span>:
+</span><span>  </span><span style=color:#bf616a>docleveltag</span><span>: </span><span style=color:#a3be8c>is-tagging-everything </span><span style=color:#65737e># applies to all operations in this case
+</span><span>
+</span><span style=color:#bf616a>bindings</span><span>:
+</span><span>  </span><span style=color:#bf616a>binding1</span><span>: </span><span style=color:#a3be8c>Identity(); </span><span style=color:#65737e># will be overridden at the block level
+</span><span>
+</span><span style=color:#bf616a>params</span><span>:
+</span><span>  </span><span style=color:#bf616a>prepared</span><span>: </span><span style=color:#d08770>true </span><span style=color:#65737e># set prepared true by default for all contained op templates
+</span><span>
+</span><span style=color:#bf616a>blocks</span><span>:
+</span><span>  </span><span style=color:#bf616a>block_named_fred</span><span>:
+</span><span>    </span><span style=color:#bf616a>bindings</span><span>:
+</span><span>      </span><span style=color:#bf616a>binding1</span><span>: </span><span style=color:#a3be8c>NumberNameToString();
+</span><span>    </span><span style=color:#bf616a>tags</span><span>:
+</span><span>      </span><span style=color:#bf616a>block</span><span>: </span><span style=color:#a3be8c>schema
+</span><span>    </span><span style=color:#bf616a>params</span><span>:
+</span><span>      </span><span style=color:#bf616a>prepared</span><span>: </span><span style=color:#d08770>false
+</span><span>    </span><span style=color:#bf616a>description</span><span>: </span><span style=color:#a3be8c>This is just an example operation
+</span><span>    </span><span style=color:#bf616a>ops</span><span>:
+</span><span>      </span><span style=color:#bf616a>op1</span><span>:
+</span><span>        </span><span style=color:#bf616a>name</span><span>: </span><span style=color:#a3be8c>special-op-name
+</span><span>        </span><span style=color:#bf616a>op</span><span>: </span><span style=color:#a3be8c>select * from ks1.tb1;
+</span><span>
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>docleveltag</span><span>": "</span><span style=color:#a3be8c>is-tagging-everything</span><span>"
+</span><span>  },
+</span><span>  "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>binding1</span><span>": "</span><span style=color:#a3be8c>Identity();</span><span>"
+</span><span>  },
+</span><span>  "</span><span style=color:#a3be8c>params</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>prepared</span><span>": </span><span style=color:#d08770>true
+</span><span>  },
+</span><span>  "</span><span style=color:#a3be8c>blocks</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>block_named_fred</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>binding1</span><span>": "</span><span style=color:#a3be8c>NumberNameToString();</span><span>"
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>description</span><span>": "</span><span style=color:#a3be8c>This is just an example operation</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>params</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>prepared</span><span>": </span><span style=color:#d08770>false
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>schema</span><span>"
+</span><span>      },
+</span><span>      "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>op1</span><span>": {
+</span><span>          "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>",
+</span><span>          "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>select * from ks1.tb1;</span><span>"
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>binding1</span><span>": "</span><span style=color:#a3be8c>NumberNameToString();</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from ks1.tb1;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>params</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>prepared</span><span>": </span><span style=color:#d08770>false
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block_named_fred</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>docleveltag</span><span>": "</span><span style=color:#a3be8c>is-tagging-everything</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>special-op-name</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><nav><div><a href=https://docs.nosqlbench.io/reference/workload-yaml/01-spectest-formatting/>‹ SpecTest Formatting</a></div><div><a href=https://docs.nosqlbench.io/reference/workload-yaml/05-op-template-payloads/> Op Template Payloads ›</a></div></nav></article></main><footer><div class=c><nav class=tpad><div></div></nav><p>© <span id=year>2025</span> NoSQLBench Documentation<p>Powered by <a href=https://www.getzola.org/ target=_blank>Zola</a> & <a href=https://github.com/jieiku/abridge/ target=_blank>Abridge</a></div></footer>

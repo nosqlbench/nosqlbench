@@ -1,0 +1,249 @@
+<!doctype html><html lang=en><head><script integrity=sha384-pb++s6uBRKaQv+iAXpgA/H3IlpLZdO14tTwuCI7uXmz4aaZdByoCcM+6BhynMq/1 src=https://docs.nosqlbench.io/js/theme.min.js></script><link href="https://docs.nosqlbench.io/abridge.css?h=17d1d14ae374495df55a" rel=stylesheet><meta charset=utf-8><meta content="ie=edge" http-equiv=x-ua-compatible><meta content="width=device-width,initial-scale=1" name=viewport><meta content=https://docs.nosqlbench.io name=base><meta content=True name=HandheldFriendly><meta content=yes name=mobile-web-app-capable><meta content=yes name=apple-mobile-web-app-capable><meta content=default name=apple-mobile-web-app-status-bar-style><link href=https://docs.nosqlbench.io/favicon.svg rel=icon type=image/svg+xml><link title="NoSQLBench Documentation Atom Feed" href=https://docs.nosqlbench.io/atom.xml rel=alternate type=application/atom+xml><meta content="index, follow" name=robots><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name=googlebot><meta content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" name=bingbot><title>Workload Structure | NoSQLBench Documentation</title><meta content="NoSQLBench Team" name=author><meta content="NoSQLBench Documentation" name=copyright><meta content="Auto-generated reference documentation for Workload Structure" name=description><link href=https://docs.nosqlbench.io/reference/workload-yaml/02-workload-structure/ rel=canonical><meta content=https://docs.nosqlbench.io/reference/workload-yaml/02-workload-structure/ property=og:url><meta content=https://docs.nosqlbench.io/reference/workload-yaml/02-workload-structure/ name=twitter:url><meta content="Auto-generated reference documentation for Workload Structure" property=og:description><meta content="Auto-generated reference documentation for Workload Structure" name=twitter:description><meta content="Workload Structure | NoSQLBench Documentation" property=og:title><meta content="Workload Structure | NoSQLBench Documentation" name=twitter:title><meta content=summary name=twitter:card><meta content="NoSQLBench Documentation" property=og:site_name><meta content=en_US property=og:locale><meta content=website property=og:type><meta content=2025-11-13 property=og:updated_time><script src="https://docs.nosqlbench.io/js/theme_button.js?h=12a31e87fcbe7a55e953" defer integrity=sha384-UBxLGgFVZtEgNzOU3WqKoFT1oILftGjShFO4WIs1dO/jK7SNyz7BMYCYt5PffTxe></script><script src="https://docs.nosqlbench.io/js/email.js?h=ee3dd742e11c5014fdef" defer integrity=sha384-y0LUfjslyVLYZvCOyhELpvKivlXAq27Vnbed54glXoe/pZSYS/Pfqghp/sQt1xcV></script><script src="https://docs.nosqlbench.io/js/codecopy.js?h=0a54f99e682443925d3a" defer integrity=sha384-qssVvPpQgISh4PFkSBGTgXEMzuFO8Hat5m1MsdkpannoByWSTpLfBe4iEVl3+RiP></script><script src="https://docs.nosqlbench.io/js/elasticlunr.min.js?h=4f648b9e42abdef9c436" defer integrity=sha384-Q8viz7rndi8MSNDtItDgVWNSrCumjepopRMlz2nElkWPRXDQAcfiZGJbrCJVXdtw></script><script src="https://docs.nosqlbench.io/search_index.en.js?h=e2df0fd710d0c807a7aa" defer integrity=sha384-nyOftseEtxo2Pc23RFR1hxsCZHtUr0xOCP7JVJ8oGIs+cnDq6GZkzCq2hWZ2cJIh></script><script src="https://docs.nosqlbench.io/js/searchjava.js?h=36b818b07e8b2b318967" defer integrity=sha384-i6K7Uy98ZLnOwn6no8sDUTeBitDmiLHOKxkcJYbjgu6vQ3hdyMQPzmeuX04BRs8J></script><noscript><link href=https://docs.nosqlbench.io/nojs.css rel=stylesheet></noscript><body><header><nav><div><big><a title="NoSQLBench Documentation" href=https://docs.nosqlbench.io></a></big></div><div><div><ul><li><a href=https://docs.nosqlbench.io/tutorials/> Tutorials </a><li><a href=https://docs.nosqlbench.io/guides/> Guides </a><li><a href=https://docs.nosqlbench.io/reference/> Reference </a><li><a href=https://docs.nosqlbench.io/explanations/> Explanations </a><li><a href=https://docs.nosqlbench.io/development/> Development </a><li><a href=https://github.com/nosqlbench/nosqlbench target=_blank> GitHub </a><li><i class="js svgs adjust" id=mode type=reset></i></ul></div><div><div><form autocomplete=off class=js id=searchbox name=goSearch><div class=searchd><input id=searchinput placeholder=Search title=Search><button class="svgs svgm search" title=Search></button></div><div class=results><div id=suggestions></div></div></form></div></div></div></nav></header><main><article><h1><a href=https://docs.nosqlbench.io/reference/workload-yaml/02-workload-structure/>Workload Structure</a></h1><h1 id=workload-structure>Workload Structure</h1><h2 id=keywords>Keywords</h2><p>The following words have special meaning in templated workloads:<ul><li>name - names things<li>desc, description - describes the current element. First line is summary.<li>scenarios - describes named command sequences for automated workflows<li>bindings - defines procedural generation functions<li>params - decorates operations with special configurations<li>tags - describes elements for filtering and grouping<li>op, ops, operations statement, statements - defines op templates<li>blocks - groups any or all elements</ul><hr><h2 id=description>Description</h2><p><strong>zero or one <code>description</code> fields:</strong><p>The first line of the description represents the summary of the description in summary views. Otherwise, the whole value is used.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>description</span><span>: </span><span style=color:#b48ead>|
+</span><span style=color:#a3be8c>  summary of this workload
+</span><span style=color:#a3be8c>  and more details
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>description</span><span>": "</span><span style=color:#a3be8c>summary of this workload</span><span style=color:#96b5b4>\n</span><span style=color:#a3be8c>and more details</span><span style=color:#96b5b4>\n</span><span>"
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><hr><h2 id=scenarios>Scenarios</h2><p><strong>zero or one <code>scenarios</code> fields, containing one of the following forms</strong><p>The way that you create macro-level workloads from individual stages is called <em>named scenarios</em> in NB. These are basically command line templates which can be invoked automatically by calling their name out on your command line. More details on their usage are in the workload construction guide. We’re focused merely on the structural rules here.<h3 id=single-un-named-step>single un-named step</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>scenarios</span><span>:
+</span><span>  </span><span style=color:#bf616a>default</span><span>: </span><span style=color:#a3be8c>run driver=diag cycles=10
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>scenarios</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>default</span><span>": "</span><span style=color:#a3be8c>run driver=diag cycles=10</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><h3 id=multiple-named-steps>multiple named steps</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>scenarios</span><span>:
+</span><span>  </span><span style=color:#bf616a>default</span><span>:
+</span><span>    </span><span style=color:#bf616a>step1</span><span>: </span><span style=color:#a3be8c>run alias=first driver=diag cycles=10
+</span><span>    </span><span style=color:#bf616a>step2</span><span>: </span><span style=color:#a3be8c>run alias=second driver=diag cycles=10
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>scenarios</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>default</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>step1</span><span>": "</span><span style=color:#a3be8c>run alias=first driver=diag cycles=10</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>step2</span><span>": "</span><span style=color:#a3be8c>run alias=second driver=diag cycles=10</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><h3 id=list-of-un-named-steps>list of un-named steps</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>scenarios</span><span>:
+</span><span>  </span><span style=color:#bf616a>default</span><span>:
+</span><span>    - </span><span style=color:#a3be8c>run alias=first driver=diag cycles=10
+</span><span>    - </span><span style=color:#a3be8c>run alias=second driver=diag cycles=10
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>scenarios</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>default</span><span>": [
+</span><span>      "</span><span style=color:#a3be8c>run alias=first driver=diag cycles=10</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>run alias=second driver=diag cycles=10</span><span>"
+</span><span>    ]
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><h3 id=silent-locked-step-parameters>silent locked step parameters</h3><p>For scenario steps which should not be overridable by user parameters on the command line, a double equals is used to lock the values for a given step without informing the user that their provided value was ignored. This can be useful in cases where there are multiple steps and some parameters should only be changeable for some steps.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#65737e># The user is not allowed to change the value for the alias parameter, and attempting to do so
+</span><span style=color:#65737e># will cause an error to be thrown and the scenario halted.
+</span><span style=color:#bf616a>scenarios</span><span>:
+</span><span>  </span><span style=color:#bf616a>default</span><span>: </span><span style=color:#a3be8c>run alias==first driver=diag cycles=10
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>scenarios</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>default</span><span>": "</span><span style=color:#a3be8c>run alias==first driver=diag cycles=10</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><h3 id=verbose-locked-step-parameters>verbose locked step parameters</h3><p>For scenario steps which should not be overridable by user parameters on the command line, a triple equals is used to indicate that changing these parameters is not allowed. If a user tries to override a verbose locked parameter, an error is thrown and the scenario is not allowed to run. This can be useful when you want to clearly indicate that a parameter must remain as it is.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#65737e># The user is not allowed to change the value for the alias parameter, and attempting to do so
+</span><span style=color:#65737e># will cause an error to be thrown and the scenario halted.
+</span><span style=color:#bf616a>scenarios</span><span>:
+</span><span>  </span><span style=color:#bf616a>default</span><span>: </span><span style=color:#a3be8c>run alias===first driver=diag cycles=10
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>scenarios</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>default</span><span>": "</span><span style=color:#a3be8c>run alias===first driver=diag cycles=10</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><hr><h2 id=bindings>Bindings</h2><p><strong>zero or one <code>bindings</code> fields, containing a map of named bindings recipes</strong><p>Bindings are the functions which synthesize data for your operations. They are specified in recipes which are just function chains from the provided libraries.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>bindings</span><span>:
+</span><span>  </span><span style=color:#bf616a>cycle</span><span>: </span><span style=color:#a3be8c>Identity();
+</span><span>  </span><span style=color:#bf616a>name</span><span>: </span><span style=color:#a3be8c>NumberNameToString();
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>bindings</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>cycle</span><span>": "</span><span style=color:#a3be8c>Identity();</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>NumberNameToString();</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><hr><h2 id=params>Params</h2><p><strong>zero of one <code>params</code> fields, containing a map of parameter names to values</strong><p>Params are modifiers to your operations. They specify important details which are not part of the operation’s command or payload, like consistency level, or timeout settings.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>params</span><span>:
+</span><span>  </span><span style=color:#bf616a>param1</span><span>: </span><span style=color:#a3be8c>pvalue1
+</span><span>  </span><span style=color:#bf616a>param2</span><span>: </span><span style=color:#a3be8c>pvalue2
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>params</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>param1</span><span>": "</span><span style=color:#a3be8c>pvalue1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>param2</span><span>": "</span><span style=color:#a3be8c>pvalue2</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><hr><h2 id=tags>Tags</h2><p><strong>zero or one <code>tags</code> fields, containing a map of tag names and values</strong><p>Tags are how you mark your operations for special inclusion into tests. They are basically naming metadata that lets you filter what type of operations you actually use. Further details on tags are in the workload construction guide.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>tags</span><span>:
+</span><span>  </span><span style=color:#bf616a>block</span><span>: </span><span style=color:#a3be8c>main
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>main</span><span>"
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[]
+</span></code></pre><hr><h2 id=blocks>Blocks</h2><p>Blocks are used to logically partition a workload for the purposes of grouping, configuring or executing subsets and op sequences. Blocks can contain any of the defined elements above. Every op template within a block automatically gets a tag with the name ‘block’ and the value of the block name. This makes it easy to select a whole block at a time with a tag filter like <code>tags=block:"schema.*"</code>.<p>Blocks are not recursive. You may not put a block inside another block.<h3 id=named-blocks-as-a-map-of-property-maps>named blocks as a map of property maps</h3><p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>blocks</span><span>:
+</span><span>  </span><span style=color:#bf616a>namedblock1</span><span>:
+</span><span>    </span><span style=color:#bf616a>ops</span><span>:
+</span><span>      </span><span style=color:#bf616a>op1</span><span>: </span><span style=color:#a3be8c>select * from bar.table;
+</span><span>      </span><span style=color:#bf616a>op2</span><span>:
+</span><span>        </span><span style=color:#bf616a>type</span><span>: </span><span style=color:#a3be8c>batch
+</span><span>        </span><span style=color:#bf616a>stmt</span><span>: </span><span style=color:#a3be8c>insert into bar.table (a,b,c) values (1,2,3);
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>blocks</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>namedblock1</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>op1</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>op2</span><span>": {
+</span><span>          "</span><span style=color:#a3be8c>type</span><span>": "</span><span style=color:#a3be8c>batch</span><span>",
+</span><span>          "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>insert into bar.table (a,b,c) values (1,2,3);</span><span>"
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>namedblock1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    }
+</span><span>  },
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op2</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>insert into bar.table (a,b,c) values (1,2,3);</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>type</span><span>": "</span><span style=color:#a3be8c>batch</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op2</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>namedblock1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op2</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><h3 id=lists-of-blocks-as-a-list-of-property-maps>lists of blocks as a list of property maps</h3><p>When blocks are defined as a list of entries, each entry is a map.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>blocks</span><span>:
+</span><span>  - </span><span style=color:#bf616a>ops</span><span>:
+</span><span>      </span><span style=color:#bf616a>op1</span><span>: </span><span style=color:#a3be8c>select * from bar.table;
+</span><span>      </span><span style=color:#bf616a>op2</span><span>:
+</span><span>        </span><span style=color:#bf616a>type</span><span>: </span><span style=color:#a3be8c>batch
+</span><span>        </span><span style=color:#bf616a>stmt</span><span>: </span><span style=color:#a3be8c>insert into bar.table (a,b,c) values (1,2,3);
+</span><span>  - </span><span style=color:#bf616a>name</span><span>: </span><span style=color:#a3be8c>this_is_block_2
+</span><span>    </span><span style=color:#bf616a>ops</span><span>:
+</span><span>      </span><span style=color:#bf616a>op3</span><span>: </span><span style=color:#a3be8c>select * from foo.table;
+</span><span>
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>blocks</span><span>": [
+</span><span>    {
+</span><span>      "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>op1</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>op2</span><span>": {
+</span><span>          "</span><span style=color:#a3be8c>type</span><span>": "</span><span style=color:#a3be8c>batch</span><span>",
+</span><span>          "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>insert into bar.table (a,b,c) values (1,2,3);</span><span>"
+</span><span>        }
+</span><span>      }
+</span><span>    },
+</span><span>    {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>this_is_block_2</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>ops</span><span>": {
+</span><span>        "</span><span style=color:#a3be8c>op3</span><span>": "</span><span style=color:#a3be8c>select * from foo.table;</span><span>"
+</span><span>      }
+</span><span>    }
+</span><span>  ]
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from bar.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op1</span><span>"
+</span><span>    }
+</span><span>  },
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op2</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>insert into bar.table (a,b,c) values (1,2,3);</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>type</span><span>": "</span><span style=color:#a3be8c>batch</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op2</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>block1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op2</span><span>"
+</span><span>    }
+</span><span>  },
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op3</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>select * from foo.table;</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>op3</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>this_is_block_2</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>op3</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><hr><h2 id=names>Names</h2><p>All documents, blocks, and ops within a workload can have an assigned name. When map and list forms are both supported for entries, the map form provides the name. When list forms are used, an additional field named <code>name</code> can be used.<p><em>yaml:</em><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>blocks</span><span>:
+</span><span>  - </span><span style=color:#bf616a>name</span><span>: </span><span style=color:#a3be8c>myblock
+</span><span>    </span><span style=color:#bf616a>op</span><span>: "</span><span style=color:#a3be8c>test op</span><span>"
+</span><span>
+</span></code></pre><p><em>json:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>{
+</span><span>  "</span><span style=color:#a3be8c>blocks</span><span>": [
+</span><span>    {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>myblock</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>test op</span><span>"
+</span><span>    }
+</span><span>  ]
+</span><span>}
+</span></code></pre><p><em>ops:</em><pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>
+</span><span>[
+</span><span>  {
+</span><span>    "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>op</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>stmt</span><span>": "</span><span style=color:#a3be8c>test op</span><span>"
+</span><span>    },
+</span><span>    "</span><span style=color:#a3be8c>tags</span><span>": {
+</span><span>      "</span><span style=color:#a3be8c>name</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>block</span><span>": "</span><span style=color:#a3be8c>myblock</span><span>",
+</span><span>      "</span><span style=color:#a3be8c>op</span><span>": "</span><span style=color:#a3be8c>stmt1</span><span>"
+</span><span>    }
+</span><span>  }
+</span><span>]
+</span></code></pre><p>–<h1 id=putting-things-together>Putting things together</h1><p>This document is focused on the basic properties that can be added to a templated workload. To see how they are combined together, see <a href=https://docs.nosqlbench.io/reference/workload-yaml/02-workload-structure/op_template_basics.md>Op Templates Basics</a>.<nav><div><a href=https://docs.nosqlbench.io/reference/workload-yaml/00-workload-specification/>‹ Workload Specification</a></div><div></div></nav></article></main><footer><div class=c><nav class=tpad><div></div></nav><p>© <span id=year>2025</span> NoSQLBench Documentation<p>Powered by <a href=https://www.getzola.org/ target=_blank>Zola</a> & <a href=https://github.com/jieiku/abridge/ target=_blank>Abridge</a></div></footer><span class=topout> <span class=topleft> </span><a title="Back to Top" class=top href=#><i class="svgs svgh angu"></i></a> </span>
