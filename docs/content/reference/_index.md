@@ -29,9 +29,3 @@ Complete command-line interface reference with all options and examples
 
 ### [Workload YAML](/reference/workload-yaml/)
 YAML schema documentation for workload definitions (bindings, statements, scenarios)
-
-### [Metrics](/reference/metrics/)
-Metrics system reference and MetricsQL syntax
-
-### [API](/reference/api/)
-Java API and REST endpoint documentation

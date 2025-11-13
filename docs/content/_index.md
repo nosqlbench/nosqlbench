@@ -30,17 +30,19 @@ This documentation is organized using the [Diátaxis framework](https://diataxis
 
 ## Quick Links
 
-- [Installation](/tutorials/getting-started/installation/)
-- [Your First Workload](/tutorials/workloads/first-workload/)
-- [Command Line Reference](/reference/cli/commands/)
-- [Binding Functions Reference](/reference/bindings/)
+- [Installation](/tutorials/getting-started/00-installation/)
+- [Getting Started](/tutorials/getting-started/)
+- [Workload Basics](/tutorials/workload-basics/)
+- [Command Line Reference](/reference/cli/options/)
+- [Binding Functions](/reference/bindings/)
 - [GitHub Repository](https://github.com/nosqlbench/nosqlbench)
 
 ## Getting Help
 
 - **Issues & Bugs**: [GitHub Issues](https://github.com/nosqlbench/nosqlbench/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/nosqlbench/nosqlbench/discussions)
-- **Contributing**: See our [Contributing Guide](/development/contributing/)
+- **Discord**: [Join our community](https://discord.gg/dBHRakusMN)
+- **Contributing**: See our [Contributing Guide](/development/contributing/getting-started/)
 
 ---
 
