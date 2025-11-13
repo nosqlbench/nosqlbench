@@ -16,16 +16,46 @@ topic = "specifications"
 
 Reference documentation is information-oriented. It describes the machinery and provides accurate technical descriptions without explanation or instruction.
 
-## Documentation Sections
+## Reference Sections
 
-### [Binding Functions](/reference/bindings/)
-Auto-generated documentation of all virtdata binding functions for data generation (state, functional, premade, readers, etc.)
+### [CLI Commands](cli/)
+- [Command Line Options](cli/options/)
+- [CLI Scripting](cli/scripting/)
+- [Core Activity Parameters](cli/core-activity-params/)
+- [SSL Options](cli/ssl-options/)
 
-### [Drivers](/reference/drivers/)
-Driver-specific documentation for supported databases and systems (CQL, HTTP, MongoDB, Kafka, vector databases, etc.)
+### [Binding Functions](bindings/)
+Auto-generated reference for all virtdata binding functions:
+- [State Functions](bindings/funcref-state/)
+- [Functional Functions](bindings/funcref-functional/)
+- [Collections](bindings/funcref-collections/)
+- [Distributions](bindings/funcref-distributions/)
+- [Datetime Functions](bindings/funcref-datetime/)
+- [And many more...](bindings/)
 
-### [CLI Commands](/reference/cli/)
-Complete command-line interface reference with all options and examples
+### [Drivers](drivers/)
+Driver-specific documentation for all supported systems:
+- [CQL (Cassandra)](drivers/cqld4/)
+- [HTTP](drivers/http/)
+- [Kafka](drivers/kafka/)
+- [MongoDB (S4J)](drivers/s4j/)
+- [DynamoDB](drivers/dynamodb/)
+- [See all drivers...](drivers/)
 
-### [Workload YAML](/reference/workload-yaml/)
-YAML schema documentation for workload definitions (bindings, statements, scenarios)
+### [Workload YAML](workload-yaml/)
+Complete workload specification reference:
+- [Workload Specification](workload-yaml/00-workload-specification/)
+- [Workload Structure](workload-yaml/02-workload-structure/)
+- [Op Template Basics](workload-yaml/04-op-template-basics/)
+- [Core Op Fields](workload-yaml/core-op-fields/)
+- [See all YAML docs...](workload-yaml/)
+
+### [Apps](apps/)
+Built-in applications reference:
+- [VirtData](apps/virtdata/)
+- [MQL (MetricsQL)](apps/mql/)
+- [CQLGen](apps/cqlgen/)
+- [Export Docs](apps/export-docs/)
+
+### [Concepts](concepts/)
+- [Timing Terminology](concepts/timing-terms/)

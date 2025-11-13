@@ -18,25 +18,13 @@ Explanations help you build mental models of how NoSQLBench works and understand
 
 ## Topics
 
-### Core Concepts
-- Activities and scenarios
-- Workload templates
-- Binding system architecture
-- Metrics system design
+### [Core Concepts](concepts/)
+- [Core Concepts Overview](concepts/core-concepts/)
+- [Names and Labels](concepts/names-and-labels/)
+- [Op Templates Explained](concepts/op-templates/)
 
-### Architecture
-- Engine design overview
-- Driver system
-- VirtData architecture
-- MetricsQL integration
-
-### Design Philosophy
-- Core principles
-- Why NoSQLBench
-- Comparison with other tools
-
-### Advanced Topics
-- Operation synthesis
-- Workload synthesis
-- Distributed testing
-- Custom adapters
+### [Philosophy & Design](philosophy/)
+- [Why NoSQLBench?](philosophy/why-nosqlbench/)
+- [Design Principles](philosophy/design-principles/)
+- [Feature Showcase](philosophy/showcase/)
+- [Community](philosophy/community/)

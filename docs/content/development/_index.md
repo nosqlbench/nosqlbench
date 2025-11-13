@@ -16,36 +16,41 @@ topic = "contributing"
 
 This section contains guides for contributing code, building from source, understanding the project architecture, and following development standards.
 
-## Getting Started
+## Contributing
 
-### [Contributing](/development/contributing/)
-How to contribute to NoSQLBench - code of conduct, pull request process, and guidelines
+### [Getting Started Contributing](contributing/getting-started/)
+How to get involved with the NoSQLBench project
 
-### [Building](/development/building/)
-Building NoSQLBench from source - requirements, Maven commands, and troubleshooting
+### [Pull Request Guidelines](contributing/pull-requests/)
+PR process, code review, and acceptance criteria
 
-## Development Guides
+### [Working Together](contributing/collaboration/)
+Best practices for collaboration
 
-### [Creating Drivers](/development/guides/creating-drivers/)
-Guide to implementing new database drivers
+### [New Maintainers](contributing/maintainers/)
+Information for aspiring maintainers
 
-### [Writing Binding Functions](/development/guides/binding-functions/)
-Creating custom virtdata binding functions
+### [Release Management](contributing/releases/)
+Release process and channels
 
-### [Testing Standards](/development/guides/testing/)
-Testing philosophy, test structure, and best practices
+## Developer Guides
 
-### [Documentation System](/development/guides/documentation-system/)
-How the documentation system works and how to contribute docs
+### [Creating Adapters](guides/creating-adapters/)
+Complete guide to implementing new database adapters
 
-## Architecture
+### [IntelliJ License Setup](guides/intellij-license/)
+Configure auto-apply for Apache license headers
 
-### [Module Structure](/development/architecture/modules/)
-Overview of Maven modules and their purposes
+### [Faster Iteration](guides/recompile-less/)
+Maven techniques for faster development cycles
 
-### [Design Patterns](/development/architecture/design-patterns/)
-Common patterns used throughout the codebase
+## Project Standards
 
-## RFCs & Design Proposals
+### [Coding Standards](standards/coding-standards/)
+Code quality and testing requirements
 
-Design proposals and architectural decision records for major features
+### [Dependency Management](standards/dependencies/)
+Java LTS, no shading, JPMS standards
+
+### [Project Structure](standards/project-structure/)
+Module architecture and package naming
