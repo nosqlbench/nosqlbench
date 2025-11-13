@@ -153,4 +153,18 @@ public class MutableMarkdown  {
         sb.append(getBody());
         return sb.toString();
     }
+
+    /**
+     * Get the markdown document with TOML front matter (for Zola static site generator).
+     * Uses +++ delimiters instead of --- and TOML format instead of YAML.
+     *
+     * @return Markdown with TOML front matter
+     */
+    public String getComposedMarkdownToml() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(frontMatter.asToml());
+        sb.append("\n");
+        sb.append(getBody());
+        return sb.toString();
+    }
 }

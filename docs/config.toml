@@ -1,0 +1,82 @@
+# NoSQLBench Documentation Site Configuration
+# Static site generator: Zola (https://www.getzola.org/)
+
+base_url = "https://docs.nosqlbench.io"
+title = "NoSQLBench Documentation"
+description = "High-performance, programmable load testing and data generation for NoSQL databases and distributed systems"
+default_language = "en"
+
+# Theme: Standard Abridge (fast, lightweight, accessible)
+# GitHub: https://github.com/Jieiku/abridge
+# Documentation: https://abridge.pages.dev/
+theme = "abridge"
+
+# Build settings
+compile_sass = true
+minify_html = true
+build_search_index = true
+generate_feed = true
+feed_filename = "atom.xml"
+
+# Taxonomy settings for organizing content
+taxonomies = [
+    { name = "tags", feed = true },
+    { name = "categories", feed = true },
+]
+
+[markdown]
+# Enable GitHub Flavored Markdown for tables, task lists, etc.
+external_links_target_blank = true
+external_links_no_follow = false
+external_links_no_referrer = false
+smart_punctuation = true
+highlight_code = true
+highlight_theme = "base16-ocean-dark"
+
+[link_checker]
+# Skip external links during build (optional, speeds up builds)
+skip_prefixes = []
+skip_anchor_prefixes = []
+
+[extra]
+# Site metadata
+author = "NoSQLBench Team"
+repo_url = "https://github.com/nosqlbench/nosqlbench"
+
+# Abridge theme configuration
+# See: https://abridge.pages.dev/overview-abridge/ for all options
+theme_mode = "auto"  # auto, dark, light
+uglyurls = false
+favicon_svg = "/favicon.svg"
+logo = "/images/nosqlbench-logo.svg"
+
+# Navigation menu (customize as needed)
+[[extra.menu]]
+name = "Tutorials"
+url = "/tutorials/"
+weight = 10
+
+[[extra.menu]]
+name = "Guides"
+url = "/guides/"
+weight = 20
+
+[[extra.menu]]
+name = "Reference"
+url = "/reference/"
+weight = 30
+
+[[extra.menu]]
+name = "Explanations"
+url = "/explanations/"
+weight = 40
+
+[[extra.menu]]
+name = "Development"
+url = "/development/"
+weight = 50
+
+[[extra.menu]]
+name = "GitHub"
+url = "https://github.com/nosqlbench/nosqlbench"
+weight = 100

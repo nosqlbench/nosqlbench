@@ -18,6 +18,9 @@ package io.nosqlbench.api.docsapi.docexporter;
 
 import io.nosqlbench.nb.api.markdown.aggregator.MutableMarkdown;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class BundledFrontmatterInjector implements BundledMarkdownProcessor {
@@ -32,6 +35,7 @@ public class BundledFrontmatterInjector implements BundledMarkdownProcessor {
 
     @Override
     public MutableMarkdown apply(MutableMarkdown parsedMarkdown) {
+        // Set weight if not already set
         if (parsedMarkdown.getFrontmatter().getWeight()<=0) {
             String title = parsedMarkdown.getFrontmatter().getTitle();
             if (parsedMarkdown.getPath()!=null && parsedMarkdown.getPath().endsWith("README.md")) {
@@ -40,7 +44,99 @@ public class BundledFrontmatterInjector implements BundledMarkdownProcessor {
                 parsedMarkdown.getFrontmatter().setWeight(floorWeight +alphaWeightOf(title));
             }
         }
+
+        // Add compositional metadata for Zola/docs site organization
+        addCompositionalMetadata(parsedMarkdown);
+
         return parsedMarkdown;
+    }
+
+    /**
+     * Add compositional metadata to enable flexible site organization.
+     * This metadata allows the static site generator to organize content
+     * independent of file location.
+     */
+    private void addCompositionalMetadata(MutableMarkdown parsedMarkdown) {
+        // Determine document type from title and source
+        String title = parsedMarkdown.getFrontmatter().getTitle();
+        String source = parsedMarkdown.getFrontmatter().getSource();
+        boolean isBindingFunction = title != null && title.toLowerCase().contains("functions");
+        boolean isDriverDoc = source != null && source.contains("adapter-");
+        boolean isAppDoc = source != null && source.contains("/apps/");
+        boolean isWorkloadSpec = source != null && source.contains("workload_definition");
+
+        // Set quadrant (all auto-generated docs are reference material)
+        if (parsedMarkdown.getFrontmatter().getQuadrant() == null) {
+            parsedMarkdown.getFrontmatter().setQuadrant("reference");
+        }
+
+        // Set topic based on document type
+        if (parsedMarkdown.getFrontmatter().getTopic() == null) {
+            if (isBindingFunction) {
+                parsedMarkdown.getFrontmatter().setTopic("bindings");
+            } else if (isDriverDoc) {
+                parsedMarkdown.getFrontmatter().setTopic("drivers");
+            } else if (isAppDoc) {
+                parsedMarkdown.getFrontmatter().setTopic("apps");
+            } else if (isWorkloadSpec) {
+                parsedMarkdown.getFrontmatter().setTopic("workload-yaml");
+            } else {
+                parsedMarkdown.getFrontmatter().setTopic("general");
+            }
+        }
+
+        // Extract category from title (e.g., "state functions" -> "state")
+        if (parsedMarkdown.getFrontmatter().getCategory() == null && isBindingFunction) {
+            String category = title.toLowerCase()
+                .replace(" functions", "")
+                .replace("functions", "")
+                .trim();
+            if (!category.isEmpty()) {
+                parsedMarkdown.getFrontmatter().setCategory(category);
+            }
+        }
+
+        // Add tags for searchability
+        if (parsedMarkdown.getFrontmatter().getTags().isEmpty()) {
+            List<String> tags = new ArrayList<>();
+            tags.add("auto-generated");
+
+            if (isBindingFunction) {
+                tags.addAll(List.of("virtdata", "data-generation", "binding-functions"));
+            } else if (isDriverDoc) {
+                tags.addAll(List.of("driver", "adapter", "database"));
+            } else if (isAppDoc) {
+                tags.addAll(List.of("built-in-app", "command"));
+            } else if (isWorkloadSpec) {
+                tags.addAll(List.of("yaml", "specification", "workload"));
+            }
+
+            parsedMarkdown.getFrontmatter().setTags(tags);
+        }
+
+        // Mark as auto-generated and non-testable (pure reference)
+        if (parsedMarkdown.getFrontmatter().getGenerator() == null) {
+            parsedMarkdown.getFrontmatter().setGenerator("BundledMarkdownExporter");
+        }
+
+        parsedMarkdown.getFrontmatter().setTestable(false);
+
+        // Set template for docs pages
+        if (parsedMarkdown.getFrontmatter().getTemplate() == null) {
+            parsedMarkdown.getFrontmatter().setTemplate("docs-page.html");
+        }
+
+        // Set date
+        if (parsedMarkdown.getFrontmatter().getDate() == null) {
+            parsedMarkdown.getFrontmatter().setDate(LocalDate.now().toString());
+        }
+
+        // Set description if not present
+        if (parsedMarkdown.getFrontmatter().getDescription() == null) {
+            parsedMarkdown.getFrontmatter().setDescription(
+                "Auto-generated reference documentation for " + title
+            );
+        }
     }
 
     private long alphaWeightOf(String name) {

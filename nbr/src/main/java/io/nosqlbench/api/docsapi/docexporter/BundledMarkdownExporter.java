@@ -40,6 +40,11 @@ public class BundledMarkdownExporter implements BundledApp {
         OptionSpec<String> zipfileSpec = parser.accepts("zipfile", "zip file to write to")
             .withOptionalArg().ofType(String.class).defaultsTo("exported_docs.zip");
 
+        OptionSpec<String> dirSpec = parser.accepts("dir", "directory to export to (e.g., docs/)")
+            .withOptionalArg().ofType(String.class);
+
+        OptionSpec<Void> tomlSpec = parser.accepts("toml", "use TOML front matter instead of YAML (for Zola)");
+
         OptionSpec<?> helpSpec = parser.acceptsAll(List.of("help", "h", "?"), "Display help").forHelp();
         OptionSet options = parser.parse(args);
         if (options.has(helpSpec)) {
@@ -50,9 +55,31 @@ public class BundledMarkdownExporter implements BundledApp {
             }
         }
 
-        String zipfile = options.valueOf(zipfileSpec);
+        BundledFrontmatterInjector frontmatterInjector = new BundledFrontmatterInjector(1000, 100);
 
-        new BundledMarkdownZipExporter(new BundledFrontmatterInjector(1000,100)).exportDocs(Path.of(zipfile));
+        // Export to directory if --dir is specified
+        if (options.has(dirSpec)) {
+            String dirPath = options.valueOf(dirSpec);
+            boolean useToml = options.has(tomlSpec);
+
+            System.out.println("Exporting documentation to directory: " + dirPath);
+            System.out.println("Front matter format: " + (useToml ? "TOML" : "YAML"));
+
+            try {
+                new BundledMarkdownDirectoryExporter(useToml, frontmatterInjector).exportDocs(Path.of(dirPath));
+                System.out.println("Documentation exported successfully!");
+            } catch (Exception e) {
+                System.err.println("Error exporting documentation: " + e.getMessage());
+                e.printStackTrace();
+                return 1;
+            }
+        } else {
+            // Default: export to ZIP file
+            String zipfile = options.valueOf(zipfileSpec);
+            System.out.println("Exporting documentation to ZIP file: " + zipfile);
+
+            new BundledMarkdownZipExporter(frontmatterInjector).exportDocs(Path.of(zipfile));
+        }
 
         return 0;
     }
