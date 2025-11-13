@@ -556,4 +556,4 @@ blocks:
 # Putting things together
 
 This document is focused on the basic properties that can be added to a templated workload. To see
-how they are combined together, see [Op Templates Basics](op_template_basics.md).
+how they are combined together, see [Op Templates Basics](op_template_basics/).

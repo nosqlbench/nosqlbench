@@ -177,9 +177,9 @@ Using cycles as seeds means:
 
 Now that you understand the concepts:
 
-- **[Activities](activities.md)** - Deep dive into activity lifecycle and configuration
-- **[Scenarios](scenarios.md)** - Scenario composition and scripting
-- **[Bindings](bindings.md)** - Data generation system explained
+- **[Activities](activities/)** - Deep dive into activity lifecycle and configuration
+- **[Scenarios](scenarios/)** - Scenario composition and scripting
+- **[Bindings](bindings/)** - Data generation system explained
 - **[Workload Templates](../../reference/workload-yaml/)** - YAML specification
 
 ## Related Documentation

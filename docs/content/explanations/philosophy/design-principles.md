@@ -17,7 +17,7 @@ Core design principles that steer the technical design of NoSQLBench. These prin
 
 ## Respect for Users
 
-While this sounds like a conduct-level aspect, the focus here is on what this means in terms of design. (Respect is absolutely part of the [code of conduct](../../development/contributing.md) governing this project as well.)
+While this sounds like a conduct-level aspect, the focus here is on what this means in terms of design. (Respect is absolutely part of the [code of conduct](../../development/contributing/) governing this project as well.)
 
 ### In Design Terms
 
@@ -55,7 +55,7 @@ We look for concepts that:
 
 **Bindings:** Declarative data generation that separates "what data" from "what operations."
 
-See [Core Concepts](../concepts/core-concepts.md) for detailed explanations.
+See [Core Concepts](../concepts/core-concepts/) for detailed explanations.
 
 ## Composable Systems
 
@@ -154,9 +154,9 @@ These aren't just aspirational statements - they guide every design decision:
 
 ## Related Documentation
 
-- **[Core Concepts](../concepts/core-concepts.md)** - Concepts stemming from these principles
+- **[Core Concepts](../concepts/core-concepts/)** - Concepts stemming from these principles
 - **[Architecture](../architecture/)** - How principles guide implementation
-- **[Contributing](../../development/contributing.md)** - Apply these principles in contributions
+- **[Contributing](../../development/contributing/)** - Apply these principles in contributions
 
 ---
 

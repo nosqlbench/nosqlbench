@@ -36,7 +36,7 @@ are instanced and shared between op templates which specify the same driver by n
 During activity initialization, all the drivers which are loaded by active op templates (those
 not filtered out) are consulted for valid activity params. Only params which are valid for at least
 one active driver will be allowed to be set on the activity. This includes [core activity
-params](../cli/core-activity-params.md).
+params](../cli/core-activity-params/).
 
 ## *space*
 

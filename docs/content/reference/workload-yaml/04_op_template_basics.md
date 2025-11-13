@@ -274,7 +274,7 @@ ops:
 All the forms above merely show how you can structure op templates into common collection forms and
 have them be interpreted in a flexible yet obvious way.
 
-However, all the properties described in [templated_workloads.md](templated_workloads.md)
+However, all the properties described in [templated_workloads.md](templated_workloads/)
 can be attached directly to op templates too. This section contains a few examples to illustrate
 this at work.
 

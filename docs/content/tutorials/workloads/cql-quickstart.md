@@ -46,7 +46,7 @@ chmod +x nb5
 ./nb5 --version
 ```
 
-See [Installation](../getting-started/installation.md) for other download options.
+See [Installation](../getting-started/installation/) for other download options.
 
 ### 2. Run Cassandra
 
@@ -262,11 +262,11 @@ Now that you've run your first CQL workload:
 1. **[Explore Binding Functions](../../reference/bindings/)** - Learn about data generation
 2. **[Understand Workload Structure](../../reference/workload-yaml/)** - Deep dive into YAML specification
 3. **[Create Custom Workloads](../../guides/workload-design/)** - Design your own test scenarios
-4. **[HTTP Quickstart](http-quickstart.md)** - Try HTTP/REST testing
+4. **[HTTP Quickstart](http-quickstart/)** - Try HTTP/REST testing
 
 ## Want to Contribute?
 
-NoSQLBench is open source! See our [Contributing Guide](../../development/contributing.md) to get involved.
+NoSQLBench is open source! See our [Contributing Guide](../../development/contributing/) to get involved.
 
 ---
 

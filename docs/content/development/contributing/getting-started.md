@@ -30,7 +30,7 @@ NoSQLBench does not presently have a contributor covenant or CLA (Contributor Li
 but this may be added if necessary. In general, we try to keep the friction low for new
 contributors. The main two things you have to agree to contribute to NoSQLBench are:
 
-* Adhere to the [code of conduct](https://github.com/nosqlbench/nosqlbench/blob/main/CODE_OF_CONDUCT.md).
+* Adhere to the [code of conduct](https://github.com/nosqlbench/nosqlbench/blob/main/CODE_OF_CONDUCT/).
 * License all of your contributions with the [Apache Public License, version 2](https://www.apache.org/licenses/LICENSE-2.0)
 * In your license header, use the project name `nosqlbench` as the copyright holder.[^1]
 

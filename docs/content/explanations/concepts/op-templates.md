@@ -78,7 +78,7 @@ trivial to the sophisticated.
 ## How?
 
 The rules for this mechanism are part of the nb5
-[workload definition](../../reference/workload-yaml/_index.md)
+[workload definition](../../reference/workload-yaml/_index/)
 standard, which covers all the details and corner cases. The nb5 runtime handles all the
 structural processing for users and developers, so there is little ambiguity about valid or
 equivalent forms. This standard is elevated to a tested specification because it is part of the
@@ -94,11 +94,11 @@ The design principles used when building this standard include:
 
 # Valid Forms
 
-👉 The [Workload Basics](../../tutorials/workload-basics/_index.md) tutorial is a great way to learn about op
+👉 The [Workload Basics](../../tutorials/workload-basics/_index/) tutorial is a great way to learn about op
 templates.
 
 What determines if a given op template is valid or not depends on a couple of things: Can it be
-recognized according to the [workload definition](../../reference/workload-yaml/_index.md)
+recognized according to the [workload definition](../../reference/workload-yaml/_index/)
 standard?
 Can it be
 recognized by the specified driver as a valid op template, _according to the field names and values?_
@@ -108,12 +108,12 @@ preference:
 
 - The built-in workloads. Use the `--list-workloads` and `--copy <workload>` options to discover
   and copy out some examples. These are documented under
-  [discovery options](../../reference/cli/options.md).
+  [discovery options](../../reference/cli/options/).
 - The driver documentation. Each driver should provide clear examples that can be pasted right
   into a new workload if you want. Access the documentation for a specific driver with `nb5 help
   <driver>`.
-- The [Workload Basics](../../tutorials/workload-basics/_index.md) tutorial.
-- Finally, the detailed [workload definition specification](../../reference/workload-yaml/_index.md),
+- The [Workload Basics](../../tutorials/workload-basics/_index/) tutorial.
+- Finally, the detailed [workload definition specification](../../reference/workload-yaml/_index/),
   if you need, for example to see all the possibilities. Developers will generally want to know
   what can be specified, but those who are just using nb5 will get by easily on the examples.
 
@@ -240,7 +240,7 @@ strictly necessary.
 All the op fields can be fully dynamic! However, it is not efficient for everything about an
 operation to be undetermined until cycle time. Therefore, driver developers will often require
 certain identifying op fields to be static for the purposes of determining op type. The rules
-for this are up to each driver. For example, with the [cqld4 driver](../../reference/drivers/cqld4.md)
+for this are up to each driver. For example, with the [cqld4 driver](../../reference/drivers/cqld4/)
 , you can
 specify that you want a raw, prepared, or other type of statement to be executed, but each op
 template must pick one. This is necessary to allow activities to pre-compute or pre-bake much

@@ -13,7 +13,7 @@ topic = "workloads"
 
 Quick-start tutorials for running NoSQLBench with specific workload types:
 
-- [CQL Quickstart](cql-quickstart.md) - Get started with Cassandra/CQL workloads
-- [HTTP Quickstart](http-quickstart.md) - Get started with HTTP/REST workloads
+- [CQL Quickstart](cql-quickstart/) - Get started with Cassandra/CQL workloads
+- [HTTP Quickstart](http-quickstart/) - Get started with HTTP/REST workloads
 
 For comprehensive workload design, see the [Workload Basics](../workload-basics/) tutorial series.

@@ -92,7 +92,7 @@ This includes key details, like:
 - What questions you aim to answer - What is the purpose of the test?
 - A high-level outline of the testing method or workflow used.
 - Details on how metrics are measured
-  (see [Vantage Points](vantage-points.md))
+  (see [Vantage Points](vantage-points/))
 - The basic formulae (like the nominal vs saturating rates above)
 - a direct and uncomplicated visual about the fundamental relationship between
 the test parameters

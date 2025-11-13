@@ -159,4 +159,4 @@ constructor as a requirement.
 
 NBLabels provides convenient construction patterns to allow for composing more detailed label sets.
 
-For practical usage of the labeling system, see the [labeling guides](../../guides/workload-design/labeling/_index.md).
+For practical usage of the labeling system, see the [labeling guides](../../guides/workload-design/labeling/_index/).

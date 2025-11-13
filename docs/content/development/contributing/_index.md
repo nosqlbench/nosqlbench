@@ -13,7 +13,7 @@ topic = "contributing"
 
 We welcome all contributions to NoSQLBench! This section covers:
 
-- [Getting Started](getting-started.md) - How to begin contributing
-- [Pull Request Guidelines](pull-requests.md) - PR process and expectations
+- [Getting Started](getting-started/) - How to begin contributing
+- [Pull Request Guidelines](pull-requests/) - PR process and expectations
 
 Join us on [Discord](https://discord.gg/dBHRakusMN) to connect with the community!

@@ -45,7 +45,7 @@ parameters which will be recognized on the command line.
 # Scenario Commands
 
 Any command line argument which is not a global option (starting with a `-` or `--`), is a
-scenario command. These are all described in [CLI Scripting](../../../reference/cli/scripting.md).
+scenario command. These are all described in [CLI Scripting](../../../reference/cli/scripting/).
 
 Most of the time, when you are running scenario commands, they are being used to start, modify,
 or stop an activity. **Scenario commands are all about managing activities.** So, in practice,
@@ -78,7 +78,7 @@ allow you to initialize your workload. There are a few ways that these parameter
 
 # Named Scenario Params
 
-It is common to use the [Named Scenarios](../../../tutorials/workload-basics/11-named-scenarios.md)
+It is common to use the [Named Scenarios](../../../tutorials/workload-basics/11-named-scenarios/)
 feature to
 bundle up multiple activity workflows into a single command. When you do this, it is
 possible to apply params on the command line to the named scenario. In effect, this means you are
@@ -95,7 +95,7 @@ scenario steps which are not locked.
 
 Activities, *all activities*, are based on a set of op templates. These are the
 [YAML](https://yaml.org/), [json](https://www.json.org/), [jsonnet](https://jsonnet.org/), or direct
-data structures which follow the [workload definition](../../../reference/workload-yaml/_index.md)
+data structures which follow the [workload definition](../../../reference/workload-yaml/_index/)
 standard. These schematic values are provided to the selected driver to be mapped to native
 operations.
 

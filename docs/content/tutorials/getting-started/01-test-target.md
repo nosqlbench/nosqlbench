@@ -127,11 +127,11 @@ If the workload runs without errors, your connection is working.
 
 ## Next Steps
 
-- **[Built-in Scenarios](02-scenarios.md)** - Explore pre-built workloads
-- **[Example Results](03-example-results.md)** - See what NoSQLBench outputs
-- **[CQL Quickstart](../workloads/cql-quickstart.md)** - Run a complete CQL tutorial
+- **[Built-in Scenarios](02-scenarios/)** - Explore pre-built workloads
+- **[Example Results](03-example-results/)** - See what NoSQLBench outputs
+- **[CQL Quickstart](../workloads/cql-quickstart/)** - Run a complete CQL tutorial
 
 ## Related Documentation
 
-- **[CQL Driver Reference](../../reference/drivers/cqld4.md)** - Detailed cqld4 driver configuration
+- **[CQL Driver Reference](../../reference/drivers/cqld4/)** - Detailed cqld4 driver configuration
 - **[Driver Discovery](../../reference/drivers/)** - All available drivers

@@ -253,7 +253,7 @@ is assumed to be 0, meaning that a report will always show on that channel.
 ## Labeling Options
 
 For an in-depth introduction to descriptive metadata support in NoSQLBench, see the
-[Labeling Results](../../guides/workload-design/labeling-system.md) section.
+[Labeling Results](../../guides/workload-design/labeling-system/) section.
 
 You can add labels and their values to a NoSQLBench session:
 

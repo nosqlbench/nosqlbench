@@ -21,34 +21,34 @@ Each driver provides connectivity and workload execution for a specific database
 ## Available Drivers
 
 ### Relational & Document
-- **[CQL (cqld4)](cqld4.md)** - Apache Cassandra / DataStax driver (v4.x)
-- **[DataAPI](dataapi.md)** - DataStax Data API driver
-- **[MongoDB (s4j)](s4j.md)** - MongoDB driver
+- **[CQL (cqld4)](cqld4/)** - Apache Cassandra / DataStax driver (v4.x)
+- **[DataAPI](dataapi/)** - DataStax Data API driver
+- **[MongoDB (s4j)](s4j/)** - MongoDB driver
 
 ### Vector Databases
-- **[Qdrant](qdrant.md)** - Qdrant vector database
+- **[Qdrant](qdrant/)** - Qdrant vector database
 
 ### Messaging & Streaming
-- **[Kafka](kafka.md)** - Apache Kafka producer/consumer
-- **[Pulsar](pulsar.md)** - Apache Pulsar
-- **[AMQP](amqp.md)** - AMQP messaging protocol
+- **[Kafka](kafka/)** - Apache Kafka producer/consumer
+- **[Pulsar](pulsar/)** - Apache Pulsar
+- **[AMQP](amqp/)** - AMQP messaging protocol
 
 ### Graph Databases
-- **[Neo4j](neo4j.md)** - Neo4j graph database
+- **[Neo4j](neo4j/)** - Neo4j graph database
 
 ### Cloud Services
-- **[DynamoDB](dynamodb.md)** - Amazon DynamoDB
-- **[Spanner](spanner.md)** - Google Cloud Spanner
+- **[DynamoDB](dynamodb/)** - Amazon DynamoDB
+- **[Spanner](spanner/)** - Google Cloud Spanner
 
 ### Protocol & Utility
-- **[HTTP](http.md)** - HTTP/REST client
-- **[TCP Client](tcpclient.md)** - TCP client protocol
-- **[TCP Server](tcpserver.md)** - TCP server protocol
-- **[Stdout](stdout.md)** - Standard output (testing/debugging)
-- **[Diag](diag.md)** - Diagnostics driver
+- **[HTTP](http/)** - HTTP/REST client
+- **[TCP Client](tcpclient/)** - TCP client protocol
+- **[TCP Server](tcpserver/)** - TCP server protocol
+- **[Stdout](stdout/)** - Standard output (testing/debugging)
+- **[Diag](diag/)** - Diagnostics driver
 
 ### Examples
-- **[Example](example.md)** - Example driver template
+- **[Example](example/)** - Example driver template
 
 ## Auto-Generated Content
 

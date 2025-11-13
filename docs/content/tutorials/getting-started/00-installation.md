@@ -115,9 +115,9 @@ This runs a basic scenario that demonstrates data generation without requiring a
 
 Now that NoSQLBench is installed:
 
-1. **[Set Up Test Target](01-test-target.md)** - Start a database to test against
-2. **[Run Built-in Scenarios](02-scenarios.md)** - Explore pre-built workloads
-3. **[CQL Quickstart](../workloads/cql-quickstart.md)** - Run your first Cassandra workload
+1. **[Set Up Test Target](01-test-target/)** - Start a database to test against
+2. **[Run Built-in Scenarios](02-scenarios/)** - Explore pre-built workloads
+3. **[CQL Quickstart](../workloads/cql-quickstart/)** - Run your first Cassandra workload
 
 ## Troubleshooting
 

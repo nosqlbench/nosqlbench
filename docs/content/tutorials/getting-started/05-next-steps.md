@@ -53,8 +53,8 @@ Build self-contained, portable YAML files specifying:
 - Custom bindings
 
 **Start here:**
-- **[CQL Quickstart](../workloads/cql-quickstart.md)** - Learn by doing
-- **[HTTP Quickstart](../workloads/http-quickstart.md)** - REST API testing
+- **[CQL Quickstart](../workloads/cql-quickstart/)** - Learn by doing
+- **[HTTP Quickstart](../workloads/http-quickstart/)** - REST API testing
 - **[Workload YAML Specification](../../reference/workload-yaml/)** - Complete format reference
 - **[Workload Design Guides](../../guides/workload-design/)** - Best practices
 
@@ -77,34 +77,34 @@ Use ECMAScript to control scenarios programmatically from start to finish. This 
 ### Performance Engineers
 
 Focus on metrics and analysis:
-- [Understanding Metrics](04-reading-metrics.md)
+- [Understanding Metrics](04-reading-metrics/)
 - [Metrics and Analysis Guides](../../guides/metrics/)
-- [MetricsQL](../../reference/apps/mql.md)
+- [MetricsQL](../../reference/apps/mql/)
 
 ### Test Automation Engineers
 
 Focus on workload building:
 - [Workload Design](../../guides/workload-design/)
 - [Testing Strategies](../../guides/testing/)
-- [Built-in Scenarios](02-scenarios.md)
+- [Built-in Scenarios](02-scenarios/)
 
 ### Database Administrators
 
 Focus on specific drivers and deployment:
-- [CQL Driver](../../reference/drivers/cqld4.md)
+- [CQL Driver](../../reference/drivers/cqld4/)
 - [Driver Documentation](../../reference/drivers/)
-- [Load Testing Best Practices](../../guides/testing/load-testing.md)
+- [Load Testing Best Practices](../../guides/testing/load-testing/)
 
 ### Developers
 
 Focus on data generation and binding functions:
 - [Binding Functions Reference](../../reference/bindings/)
 - [Data Generation Guides](../../guides/data-generation/)
-- [Creating Custom Functions](../../development/guides/binding-functions.md)
+- [Creating Custom Functions](../../development/guides/binding-functions/)
 
 ## Resources
 
-- **[Documentation Home](../../_index.md)** - Full documentation index
+- **[Documentation Home](../../_index/)** - Full documentation index
 - **[GitHub Repository](https://github.com/nosqlbench/nosqlbench)** - Source code, issues, discussions
 - **[Release Notes](../../release-notes/)** - Latest features and changes
 
@@ -112,7 +112,7 @@ Focus on data generation and binding functions:
 
 - **Questions:** [GitHub Discussions](https://github.com/nosqlbench/nosqlbench/discussions)
 - **Bugs:** [GitHub Issues](https://github.com/nosqlbench/nosqlbench/issues)
-- **Contributing:** [Contributing Guide](../../development/contributing.md)
+- **Contributing:** [Contributing Guide](../../development/contributing/)
 
 ---
 

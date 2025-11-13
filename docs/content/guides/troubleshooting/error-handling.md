@@ -248,10 +248,10 @@ Query these metrics using MetricsQL:
 
 ## Related Documentation
 
-- **[Activity Parameters](../workload-design/activity-parameters.md)** - All activity configuration options
-- **[Standard Metrics](../metrics/standard-metrics.md)** - Understanding metrics
-- **[Common Errors](common-errors.md)** - Troubleshooting specific error types
-- **[MetricsQL Reference](../../reference/apps/mql.md)** - Querying error metrics
+- **[Activity Parameters](../workload-design/activity-parameters/)** - All activity configuration options
+- **[Standard Metrics](../metrics/standard-metrics/)** - Understanding metrics
+- **[Common Errors](common-errors/)** - Troubleshooting specific error types
+- **[MetricsQL Reference](../../reference/apps/mql/)** - Querying error metrics
 
 ---
 

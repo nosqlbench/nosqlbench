@@ -34,12 +34,12 @@ highlight_code = true
 highlight_theme = "base16-ocean-dark"
 
 [link_checker]
-# Skip external links during build (speeds up builds, external anchors change frequently)
-skip_prefixes = [
-    "http://",
-    "https://",
-]
+# Check all links including external (for full validation)
+skip_prefixes = []
 skip_anchor_prefixes = []
+# Set to true to check external links as well
+internal_level = "error"
+external_level = "warn"
 
 [extra]
 # Site metadata

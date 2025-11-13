@@ -128,9 +128,9 @@ This makes large metric sets easier to navigate while preserving the full relati
 ## Examples
 
 See detailed examples organized by topic:
-- [Examples Overview](mql-examples.md) - Navigation and all examples
-- [Instant Queries](mql-instant-queries.md) - Point-in-time queries
-- [Range Queries](mql-range-queries.md) - Time-series queries
+- [Examples Overview](mql-examples/) - Navigation and all examples
+- [Instant Queries](mql-instant-queries/) - Point-in-time queries
+- [Range Queries](mql-range-queries/) - Time-series queries
 - More examples coming for rate, aggregation, and quantile queries
 
 ## Database Location
@@ -237,4 +237,4 @@ This is useful for:
 
 Run `nb5 help mql` to see this documentation.
 
-For detailed examples, see the [examples README](docs/mql/README.md).
+For detailed examples, see the [examples README](docs/mql/README/).

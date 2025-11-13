@@ -138,6 +138,6 @@ binding functions.
 
 ## Further Details
 
-A deeper explanation of binding concepts can be found in the [Binding Concepts](../../reference/bindings/_index.md)
+A deeper explanation of binding concepts can be found in the [Binding Concepts](../../reference/bindings/_index/)
 part of the Reference Section, where you will also find documentation about how to use the various
 binding functions that are available.

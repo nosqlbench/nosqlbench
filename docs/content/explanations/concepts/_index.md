@@ -13,5 +13,5 @@ topic = "concepts"
 
 Essential concepts for understanding NoSQLBench:
 
-- [Core Concepts](core-concepts.md) - Activities, scenarios, workloads, and metrics
-- [Names and Labels](names-and-labels.md) - The naming and labeling architecture
+- [Core Concepts](core-concepts/) - Activities, scenarios, workloads, and metrics
+- [Names and Labels](names-and-labels/) - The naming and labeling architecture

@@ -13,6 +13,6 @@ topic = "guides"
 
 Practical guides for extending and developing NoSQLBench:
 
-- [Creating Adapters](creating-adapters.md) - Complete guide to implementing new drivers
+- [Creating Adapters](creating-adapters/) - Complete guide to implementing new drivers
 
 More guides will be added as the developer documentation expands.

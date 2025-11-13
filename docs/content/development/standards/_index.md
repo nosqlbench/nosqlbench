@@ -13,6 +13,6 @@ topic = "standards"
 
 Standards and conventions for NoSQLBench development:
 
-- [Coding Standards](coding-standards.md) - Code quality and testing requirements
+- [Coding Standards](coding-standards/) - Code quality and testing requirements
 
 Additional standards documentation will be added for dependencies and project structure.

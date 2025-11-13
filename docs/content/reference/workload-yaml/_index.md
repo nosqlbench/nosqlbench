@@ -21,28 +21,28 @@ This section contains the **living documentation** for workload definitions. All
 
 ## Specification Documents
 
-### [00 - Workload Specification](00_workload_specification.md)
+### [00 - Workload Specification](00_workload_specification/)
 Overview of the workload specification format and structure
 
-### [01 - Spectest Formatting](01_spectest_formatting.md)
+### [01 - Spectest Formatting](01_spectest_formatting/)
 How specification tests are formatted and validated
 
-### [02 - Workload Structure](02_workload_structure.md)
+### [02 - Workload Structure](02_workload_structure/)
 Overall structure of workload YAML files
 
-### [04 - Op Template Basics](04_op_template_basics.md)
+### [04 - Op Template Basics](04_op_template_basics/)
 Basic operation template syntax and usage
 
-### [05 - Op Template Payloads](05_op_template_payloads.md)
+### [05 - Op Template Payloads](05_op_template_payloads/)
 Defining payloads in operation templates
 
-### [06 - Op Template Variations](06_op_template_variations.md)
+### [06 - Op Template Variations](06_op_template_variations/)
 Creating template variations for different scenarios
 
-### [07 - Template Variables](07_template_variables.md)
+### [07 - Template Variables](07_template_variables/)
 Using variables and bindings in templates
 
-### [08 - Parsed Op API](08_parsed_op_api.md)
+### [08 - Parsed Op API](08_parsed_op_api/)
 Programmatic access to parsed operations
 
 ## Living Documentation

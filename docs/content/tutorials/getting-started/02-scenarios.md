@@ -100,7 +100,7 @@ Run specific scenarios or scenario steps:
 
 You can skip named scenarios and invoke activities directly. This section shows how to drill down to individual steps.
 
-**Skip ahead?** If you just want to use built-in scenarios, jump to [Example Results](03-example-results.md).
+**Skip ahead?** If you just want to use built-in scenarios, jump to [Example Results](03-example-results/).
 
 ### Create a Schema
 
@@ -225,8 +225,8 @@ Configured scenario log at logs/scenario_YYYYMMDD_HHMMSS_XXX.log
 
 Next, learn how to interpret these results:
 
-- **[Example Results](03-example-results.md)** - Understand NoSQLBench output
-- **[Reading Metrics](04-reading-metrics.md)** - Analyze performance metrics
+- **[Example Results](03-example-results/)** - Understand NoSQLBench output
+- **[Reading Metrics](04-reading-metrics/)** - Analyze performance metrics
 
 ## Key Concepts
 
@@ -241,5 +241,5 @@ Next, learn how to interpret these results:
 ## Related Documentation
 
 - **[Workload YAML Specification](../../reference/workload-yaml/)** - Complete YAML format reference
-- **[CQL Driver](../../reference/drivers/cqld4.md)** - CQL driver details
+- **[CQL Driver](../../reference/drivers/cqld4/)** - CQL driver details
 - **[CLI Reference](../../reference/cli/)** - All command-line options

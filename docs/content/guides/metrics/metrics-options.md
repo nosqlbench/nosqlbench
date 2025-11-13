@@ -34,7 +34,7 @@ although some examples of these may be found below.
 ## Metrics via HTTP push
 
 You can have your metrics pushed up to a metrics store via HTTP push method and the
-[OpenMetrics Exposition](https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md)
+[OpenMetrics Exposition](https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics/)
 format.
 
     --report-prompush-to "<push gateway URL>"

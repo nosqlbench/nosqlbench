@@ -27,7 +27,7 @@ source = "https://github.com/nosqlbench/nosqlbench/blob/main/nb-adapters/adapter
 
 # 1. Overview {#1-overview}
 
-This driver is similar to [NB Pulsar driver](../../../../adapter-pulsar/src/main/resources/pulsar.md) that allows NB based workload generation and performance testing against a Pulsar cluster. It also follows a similar pattern to configure and connect to the Pulsar cluster for workload execution.
+This driver is similar to [NB Pulsar driver](../../../../adapter-pulsar/src/main/resources/pulsar/) that allows NB based workload generation and performance testing against a Pulsar cluster. It also follows a similar pattern to configure and connect to the Pulsar cluster for workload execution.
 
 However, the major difference is instead of simulating native Pulsar client workloads, the NB S4J driver allows simulating JMS oriented workloads (that follows JMS spec 2.0 and 1.1) to be executed on the Pulsar cluster. Under the hood, this is achieved through DataStax's [Starlight for JMS API] (https://github.com/datastax/pulsar-jms).
 

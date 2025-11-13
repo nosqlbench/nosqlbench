@@ -40,7 +40,7 @@ Even without configuring external metrics collection, NoSQLBench periodically re
 2019-08-12 15:46:01,703 INFO [main] -- END METRICS DETAIL --
 ```
 
-There's a lot here - let's focus on the most important metrics first. For detailed analysis, see [Reading Metrics](04-reading-metrics.md).
+There's a lot here - let's focus on the most important metrics first. For detailed analysis, see [Reading Metrics](04-reading-metrics/).
 
 ## Alternative Metrics Formats
 
@@ -85,17 +85,17 @@ Then query with:
 ./nb5 mql "SELECT * FROM metrics"
 ```
 
-See the [MQL Reference](../../reference/apps/mql.md) for query syntax.
+See the [MQL Reference](../../reference/apps/mql/) for query syntax.
 
 ## What's Next?
 
 You've run your first NoSQLBench scenario! Next steps:
 
-- **[Reading Metrics](04-reading-metrics.md)** - Understand key metrics in detail
-- **[Next Steps](05-next-steps.md)** - Choose your path forward
+- **[Reading Metrics](04-reading-metrics/)** - Understand key metrics in detail
+- **[Next Steps](05-next-steps/)** - Choose your path forward
 
 ## Related Documentation
 
 - **[Metrics Reference](../../reference/metrics/)** - Complete metrics documentation
 - **[CLI Reference](../../reference/cli/)** - All command-line options
-- **[MQL App](../../reference/apps/mql.md)** - MetricsQL for metrics analysis
+- **[MQL App](../../reference/apps/mql/)** - MetricsQL for metrics analysis

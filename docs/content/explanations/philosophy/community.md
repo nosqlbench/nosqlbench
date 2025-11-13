@@ -35,7 +35,7 @@ each other. Please
 
 We welcome all builders to NoSQLBench to help us improve it. Whether you are focused on improving
 docs, building a new subsystem or developing a new scripting extension, there is room for everyone, and all are
-appreciated. We have a new [contributing](../../development/contributing.md) section
+appreciated. We have a new [contributing](../../development/contributing/) section
 if you are interested.
 
 ## Documentation

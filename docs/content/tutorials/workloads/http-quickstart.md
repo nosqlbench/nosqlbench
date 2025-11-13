@@ -18,7 +18,7 @@ author = "Jeff Banks (DataStax)"
 
 Learn HTTP/REST API testing with NoSQLBench using the Stargate data gateway.
 
-**Previous tutorial:** If you haven't completed the [CQL Quickstart](cql-quickstart.md), start there for foundational concepts.
+**Previous tutorial:** If you haven't completed the [CQL Quickstart](cql-quickstart/), start there for foundational concepts.
 
 ## What You'll Learn
 
@@ -254,7 +254,7 @@ Edit `http-rest-starter.yaml` to adjust:
 
 ## Next Steps
 
-- **[HTTP Driver Reference](../../reference/drivers/http.md)** - Complete HTTP driver documentation
+- **[HTTP Driver Reference](../../reference/drivers/http/)** - Complete HTTP driver documentation
 - **[Workload Design](../../guides/workload-design/)** - Create custom HTTP workloads
 - **[Binding Functions](../../reference/bindings/)** - Advanced data generation
 - **More Examples** - Explore Stargate examples:
@@ -264,10 +264,10 @@ Edit `http-rest-starter.yaml` to adjust:
 
 ## Related Documentation
 
-- **[CQL Quickstart](cql-quickstart.md)** - Compare with CQL driver approach
-- **[HTTP Driver](../../reference/drivers/http.md)** - HTTP driver options and features
+- **[CQL Quickstart](cql-quickstart/)** - Compare with CQL driver approach
+- **[HTTP Driver](../../reference/drivers/http/)** - HTTP driver options and features
 - **[Stargate Documentation](https://stargate.io/docs/)** - Learn more about Stargate
 
 ---
 
-*This tutorial demonstrates HTTP/REST testing using NoSQLBench with the Stargate data gateway. For direct database testing, see the [CQL Quickstart](cql-quickstart.md).*
+*This tutorial demonstrates HTTP/REST testing using NoSQLBench with the Stargate data gateway. For direct database testing, see the [CQL Quickstart](cql-quickstart/).*

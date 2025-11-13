@@ -131,10 +131,10 @@ High wait time = NoSQLBench spent significant time rate-limiting to meet your ta
 
 You've completed your first NoSQLBench run!
 
-- **[Next Steps](05-next-steps.md)** - Choose your path forward
+- **[Next Steps](05-next-steps/)** - Choose your path forward
 - **[Workload Design Guides](../../guides/workload-design/)** - Create custom workloads
 - **[Metrics Reference](../../reference/metrics/)** - Complete metrics documentation
 
 ## Congratulations!
 
-You now understand the basics of running NoSQLBench and interpreting results. Continue to [Next Steps](05-next-steps.md) to choose your learning path.
+You now understand the basics of running NoSQLBench and interpreting results. Continue to [Next Steps](05-next-steps/) to choose your learning path.

@@ -13,7 +13,7 @@ topic = "troubleshooting"
 
 Guides for diagnosing and solving common NoSQLBench issues:
 
-- [Error Handling](error-handling.md) - Understanding and configuring error handling
-- [YAML Diagnostics](yaml-diagnostics.md) - Common YAML loading errors and solutions
+- [Error Handling](error-handling/) - Understanding and configuring error handling
+- [YAML Diagnostics](yaml-diagnostics/) - Common YAML loading errors and solutions
 
-For general help, see the [Community](../../explanations/philosophy/community.md) page.
+For general help, see the [Community](../../explanations/philosophy/community/) page.

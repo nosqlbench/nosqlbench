@@ -14,7 +14,7 @@ tags = ["development", "adapters", "drivers", "architecture"]
 NoSQLBench is composed of a sound architectural underpinning that makes the process of implementing new adapters as seamless and quick as possible. NoSQLBench provides a hierarchy of classes which can be extended and interfaces to be implemented, in order to avoid having to re-implement the application infrastructure and in so doing reduces both the complexity and demands on time involved in implementing a new adapter type. However, it is necessary to understand this existing architecture in order to effectively use the provided building blocks. The following is intended as a guide to developing new adapters to extend the functionality of NoSQLBench.
 
 # Prerequisites and Assumptions
-* It is assumed that the developer(s) have familiarized themselves with the [core concepts](../../explanations/concepts/core-concepts.md) provided in the NoSQLBench documentation.
+* It is assumed that the developer(s) have familiarized themselves with the [core concepts](../../explanations/concepts/core-concepts/) provided in the NoSQLBench documentation.
 * The ability to code in Java is required. NoSQLBench makes extensive use of lambda functionality. It is a requirement to understand and be comfortable using these principles to develop an adapter.
 * This guide is not specific to any particular client. It is assumed that the developer(s) have familiarity with the client they are developing an adapter for.
 

@@ -164,7 +164,7 @@ OR
 
 ### Metrics
 
-All metrics are labeled according to the label set provided. This supports metric systems which use the [OpenMetrics](https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md)
+All metrics are labeled according to the label set provided. This supports metric systems which use the [OpenMetrics](https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics/)
 exposition format. The recently added push reporter builds this format out of the labels provided
 where metrics are instanced.
 
@@ -225,4 +225,4 @@ Some specific examples for why this is important:
   of your other labels. The validity of your aggregating metrics depends directly on this being
   stable and distinctly addressable.
 
-See [Labeling Controls](labeling-controls.md) for how to implement label validation and filtering.
+See [Labeling Controls](labeling-controls/) for how to implement label validation and filtering.

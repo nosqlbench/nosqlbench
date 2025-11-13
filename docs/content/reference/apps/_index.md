@@ -18,16 +18,16 @@ NoSQLBench includes several built-in applications accessible via the command lin
 
 ## Available Apps
 
-### [virtdata](virtdata.md)
+### [virtdata](virtdata/)
 Command-line tool for testing and validating binding functions. Useful for verifying data generation logic and getting performance baselines.
 
-### [cqlgen](cqlgen.md)
+### [cqlgen](cqlgen/)
 Generate CQL schema definitions and data from templates.
 
-### [mql](mql.md)
+### [mql](mql/)
 MetricsQL query interface for analyzing metrics stored in SQLite.
 
-### [export-docs](export-docs.md)
+### [export-docs](export-docs/)
 Export bundled documentation to ZIP or directory format.
 
 ## Usage

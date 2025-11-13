@@ -78,5 +78,5 @@ effectively.
 A good rule of thumb to use is 1 client node for each 3 target nodes in a cluster. This will
 of-course vary by workload and hardware, but it is a reasonable starting point.
 
-It is also important to consider the section on [Scaling Math](scaling-math.md)
+It is also important to consider the section on [Scaling Math](scaling-math/)
 when sizing your load bank.

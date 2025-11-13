@@ -18,7 +18,7 @@ test, or you may have a myriad of different access patterns. In either case, all
 operations that you want to execute must be defined in template form beforehand.
 
 As templates, you indicate where the variable parts are filled in when needed. How this is done
-will be explained in the [data bindings](03-data-bindings.md) section.
+will be explained in the [data bindings](03-data-bindings/) section.
 
 # Simple statements
 
