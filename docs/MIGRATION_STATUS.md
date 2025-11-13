@@ -34,7 +34,25 @@
 - ✅ Abridge theme installed
 - ✅ Front matter standards established (TOML format with compositional metadata)
 
-## In Progress 🚧
+## Completed ✅ (Continued)
+
+### Workload Basics Tutorials (14 files) - ALL COMPLETE
+Complete tutorial series on workload design fundamentals:
+- ✅ `00-designing-workloads.md` → `tutorials/workload-basics/00-designing-workloads.md`
+- ✅ `01-op-templates.md` → `tutorials/workload-basics/01-op-templates.md`
+- ✅ `02-workload-template-layout.md` → `tutorials/workload-basics/02-workload-template-layout.md`
+- ✅ `03-data-bindings.md` → `tutorials/workload-basics/03-data-bindings.md`
+- ✅ `04-op-params.md` → `tutorials/workload-basics/04-op-params.md`
+- ✅ `05-op-tags.md` → `tutorials/workload-basics/05-op-tags.md`
+- ✅ `06-op-blocks.md` → `tutorials/workload-basics/06-op-blocks.md`
+- ✅ `07-more-op-templates.md` → `tutorials/workload-basics/07-more-op-templates.md`
+- ✅ `08-multi-docs.md` → `tutorials/workload-basics/08-multi-docs.md`
+- ✅ `09-template-params.md` → `tutorials/workload-basics/09-template-params.md`
+- ✅ `10-stmt-naming.md` → `tutorials/workload-basics/10-stmt-naming.md`
+- ✅ `11-named-scenarios.md` → `tutorials/workload-basics/11-named-scenarios.md`
+- ✅ `99-yaml-diagnostics.md` → `guides/troubleshooting/yaml-diagnostics.md`
+
+## Pending 📋
 
 ### Guides - User Guide Migration
 The following files from `local/nosqlbench-build-docs/site/content/user-guide/` need migration:
@@ -54,24 +72,6 @@ The following files from `local/nosqlbench-build-docs/site/content/user-guide/` 
 - Scenario scripting → `guides/workload-design/scenario-scripting/`
 - Testing at scale → `guides/testing/scale/`
 - Timing terms → `reference/concepts/timing-terminology.md`
-
-## Pending 📋
-
-### Workloads-101 (14 files)
-These are important tutorial-style guides for workload design:
-- `00-designing-workloads.md` → `guides/workload-design/designing-workloads.md`
-- `01-op-templates.md` → `tutorials/workload-basics/op-templates.md`
-- `02-workload-template-layout.md` → `tutorials/workload-basics/template-layout.md`
-- `03-data-bindings.md` → `tutorials/data-generation/bindings-basics.md`
-- `04-op-params.md` → `tutorials/workload-basics/op-parameters.md`
-- `05-op-tags.md` → `tutorials/workload-basics/op-tags.md`
-- `06-op-blocks.md` → `tutorials/workload-basics/op-blocks.md`
-- `07-more-op-templates.md` → `tutorials/workload-basics/advanced-templates.md`
-- `08-multi-docs.md` → `tutorials/workload-basics/multi-document.md`
-- `09-template-params.md` → `tutorials/workload-basics/template-parameters.md`
-- `10-stmt-naming.md` → `tutorials/workload-basics/statement-naming.md`
-- `11-named-scenarios.md` → `tutorials/workload-basics/named-scenarios.md`
-- `99-yaml-diagnostics.md` → `guides/troubleshooting/yaml-diagnostics.md`
 
 ### Development Documentation
 Files from `local/nosqlbench-build-docs/site/content/dev-guide/`:
@@ -130,4 +130,20 @@ Content is organized by the Diátaxis framework:
 
 ---
 
-Last Updated: 2025-11-13
+## Progress Summary
+
+**Major Milestones:**
+- ✅ Complete reference documentation (auto-generated + manual)
+- ✅ Complete tutorials foundation (getting-started + quickstarts + workload-basics)
+- ✅ Complete explanations foundation (core concepts + philosophy)
+- ✅ Initial guides (metrics, error handling, troubleshooting)
+- 🚧 User guide advanced topics (in progress)
+- 📋 Development documentation (pending)
+
+**Files Migrated:** 100+ files
+**Sections Complete:** Tutorials, Reference (mostly), Explanations (foundation)
+**Sections Remaining:** Guides (advanced), Development
+
+---
+
+Last Updated: 2025-11-13 (Session 2)
