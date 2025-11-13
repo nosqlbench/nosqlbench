@@ -16,7 +16,7 @@ workloads. This means that you can fast-track performance, sizing and data model
 writing your own testing harness.
 
 To get started right away, jump to the
-[Getting Started](../../tutorials/getting-started/_index/) section of the docs.
+[Getting Started](../../tutorials/getting-started/) section of the docs.
 
 ## What is NoSQLBench?
 

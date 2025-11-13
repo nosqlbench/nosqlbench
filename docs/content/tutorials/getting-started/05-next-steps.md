@@ -104,7 +104,7 @@ Focus on data generation and binding functions:
 
 ## Resources
 
-- **[Documentation Home](../../_index/)** - Full documentation index
+- **[Documentation Home](../../)** - Full documentation index
 - **[GitHub Repository](https://github.com/nosqlbench/nosqlbench)** - Source code, issues, discussions
 - **[Release Notes](../../release-notes/)** - Latest features and changes
 

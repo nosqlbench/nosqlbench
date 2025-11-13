@@ -78,7 +78,7 @@ trivial to the sophisticated.
 ## How?
 
 The rules for this mechanism are part of the nb5
-[workload definition](../../reference/workload-yaml/_index/)
+[workload definition](../../reference/workload-yaml/)
 standard, which covers all the details and corner cases. The nb5 runtime handles all the
 structural processing for users and developers, so there is little ambiguity about valid or
 equivalent forms. This standard is elevated to a tested specification because it is part of the
@@ -94,11 +94,11 @@ The design principles used when building this standard include:
 
 # Valid Forms
 
-👉 The [Workload Basics](../../tutorials/workload-basics/_index/) tutorial is a great way to learn about op
+👉 The [Workload Basics](../../tutorials/workload-basics/) tutorial is a great way to learn about op
 templates.
 
 What determines if a given op template is valid or not depends on a couple of things: Can it be
-recognized according to the [workload definition](../../reference/workload-yaml/_index/)
+recognized according to the [workload definition](../../reference/workload-yaml/)
 standard?
 Can it be
 recognized by the specified driver as a valid op template, _according to the field names and values?_
@@ -112,8 +112,8 @@ preference:
 - The driver documentation. Each driver should provide clear examples that can be pasted right
   into a new workload if you want. Access the documentation for a specific driver with `nb5 help
   <driver>`.
-- The [Workload Basics](../../tutorials/workload-basics/_index/) tutorial.
-- Finally, the detailed [workload definition specification](../../reference/workload-yaml/_index/),
+- The [Workload Basics](../../tutorials/workload-basics/) tutorial.
+- Finally, the detailed [workload definition specification](../../reference/workload-yaml/),
   if you need, for example to see all the possibilities. Developers will generally want to know
   what can be specified, but those who are just using nb5 will get by easily on the examples.
 

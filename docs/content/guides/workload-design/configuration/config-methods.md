@@ -95,7 +95,7 @@ scenario steps which are not locked.
 
 Activities, *all activities*, are based on a set of op templates. These are the
 [YAML](https://yaml.org/), [json](https://www.json.org/), [jsonnet](https://jsonnet.org/), or direct
-data structures which follow the [workload definition](../../../reference/workload-yaml/_index/)
+data structures which follow the [workload definition](../../../reference/workload-yaml/)
 standard. These schematic values are provided to the selected driver to be mapped to native
 operations.
 

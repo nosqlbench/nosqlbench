@@ -92,7 +92,7 @@ activity params documented in this section.
   might be necessary for some characters when using this on the command line.
     - example: `workload='{"bindings":{"b1":"NumberNameToString()"},"op":"testing {b1}"}'`
 
-The workload param tells an activity where to load its [workload template](../../tutorials/workload-basics/_index/) from. The workload template is a collection of op templates which
+The workload param tells an activity where to load its [workload template](../../tutorials/workload-basics/) from. The workload template is a collection of op templates which
 are blueprints for the operations that an activity runs.
 
 If the file is a Jsonnet file (by extension), then a local jsonnet interpreter will be run
@@ -134,7 +134,7 @@ template has a set of tags, which include two auto-tags that are provided by the
   regex matching that can be globally distinct within a workload.
 
 The rules for tag filtering are explained in depth in the [Op Tags](../../tutorials/workload-basics/05-op-tags/)
-of the [Workload Basics](../../tutorials/workload-basics/_index/) tutorial.
+of the [Workload Basics](../../tutorials/workload-basics/) tutorial.
 
 ## threads
 
