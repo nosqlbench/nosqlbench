@@ -16,8 +16,8 @@ This section touches on topics of using randomized data within NoSQLBench tests.
 ## Benefits
 
 The benefits of using procedural generation for the purposes of load testing is taken as granted in
-this section. For a more thorough discussion on the merits, please see the Virtual DataSet
-concepts in the explanations section.
+this section. For a more thorough discussion on the merits, please see the
+[Virtual DataSet](../../../explanations/philosophy/showcase/#virtual-data-set) concepts in the explanations section.
 
 ## Basic Theory
 

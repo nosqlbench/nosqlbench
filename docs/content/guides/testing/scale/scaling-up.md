@@ -39,7 +39,7 @@ test to be framed and represented properly.
 
 Metrics which are most often used include:
 - response time, one of (or all of)
-  - p99 response time (historically called _latency_, but see the timing terminology reference)
+  - p99 response time (historically called _latency_, but see [Timing Terms](../../../reference/concepts/timing-terms/))
   - read-specific p99 response time, as read patterns in systems are often much more indicative
     of overally scaling character
 - Dataset Size
