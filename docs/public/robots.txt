@@ -1,5 +1,0 @@
-
-Sitemap: https://docs.nosqlbench.io/sitemap.xml
-User-Agent: *
-Allow: /
-Host: https://docs.nosqlbench.io
