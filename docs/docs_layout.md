@@ -1,3 +1,18 @@
+---
+title: "NoSQLBench Documentation Layout"
+description: "Intentional layout and principles for the NoSQLBench documentation corpus."
+audience: meta
+diataxis: explanation
+tags:
+  - documentation
+  - planning
+component: docsys
+topic: docops
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 # NoSQLBench Documentation Layout
 
 This doc defines the intentional layout of the core docs of the nosqlbench project.
@@ -14,8 +29,15 @@ There are multiple sources of docs:
   * This is in zola-compatible format, but that is not important for this
 * Living examples of docs which are tested by unit tests like UniformWorkloadSpecificationTest
 
-# Docs Location
-The set of maintained docs shall be comprised of all the markdown files an structure in the docs directory in addition to all the modular, programmatic, or other docs sources which are associated with implementations in the repo.
+# Maintained Docs Location
+The set of maintained docs shall be comprised of:
+* all markdown files and structure in the docs directory
+* all modular, programmatic, or other docs provided by annotations or similar
+
+## Excluded Paths
+Git ignored files and .github files are all excluded from the maintained set.
+Generated artifacts (for example `target/**`, build caches, or other ignored paths) are explicitly excluded.
+All canonical adapter docs live in their respective source modules (e.g., `nb-adapters/*/src/main/resources/`); any duplicates produced under `target/**` are ignored.
 
 # Docs Principles
 The principles below should apply to how the docs are maintained and used.
@@ -48,3 +70,6 @@ The docs should be organized in the Diátaxis framework structure.
 
 ## Projected Docs
 It should be possible to take the set of maintained docs, including those which are live example docs, annotated methods and classes, and other sources, and through a programmatic organization process, assemble them into a well-structured copy of the docs, with the metadata in the from matter being used to apply topological layout to taxonomic or other cues for consistent organization.
+
+## Enforced Checks
+Every documentation requirement described here must be enforced in code. Module-specific rules (for example, “each adapter ships a `source:`-annotated markdown file in `src/main/resources`”) should be implemented as unit or module-level tests within that module. Cross-cutting requirements (such as verifying `source` paths resolve to tracked files or that ignored/generated artifacts are excluded) should be validated via integrated tests at the repo level. This ensures the rules stay executable and fail CI when broken. Before adding a new check, review the existing unit/integration suites (e.g., SPI-based adapter validation or doc exporter tests) to avoid duplicating logic.
