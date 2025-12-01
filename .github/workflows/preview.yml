@@ -22,7 +22,7 @@ jobs:
     steps:
 
       - name: checkout repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup java
         uses: actions/setup-java@v5
@@ -224,7 +224,7 @@ jobs:
 #        echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
 #
 #    - name: checkout build docs
-#      uses: actions/checkout@v5
+#      uses: actions/checkout@v6
 #      with:
 #        repository: nosqlbench/nosqlbench-build-docs
 #        path: build-docs
@@ -258,7 +258,7 @@ jobs:
 #          echo "DOCKER_TAGS=${{ needs.preview-build.outputs.docker_tags }}" >> $GITHUB_ENV
 #
 #      - name: checkout javadocs
-#        uses: actions/checkout@v5
+#        uses: actions/checkout@v6
 #        with:
 #          repository: nosqlbench/nosqlbench-javadocs
 #          path: javadocs
