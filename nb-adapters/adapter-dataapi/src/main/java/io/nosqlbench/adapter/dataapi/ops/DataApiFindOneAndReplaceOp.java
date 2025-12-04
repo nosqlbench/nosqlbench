@@ -16,18 +16,18 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Collection;
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.FindOneAndReplaceOptions;
+import com.datastax.astra.client.collections.Collection;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndReplaceOptions;
 
 public class DataApiFindOneAndReplaceOp extends DataApiBaseOp {
     private final Collection collection;
     private final Filter filter;
     private final Object replacement;
-    private final FindOneAndReplaceOptions options;
+    private final CollectionFindOneAndReplaceOptions options;
 
-    public DataApiFindOneAndReplaceOp(Database db, Collection collection, Filter filter, Object replacement, FindOneAndReplaceOptions options) {
+    public DataApiFindOneAndReplaceOp(Database db, Collection collection, Filter filter, Object replacement, CollectionFindOneAndReplaceOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;

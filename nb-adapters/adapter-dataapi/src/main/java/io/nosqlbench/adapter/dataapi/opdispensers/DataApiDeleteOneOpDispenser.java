@@ -16,10 +16,10 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.DeleteOneOptions;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.Sort;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.commands.options.CollectionDeleteOneOptions;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteOneOp;
@@ -42,7 +42,7 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            DeleteOneOptions options = getDeleteOneOptions(op, l);
+            CollectionDeleteOneOptions options = getDeleteOneOptions(op, l);
 
             return new DataApiDeleteOneOp(
                 db,
@@ -53,14 +53,14 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private DeleteOneOptions getDeleteOneOptions(ParsedOp op, long l) {
-        DeleteOneOptions options = new DeleteOneOptions();
+    private CollectionDeleteOneOptions getDeleteOneOptions(ParsedOp op, long l) {
+        CollectionDeleteOneOptions options = new CollectionDeleteOneOptions();
         Sort sort = getSortFromOp(op, l);
         float[] vector = getVectorFromOp(op, l);
         if (sort != null) {
-            options = (vector != null) ? options.sort(vector, sort) : options.sort(sort);
+            options = (vector != null) ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
         } else if (vector != null) {
-            options = options.sort(vector, null);
+            options = options.sort(Sort.vector(vector));
         }
         return options;
     }

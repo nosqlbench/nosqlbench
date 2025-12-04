@@ -16,11 +16,11 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.FindOneOptions;
-import com.datastax.astra.client.model.Projection;
-import com.datastax.astra.client.model.Sort;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOneOptions;
+import com.datastax.astra.client.core.query.Projection;
+import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneOp;
@@ -42,7 +42,7 @@ public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            FindOneOptions options = getFindOneOptions(op, l);
+            CollectionFindOneOptions options = getCollectionFindOneOptions(op, l);
             return new DataApiFindOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
@@ -52,20 +52,20 @@ public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private FindOneOptions getFindOneOptions(ParsedOp op, long l) {
-        FindOneOptions options = new FindOneOptions();
+    private CollectionFindOneOptions getCollectionFindOneOptions(ParsedOp op, long l) {
+        CollectionFindOneOptions options = new CollectionFindOneOptions();
         Sort sort = getSortFromOp(op, l);
         float[] vector = getVectorValues(op, l);
         if (sort != null) {
-            options = vector != null ? options.sort(vector, sort) : options.sort(sort);
+            options = vector != null ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
         } else if (vector != null) {
-            options = options.sort(vector);
+            options = options.sort(Sort.vector(vector));
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
             options = options.projection(projection);
         }
-        options.setIncludeSimilarity(true);
+        options.includeSimilarity(true);
         return options;
     }
 

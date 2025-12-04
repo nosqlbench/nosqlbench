@@ -16,27 +16,30 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Collection;
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Document;
-import com.datastax.astra.client.model.Filter;
+import com.datastax.astra.client.collections.Collection;
+import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Sort;
 
 public class DataApiFindVectorFilterOp extends DataApiBaseOp {
     private final Collection<Document> collection;
-    private final float[] vector;
-    private final int limit;
     private final Filter filter;
+    private final CollectionFindOptions options;
 
     public DataApiFindVectorFilterOp(Database db, Collection<Document> collection, float[] vector, int limit, Filter filter) {
         super(db);
         this.collection = collection;
-        this.vector = vector;
-        this.limit = limit;
         this.filter = filter;
+        this.options = new CollectionFindOptions().sort(Sort.vector(vector)).limit(limit);
     }
 
     @Override
     public Object apply(long value) {
-        return collection.find(filter, vector, limit);
+        CollectionFindCursor<Document, Document> cursor = collection.find(filter, options);
+        // Caution: might bloat memory
+        return cursor.toList();
     }
 }

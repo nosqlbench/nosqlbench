@@ -16,11 +16,11 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.FindOptions;
-import com.datastax.astra.client.model.Projection;
-import com.datastax.astra.client.model.Sort;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
+import com.datastax.astra.client.core.query.Projection;
+import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiFindOp;
@@ -43,7 +43,7 @@ public class DataApiFindOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            FindOptions options = getFindOptions(op, l);
+            CollectionFindOptions options = getCollectionFindOptions(op, l);
             return new DataApiFindOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
@@ -53,15 +53,15 @@ public class DataApiFindOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private FindOptions getFindOptions(ParsedOp op, long l) {
-        FindOptions options = new FindOptions();
+    private CollectionFindOptions getCollectionFindOptions(ParsedOp op, long l) {
+        CollectionFindOptions options = new CollectionFindOptions();
         Sort sort = getSortFromOp(op, l);
         if (op.isDefined("vector")) {
             float[] vector = getVectorValues(op, l);
             if (sort != null) {
-                options = vector != null ? options.sort(vector, sort) : options.sort(sort);
+                options = vector != null ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
             } else if (vector != null) {
-                options = options.sort(vector);
+                options = options.sort(Sort.vector(vector));
             }
         }
         Projection[] projection = getProjectionFromOp(op, l);
@@ -78,11 +78,11 @@ public class DataApiFindOpDispenser extends DataApiOpDispenser {
         }
         Optional<LongFunction<Boolean>> includeSimilarityFunction = op.getAsOptionalFunction("includeSimilarity", Boolean.class);
         if (includeSimilarityFunction.isPresent()) {
-            options.setIncludeSimilarity(includeSimilarityFunction.get().apply(l));
+            options.includeSimilarity(includeSimilarityFunction.get().apply(l));
         }
         Optional<LongFunction<String>> pageStateFunction = op.getAsOptionalFunction("pageState", String.class);
         if (pageStateFunction.isPresent()) {
-            options.setPageState(pageStateFunction.get().apply(l));
+            options.pageState(pageStateFunction.get().apply(l));
         }
         return options;
     }

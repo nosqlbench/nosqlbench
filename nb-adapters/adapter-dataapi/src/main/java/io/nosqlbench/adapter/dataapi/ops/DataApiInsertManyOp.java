@@ -16,19 +16,19 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Document;
-import com.datastax.astra.client.model.InsertManyOptions;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.collections.commands.options.CollectionInsertManyOptions;
 
 import java.util.List;
 
 public class DataApiInsertManyOp extends DataApiBaseOp {
     private final List<? extends Document> documents;
     private final String collectionName;
-    private final InsertManyOptions options;
+    private final CollectionInsertManyOptions options;
 
 
-    public DataApiInsertManyOp(Database db, String collectionName, List<? extends Document> documents, InsertManyOptions options) {
+    public DataApiInsertManyOp(Database db, String collectionName, List<? extends Document> documents, CollectionInsertManyOptions options) {
         super(db);
         this.collectionName = collectionName;
         this.documents = documents;

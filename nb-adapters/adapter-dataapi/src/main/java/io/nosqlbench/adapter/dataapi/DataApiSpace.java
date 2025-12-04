@@ -17,7 +17,7 @@
 package io.nosqlbench.adapter.dataapi;
 
 import com.datastax.astra.client.DataAPIClient;
-import com.datastax.astra.client.Database;
+import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
 import com.datastax.astra.client.admin.DatabaseAdmin;
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;

@@ -16,19 +16,21 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Collection;
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.collections.Collection;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
+import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
 
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 public class DataApiFindOp extends DataApiBaseOp {
     private final Collection<Document> collection;
     private final Filter filter;
-    private final FindOptions options;
+    private final CollectionFindOptions options;
 
-    public DataApiFindOp(Database db, Collection<Document> collection, Filter filter, FindOptions options) {
+    public DataApiFindOp(Database db, Collection<Document> collection, Filter filter, CollectionFindOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;
@@ -37,9 +39,8 @@ public class DataApiFindOp extends DataApiBaseOp {
 
     @Override
     public List<Document> apply(long value) {
-        // TODO: make sure we're traversing result data
-        FindIterable<Document> documentStream = collection.find(filter, options);
-        List<Document> documents = StreamSupport.stream(documentStream.spliterator(), false).toList();
-        return documents;
+        CollectionFindCursor<Document, Document> cursor = collection.find(filter, options);
+        // Caution: might bloat memory
+        return cursor.toList();
     }
 }

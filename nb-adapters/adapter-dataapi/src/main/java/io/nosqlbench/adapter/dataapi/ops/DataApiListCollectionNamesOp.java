@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Database;
+import com.datastax.astra.client.databases.Database;
 
 import java.util.stream.Stream;
 
@@ -29,7 +29,7 @@ public class DataApiListCollectionNamesOp extends DataApiBaseOp {
     @Override
     public Object apply(long value) {
         Stream<String> response;
-        response = db.listCollectionNames();
+        response = db.listCollectionNames().stream();
         if(logger.isDebugEnabled()) response.forEach(logger::debug);
         return response;
     }
