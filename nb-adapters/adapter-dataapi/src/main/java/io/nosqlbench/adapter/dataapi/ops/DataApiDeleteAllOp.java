@@ -16,9 +16,8 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Collection;
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Filter;
+import com.datastax.astra.client.collections.Collection;
+import com.datastax.astra.client.databases.Database;
 
 public class DataApiDeleteAllOp extends DataApiBaseOp {
     private final Collection collection;

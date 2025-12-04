@@ -16,10 +16,15 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
+import com.datastax.astra.client.collections.commands.ReturnDocument;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndReplaceOptions;
+import com.datastax.astra.client.core.query.Projection;
+import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneAndReplaceOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +47,7 @@ public class DataApiFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            FindOneAndReplaceOptions options = getFindOneAndReplaceOptions(op, l);
+            CollectionFindOneAndReplaceOptions options = getCollectionFindOneAndReplaceOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
             LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
 
@@ -56,15 +61,15 @@ public class DataApiFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private FindOneAndReplaceOptions getFindOneAndReplaceOptions(ParsedOp op, long l) {
-        FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
+    private CollectionFindOneAndReplaceOptions getCollectionFindOneAndReplaceOptions(ParsedOp op, long l) {
+        CollectionFindOneAndReplaceOptions options = new CollectionFindOneAndReplaceOptions();
         Sort sort = getSortFromOp(op, l);
         if (op.isDefined("vector")) {
             float[] vector = getVectorValues(op, l);
             if (sort != null) {
-                options = vector != null ? options.sort(vector, sort) : options.sort(sort);
+                options = vector != null ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
             } else if (vector != null) {
-                options = options.sort(vector);
+                options = options.sort(Sort.vector(vector));
             }
         }
         Projection[] projection = getProjectionFromOp(op, l);
@@ -77,8 +82,8 @@ public class DataApiFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
         }
         if (op.isDefined("returnDocument")) {
             options = switch ((String) op.get("returnDocument", l)) {
-                case "after" -> options.returnDocumentAfter();
-                case "before" -> options.returnDocumentBefore();
+                case "after" -> options.returnDocument(ReturnDocument.AFTER);
+                case "before" -> options.returnDocument(ReturnDocument.BEFORE);
                 default -> throw new RuntimeException("Invalid returnDocument value: " + op.get("returnDocument", l));
             };
         }

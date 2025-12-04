@@ -16,8 +16,6 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.model.CollectionOptions;
-import com.datastax.astra.client.model.SimilarityMetric;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiCreateCollectionOp;
@@ -43,7 +41,7 @@ public class DataApiCreateCollectionOpDispenser extends DataApiOpDispenser {
                 new DataApiCreateCollectionOp(
                     spaceFunction.apply(l).getDatabase(),
                     targetFunction.apply(l),
-                    this.getCollectionOptionsFromOp(op, l)
+                    this.getCollectionDefinitionFromOp(op, l)
                 );
 
             return dataApiCreateCollectionOp;

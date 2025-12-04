@@ -16,8 +16,8 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.model.Document;
-import com.datastax.astra.client.model.InsertManyOptions;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.collections.commands.options.CollectionInsertManyOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiInsertManyOp;
@@ -48,13 +48,13 @@ public class DataApiInsertManyOpDispenser extends DataApiOpDispenser {
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
                 documents,
-                getInsertManyOptions(op, l)
+                getCollectionInsertManyOptions(op, l)
             );
         };
     }
 
-    private InsertManyOptions getInsertManyOptions(ParsedOp op, long l) {
-        InsertManyOptions options = new InsertManyOptions();
+    private CollectionInsertManyOptions getCollectionInsertManyOptions(ParsedOp op, long l) {
+        CollectionInsertManyOptions options = new CollectionInsertManyOptions();
         Optional<LongFunction<Map>> optionsFunction = op.getAsOptionalFunction("options", Map.class);
         if (optionsFunction.isPresent()) {
             Map<String, String> optionFields = optionsFunction.get().apply(l);

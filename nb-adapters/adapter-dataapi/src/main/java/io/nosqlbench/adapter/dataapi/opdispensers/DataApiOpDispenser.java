@@ -16,7 +16,16 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Filters;
+import com.datastax.astra.client.collections.definition.CollectionDefinition;
+import com.datastax.astra.client.collections.definition.CollectionDefaultIdTypes;
+import com.datastax.astra.client.collections.CollectionOptions;
+import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.Updates;
+import com.datastax.astra.client.core.query.Sort;
+import com.datastax.astra.client.core.vector.SimilarityMetric;
+import com.datastax.astra.client.core.query.Projection;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
@@ -45,8 +54,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             String sortOrder = sortFields.get("type").toString();
             String sortField = sortFields.get("field").toString();
             switch(sortOrder) {
-                case "asc" -> sort = Sorts.ascending(sortField);
-                case "desc" -> sort = Sorts.descending(sortField);
+                case "asc" -> sort = Sort.ascending(sortField);
+                case "desc" -> sort = Sort.descending(sortField);
             }
         }
         return sort;
@@ -188,9 +197,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 if (field.getKey().equalsIgnoreCase("include")) {
-                    projection = Projections.include(sb.toString());
+                    projection = Projection.include(sb.toString());
                 } else if (field.getKey().equalsIgnoreCase("exclude")) {
-                    projection = Projections.exclude(sb.toString());
+                    projection = Projection.exclude(sb.toString());
                 } else {
                     logger.error("Projection " + field + " not supported");
                 }
@@ -199,8 +208,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return projection;
     }
 
-    protected CollectionOptions getCollectionOptionsFromOp(ParsedOp op, long l) {
-        CollectionOptions.CollectionOptionsBuilder optionsBldr = CollectionOptions.builder();
+    protected CollectionDefinition getCollectionDefinitionFromOp(ParsedOp op, long l) {
+        CollectionDefinition optionsBldr = new CollectionDefinition();
         Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
         if (dimFunc.isPresent()) {
             LongFunction<Integer> af = dimFunc.get();
@@ -214,17 +223,24 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Optional<LongFunction<String>> typeFunc = op.getAsOptionalFunction("collectionType", String.class);
         if (typeFunc.isPresent()) {
             LongFunction<String> tf = typeFunc.get();
-            optionsBldr = optionsBldr.defaultIdType(CollectionIdTypes.fromValue(tf.apply(l)));
+            optionsBldr = optionsBldr.defaultId(CollectionDefaultIdTypes.fromValue(tf.apply(l)));
         }
         Optional<LongFunction<String>> providerFunc = op.getAsOptionalFunction("serviceProvider", String.class);
         Optional<LongFunction<String>> modeFunc = op.getAsOptionalFunction("serviceMode", String.class);
+        Optional<LongFunction<String>> apiKeyFunc = op.getAsOptionalFunction("serviceSharedSecretKey", String.class);
         Optional<LongFunction<Map>> paramFunc = op.getAsOptionalFunction("serviceParameters", Map.class);
         if (providerFunc.isPresent() && modeFunc.isPresent()) {
             LongFunction<String> pf = providerFunc.get();
             LongFunction<String> mf = modeFunc.get();
-            optionsBldr = paramFunc.isPresent() ?
-                optionsBldr.vectorize(pf.apply(l), mf.apply(l),  paramFunc.get().apply(l)) :
-                optionsBldr.vectorize(pf.apply(l), mf.apply(l));
+            if (apiKeyFunc.isPresent()){
+                LongFunction<String> ak = apiKeyFunc.get();
+                optionsBldr = paramFunc.isPresent() ?
+                    optionsBldr.vectorize(pf.apply(l), mf.apply(l), ak.apply(l), paramFunc.get().apply(l)) :
+                    optionsBldr.vectorize(pf.apply(l), mf.apply(l), ak.apply(l));
+            }else{
+                // paramFunc ignored (due to signature of vectorize method)
+                optionsBldr = optionsBldr.vectorize(pf.apply(l), mf.apply(l));
+            }
         }
         Optional<LongFunction<List>> allowFunc = op.getAsOptionalFunction("allowIndex", List.class);
         if (allowFunc.isPresent()) {
@@ -237,7 +253,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             optionsBldr = optionsBldr.indexingDeny(Arrays.toString(df.apply(l).toArray(new String[0])));
         }
 
-        return optionsBldr.build();
+        return optionsBldr;
     }
 
 }

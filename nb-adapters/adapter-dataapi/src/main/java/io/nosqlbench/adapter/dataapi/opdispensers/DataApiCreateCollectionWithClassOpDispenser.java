@@ -38,7 +38,7 @@ public class DataApiCreateCollectionWithClassOpDispenser extends DataApiOpDispen
         return (l) -> new DataApiCreateCollectionWithClassOp(
             spaceFunction.apply(l).getDatabase(),
             targetFunction.apply(l),
-            this.getCollectionOptionsFromOp(op, l),
+            this.getCollectionDefinitionFromOp(op, l),
             getCreateClass(op, l)
         );
     }

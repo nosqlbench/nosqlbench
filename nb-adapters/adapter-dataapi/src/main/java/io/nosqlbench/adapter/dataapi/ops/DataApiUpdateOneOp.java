@@ -16,19 +16,19 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Collection;
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.Filter;
-import com.datastax.astra.client.model.Update;
-import com.datastax.astra.client.model.UpdateOneOptions;
+import com.datastax.astra.client.collections.Collection;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.options.CollectionUpdateOneOptions;
 
 public class DataApiUpdateOneOp extends DataApiBaseOp {
     private final Collection collection;
     private final Filter filter;
     private final Update update;
-    private final UpdateOneOptions options;
+    private final CollectionUpdateOneOptions options;
 
-    public DataApiUpdateOneOp(Database db, Collection collection, Filter filter, Update update, UpdateOneOptions options) {
+    public DataApiUpdateOneOp(Database db, Collection collection, Filter filter, Update update, CollectionUpdateOneOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;

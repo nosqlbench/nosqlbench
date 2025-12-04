@@ -16,8 +16,10 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.options.CollectionUpdateManyOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateManyOp;
@@ -42,7 +44,7 @@ public class DataApiUpdateManyOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            UpdateManyOptions options = getUpdateManyOptions(op, l);
+            CollectionUpdateManyOptions options = getCollectionUpdateManyOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("updates", Map.class);
 
             return new DataApiUpdateManyOp(
@@ -55,8 +57,8 @@ public class DataApiUpdateManyOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private UpdateManyOptions getUpdateManyOptions(ParsedOp op, long l) {
-        UpdateManyOptions options = new UpdateManyOptions();
+    private CollectionUpdateManyOptions getCollectionUpdateManyOptions(ParsedOp op, long l) {
+        CollectionUpdateManyOptions options = new CollectionUpdateManyOptions();
         Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
         if (upsertFunction.isPresent()) {
             options = options.upsert(upsertFunction.get().apply(l));

@@ -16,12 +16,13 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionReplaceOneOptions;
+import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiReplaceOneOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,7 +44,7 @@ public class DataApiReplaceOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            ReplaceOneOptions options = getReplaceOneOptions(op, l);
+            CollectionReplaceOneOptions options = getCollectionReplaceOneOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
             LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
 
@@ -57,8 +58,8 @@ public class DataApiReplaceOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private ReplaceOneOptions getReplaceOneOptions(ParsedOp op, long l) {
-        ReplaceOneOptions options = new ReplaceOneOptions();
+    private CollectionReplaceOneOptions getCollectionReplaceOneOptions(ParsedOp op, long l) {
+        CollectionReplaceOneOptions options = new CollectionReplaceOneOptions();
 
         Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
         if (upsertFunction.isPresent()) {

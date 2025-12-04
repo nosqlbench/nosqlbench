@@ -16,9 +16,11 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Collection;
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.collections.Collection;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
 
 public class DataApiFindOneAndUpdateOp extends DataApiBaseOp {
     private final Collection<Document> collection;

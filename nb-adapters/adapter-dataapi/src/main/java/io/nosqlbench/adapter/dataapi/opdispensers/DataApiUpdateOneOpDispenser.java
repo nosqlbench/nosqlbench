@@ -16,8 +16,11 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.*;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.commands.options.CollectionUpdateOneOptions;
+import com.datastax.astra.client.core.query.Sort;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateOneOp;
@@ -42,7 +45,7 @@ public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            UpdateOneOptions options = getUpdateOneOptions(op, l);
+            CollectionUpdateOneOptions options = getUpdateOneOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("update", Map.class);
 
             return new DataApiUpdateOneOp(
@@ -55,8 +58,8 @@ public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private UpdateOneOptions getUpdateOneOptions(ParsedOp op, long l) {
-        UpdateOneOptions options = new UpdateOneOptions();
+    private CollectionUpdateOneOptions getUpdateOneOptions(ParsedOp op, long l) {
+        CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
         Sort sort = getSortFromOp(op, l);
         float[] vector = getVectorFromOp(op, l);
 
@@ -65,7 +68,7 @@ public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
             options = options.upsert(upsertFunction.get().apply(l));
         }
         if (sort != null) {
-            options = (vector != null) ? options.vector(vector, sort) : options.sort(sort);
+            options = (vector != null) ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
         }
         return options;
     }
