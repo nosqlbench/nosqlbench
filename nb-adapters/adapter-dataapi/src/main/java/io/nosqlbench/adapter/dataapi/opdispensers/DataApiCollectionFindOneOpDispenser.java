@@ -23,7 +23,7 @@ import com.datastax.astra.client.core.query.Projection;
 import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,18 +32,18 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOneOpDispenser.class);
-    private final LongFunction<DataApiFindOneOp> opFunction;
+    private final LongFunction<DataApiCollectionFindOneOp> opFunction;
     public DataApiCollectionFindOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionFindOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             CollectionFindOneOptions options = getCollectionFindOneOptions(op, l);
-            return new DataApiFindOneOp(
+            return new DataApiCollectionFindOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,

@@ -22,7 +22,7 @@ import com.datastax.astra.client.collections.commands.options.CollectionReplaceO
 import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiReplaceOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionReplaceOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,14 +33,14 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionReplaceOneOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionReplaceOneOpDispenser.class);
-    private final LongFunction<DataApiReplaceOneOp> opFunction;
+    private final LongFunction<DataApiCollectionReplaceOneOp> opFunction;
 
     public DataApiCollectionReplaceOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiReplaceOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionReplaceOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
@@ -48,7 +48,7 @@ public class DataApiCollectionReplaceOneOpDispenser extends DataApiOpDispenser {
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
             LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
 
-            return new DataApiReplaceOneOp(
+            return new DataApiCollectionReplaceOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,

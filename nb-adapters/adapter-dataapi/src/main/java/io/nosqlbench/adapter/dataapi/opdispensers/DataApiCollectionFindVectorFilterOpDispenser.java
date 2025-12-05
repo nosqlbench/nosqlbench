@@ -20,7 +20,7 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindVectorFilterOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindVectorFilterOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,19 +29,19 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionFindVectorFilterOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionFindVectorFilterOpDispenser.class);
-    private final LongFunction<DataApiFindVectorFilterOp> opFunction;
+    private final LongFunction<DataApiCollectionFindVectorFilterOp> opFunction;
     public DataApiCollectionFindVectorFilterOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindVectorFilterOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionFindVectorFilterOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             float[] vector = getVectorValues(op, l);
             Filter filter = getFilterFromOp(op, l);
             int limit = getLimit(op, l);
-            return new DataApiFindVectorFilterOp(
+            return new DataApiCollectionFindVectorFilterOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 vector,

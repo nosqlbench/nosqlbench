@@ -18,22 +18,22 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiEstimatedDocumentCountOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionEstimatedDocumentCountOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 
 public class DataApiCollectionEstimatedDocumentCountOpDispenser extends DataApiOpDispenser {
-    private final LongFunction<DataApiEstimatedDocumentCountOp> opFunction;
+    private final LongFunction<DataApiCollectionEstimatedDocumentCountOp> opFunction;
     public DataApiCollectionEstimatedDocumentCountOpDispenser(
         DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiEstimatedDocumentCountOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionEstimatedDocumentCountOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            return new DataApiEstimatedDocumentCountOp(
+            return new DataApiCollectionEstimatedDocumentCountOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l)
             );

@@ -19,25 +19,23 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.Update;
-import com.datastax.astra.client.collections.commands.options.CollectionUpdateManyOptions;
 
-public class DataApiUpdateManyOp extends DataApiBaseOp {
+public class DataApiCollectionFindDistinctOp extends DataApiBaseOp {
     private final Collection collection;
+    private final String fieldName;
     private final Filter filter;
-    private final Update update;
-    private final CollectionUpdateManyOptions options;
+    private final Class<?> resultClass;
 
-    public DataApiUpdateManyOp(Database db, Collection collection, Filter filter, Update update, CollectionUpdateManyOptions options) {
+    public DataApiCollectionFindDistinctOp(Database db, Collection collection, String fieldName, Filter filter, Class<?> resultClass) {
         super(db);
         this.collection = collection;
+        this.fieldName = fieldName;
         this.filter = filter;
-        this.update = update;
-        this.options = options;
+        this.resultClass = resultClass;
     }
 
     @Override
     public Object apply(long value) {
-        return collection.updateMany(filter, update, options);
+        return collection.distinct(fieldName, filter, resultClass);
     }
 }

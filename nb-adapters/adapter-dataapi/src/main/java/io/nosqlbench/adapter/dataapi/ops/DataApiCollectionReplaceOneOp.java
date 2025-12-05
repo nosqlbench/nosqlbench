@@ -18,19 +18,25 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.documents.Document;
-public class DataApiFindByIdOp extends DataApiBaseOp {
-    private final Collection<Document> collection;
-    private final Object id;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionReplaceOneOptions;
 
-    public DataApiFindByIdOp(Database db, Collection<Document> collection, Object id) {
+public class DataApiCollectionReplaceOneOp extends DataApiBaseOp {
+    private final Collection collection;
+    private final Filter filter;
+    private final Object replacement;
+    private final CollectionReplaceOneOptions options;
+
+    public DataApiCollectionReplaceOneOp(Database db, Collection collection, Filter filter, Object replacement, CollectionReplaceOneOptions options) {
         super(db);
         this.collection = collection;
-        this.id = id;
+        this.filter = filter;
+        this.replacement = replacement;
+        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        return collection.findById(id);
+        return collection.replaceOne(filter, replacement, options);
     }
 }

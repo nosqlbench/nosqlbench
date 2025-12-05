@@ -21,7 +21,7 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindDistinctOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindDistinctOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,18 +30,18 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionFindDistinctOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionFindDistinctOpDispenser.class);
-    private final LongFunction<DataApiFindDistinctOp> opFunction;
+    private final LongFunction<DataApiCollectionFindDistinctOp> opFunction;
     public DataApiCollectionFindDistinctOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindDistinctOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionFindDistinctOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             Class<?> targetClass = getTargetClass(op, l);
-            return new DataApiFindDistinctOp(
+            return new DataApiCollectionFindDistinctOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 op.getAsRequiredFunction("fieldName", String.class).apply(l),

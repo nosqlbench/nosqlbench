@@ -20,7 +20,7 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteManyOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionDeleteManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,19 +29,19 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionDeleteManyOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionDeleteManyOpDispenser.class);
-    private final LongFunction<DataApiDeleteManyOp> opFunction;
+    private final LongFunction<DataApiCollectionDeleteManyOp> opFunction;
 
     public DataApiCollectionDeleteManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiDeleteManyOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionDeleteManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
 
-            return new DataApiDeleteManyOp(
+            return new DataApiCollectionDeleteManyOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter

@@ -20,15 +20,15 @@ import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.collections.commands.Update;
-import com.datastax.astra.client.collections.commands.options.CollectionUpdateOneOptions;
+import com.datastax.astra.client.collections.commands.options.CollectionUpdateManyOptions;
 
-public class DataApiUpdateOneOp extends DataApiBaseOp {
+public class DataApiCollectionUpdateManyOp extends DataApiBaseOp {
     private final Collection collection;
     private final Filter filter;
     private final Update update;
-    private final CollectionUpdateOneOptions options;
+    private final CollectionUpdateManyOptions options;
 
-    public DataApiUpdateOneOp(Database db, Collection collection, Filter filter, Update update, CollectionUpdateOneOptions options) {
+    public DataApiCollectionUpdateManyOp(Database db, Collection collection, Filter filter, Update update, CollectionUpdateManyOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;
@@ -38,6 +38,6 @@ public class DataApiUpdateOneOp extends DataApiBaseOp {
 
     @Override
     public Object apply(long value) {
-        return collection.updateOne(filter, update, options);
+        return collection.updateMany(filter, update, options);
     }
 }

@@ -22,8 +22,8 @@ import com.datastax.astra.client.core.query.Projection;
 import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindByIdOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindByIdOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,17 +32,17 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionFindByIdOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionFindByIdOpDispenser.class);
-    private final LongFunction<DataApiFindByIdOp> opFunction;
+    private final LongFunction<DataApiCollectionFindByIdOp> opFunction;
     public DataApiCollectionFindByIdOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindByIdOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionFindByIdOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Object id = getIdFromOp(op, l);
-            return new DataApiFindByIdOp(
+            return new DataApiCollectionFindByIdOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 id

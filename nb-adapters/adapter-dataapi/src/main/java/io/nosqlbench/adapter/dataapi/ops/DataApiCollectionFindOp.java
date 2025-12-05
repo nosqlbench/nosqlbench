@@ -18,24 +18,29 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
+import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
 
-public class DataApiFindDistinctOp extends DataApiBaseOp {
-    private final Collection collection;
-    private final String fieldName;
+import java.util.List;
+
+public class DataApiCollectionFindOp extends DataApiBaseOp {
+    private final Collection<Document> collection;
     private final Filter filter;
-    private final Class<?> resultClass;
+    private final CollectionFindOptions options;
 
-    public DataApiFindDistinctOp(Database db, Collection collection, String fieldName, Filter filter, Class<?> resultClass) {
+    public DataApiCollectionFindOp(Database db, Collection<Document> collection, Filter filter, CollectionFindOptions options) {
         super(db);
         this.collection = collection;
-        this.fieldName = fieldName;
         this.filter = filter;
-        this.resultClass = resultClass;
+        this.options = options;
     }
 
     @Override
-    public Object apply(long value) {
-        return collection.distinct(fieldName, filter, resultClass);
+    public List<Document> apply(long value) {
+        CollectionFindCursor<Document, Document> cursor = collection.find(filter, options);
+        // Caution: might bloat memory
+        return cursor.toList();
     }
 }

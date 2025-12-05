@@ -17,29 +17,29 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
-import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
 import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.exceptions.TooManyDocumentsToCountException;
 import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.core.query.Sort;
 
-public class DataApiFindVectorFilterOp extends DataApiBaseOp {
+public class DataApiCollectionCountDocumentsOp extends DataApiBaseOp {
     private final Collection<Document> collection;
     private final Filter filter;
-    private final CollectionFindOptions options;
+    private final int upperBound;
 
-    public DataApiFindVectorFilterOp(Database db, Collection<Document> collection, float[] vector, int limit, Filter filter) {
+    public DataApiCollectionCountDocumentsOp(Database db, Collection<Document> collection, Filter filter, int upperBound) {
         super(db);
         this.collection = collection;
         this.filter = filter;
-        this.options = new CollectionFindOptions().sort(Sort.vector(vector)).limit(limit);
+        this.upperBound = upperBound;
     }
 
     @Override
     public Object apply(long value) {
-        CollectionFindCursor<Document, Document> cursor = collection.find(filter, options);
-        // Caution: might bloat memory
-        return cursor.toList();
+        try {
+            return collection.countDocuments(filter, upperBound);
+        } catch (TooManyDocumentsToCountException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
