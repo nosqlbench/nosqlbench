@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Database;
+import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.DatabaseAdmin;
 
 public class DataApiListNamespacesOp extends DataApiDBAdminOp {
@@ -27,6 +27,6 @@ public class DataApiListNamespacesOp extends DataApiDBAdminOp {
 
     @Override
     public Object apply(long value) {
-        return admin.listNamespaceNames();
+        return admin.listKeyspaceNames();
     }
 }

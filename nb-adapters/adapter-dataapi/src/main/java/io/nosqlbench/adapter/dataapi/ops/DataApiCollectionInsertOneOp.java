@@ -17,15 +17,20 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.datastax.astra.client.collections.definition.documents.Document;
 
-public abstract class DataApiBaseOp implements CycleOp<Object> {
-    protected static final Logger logger = LogManager.getLogger(DataApiBaseOp.class);
-    protected final Database db;
+public class DataApiCollectionInsertOneOp extends DataApiBaseOp {
+    private final Document doc;
+    private final String collectionName;
 
-    public DataApiBaseOp(Database db) {
-        this.db = db;
+    public DataApiCollectionInsertOneOp(Database db, String collectionName, Document doc) {
+        super(db);
+        this.collectionName = collectionName;
+        this.doc = doc;
+    }
+
+    @Override
+    public Object apply(long value) {
+        return db.getCollection(collectionName).insertOne(doc);
     }
 }
