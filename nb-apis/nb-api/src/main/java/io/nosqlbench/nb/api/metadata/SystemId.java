@@ -46,7 +46,11 @@ public class SystemId {
      * @return A address for the node, likely to be unique and stable for its lifetime
      */
     public static String getNodeId() {
-        return getMainInetAddrDirect().map(InetAddress::getHostAddress).orElse("UNKNOWN_HOST_ID");
+        InetAddress fallback = InetAddress.getLoopbackAddress();
+        return getMainInetAddrDirect()
+            .or(() -> Optional.of(fallback))
+            .map(InetAddress::getHostAddress)
+            .orElse(fallback.getHostAddress());
     }
 
 
@@ -100,7 +104,7 @@ public class SystemId {
             Enumeration<NetworkInterface> ni = NetworkInterface.getNetworkInterfaces();
             return new ArrayList<>(Collections.list(ni));
         } catch (SocketException e) {
-            throw new RuntimeException(e);
+            return Collections.emptyList();
         }
     }
 
@@ -128,37 +132,41 @@ public class SystemId {
     }
 
     public static String getHostSummary() {
-        SystemInfo sysinfo = new SystemInfo();
-        HardwareAbstractionLayer hal = sysinfo.getHardware();
-        CentralProcessor p = hal.getProcessor();
+        try {
+            SystemInfo sysinfo = new SystemInfo();
+            HardwareAbstractionLayer hal = sysinfo.getHardware();
+            CentralProcessor p = hal.getProcessor();
 
-        Gson gson = new GsonBuilder().create();
+            Gson gson = new GsonBuilder().create();
 
-        Set<String> ifspeeds = new HashSet<>();
-        hal.getNetworkIFs().forEach(
-            x -> {
-                long spd = x.getSpeed();
-                if (spd < (1024 * 1024 * 1000)) {
-                    ifspeeds.add(String.format("%.0fMib", (double) (spd / (1024 * 1024))));
-                } else {
-                    ifspeeds.add(String.format("%.0fGib", (double) (spd / (1024 * 1024 * 1000))));
+            Set<String> ifspeeds = new HashSet<>();
+            hal.getNetworkIFs().forEach(
+                x -> {
+                    long spd = x.getSpeed();
+                    if (spd < (1024 * 1024 * 1000)) {
+                        ifspeeds.add(String.format("%.0fMib", (double) (spd / (1024 * 1024))));
+                    } else {
+                        ifspeeds.add(String.format("%.0fGib", (double) (spd / (1024 * 1024 * 1000))));
+                    }
                 }
-            }
-        );
+            );
 
-        Map<String, Object> details = Map.of(
-            "physical-cores", String.valueOf(p.getPhysicalProcessorCount()),
-            "logical-cores", String.valueOf(p.getLogicalProcessors().size()),
-            "max-frequency-ghz", String.format("%.2f", (p.getMaxFreq() / 1_000_000_000_000.0d)),
-            "sockets", String.valueOf(p.getPhysicalPackageCount()),
-            "processor-name", String.valueOf(p.getProcessorIdentifier().getName()),
-            "memory-GiB", String.format("%.2f", hal.getMemory().getTotal() / (1024.0 * 1024.0 * 1024.0)),
-            "heap-max-GiB", String.format("%.2f", Runtime.getRuntime().maxMemory() / (1024.0 * 1024.0 * 1024.0)),
-            "if-speeds", ifspeeds
+            Map<String, Object> details = Map.of(
+                "physical-cores", String.valueOf(p.getPhysicalProcessorCount()),
+                "logical-cores", String.valueOf(p.getLogicalProcessors().size()),
+                "max-frequency-ghz", String.format("%.2f", (p.getMaxFreq() / 1_000_000_000_000.0d)),
+                "sockets", String.valueOf(p.getPhysicalPackageCount()),
+                "processor-name", String.valueOf(p.getProcessorIdentifier().getName()),
+                "memory-GiB", String.format("%.2f", hal.getMemory().getTotal() / (1024.0 * 1024.0 * 1024.0)),
+                "heap-max-GiB", String.format("%.2f", Runtime.getRuntime().maxMemory() / (1024.0 * 1024.0 * 1024.0)),
+                "if-speeds", ifspeeds
 
-        );
+            );
 
-        return gson.toJson(details);
+            return gson.toJson(details);
+        } catch (Throwable t) {
+            return "{\"error\":\"host-info-unavailable\"}";
+        }
 
     }
 
@@ -169,13 +177,12 @@ public class SystemId {
 
     public static String getBrailleNodeId() {
         String nodeId = getNodeId();
-        String[] fields = nodeId.split("\\.");
-        byte[] addr;
+        byte[] addr = InetAddress.getLoopbackAddress().getAddress();
         try {
             InetAddress inetAddr = Inet4Address.getByName(nodeId);
             addr = inetAddr.getAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
+        } catch (UnknownHostException ignored) {
+            // fall back to loopback bytes
         }
         return braille((addr[0] << 24) + (addr[1] << 16) + (addr[2] << 8) + addr[3]);
     }

@@ -42,6 +42,14 @@ import javax.script.ScriptException;
  */
 public class NBCLIErrorHandler {
 
+    static {
+        // Avoid NetUtils hostname lookups failing in containerized or offline environments.
+        String envHost = System.getenv("HOSTNAME");
+        String fallbackHost = (envHost == null || envHost.isBlank()) ? "localhost" : envHost;
+        System.setProperty("LOG4J_HOST_NAME", System.getProperty("LOG4J_HOST_NAME", fallbackHost));
+        System.setProperty("log4j2.hostname", System.getProperty("log4j2.hostname", fallbackHost));
+    }
+
     private final static Logger logger = LogManager.getLogger("ERRORHANDLER");
 
     public static int handle(Throwable t, boolean wantsStackTraces, String version) {

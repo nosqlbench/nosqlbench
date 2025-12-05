@@ -75,6 +75,13 @@ import java.util.stream.Collectors;
 
 public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
+    static {
+        String envHost = System.getenv("HOSTNAME");
+        String fallbackHost = (envHost == null || envHost.isBlank()) ? "localhost" : envHost;
+        System.setProperty("LOG4J_HOST_NAME", System.getProperty("LOG4J_HOST_NAME", fallbackHost));
+        System.setProperty("log4j2.hostname", System.getProperty("log4j2.hostname", fallbackHost));
+    }
+
     private static Logger logger;
     private static final NBLoggerConfig loggerConfig;
     private static final int EXIT_OK = 0;
