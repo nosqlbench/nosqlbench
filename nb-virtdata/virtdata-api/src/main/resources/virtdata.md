@@ -2,6 +2,17 @@
 weight: 225811593
 title: virtdata
 source: nb-virtdata/virtdata-api/src/main/resources/virtdata.md
+description: "Doc for virtdata."
+tags:
+  - nb-virtdata
+  - docs
+audience: developer
+diataxis: reference
+component: virtdata
+topic: bindings
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 # virtdata
 

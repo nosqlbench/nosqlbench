@@ -1,6 +1,19 @@
 ---
+source: nb-adapters/adapter-cqld4/src/main/resources/activities/baselines/cql_iot.md
+
 title: CQL IoT
 weight: 2
+description: "Adapter doc for cql iot."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 # CQL IoT

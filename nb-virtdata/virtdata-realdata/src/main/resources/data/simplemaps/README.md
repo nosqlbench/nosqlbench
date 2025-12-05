@@ -1,3 +1,18 @@
+---
+title: "Readme"
+description: "Doc for README."
+tags:
+  - nb-virtdata
+  - docs
+audience: developer
+diataxis: reference
+component: virtdata
+topic: bindings
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 The data in this directory was provided by simplemaps according to their free license with
 attribution.
 

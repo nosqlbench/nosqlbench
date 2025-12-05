@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-pinecone/src/main/resources/pinecone.md
+title: "Pinecone Driver Adapter"
+description: "Guide for connecting NoSQLBench workloads to Pinecone vector databases."
+audience: operator
+diataxis: howto
+tags:
+  - pinecone
+  - vector
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # pinecone driver adapter
 The pinecone driver adapter is a nb adapter for the pinecone driver, an open source Java driver for connecting to and

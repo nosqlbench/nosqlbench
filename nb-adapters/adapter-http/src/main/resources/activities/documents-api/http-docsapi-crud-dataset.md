@@ -1,6 +1,18 @@
 ---
+source: nb-adapters/adapter-http/src/main/resources/activities/documents-api/http-docsapi-crud-dataset.md
+
 title: Documents API CRUD using an external Dataset
 weight: 3
+audience: operator
+diataxis: howto
+tags:
+  - http
+  - documents-api
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 ## Description

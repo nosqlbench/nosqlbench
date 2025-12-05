@@ -1,3 +1,18 @@
+---
+title: "Getting NoSQLBench"
+description: "Download links, binaries, and container images for NoSQLBench 5."
+audience: user
+diataxis: howto
+tags:
+  - downloads
+  - installation
+component: core
+topic: ops
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 # Getting NoSQLBench
 
 ## Latest Downloads
@@ -24,4 +39,3 @@ Links to docker images:
 
 - [nosqlbench/nosqlbench:latest](https://hub.docker.com/r/nosqlbench/nosqlbench/tags?page=1&name=latest)
 - [All tagged docker images](https://hub.docker.com/r/nosqlbench/nosqlbench/tags)
-

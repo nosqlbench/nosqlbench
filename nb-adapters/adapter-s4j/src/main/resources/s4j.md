@@ -2,6 +2,17 @@
 weight: 0
 title: S4J
 source: nb-adapters/adapter-s4j/src/main/resources/s4j.md
+description: "JMS/S4J adapter guide for publishing and consuming via NoSQLBench."
+audience: operator
+diataxis: howto
+tags:
+  - s4j
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 - [1. Overview](#1-overview)
 - [2. Execute NB S4J Workload](#2-execute-nb-s4j-workload)

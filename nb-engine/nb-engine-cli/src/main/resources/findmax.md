@@ -1,3 +1,18 @@
+---
+title: "Example Output (start of run)"
+description: "Doc for findmax."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 Analysis Method: FindMax
 ========================
 

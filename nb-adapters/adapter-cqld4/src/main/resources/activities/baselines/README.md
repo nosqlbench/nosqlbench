@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/activities/baselines/README.md
+
+title: "Baselines Version 1"
+description: "Adapter doc for README."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # Baselines Version 1
 
 In order to avoid changing those tests and possibly impacting

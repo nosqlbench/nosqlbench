@@ -1,3 +1,18 @@
+---
+title: "Modular Scenarios"
+description: "API doc for scenario boundaries."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Modular Scenarios
 
 Sketch of named scenario:

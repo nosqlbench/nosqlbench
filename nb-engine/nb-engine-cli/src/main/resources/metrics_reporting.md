@@ -1,3 +1,18 @@
+---
+title: "What You Can Configure"
+description: "Doc for metrics reporting."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 contin# Metrics Reporting Guide
 
 ## What You Can Configure

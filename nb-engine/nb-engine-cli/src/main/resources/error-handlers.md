@@ -1,3 +1,18 @@
+---
+title: "Error Handlers"
+description: "Doc for error-handlers."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Error Handlers
 
 A new error handler facility has been introduced to NoSQLBench in the HTTP

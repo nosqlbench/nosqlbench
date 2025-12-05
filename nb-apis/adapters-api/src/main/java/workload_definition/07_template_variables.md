@@ -1,5 +1,17 @@
 ---
 source: nb-apis/adapters-api/src/main/java/workload_definition/07_template_variables.md
+title: "07 Template Variables"
+description: "API doc for 07 template variables."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 # Template Variables
 

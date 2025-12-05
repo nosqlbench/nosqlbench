@@ -1,3 +1,18 @@
+---
+title: "Script Parameters"
+description: "Doc for cli-scripting."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 Running Activities and Scenarios via CLI
 ========================================
 

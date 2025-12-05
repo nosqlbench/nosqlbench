@@ -1,6 +1,17 @@
 ---
 title: null functions
 weight: 40
+description: "Doc for funcref nulls."
+tags:
+  - nb-virtdata
+  - docs
+audience: developer
+diataxis: reference
+component: virtdata
+topic: bindings
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 These functions can generate null values. When using nulls in your binding recipes, ensure that you don't generate them

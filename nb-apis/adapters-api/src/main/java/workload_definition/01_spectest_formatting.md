@@ -1,5 +1,17 @@
 ---
 source: nb-apis/adapters-api/src/main/java/workload_definition/01_spectest_formatting.md
+title: "01 Spectest Formatting"
+description: "API doc for 01 spectest formatting."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 # SpecTest Formatting
 

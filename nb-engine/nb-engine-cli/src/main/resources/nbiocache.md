@@ -1,3 +1,18 @@
+---
+title: "NB Caching"
+description: "Doc for nbiocache."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NB Caching
 
 nosqlbench provides a means of caching and validating files from remote URLs.

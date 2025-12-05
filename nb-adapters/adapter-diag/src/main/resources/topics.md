@@ -1,2 +1,0 @@
-# diag help topics
-- diag

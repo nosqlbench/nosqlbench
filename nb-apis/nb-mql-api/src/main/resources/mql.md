@@ -1,3 +1,18 @@
+---
+title: "MetricsQL Query Engine"
+description: "API doc for mql."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # MetricsQL Query Engine
 
 MetricsQL is a query engine for analyzing NoSQLBench SQLite metrics databases. It provides a MetricsQL/PromQL-inspired interface for querying time-series metrics data.
@@ -222,4 +237,4 @@ This is useful for:
 
 Run `nb5 help mql` to see this documentation.
 
-For detailed examples, see the [examples README](docs/mql/README.md).
+For detailed examples, see the [MetricsQL Query Examples](mql-examples.md).

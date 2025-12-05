@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-http/src/main/resources/activities/baselines/http-rest.md
+
+title: "HTTP REST Baseline Usage Guide"
+description: "Tips for configuring the http-rest-* baseline workloads."
+audience: operator
+diataxis: howto
+tags:
+  - http
+  - baselines
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # Baselines/http-rest-* Usage Guide
 
 Identifies some key settings, as well as tips & tricks for use with the `http-rest-*` baseline activities.

@@ -1,6 +1,17 @@
 ---
 title: pre-made functions
 weight: 20
+description: "Doc for funcref premade."
+tags:
+  - nb-virtdata
+  - docs
+audience: developer
+diataxis: reference
+component: virtdata
+topic: bindings
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 Functions in this category are meant to provide easy grab-and-go functions that are tailored for real-world simulation.

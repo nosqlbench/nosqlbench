@@ -1,3 +1,18 @@
+---
+title: "for specific help topics run"
+description: "Doc for basic."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # for specific help topics run
     ./nb help <topic>
 

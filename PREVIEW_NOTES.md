@@ -1,3 +1,18 @@
+---
+title: "Preview Notes"
+description: "Rolling notes that accompany preview builds and their automation changes."
+audience: developer
+diataxis: reference
+tags:
+  - releases
+  - preview
+component: docsys
+topic: releases
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 - 2b85c1cce (HEAD -> main, tag: 5.17.1-preview) versions and release action update
 - 2d3263cfb make release tag distinct
 - 639dbf2d6 update action version

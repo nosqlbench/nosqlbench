@@ -1,3 +1,18 @@
+---
+title: "docker-metrics"
+description: "Doc for docker-metrics."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # docker-metrics
 
 ```

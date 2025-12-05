@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-gcp-spanner/src/main/resources/spanner.md
+title: "Google Spanner Driver Adapter"
+description: "Guide for configuring NoSQLBench workloads against Google Cloud Spanner."
+audience: operator
+diataxis: howto
+tags:
+  - spanner
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # Google Spanner driver adapter
 The Google Cloud Spanner driver adapter is a NoSQLBench adapter for the `gcp_spanner` driver, a Java driver

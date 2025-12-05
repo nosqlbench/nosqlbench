@@ -1,3 +1,18 @@
+---
+title: "Building NoSQLBench"
+description: "Requirements and steps for building NoSQLBench locally."
+audience: developer
+diataxis: howto
+tags:
+  - build
+  - contributors
+component: core
+topic: contributing
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 # Building NoSQLBench
 
 ## requirements
@@ -51,5 +66,4 @@ The releases workflow is responsible for thie following:
 
 The build workflow simply builds the project and then verifies it in that order
 using the standard maven mojo.
-
 

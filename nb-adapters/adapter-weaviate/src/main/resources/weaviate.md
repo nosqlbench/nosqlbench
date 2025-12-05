@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-weaviate/src/main/resources/weaviate.md
+title: "Weaviate Driver Adapter"
+description: "Instructions for running Weaviate vector workloads with NoSQLBench."
+audience: operator
+diataxis: howto
+tags:
+  - weaviate
+  - vector
+component: drivers
+topic: drivers
+status: draft
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # Weaviate driver adapter
 
@@ -67,6 +79,6 @@ The following are a couple high level API operations.
 
 ## Examples
 
-Check out the [full example available here](./activities/weaviate_vectors_live.yaml).
+Check out the [full example available here](activities/weaviate_vector_live.yaml).
 
 ---

@@ -1,5 +1,17 @@
 ---
 source: nb-apis/adapters-api/src/main/java/workload_definition/04_op_template_basics.md
+title: "04 Op Template Basics"
+description: "API doc for 04 op template basics."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 # Op Templates
 
@@ -262,7 +274,7 @@ ops:
 All the forms above merely show how you can structure op templates into common collection forms and
 have them be interpreted in a flexible yet obvious way.
 
-However, all the properties described in [templated_workloads.md](templated_workloads.md)
+However, all the properties described in [Workload Structure](02_workload_structure.md)
 can be attached directly to op templates too. This section contains a few examples to illustrate
 this at work.
 
@@ -433,5 +445,4 @@ blocks:
   }
 ]
 ```
-
 

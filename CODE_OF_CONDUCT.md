@@ -1,3 +1,18 @@
+---
+title: "Code of Conduct"
+description: "Expectations for behavior within the NoSQLBench community."
+audience: developer
+diataxis: reference
+tags:
+  - conduct
+  - governance
+component: community
+topic: contributing
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 # Forward
 
 This document reflects a commitment to maintain respect and civility

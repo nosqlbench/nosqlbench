@@ -1,3 +1,18 @@
+---
+title: "NoSQLBench Modules Overview"
+description: "High-level tour of the repository modules and how to contribute."
+audience: developer
+diataxis: explanation
+tags:
+  - architecture
+  - modules
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 ## Contributing
 
 We are actively looking for contributors to help make NoSQLBench better.
@@ -39,5 +54,4 @@ naming conventions have been adopted:
 All runtime packaging and bundling is done in the `nb` module. It produces a Linux binary
   in target/eb. If you are doing testing and need to have a classpath that includes all th
   bundled modules together, then use the `nb` module as your classpath module.
-
 

@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-jdbc/src/main/resources/pgvector.md
+
+title: "pgvector"
+description: "Adapter doc for pgvector."
+audience: operator
+diataxis: howto
+tags:
+  - jdbc
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # pgvector
 
 The jdbc adapter supports testing against

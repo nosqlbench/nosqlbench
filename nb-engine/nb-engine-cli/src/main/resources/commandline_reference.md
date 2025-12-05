@@ -1,3 +1,18 @@
+---
+title: "Command-Line Reference"
+description: "Doc for commandline reference."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Command-Line Reference
 
 This document lists the primary command-line flags, sub-commands, and scripting

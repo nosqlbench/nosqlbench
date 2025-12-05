@@ -1,6 +1,18 @@
 ---
+source: nb-adapters/adapter-http/src/main/resources/activities/documents-api/http-docsapi-crud-basic.md
+
 title: Documents API CRUD Basic
 weight: 2
+audience: operator
+diataxis: howto
+tags:
+  - http
+  - documents-api
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 ## Description
@@ -63,5 +75,4 @@ Note that error handling is set to `errors=timer,warn`, which means that in case
 - `docscount` - the number of documents to process in each step of a scenario (default: `10_000_000`)
 
 Note that if number of documents is higher than `read-cycles` you would experience misses, which will result in `HTTP 404` and smaller latencies.
-
 

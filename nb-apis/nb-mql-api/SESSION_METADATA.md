@@ -1,3 +1,18 @@
+---
+title: "Session Metadata Feature"
+description: "API doc for SESSION METADATA."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Session Metadata Feature
 
 ## Overview

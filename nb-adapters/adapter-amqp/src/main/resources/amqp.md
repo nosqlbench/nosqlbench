@@ -2,6 +2,17 @@
 weight: 0
 title: AMQP
 source: nb-adapters/adapter-amqp/src/main/resources/amqp.md
+description: "Guide for running AMQP 0-9-1 workloads with NoSQLBench."
+audience: operator
+diataxis: howto
+tags:
+  - amqp
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 - [1. Overview](#1-overview)
 - [2. NB AMQP Usage](#2-nb-amqp-usage)

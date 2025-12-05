@@ -1,3 +1,18 @@
+---
+title: "MetricsQL Query Examples"
+description: "API doc for mql-examples."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # MetricsQL Query Examples
 
 This directory contains executable examples demonstrating all query commands in the MetricsQL query engine. Each example is validated by automated tests to ensure the documentation stays accurate.
@@ -5,13 +20,13 @@ This directory contains executable examples demonstrating all query commands in 
 ## Example Files by Theme
 
 ### Basic Queries
-- **[INSTANT_QUERIES.md](INSTANT_QUERIES.md)** - Get current/latest values
+- **[Instant Queries](mql-instant-queries.md)** - Get current/latest values
   - Basic instant queries
   - Label filtering
   - Error metrics
   - Multi-dimensional filtering
 
-- **[RANGE_QUERIES.md](RANGE_QUERIES.md)** - Time-series data retrieval
+- **[Range Queries](mql-range-queries.md)** - Time-series data retrieval
   - Time-series over windows
   - Historical data analysis
   - Error tracking over time
@@ -54,7 +69,7 @@ All examples use `examples.db`, which contains metrics from a simplified e-comme
 - `endpoint`: {/users, /products}
 - `status`: {200, 404, 500}
 
-See [TEST_DATABASES.md](../TEST_DATABASES.md) for detailed schema information.
+See [SESSION_METADATA.md](../../../SESSION_METADATA.md) for detailed schema information.
 
 ## How Examples Work
 

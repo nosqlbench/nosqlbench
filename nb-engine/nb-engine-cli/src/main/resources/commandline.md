@@ -1,3 +1,18 @@
+---
+title: "Command-Line Options"
+description: "Doc for commandline."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Command-Line Options
 
 Help ( You're looking at it. )

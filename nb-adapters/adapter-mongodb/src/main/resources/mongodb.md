@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-mongodb/src/main/resources/mongodb.md
+title: "MongoDB Adapter Guide"
+description: "How to run MongoDB workloads with NoSQLBench using the db.runCommand API."
+audience: operator
+diataxis: howto
+tags:
+  - mongodb
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # MongoDB
 

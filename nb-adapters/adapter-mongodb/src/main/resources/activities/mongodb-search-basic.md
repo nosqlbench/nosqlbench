@@ -1,6 +1,18 @@
 ---
+source: nb-adapters/adapter-mongodb/src/main/resources/activities/mongodb-search-basic.md
+
 title: MongoDB Search Basic
 weight: 2
+audience: operator
+diataxis: howto
+tags:
+  - mongodb
+  - activities
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 ## Description
@@ -62,5 +74,4 @@ The basic search workload can test the following `where` clauses:
 - `docpadding` - the number of fields to add to each document; useful for writing larger documents. A value of e.g. `5` would make each document have 20 leaf values, instead of 15. (default: `0`)
 - `match-ratio` - a value between 0 and 1 detailing what ratio of the documents written should match the search parameters. If match-ratio is e.g. `0.1` then approximately one-tenth of the documents will have `match1`, `match2`, and `match3` values that are `0`, `"true"`, and `true`, respectively. (default: `0.01`)
 - `fields` - the fields projection that you would like to use with Mongo, e.g. `{"debt": 1}`. This restricts the fields returned during benchmarking.
-
 

@@ -1,3 +1,18 @@
+---
+title: "Args Files"
+description: "Doc for argsfile."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Args Files
 
 An argsfile (Command Line Arguments File) is a simple text file which

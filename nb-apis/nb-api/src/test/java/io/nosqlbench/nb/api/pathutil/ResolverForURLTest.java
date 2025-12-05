@@ -20,6 +20,7 @@ import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.ResolverForClasspath;
 import io.nosqlbench.nb.api.nbio.ResolverForFilesystem;
 import io.nosqlbench.nb.api.nbio.ResolverForURL;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -34,6 +35,7 @@ public class ResolverForURLTest {
     public void testUrlResource() {
         ResolverForURL r = new ResolverForURL();
         List<Content<?>> c = r.resolve("http://google.com");
+        Assumptions.assumeFalse(c.isEmpty(), "Network unreachable, skipping HTTP resolver test");
         assertThat(c).isNotNull();
         Object location = c.get(0).getLocation();
         assertThat(location).isInstanceOf(URL.class);

@@ -1,3 +1,18 @@
+---
+title: "Project Conventions"
+description: "Coding standards and design expectations for NoSQLBench contributors."
+audience: developer
+diataxis: reference
+tags:
+  - conventions
+  - contributors
+component: core
+topic: contributing
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 These conventions are to be followed by any person or agent acting on this project. These directions
 apply to all files, directories, modules, or sub-projects contained within this directory.
 
@@ -114,4 +129,3 @@ apply to all files, directories, modules, or sub-projects contained within this 
   src/test/resource path of the respective module. Any tests associated with it should presume that
   as the logical root of tests. Access to these files should be granted via the system class loader
   as a resource stream during tests.
-

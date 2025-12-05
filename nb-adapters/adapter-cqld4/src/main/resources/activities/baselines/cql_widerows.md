@@ -1,6 +1,19 @@
 ---
+source: nb-adapters/adapter-cqld4/src/main/resources/activities/baselines/cql_widerows.md
+
 title: CQL Wide Rows
 weight: 3
+description: "Adapter doc for cql widerows."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 ## Description

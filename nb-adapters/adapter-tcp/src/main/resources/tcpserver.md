@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-tcp/src/main/resources/tcpserver.md
+title: "TCP Server Adapter"
+description: "Server-push variant of the stdout adapter over TCP."
+audience: operator
+diataxis: howto
+tags:
+  - tcp
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # tcpserver
 

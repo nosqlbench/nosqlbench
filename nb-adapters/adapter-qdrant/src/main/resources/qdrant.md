@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-qdrant/src/main/resources/qdrant.md
+title: "Qdrant Driver Adapter"
+description: "How to run vector workloads against Qdrant using the NoSQLBench adapter."
+audience: operator
+diataxis: howto
+tags:
+  - qdrant
+  - vector
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 # qdrant driver adapter

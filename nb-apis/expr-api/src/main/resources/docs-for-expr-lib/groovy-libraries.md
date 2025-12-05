@@ -1,3 +1,18 @@
+---
+title: "Groovy Expression Libraries"
+description: "API doc for groovy-libraries."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Groovy Expression Libraries
 
 NoSQLBench automatically loads Groovy libraries from the `lib/groovy/` directory to extend expression functionality. Libraries are marked with the `@Library` annotation and provide themed collections of utility functions.

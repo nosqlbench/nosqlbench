@@ -1,3 +1,17 @@
+---
+title: "Data Verification"
+description: "Doc for verify."
+tags:
+  - docs
+audience: developer
+diataxis: reference
+component: docsys
+topic: architecture
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 # Data Verification
 
 NoSQLBench has the capability to verify data that is the result of an operation by comparing

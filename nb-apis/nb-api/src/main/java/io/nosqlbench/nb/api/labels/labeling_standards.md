@@ -1,3 +1,18 @@
+---
+title: "Labeling Standards"
+description: "API doc for labeling standards."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 ## Labeling Standards
 
 NOTE: This needs to be updated for NB521

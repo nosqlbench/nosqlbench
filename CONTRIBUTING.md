@@ -1,3 +1,18 @@
+---
+title: "Contributing to NoSQLBench"
+description: "Guidelines and references for people who want to contribute to NoSQLBench."
+audience: developer
+diataxis: howto
+tags:
+  - contributing
+  - governance
+component: community
+topic: contributing
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 [![All Contributors](https://img.shields.io/github/all-contributors/nosqlbench/nosqlbench?color=ee8449&style=flat-square)](#contributors)
 
 NoSQLBench is an ambitious project. It aims to solve long-standing problems in distributed systems

@@ -1,3 +1,18 @@
+---
+title: "VictoriaMetrics MetricsQL Compatibility"
+description: "API doc for VICTORIAMETRICS COMPATIBILITY."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # VictoriaMetrics MetricsQL Compatibility
 
 ## Overview

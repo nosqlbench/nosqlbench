@@ -1,3 +1,18 @@
+---
+title: "MetricsQL Implementation Differences"
+description: "API doc for METRICSQL DIFFERENCES."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # MetricsQL Implementation Differences
 
 This document describes behavioral differences between NoSQLBench's MetricsQL implementation and VictoriaMetrics' official MetricsQL engine.

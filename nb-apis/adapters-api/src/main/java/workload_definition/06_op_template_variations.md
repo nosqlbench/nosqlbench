@@ -1,6 +1,17 @@
 ---
 source: nb-apis/adapters-api/src/main/java/workload_definition/06_op_template_variations.md
 title: Op Template Variations
+description: "API doc for 06 op template variations."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 # Op Templates Variations

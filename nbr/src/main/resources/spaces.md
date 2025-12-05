@@ -1,3 +1,17 @@
+---
+title: "NoSQLBench Spaces"
+description: "Doc for spaces."
+tags:
+  - docs
+audience: developer
+diataxis: reference
+component: docsys
+topic: architecture
+status: live
+owner: "@nosqlbench/docs"
+generated: false
+---
+
 # NoSQLBench Spaces
 
 The _spaces_ feature of NoSQLBench allows for users to control how native

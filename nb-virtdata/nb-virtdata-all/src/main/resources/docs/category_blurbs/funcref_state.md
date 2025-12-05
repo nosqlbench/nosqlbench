@@ -1,6 +1,17 @@
 ---
 title: state functions
 weight: 30
+description: "Doc for funcref state."
+tags:
+  - nb-virtdata
+  - docs
+audience: developer
+diataxis: reference
+component: virtdata
+topic: bindings
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 Functions in the state category allow you to do things with side-effects in the function flow. Specifically, they allow

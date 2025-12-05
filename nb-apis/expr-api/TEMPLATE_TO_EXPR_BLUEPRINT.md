@@ -1,3 +1,18 @@
+---
+title: "TEMPLATE Variables to Expr Library - Integration Blueprint"
+description: "API doc for TEMPLATE TO EXPR BLUEPRINT."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # TEMPLATE Variables to Expr Library - Integration Blueprint
 
 ## Executive Summary

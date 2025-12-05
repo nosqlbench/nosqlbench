@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-jdbc/src/main/resources/jdbc.md
+
+title: "JDBC Driver Adapter"
+description: "Guide to using the Hikari-powered JDBC adapter for PostgreSQL-compatible databases."
+audience: operator
+diataxis: howto
+tags:
+  - jdbc
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # JDBC driver
 This JDBC driver leverages [Hikari Connection Pool](https://github.com/brettwooldridge/HikariCP/wiki) for connection pool and works with PostgreSQL®. This leverages NoSQLBench based workload generation and performance testing against any PostgreSQL-compatible database cluster. Example: CockroachDB® or YugabyteDB® (YSQL API).
 

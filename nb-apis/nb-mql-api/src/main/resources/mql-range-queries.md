@@ -1,3 +1,18 @@
+---
+title: "Range Queries"
+description: "API doc for mql-range-queries."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Range Queries
 
 Retrieve time-series data over a time window. Range queries return all data points within a specified time range.

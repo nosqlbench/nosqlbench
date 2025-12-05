@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-http/src/main/resources/http.md
+title: "Http"
+description: "HTTP adapter doc: http."
+audience: operator
+diataxis: howto
+tags:
+  - http
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # http
 

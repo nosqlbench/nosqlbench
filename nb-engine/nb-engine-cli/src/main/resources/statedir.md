@@ -1,3 +1,18 @@
+---
+title: "State Directory"
+description: "Doc for statedir."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # State Directory
 
 In order to maintain state for a NoSQLBench client instance,

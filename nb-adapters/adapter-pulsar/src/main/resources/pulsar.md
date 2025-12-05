@@ -1,6 +1,18 @@
 ---
 weight: 0
 source: nb-adapters/adapter-pulsar/src/main/resources/pulsar.md
+title: "Pulsar Adapter Guide"
+description: "Comprehensive reference for running Apache Pulsar workloads with NoSQLBench."
+audience: operator
+diataxis: howto
+tags:
+  - pulsar
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 # Pulsar
@@ -214,7 +226,7 @@ Its value is mandatory and depending on the actual identifier, its value can be 
 * ***Topic name***: for the rest of the types and in format [(persistent|non-persistent)://]<tenant>/<namespace>/<topic>
   is mandatory for each NB Pulsar operation type
 
-Each Pulsar `OpType` may have optional Op specific parameters. Please refer to [here](yaml_examples) for the example NB Pulsar YAML files for each OpType
+Each Pulsar `OpType` may have optional Op specific parameters. Please refer to the [adapter sample workloads](https://github.com/nosqlbench/nosqlbench/tree/main/nb-adapters/adapter-pulsar/src/main/resources/scenarios) for example NB Pulsar YAML files for each OpType
 
 # 4. Message Generation and Schema Support {#4-message-generation-and-schema-support}
 

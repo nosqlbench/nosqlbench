@@ -1,13 +1,25 @@
 ---
+source: nb-adapters/adapter-mongodb/src/main/resources/activities/mongodb-crud-dataset.md
+
 title: mongoDB CRUD Dataset
 weight: 2
+audience: operator
+diataxis: howto
+tags:
+  - mongodb
+  - activities
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 
 ## Description
 
 The mongoDB CRUD Dataset workflow emulates CRUD operations for the mongoDB using JSON documents from an external dataset.
 It's a counterpart of the Stargate's Documents API CRUD Dataset workflow.
-Please refer to [http-docsapi-crud-dataset.md](../../../../../driver-http/src/main/resources/activities/documents-api/http-docsapi-crud-dataset.md) for the general workflow design details.
+Please refer to [http-docsapi-crud-dataset.md](../../../../../adapter-http/src/main/resources/activities/documents-api/http-docsapi-crud-dataset.md) for the general workflow design details.
 
 ## Indexing
 

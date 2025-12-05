@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-dynamodb/src/main/resources/dynamodb.md
+title: "DynamoDB Adapter Guide"
+description: "Instructions for exercising DynamoDB workloads via NoSQLBench."
+audience: operator
+diataxis: howto
+tags:
+  - dynamodb
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # dynamodb
 

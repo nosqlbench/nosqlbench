@@ -1,6 +1,17 @@
 ---
 title: Using Bindings
 weight: 15
+description: "Doc for using bindings."
+tags:
+  - nb-virtdata
+  - docs
+audience: developer
+diataxis: reference
+component: virtdata
+topic: bindings
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 The functions which you can use to generate data in your workloads are

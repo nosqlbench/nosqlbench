@@ -1,3 +1,18 @@
+---
+title: "Globalvars"
+description: "Doc for globalvars."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 globalvars extension
 ===================
 

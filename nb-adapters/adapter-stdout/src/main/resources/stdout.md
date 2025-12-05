@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-stdout/src/main/resources/stdout.md
+title: "Stdout Adapter Guide"
+description: "How to emit workload output to stdout or files with NoSQLBench."
+audience: operator
+diataxis: howto
+tags:
+  - stdout
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # stdout
 

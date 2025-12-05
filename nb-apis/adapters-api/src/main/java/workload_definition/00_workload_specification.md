@@ -1,5 +1,17 @@
 ---
 source: nb-apis/adapters-api/src/main/java/workload_definition/00_workload_specification.md
+title: "00 Workload Specification"
+description: "API doc for 00 workload specification."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 # Workload Specification
 

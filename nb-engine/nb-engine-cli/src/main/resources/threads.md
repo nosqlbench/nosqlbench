@@ -1,3 +1,18 @@
+---
+title: "Setting threads"
+description: "Doc for threads."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Setting threads
 
 Threads may be set in a few different ways depending on the type of

@@ -1,6 +1,17 @@
 ---
 title: datetime functions
 weight: 20
+description: "Doc for funcref datetime."
+tags:
+  - nb-virtdata
+  - docs
+audience: developer
+diataxis: reference
+component: virtdata
+topic: bindings
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 Functions in this category know about times and dates, datetimes, seconds or millisecond epoch times, and so forth.

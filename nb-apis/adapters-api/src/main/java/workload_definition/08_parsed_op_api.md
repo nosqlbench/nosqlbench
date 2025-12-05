@@ -1,5 +1,17 @@
 ---
 source: nb-apis/adapters-api/src/main/java/workload_definition/08_parsed_op_api.md
+title: "08 Parsed Op Api"
+description: "API doc for 08 parsed op api."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 # ParsedOp API
 

@@ -1,6 +1,17 @@
 ---
+title: "Kafka Adapter Guide"
+description: "How to use the NoSQLBench Kafka adapter for producing and consuming workloads."
+audience: operator
+diataxis: howto
+tags:
+  - kafka
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 weight: 0
-title: Kafka
 source: nb-adapters/adapter-kafka/src/main/resources/kafka.md
 ---
 - [1. Overview](#1-overview)

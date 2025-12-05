@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-tcp/src/main/resources/tcpclient.md
+title: "TCP Client Adapter"
+description: "Client-push variant of the stdout adapter over TCP."
+audience: operator
+diataxis: howto
+tags:
+  - tcp
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # tcpclient
 

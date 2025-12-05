@@ -1,3 +1,18 @@
+---
+title: "Pinecone Adapter Status"
+description: "Notes on why the Pinecone adapter is disconnected from the main build."
+audience: developer
+diataxis: explanation
+tags:
+  - pinecone
+  - drivers
+component: drivers
+topic: drivers
+status: deprecated
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 This driver has been disconnected from the main build and artifacts due to
 it being abandoned by pinecone.
 

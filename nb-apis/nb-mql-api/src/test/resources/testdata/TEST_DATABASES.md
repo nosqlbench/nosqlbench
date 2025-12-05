@@ -1,3 +1,18 @@
+---
+title: "Test Database Documentation"
+description: "API doc for TEST DATABASES."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Test Database Documentation
 
 This directory contains pre-generated SQLite metrics databases for testing the MetricsQL query engine. Each database represents a specific scenario with known data patterns.

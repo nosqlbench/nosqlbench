@@ -1,5 +1,17 @@
 ---
 source: nb-apis/adapters-api/src/main/java/workload_definition/05_op_template_payloads.md
+title: "05 Op Template Payloads"
+description: "API doc for 05 op template payloads."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 # Op Template Payloads
 

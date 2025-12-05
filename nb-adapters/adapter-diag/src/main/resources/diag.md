@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-diag/src/main/resources/diag.md
+title: "Diag Adapter Guide"
+description: "Diagnostic driver for emitting cycle timing information."
+audience: developer
+diataxis: reference
+tags:
+  - diag
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # diag
 

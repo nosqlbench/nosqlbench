@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-neo4j/src/main/resources/neo4j.md
+title: "Neo4j Driver Adapter"
+description: "Instructions for targeting Neo4j/Aura with NoSQLBench workloads."
+audience: operator
+diataxis: howto
+tags:
+  - neo4j
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # neo4j driver adapter
 

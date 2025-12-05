@@ -1,3 +1,18 @@
+---
+title: "Instant Queries"
+description: "API doc for mql-instant-queries."
+tags:
+  - api
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: api
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Instant Queries
 
 Get the most recent value for metrics. Instant queries return the latest snapshot for each unique label set.

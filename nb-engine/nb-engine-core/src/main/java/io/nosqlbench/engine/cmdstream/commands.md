@@ -1,3 +1,18 @@
+---
+title: "API notes; Commands"
+description: "Doc for commands."
+tags:
+  - nb-engine
+  - docs
+audience: developer
+diataxis: reference
+component: core
+topic: architecture
+status: live
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # API notes; Commands
 
 Commands have a very basic type model which facilitates parsing,
