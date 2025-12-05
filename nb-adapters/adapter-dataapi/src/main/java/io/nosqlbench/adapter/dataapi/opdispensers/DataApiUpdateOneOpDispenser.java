@@ -45,7 +45,7 @@ public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            CollectionUpdateOneOptions options = getUpdateOneOptions(op, l);
+            CollectionUpdateOneOptions options = getCollectionUpdateOneOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("update", Map.class);
 
             return new DataApiUpdateOneOp(
@@ -58,7 +58,7 @@ public class DataApiUpdateOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private CollectionUpdateOneOptions getUpdateOneOptions(ParsedOp op, long l) {
+    private CollectionUpdateOneOptions getCollectionUpdateOneOptions(ParsedOp op, long l) {
         CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
         Sort sort = getSortFromOp(op, l);
         float[] vector = getVectorFromOp(op, l);
