@@ -22,7 +22,7 @@ import com.datastax.astra.client.collections.commands.Update;
 import com.datastax.astra.client.collections.commands.options.CollectionUpdateManyOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateManyOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionUpdateManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,21 +33,21 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateManyOpDispenser.class);
-    private final LongFunction<DataApiUpdateManyOp> opFunction;
+    private final LongFunction<DataApiCollectionUpdateManyOp> opFunction;
 
     public DataApiCollectionUpdateManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiUpdateManyOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionUpdateManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             CollectionUpdateManyOptions options = getCollectionUpdateManyOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("updates", Map.class);
 
-            return new DataApiUpdateManyOp(
+            return new DataApiCollectionUpdateManyOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,

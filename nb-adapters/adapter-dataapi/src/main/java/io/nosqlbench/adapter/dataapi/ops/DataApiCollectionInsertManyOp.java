@@ -16,25 +16,27 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.collections.commands.results.CollectionInsertOneResult;
+import com.datastax.astra.client.collections.commands.options.CollectionInsertManyOptions;
 
-public class DataApiInsertOneVectorOp extends DataApiBaseOp {
-    private final Document doc;
+import java.util.List;
+
+public class DataApiCollectionInsertManyOp extends DataApiBaseOp {
+    private final List<? extends Document> documents;
     private final String collectionName;
+    private final CollectionInsertManyOptions options;
 
-    public DataApiInsertOneVectorOp(Database db, String collectionName, Document doc, float[] vector) {
+
+    public DataApiCollectionInsertManyOp(Database db, String collectionName, List<? extends Document> documents, CollectionInsertManyOptions options) {
         super(db);
         this.collectionName = collectionName;
-        this.doc = doc.vector(vector);
+        this.documents = documents;
+        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        Collection<Document> collection = db.getCollection(collectionName);
-        CollectionInsertOneResult result = collection.insertOne(doc);
-        return result;
+        return db.getCollection(collectionName).insertMany(documents, options);
     }
 }

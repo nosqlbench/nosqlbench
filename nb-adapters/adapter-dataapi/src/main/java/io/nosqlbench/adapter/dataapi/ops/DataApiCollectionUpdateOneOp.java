@@ -19,19 +19,25 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.options.CollectionUpdateOneOptions;
 
-public class DataApiDeleteManyOp extends DataApiBaseOp {
+public class DataApiCollectionUpdateOneOp extends DataApiBaseOp {
     private final Collection collection;
     private final Filter filter;
+    private final Update update;
+    private final CollectionUpdateOneOptions options;
 
-    public DataApiDeleteManyOp(Database db, Collection collection, Filter filter) {
+    public DataApiCollectionUpdateOneOp(Database db, Collection collection, Filter filter, Update update, CollectionUpdateOneOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;
+        this.update = update;
+        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        return collection.deleteMany(filter);
+        return collection.updateOne(filter, update, options);
     }
 }

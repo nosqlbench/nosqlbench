@@ -20,17 +20,14 @@ import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
-import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOneOptions;
 
-import java.util.List;
-
-public class DataApiFindOp extends DataApiBaseOp {
+public class DataApiCollectionFindOneOp extends DataApiBaseOp {
     private final Collection<Document> collection;
     private final Filter filter;
-    private final CollectionFindOptions options;
+    private final CollectionFindOneOptions options;
 
-    public DataApiFindOp(Database db, Collection<Document> collection, Filter filter, CollectionFindOptions options) {
+    public DataApiCollectionFindOneOp(Database db, Collection<Document> collection, Filter filter, CollectionFindOneOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;
@@ -38,9 +35,7 @@ public class DataApiFindOp extends DataApiBaseOp {
     }
 
     @Override
-    public List<Document> apply(long value) {
-        CollectionFindCursor<Document, Document> cursor = collection.find(filter, options);
-        // Caution: might bloat memory
-        return cursor.toList();
+    public Object apply(long value) {
+        return collection.findOne(filter, options);
     }
 }

@@ -20,7 +20,7 @@ import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.collections.commands.options.CollectionInsertManyOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiInsertManyOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionInsertManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,18 +33,18 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionInsertManyOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertManyOpDispenser.class);
-    private final LongFunction<DataApiInsertManyOp> opFunction;
+    private final LongFunction<DataApiCollectionInsertManyOp> opFunction;
 
     public DataApiCollectionInsertManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiInsertManyOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionInsertManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             List<Document> documents = new ArrayList<>();
             op.getAsRequiredFunction("documents", List.class).apply(l).forEach(o -> documents.add(Document.parse(o.toString())));
-            return new DataApiInsertManyOp(
+            return new DataApiCollectionInsertManyOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
                 documents,

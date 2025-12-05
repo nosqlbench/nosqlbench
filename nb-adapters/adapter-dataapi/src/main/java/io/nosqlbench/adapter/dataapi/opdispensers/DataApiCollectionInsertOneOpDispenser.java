@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionInsertOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,18 +29,18 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionInsertOneOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertOneOpDispenser.class);
-    private final LongFunction<DataApiInsertOneOp> opFunction;
+    private final LongFunction<DataApiCollectionInsertOneOp> opFunction;
 
     public DataApiCollectionInsertOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiInsertOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionInsertOneOp> createOpFunction(ParsedOp op) {
         LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
         LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
         return (l) -> {
-            return new DataApiInsertOneOp(
+            return new DataApiCollectionInsertOneOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
                 docFunc.apply(l)

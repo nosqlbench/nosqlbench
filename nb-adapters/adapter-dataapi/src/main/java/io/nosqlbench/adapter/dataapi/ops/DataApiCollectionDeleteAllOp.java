@@ -18,25 +18,17 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.core.query.Sort;
-import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
 
-public class DataApiFindVectorOp extends DataApiBaseOp {
-    private final Collection<Document> collection;
-    private final CollectionFindOptions options;
+public class DataApiCollectionDeleteAllOp extends DataApiBaseOp {
+    private final Collection collection;
 
-    public DataApiFindVectorOp(Database db, Collection<Document> collection, float[] vector, int limit) {
+    public DataApiCollectionDeleteAllOp(Database db, Collection collection) {
         super(db);
         this.collection = collection;
-        this.options = new CollectionFindOptions().sort(Sort.vector(vector)).limit(limit);
     }
 
     @Override
     public Object apply(long value) {
-        CollectionFindCursor<Document, Document> cursor = collection.find(options);
-        // Caution: might bloat memory
-        return cursor.toList();
+        return collection.deleteAll();
     }
 }

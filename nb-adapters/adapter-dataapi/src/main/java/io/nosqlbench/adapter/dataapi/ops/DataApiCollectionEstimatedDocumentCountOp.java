@@ -1,5 +1,5 @@
 /*
- * Copyright (c) nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,20 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndReplaceOptions;
+import com.datastax.astra.client.collections.definition.documents.Document;
 
-public class DataApiFindOneAndReplaceOp extends DataApiBaseOp {
-    private final Collection collection;
-    private final Filter filter;
-    private final Object replacement;
-    private final CollectionFindOneAndReplaceOptions options;
-
-    public DataApiFindOneAndReplaceOp(Database db, Collection collection, Filter filter, Object replacement, CollectionFindOneAndReplaceOptions options) {
+public class DataApiCollectionEstimatedDocumentCountOp extends DataApiBaseOp {
+    private final String collectionName;
+    public DataApiCollectionEstimatedDocumentCountOp(Database db, String collectionName) {
         super(db);
-        this.collection = collection;
-        this.filter = filter;
-        this.replacement = replacement;
-        this.options = options;
+        this.collectionName = collectionName;
     }
 
     @Override
     public Object apply(long value) {
-        return collection.findOneAndReplace(filter, replacement, options);
+        long response;
+        Collection<Document> collection = db.getCollection(collectionName);
+        response = collection.estimatedDocumentCount();
+        return response;
     }
 }

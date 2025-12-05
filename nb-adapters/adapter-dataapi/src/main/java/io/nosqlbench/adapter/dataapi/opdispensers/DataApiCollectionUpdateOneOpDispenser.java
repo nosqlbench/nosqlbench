@@ -23,7 +23,7 @@ import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.collections.commands.Update;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionUpdateOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,21 +34,21 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateOneOpDispenser.class);
-    private final LongFunction<DataApiUpdateOneOp> opFunction;
+    private final LongFunction<DataApiCollectionUpdateOneOp> opFunction;
 
     public DataApiCollectionUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiUpdateOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionUpdateOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             CollectionUpdateOneOptions options = getCollectionUpdateOneOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("update", Map.class);
 
-            return new DataApiUpdateOneOp(
+            return new DataApiCollectionUpdateOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,

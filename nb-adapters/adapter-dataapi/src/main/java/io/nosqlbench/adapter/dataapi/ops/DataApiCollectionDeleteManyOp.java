@@ -16,21 +16,22 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.core.query.Filter;
 
-public class DataApiInsertOneOp extends DataApiBaseOp {
-    private final Document doc;
-    private final String collectionName;
+public class DataApiCollectionDeleteManyOp extends DataApiBaseOp {
+    private final Collection collection;
+    private final Filter filter;
 
-    public DataApiInsertOneOp(Database db, String collectionName, Document doc) {
+    public DataApiCollectionDeleteManyOp(Database db, Collection collection, Filter filter) {
         super(db);
-        this.collectionName = collectionName;
-        this.doc = doc;
+        this.collection = collection;
+        this.filter = filter;
     }
 
     @Override
     public Object apply(long value) {
-        return db.getCollection(collectionName).insertOne(doc);
+        return collection.deleteMany(filter);
     }
 }

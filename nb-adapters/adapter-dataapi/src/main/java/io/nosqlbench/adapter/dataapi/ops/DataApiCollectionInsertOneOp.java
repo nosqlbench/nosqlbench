@@ -16,25 +16,21 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.commands.options.CollectionDeleteOneOptions;
-import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.definition.documents.Document;
 
-public class DataApiDeleteOneOp extends DataApiBaseOp {
-    private final Collection collection;
-    private final Filter filter;
-    private final CollectionDeleteOneOptions options;
+public class DataApiCollectionInsertOneOp extends DataApiBaseOp {
+    private final Document doc;
+    private final String collectionName;
 
-    public DataApiDeleteOneOp(Database db, Collection collection, Filter filter, CollectionDeleteOneOptions options) {
+    public DataApiCollectionInsertOneOp(Database db, String collectionName, Document doc) {
         super(db);
-        this.collection = collection;
-        this.filter = filter;
-        this.options = options;
+        this.collectionName = collectionName;
+        this.doc = doc;
     }
 
     @Override
     public Object apply(long value) {
-        return collection.deleteOne(filter, options);
+        return db.getCollection(collectionName).insertOne(doc);
     }
 }

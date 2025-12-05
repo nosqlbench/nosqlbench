@@ -20,7 +20,7 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindVectorOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindVectorOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,18 +29,18 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionFindVectorOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionFindVectorOpDispenser.class);
-    private final LongFunction<DataApiFindVectorOp> opFunction;
+    private final LongFunction<DataApiCollectionFindVectorOp> opFunction;
     public DataApiCollectionFindVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindVectorOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionFindVectorOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             float[] vector = getVectorValues(op, l);
             int limit = getLimit(op, l);
-            return new DataApiFindVectorOp(
+            return new DataApiCollectionFindVectorOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 vector,

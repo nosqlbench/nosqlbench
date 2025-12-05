@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 import com.datastax.astra.client.databases.Database;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteAllOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionDeleteAllOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,18 +28,18 @@ import java.util.function.LongFunction;
 
 public class DataApiCollectionDeleteAllOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionDeleteAllOpDispenser.class);
-    private final LongFunction<DataApiDeleteAllOp> opFunction;
+    private final LongFunction<DataApiCollectionDeleteAllOp> opFunction;
 
     public DataApiCollectionDeleteAllOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiDeleteAllOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionDeleteAllOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
 
-            return new DataApiDeleteAllOp(
+            return new DataApiCollectionDeleteAllOp(
                 db,
                 db.getCollection(targetFunction.apply(l))
             );
