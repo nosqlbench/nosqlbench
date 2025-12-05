@@ -31,11 +31,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiInsertManyOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiInsertManyOpDispenser.class);
+public class DataApiCollectionInsertManyOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertManyOpDispenser.class);
     private final LongFunction<DataApiInsertManyOp> opFunction;
 
-    public DataApiInsertManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionInsertManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }

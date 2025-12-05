@@ -16,36 +16,42 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Projection;
+import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiFindByIdOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
 import java.util.function.LongFunction;
 
-public class DataApiInsertOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiInsertOneOpDispenser.class);
-    private final LongFunction<DataApiInsertOneOp> opFunction;
-
-    public DataApiInsertOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionFindByIdOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindByIdOpDispenser.class);
+    private final LongFunction<DataApiFindByIdOp> opFunction;
+    public DataApiCollectionFindByIdOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiInsertOneOp> createOpFunction(ParsedOp op) {
-        LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
-        LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
+    private LongFunction<DataApiFindByIdOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            return new DataApiInsertOneOp(
-                spaceFunction.apply(l).getDatabase(),
-                targetFunction.apply(l),
-                docFunc.apply(l)
+            Database db = spaceFunction.apply(l).getDatabase();
+            Object id = getIdFromOp(op, l);
+            return new DataApiFindByIdOp(
+                db,
+                db.getCollection(targetFunction.apply(l)),
+                id
             );
         };
+    }
+
+    private Object getIdFromOp(ParsedOp op, long l) {
+        return op.getAsRequiredFunction("id", Object.class).apply(l);
     }
 
     @Override

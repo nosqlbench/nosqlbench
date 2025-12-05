@@ -17,59 +17,64 @@
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.commands.options.CollectionDeleteOneOptions;
-import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionUpdateOneOptions;
 import com.datastax.astra.client.core.query.Sort;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiDeleteOneOpDispenser.class);
-    private final LongFunction<DataApiDeleteOneOp> opFunction;
+public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateOneOpDispenser.class);
+    private final LongFunction<DataApiUpdateOneOp> opFunction;
 
-    public DataApiDeleteOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiDeleteOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiUpdateOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            CollectionDeleteOneOptions options = getCollectionDeleteOneOptions(op, l);
+            CollectionUpdateOneOptions options = getCollectionUpdateOneOptions(op, l);
+            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("update", Map.class);
 
-            return new DataApiDeleteOneOp(
+            return new DataApiUpdateOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
+                new Update(docMapFunc.apply(l)),
                 options
             );
         };
     }
 
-    private CollectionDeleteOneOptions getCollectionDeleteOneOptions(ParsedOp op, long l) {
-        CollectionDeleteOneOptions options = new CollectionDeleteOneOptions();
+    private CollectionUpdateOneOptions getCollectionUpdateOneOptions(ParsedOp op, long l) {
+        CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
         Sort sort = getSortFromOp(op, l);
         float[] vector = getVectorFromOp(op, l);
+
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            options = options.upsert(upsertFunction.get().apply(l));
+        }
         if (sort != null) {
             options = (vector != null) ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
-        } else if (vector != null) {
-            options = options.sort(Sort.vector(vector));
         }
         return options;
     }
 
     private float[] getVectorFromOp(ParsedOp op, long l) {
-        if (op.isDefined("vector")) {
-            return getVectorValues(op.get("vector", l));
-        }
-        return null;
+        return getVectorValues(op.get("vector", l));
     }
 
     @Override

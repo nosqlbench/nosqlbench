@@ -30,10 +30,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiFindOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindOneOpDispenser.class);
+public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOneOpDispenser.class);
     private final LongFunction<DataApiFindOneOp> opFunction;
-    public DataApiFindOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionFindOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }

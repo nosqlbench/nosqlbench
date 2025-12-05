@@ -18,37 +18,53 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.options.CollectionUpdateManyOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCountDocumentsOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCountDocumentsOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCountDocumentsOpDispenser.class);
-    private final LongFunction<DataApiCountDocumentsOp> opFunction;
+public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateManyOpDispenser.class);
+    private final LongFunction<DataApiUpdateManyOp> opFunction;
 
-    public DataApiCountDocumentsOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionUpdateManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCountDocumentsOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiUpdateManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            int upperBound = op.getAsRequiredFunction("upperbound", Integer.class).apply(l);
+            CollectionUpdateManyOptions options = getCollectionUpdateManyOptions(op, l);
+            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("updates", Map.class);
 
-            return new DataApiCountDocumentsOp(
+            return new DataApiUpdateManyOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                upperBound
+                new Update(docMapFunc.apply(l)),
+                options
             );
         };
+    }
+
+    private CollectionUpdateManyOptions getCollectionUpdateManyOptions(ParsedOp op, long l) {
+        CollectionUpdateManyOptions options = new CollectionUpdateManyOptions();
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            options = options.upsert(upsertFunction.get().apply(l));
+        }
+
+        return options;
     }
 
     @Override

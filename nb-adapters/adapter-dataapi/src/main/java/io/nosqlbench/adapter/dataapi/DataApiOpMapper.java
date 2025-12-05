@@ -65,27 +65,27 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
                 new DataApiListCollectionNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection_with_class -> new DataApiCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
-            case insert_many -> new DataApiInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case insert_one -> new DataApiInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case insert_one_vector -> new DataApiInsertOneVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find -> new DataApiFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_one -> new DataApiFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_one_and_delete -> new DataApiFindOneAndDeleteOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_one_and_update -> new DataApiFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_vector -> new DataApiFindVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_vector_filter -> new DataApiFindVectorFilterOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case update_one -> new DataApiUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case update_many -> new DataApiUpdateManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case delete_one -> new DataApiDeleteOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case delete_many -> new DataApiDeleteManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case insert_many -> new DataApiCollectionInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case insert_one_vector -> new DataApiCollectionInsertOneVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find -> new DataApiCollectionFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_one -> new DataApiCollectionFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_one_and_delete -> new DataApiCollectionFindOneAndDeleteOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_one_and_update -> new DataApiCollectionFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_vector -> new DataApiCollectionFindVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_vector_filter -> new DataApiCollectionFindVectorFilterOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case update_one -> new DataApiCollectionUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case update_many -> new DataApiCollectionUpdateManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_one -> new DataApiCollectionDeleteOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_many -> new DataApiCollectionDeleteManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case estimated_document_count ->
-                new DataApiEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_by_id -> new DataApiFindByIdOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_distinct -> new DataApiFindDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case count_documents -> new DataApiCountDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case replace_one -> new DataApiReplaceOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_one_and_replace -> new DataApiFindOneAndReplaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case delete_all -> new DataApiDeleteAllOpDispenser(adapter, op, typeAndTarget.targetFunction);
+                new DataApiCollectionEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_by_id -> new DataApiCollectionFindByIdOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_distinct -> new DataApiCollectionFindDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case count_documents -> new DataApiCollectionCountDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case replace_one -> new DataApiCollectionReplaceOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_one_and_replace -> new DataApiCollectionFindOneAndReplaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_all -> new DataApiCollectionDeleteAllOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 

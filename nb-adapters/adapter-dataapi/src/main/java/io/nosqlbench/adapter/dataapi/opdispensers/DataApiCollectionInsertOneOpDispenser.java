@@ -20,7 +20,6 @@ import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneVectorOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,25 +27,23 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 import java.util.function.LongFunction;
 
-public class DataApiInsertOneVectorOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiInsertOneVectorOpDispenser.class);
-    private final LongFunction<DataApiInsertOneVectorOp> opFunction;
+public class DataApiCollectionInsertOneOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertOneOpDispenser.class);
+    private final LongFunction<DataApiInsertOneOp> opFunction;
 
-    public DataApiInsertOneVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionInsertOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiInsertOneVectorOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiInsertOneOp> createOpFunction(ParsedOp op) {
         LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
         LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
-        LongFunction<float[]> vectorF= op.getAsRequiredFunction("vector", float[].class);
         return (l) -> {
-            return new DataApiInsertOneVectorOp(
+            return new DataApiInsertOneOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
-                docFunc.apply(l),
-                vectorF.apply(l)
+                docFunc.apply(l)
             );
         };
     }

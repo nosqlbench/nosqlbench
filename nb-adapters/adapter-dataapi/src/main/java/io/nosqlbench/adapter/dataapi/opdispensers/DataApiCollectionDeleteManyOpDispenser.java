@@ -18,53 +18,35 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.Update;
-import com.datastax.astra.client.collections.commands.options.CollectionUpdateManyOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiUpdateManyOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiUpdateManyOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiUpdateManyOpDispenser.class);
-    private final LongFunction<DataApiUpdateManyOp> opFunction;
+public class DataApiCollectionDeleteManyOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionDeleteManyOpDispenser.class);
+    private final LongFunction<DataApiDeleteManyOp> opFunction;
 
-    public DataApiUpdateManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionDeleteManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiUpdateManyOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiDeleteManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            CollectionUpdateManyOptions options = getCollectionUpdateManyOptions(op, l);
-            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("updates", Map.class);
 
-            return new DataApiUpdateManyOp(
+            return new DataApiDeleteManyOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
-                filter,
-                new Update(docMapFunc.apply(l)),
-                options
+                filter
             );
         };
-    }
-
-    private CollectionUpdateManyOptions getCollectionUpdateManyOptions(ParsedOp op, long l) {
-        CollectionUpdateManyOptions options = new CollectionUpdateManyOptions();
-        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
-        if (upsertFunction.isPresent()) {
-            options = options.upsert(upsertFunction.get().apply(l));
-        }
-
-        return options;
     }
 
     @Override

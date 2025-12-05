@@ -1,5 +1,5 @@
 /*
- * Copyright (c) nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,26 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.core.query.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiDeleteManyOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiEstimatedDocumentCountOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiDeleteManyOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiDeleteManyOpDispenser.class);
-    private final LongFunction<DataApiDeleteManyOp> opFunction;
-
-    public DataApiDeleteManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionEstimatedDocumentCountOpDispenser extends DataApiOpDispenser {
+    private final LongFunction<DataApiEstimatedDocumentCountOp> opFunction;
+    public DataApiCollectionEstimatedDocumentCountOpDispenser(
+        DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiDeleteManyOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiEstimatedDocumentCountOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
-
-            return new DataApiDeleteManyOp(
-                db,
-                db.getCollection(targetFunction.apply(l)),
-                filter
+            return new DataApiEstimatedDocumentCountOp(
+                spaceFunction.apply(l).getDatabase(),
+                targetFunction.apply(l)
             );
         };
     }

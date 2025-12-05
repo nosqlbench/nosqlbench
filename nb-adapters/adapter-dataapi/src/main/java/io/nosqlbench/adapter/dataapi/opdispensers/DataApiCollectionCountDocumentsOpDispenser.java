@@ -18,53 +18,37 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndDeleteOptions;
-import com.datastax.astra.client.core.query.Projection;
-import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindOneAndDeleteOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCountDocumentsOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiFindOneAndDeleteOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindOneAndDeleteOpDispenser.class);
-    private final LongFunction<DataApiCollectionFindOneAndDeleteOp> opFunction;
+public class DataApiCollectionCountDocumentsOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionCountDocumentsOpDispenser.class);
+    private final LongFunction<DataApiCountDocumentsOp> opFunction;
 
-    public DataApiFindOneAndDeleteOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionCountDocumentsOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionFindOneAndDeleteOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCountDocumentsOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            CollectionFindOneAndDeleteOptions options = getCollectionFindOneAndDeleteOptions(op, l);
+            int upperBound = op.getAsRequiredFunction("upperbound", Integer.class).apply(l);
 
-            return new DataApiCollectionFindOneAndDeleteOp(
+            return new DataApiCountDocumentsOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                options
+                upperBound
             );
         };
-    }
-
-    private CollectionFindOneAndDeleteOptions getCollectionFindOneAndDeleteOptions(ParsedOp op, long l) {
-        CollectionFindOneAndDeleteOptions options = new CollectionFindOneAndDeleteOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (sort != null) {
-            options = options.sort(sort);
-        }
-        Projection[] projection = getProjectionFromOp(op, l);
-        if (projection != null) {
-            options = options.projection(projection);
-        }
-        return options;
     }
 
     @Override

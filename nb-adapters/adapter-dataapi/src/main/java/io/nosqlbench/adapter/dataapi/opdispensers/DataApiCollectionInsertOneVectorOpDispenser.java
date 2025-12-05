@@ -16,37 +16,37 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiFindOneAndUpdateOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiInsertOneVectorOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
 import java.util.function.LongFunction;
 
-public class DataApiFindOneAndUpdateOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindOneAndUpdateOpDispenser.class);
-    private final LongFunction<DataApiFindOneAndUpdateOp> opFunction;
-    public DataApiFindOneAndUpdateOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionInsertOneVectorOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertOneVectorOpDispenser.class);
+    private final LongFunction<DataApiInsertOneVectorOp> opFunction;
+
+    public DataApiCollectionInsertOneVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiFindOneAndUpdateOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiInsertOneVectorOp> createOpFunction(ParsedOp op) {
+        LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
+        LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
+        LongFunction<float[]> vectorF= op.getAsRequiredFunction("vector", float[].class);
         return (l) -> {
-            Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
-            Update update = getUpdates(op, l);
-
-            return new DataApiFindOneAndUpdateOp(
-                db,
-                db.getCollection(targetFunction.apply(l)),
-                filter,
-                update
+            return new DataApiInsertOneVectorOp(
+                spaceFunction.apply(l).getDatabase(),
+                targetFunction.apply(l),
+                docFunc.apply(l),
+                vectorF.apply(l)
             );
         };
     }
