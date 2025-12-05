@@ -1,3 +1,18 @@
+---
+title: "MetricsQL to SQLite Implementation Plan"
+description: "Comprehensive plan and status report for MetricsQL support on SQLite."
+audience: developer
+diataxis: explanation
+tags:
+  - metrics
+  - planning
+component: nb-engine
+topic: metrics
+status: live
+owner: "@nosqlbench/metrics"
+generated: false
+---
+
 # MetricsQL to SQLite Implementation Plan
 
 ## 🎉 IMPLEMENTATION COMPLETE - All 8 Phases Finished!
@@ -916,4 +931,3 @@ This plan provides a structured, DRY approach to implementing MetricsQL support 
 **Performance**: All computation pushed to SQLite native functions
 **Boundary Coverage**: Matches VictoriaMetrics rollup_test.go test scenarios
 **Documentation**: VICTORIAMETRICS_COMPATIBILITY.md details known differences
-

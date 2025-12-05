@@ -22,18 +22,13 @@ generated: false
 
 **The Open Source, Pluggable, NoSQL Benchmarking Suite**
 
-👉 The current version of NoSQLBench in development is _5.23_, which is based on Java 23 preview.
-All new language features in Java 23, and some preview features may be used. There are
-significant improvements in this branch which will be documented before a main release is
-published. If you are presently using NoSQLBench for testing, and are not actively developing
-against the code base, it is recommended that you stay on the latest 5.21 branch release until an
-official 5.23 release is available. [What's in store for 5.23.](nb_523.md)
-
-[Get it Here](DOWNLOADS.md)
+👉 The current mainline tracks the upcoming _5.25.x_ series and is built with Java 25 EA (preview features may be used). Significant changes land here first.
+If you need a stable release, use the latest published artifact from Maven Central or the downloads
+listed below. [Get it Here](DOWNLOADS.md)
 
 [Contribute to NoSQLBench](CONTRIBUTING.md)
 
-[Read the Docs](http://docs.nosqlbench.io/)
+[Read the Docs](https://docs.nosqlbench.io/)
 
 ## What is NoSQLBench?
 

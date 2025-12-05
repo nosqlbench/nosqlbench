@@ -1,3 +1,18 @@
+---
+title: "NoSQLBench Architectural Planning"
+description: "Consolidated analysis of ongoing architectural refactorings and their status."
+audience: developer
+diataxis: explanation
+tags:
+  - architecture
+  - planning
+component: core
+topic: architecture
+status: review
+owner: "@nosqlbench/architecture"
+generated: false
+---
+
 # NoSQLBench Architectural Planning - Consolidated Analysis
 
 ## Status Overview (Updated 2025-09-29)
