@@ -1,3 +1,18 @@
+---
+title: "NoSQLBench Metrics Naming Guide"
+description: "Historical and current conventions for metrics naming."
+audience: developer
+diataxis: explanation
+tags:
+  - metrics
+  - naming
+component: core
+topic: metrics
+status: draft
+owner: "@nosqlbench/metrics"
+generated: false
+---
+
 # NoSQLBench Metrics Naming Guide
 
 ## Overview

@@ -1,3 +1,17 @@
+---
+title: "Error Handling in NoSQLBench"
+description: "Developer note: Error Handling in NoSQLBench."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Error Handling in NoSQLBench
 
 This guide acts as a design template for how the error handling should be made consistent throughout

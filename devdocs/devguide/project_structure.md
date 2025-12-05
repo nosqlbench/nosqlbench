@@ -1,3 +1,17 @@
+---
+title: "Project Structure"
+description: "Developer note: Project Structure."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Project Structure
 
 nosqlbench is packaged as a

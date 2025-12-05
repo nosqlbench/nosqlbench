@@ -1,3 +1,17 @@
+---
+title: "NoSQLBench Design Principles"
+description: "Developer note: NoSQLBench Design Principles."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NoSQLBench Design Principles
 
 This is a basic readout on the design principles that inform the core

@@ -1,3 +1,17 @@
+---
+title: "NBUI Design Guide"
+description: "Developer note: NBUI Design Guide."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NBUI Design Guide
 
 General design settings for new NBUI work:

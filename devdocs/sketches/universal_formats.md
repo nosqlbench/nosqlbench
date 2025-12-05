@@ -1,3 +1,17 @@
+---
+title: "Configuration Points"
+description: "Developer note: Configuration Points."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 NoSQLBench has lots of configurable parameters. The more it is used, the more ways we add for specifying, templating, and indirecting values in various places.
 
 This is an attempt to clarify what patterns are currently supported, what a more consistent view would look like, and a plan for getting there without disrupting existing usage scenarios.

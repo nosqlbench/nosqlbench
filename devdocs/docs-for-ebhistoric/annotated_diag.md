@@ -6,6 +6,15 @@ menu:
     parent: Dev Guide
     identifier: Diag ActivityType
     weight: 12
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 {{< warning >}} This section is out of date, and will be updated after
@@ -239,4 +248,3 @@ report. If it is time to report, we mark the time in lastUpdate.
 ~~~
 
 This is all there is to making an activity react to real-time changes in the activity definition.
-

@@ -1,3 +1,17 @@
+---
+title: "OpTemplate API"
+description: "Developer note: OpTemplate API."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # OpTemplate API
 
 The operation which will be executed in a driver should be derivable from

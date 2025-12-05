@@ -1,3 +1,17 @@
+---
+title: "Editing NoSQLBench Docs"
+description: "Developer note: Editing NoSQLBench Docs."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Editing NoSQLBench Docs
 
 The docs that are hosted at docs.nosqlbench.io are built from markdown

@@ -1,3 +1,17 @@
+---
+title: "Doc System"
+description: "Developer note: Doc System."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Doc System
 
 This is a consolidation of all the doc system work thus far. This draft is meant to outline the basic features of the

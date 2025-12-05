@@ -1,3 +1,17 @@
+---
+title: "External Bindings"
+description: "Developer note: External Bindings."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # External Bindings
 
 NOTE: This is a sketch: a work in progress that is incomplete at this

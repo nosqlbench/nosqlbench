@@ -1,3 +1,17 @@
+---
+title: "Testing Patterns"
+description: "Developer note: Testing Patterns."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 ## Testing Patterns
 
 This is a work in progress...

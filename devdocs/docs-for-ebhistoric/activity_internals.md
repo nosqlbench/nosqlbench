@@ -6,6 +6,15 @@ menu:
     parent: Dev Guide
     identifier: Activity Internals
     weight: 12
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 Activities are a generalization of some type of client work that needs to occur
@@ -26,8 +35,7 @@ ActivityType. The first activity type that you will become familiar with is
 called ``diag``. An ActivityType is responsible for providing the
 application-like functionality that can be used in template form by activity
 instances. When you are ready, there is a section all about the basics of
-actually [implementing an activity
-type](/dev-guide/building_activities/).
+actually [implementing an activity type](building_activities.md).
 
 ## Activity Parameters
 
@@ -108,7 +116,7 @@ In practice, you don't have to think about the API at this level of detail. Most
 new ActivityType implementations will simply implement the API just enough to
 provide an Action implementation and nothing more.
 
-The [annotated Diag](/dev-guide/annotated_diag/) section shows the diag activity
+The [annotated Diag](annotated_diag.md) section shows the diag activity
 type, built one piece at a time.
 
 ### Why Motors?
@@ -193,6 +201,3 @@ simply that you must add the fully-qualified class name of your ActivityType
 implementations to the META-INF/services/io.nosqlbench.activityapi.ActivityType
 file of your built jar. A maven plugin automates this during build, and is
 explained in further detail in the dev guides.
-
-
-

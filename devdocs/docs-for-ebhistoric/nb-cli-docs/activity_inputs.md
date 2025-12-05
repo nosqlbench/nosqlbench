@@ -1,3 +1,17 @@
+---
+title: "Activity Inputs"
+description: "Developer note: Activity Inputs."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 ### Activity Inputs
 
 Each activity has an input that controls which cycles it will run.

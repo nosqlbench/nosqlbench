@@ -1,3 +1,17 @@
+---
+title: "Java Version Updates"
+description: "Developer note: Java Version Updates."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Java Version Updates
 
 This is a list of all the places that the Java version is referenced in
@@ -12,7 +26,6 @@ version-specific troubleshooting, this list will help.
 - In some cases, a Maven variable '<java.target.version>...</java.target.
   version>` is used.
   [here](../../mvn-defaults/pom.xml)
-- In the nb appimage build scripts under nb/build-bin.sh.
-  [here](../../nb/build-bin.sh)
+- In the nb appimage build scripts under nb5/nb-appimage/build-bin.sh.
+  [here](../../nb5/nb-appimage/build-bin.sh)
 - In the github actions workflows for the Java runtime version
-

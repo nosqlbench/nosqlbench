@@ -1,3 +1,17 @@
+---
+title: "Dynamic Endpoints"
+description: "Developer note: Dynamic Endpoints."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Dynamic Endpoints
 
 NoSQLBench is more than just a test client. It is a test scenario

@@ -1,3 +1,17 @@
+---
+title: "Examples As Tests"
+description: "Developer note: Examples As Tests."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Examples As Tests
 
 

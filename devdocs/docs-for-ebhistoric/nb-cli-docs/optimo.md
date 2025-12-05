@@ -1,3 +1,17 @@
+---
+title: "Optimo Extension (BOBYQA)"
+description: "Developer note: Optimo Extension (BOBYQA)."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Optimo Extension (BOBYQA)
 
 Optimo is the name of the scripting extension that allows nosqlbench

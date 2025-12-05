@@ -1,3 +1,17 @@
+---
+title: "Op Synthesis"
+description: "Developer note: Op Synthesis."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Op Synthesis
 
 This is a sketch of API boundaries and types for the NB driver API revamp.

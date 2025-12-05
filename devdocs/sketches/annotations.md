@@ -1,3 +1,17 @@
+---
+title: "Annotations"
+description: "Developer note: Annotations."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Annotations
 
 NOTE: Here, annotations are notes that are stored in a metrics system for

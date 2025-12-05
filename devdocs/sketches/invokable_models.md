@@ -1,3 +1,17 @@
+---
+title: "Invokable Operations"
+description: "Developer note: Invokable Operations."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Invokable Operations
 
 The op execution interface between native drivers and NoSQLBench

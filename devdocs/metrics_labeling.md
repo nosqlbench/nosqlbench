@@ -1,3 +1,18 @@
+---
+title: "Metrics Labeling"
+description: "Guidelines for consistent labeling across NoSQLBench metrics."
+audience: developer
+diataxis: explanation
+tags:
+  - metrics
+  - labeling
+component: core
+topic: metrics
+status: draft
+owner: "@nosqlbench/metrics"
+generated: false
+---
+
 # Metrics Labeling
 
 All metrics flowing from NoSQLBench should come with a useful set of labels which

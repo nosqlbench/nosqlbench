@@ -1,3 +1,17 @@
+---
+title: "Scripting Extensions"
+description: "Developer note: Scripting Extensions."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Scripting Extensions
 
 When a scenario runs, it executes a scenario control script. This script *

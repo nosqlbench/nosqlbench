@@ -1,3 +1,17 @@
+---
+title: "NBErrorHandler API"
+description: "Developer note: NBErrorHandler API."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NBErrorHandler API
 
 NoSQLBench provides a standard way of configuring error handling across

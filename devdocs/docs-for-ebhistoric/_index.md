@@ -2,6 +2,15 @@
 title: NoSQLBench Dev Guide
 layout: single
 weight: 0
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 ## Conduct
@@ -62,7 +71,6 @@ be adopted. The maintainers are leaning towards the
 [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)
 model. A stricter releas and branching model *will* be imposed as part of the next
 major release.
-
 
 
 

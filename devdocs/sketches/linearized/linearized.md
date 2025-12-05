@@ -1,3 +1,17 @@
+---
+title: "Linearized Operations"
+description: "Developer note: Linearized Operations."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Linearized Operations
 
 NOTE: This is a sketch/work in progress and will not be suitable for earnest review until this

@@ -1,3 +1,17 @@
+---
+title: "NoSQLBench Module Dependencies"
+description: "Developer note: NoSQLBench Module Dependencies."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NoSQLBench Module Dependencies
 
 This is viewable in IntelliJ markdown preview with the optional plugins

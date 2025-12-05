@@ -1,3 +1,18 @@
+---
+title: "Update Notes"
+description: "Grab bag of developer notes on naming, runtime requirements, and performance."
+audience: developer
+diataxis: explanation
+tags:
+  - updates
+  - developers
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 ## Naming Change
 * binary name
     - `nb`
@@ -271,4 +286,3 @@ review:
 
 * config
   * options can be mutually exclusive, like the thread-local rate and the per-activity rate
-

@@ -1,3 +1,17 @@
+---
+title: "Workload Synthesis"
+description: "Developer note: Workload Synthesis."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Workload Synthesis
 
 This document describes the background and essential details for understanding workload

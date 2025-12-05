@@ -1,3 +1,17 @@
+---
+title: "NBIO API"
+description: "Developer note: NBIO API."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NBIO API
 
 The NBIO class provides a way to access file and URL resources from within

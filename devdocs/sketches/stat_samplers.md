@@ -1,3 +1,17 @@
+---
+title: "Stat Samplers"
+description: "Developer note: Stat Samplers."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 This diagram shows the base implementations of all the statistical sampler
 wrappers, the types they implement, and the helper functions which are key
 to their operation.

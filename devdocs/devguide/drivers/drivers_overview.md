@@ -1,3 +1,17 @@
+---
+title: "Contributing a Driver"
+description: "Developer note: Contributing a Driver."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Contributing a Driver
 
 Drivers in NoSQLBench are how you get the core machinery to speak a

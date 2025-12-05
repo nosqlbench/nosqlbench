@@ -2,6 +2,17 @@
 title: Docs Design Guide
 weight: 10
 topics: Docs, Design Guides
+description: "Guidance for writing well-structured docs in NoSQLBench."
+audience: developer
+diataxis: reference
+tags:
+  - docs
+  - design
+component: core
+topic: docops
+status: live
+owner: "@nosqlbench/docs"
+generated: false
 ---
 
 # Docs Design Guide
@@ -88,4 +99,3 @@ When you want to block indent details, simply use the four space rule.
     what is being described above and/or below this content. Generally, it is
     formatted as an inline block with monospace rendering and a clearly different
     background.
-

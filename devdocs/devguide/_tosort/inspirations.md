@@ -1,3 +1,17 @@
+---
+title: "Docs Initiative"
+description: "Developer note: Docs Initiative."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Docs Initiative
 
 UPDATE: for now, the zola static site generator is going to be used as a tentative docs platform.

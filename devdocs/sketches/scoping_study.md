@@ -1,3 +1,17 @@
+---
+title: "Intro"
+description: "Developer note: Intro."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: architecture
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Intro
 
 As part of the pulsar driver, we're making an effort to introduce a way to

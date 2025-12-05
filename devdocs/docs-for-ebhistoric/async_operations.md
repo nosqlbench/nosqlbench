@@ -6,6 +6,15 @@ menu:
     parent: Dev Guide
     identifier: Async Operations
     weight: 12
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 {{< warning >}} This section is out of date, and will be updated after

@@ -1,3 +1,17 @@
+---
+title: "RateLimiter Design"
+description: "Developer note: RateLimiter Design."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 ## RateLimiter Design
 
 The nosqlbench rate limiter is a hybrid design, combining ideas from

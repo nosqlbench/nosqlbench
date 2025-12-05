@@ -1,3 +1,17 @@
+---
+title: "DocSys Design"
+description: "Developer note: DocSys Design."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # DocSys Design
 
 ## Future

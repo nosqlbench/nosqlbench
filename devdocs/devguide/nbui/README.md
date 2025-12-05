@@ -1,3 +1,17 @@
+---
+title: "NBUI"
+description: "Developer note: NBUI."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NBUI
 
 This is where the developer docs are kept for the NoSQLBench UI stack.

@@ -6,6 +6,15 @@ menu:
     parent: Dev Guide
     identifier: Building ActivityTypes
     weight: 12
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 
@@ -57,5 +66,4 @@ There are a couple ways you can use your new ActivityTypes  with the nosqlbench
 runtime. You can mix and match these as needed. The most common way to integrate
 your ActivityTypes with the nosqlbench core is with Maven, but the details on
 thi will vary by environment.
-
 

@@ -6,6 +6,15 @@ menu:
     parent: Dev Guide
     identifier: Contributing
     weight: 12
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
 ---
 
 ## Conduct

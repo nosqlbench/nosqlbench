@@ -1,3 +1,17 @@
+---
+title: "NBDocs - NoSQLBench Docs"
+description: "Developer note: NBDocs - NoSQLBench Docs."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: docops
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NBDocs - NoSQLBench Docs
 
 __THIS IS A WORK IN PROGRESS__

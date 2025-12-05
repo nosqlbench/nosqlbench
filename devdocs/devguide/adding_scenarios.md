@@ -1,3 +1,17 @@
+---
+title: "Adding Scenarios"
+description: "Developer note: Adding Scenarios."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # Adding Scenarios
 
 All of the named scenarios that are bundled with NoSQLBench are simply

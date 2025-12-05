@@ -1,3 +1,17 @@
+---
+title: "NoSQLBench Driver Adapter Standards"
+description: "Developer note: NoSQLBench Driver Adapter Standards."
+audience: developer
+diataxis: explanation
+tags:
+  - devdocs
+component: core
+topic: contributing
+status: draft
+owner: "@nosqlbench/devrel"
+generated: false
+---
+
 # NoSQLBench Driver Adapter Standards
 
 This document is intended to replace the earlier driver standard guide, as the APIs in the upcoming
