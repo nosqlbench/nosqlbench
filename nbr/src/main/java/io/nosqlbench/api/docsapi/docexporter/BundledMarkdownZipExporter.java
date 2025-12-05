@@ -45,6 +45,10 @@ public class BundledMarkdownZipExporter {
     }
 
     public void exportDocs(Path out) {
+        exportDocs(out, Map.of());
+    }
+
+    public void exportDocs(Path out, Map<String, Path> extraEntries) {
         ZipOutputStream zipstream;
         try {
             OutputStream stream = Files.newOutputStream(out, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -80,6 +84,14 @@ public class BundledMarkdownZipExporter {
                 zipstream.write(parsed.getComposedMarkdown().getBytes(StandardCharsets.UTF_8));
                 zipstream.closeEntry();
             }
+            for (Map.Entry<String, Path> entry : extraEntries.entrySet()) {
+                Path source = entry.getValue();
+                if (!Files.exists(source)) {
+                    throw new IOException("Missing metadata file: " + source);
+                }
+                addFileEntry(zipstream, entry.getKey(), source);
+            }
+
             zipstream.finish();
             stream.close();
         } catch (Exception e) {
@@ -116,6 +128,14 @@ public class BundledMarkdownZipExporter {
         }
         zos.closeEntry();
 
+    }
+
+    private void addFileEntry(ZipOutputStream zos, String entryName, Path source) throws IOException {
+        ZipEntry entry = new ZipEntry(entryName);
+        entry.setTime(Files.getLastModifiedTime(source).toMillis());
+        zos.putNextEntry(entry);
+        zos.write(Files.readAllBytes(source));
+        zos.closeEntry();
     }
 
 }
