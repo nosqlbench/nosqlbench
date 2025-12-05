@@ -19,7 +19,6 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
 import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;

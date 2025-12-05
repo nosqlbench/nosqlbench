@@ -20,7 +20,6 @@ import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.core.query.Filters;
 import com.datastax.astra.client.collections.definition.CollectionDefinition;
 import com.datastax.astra.client.collections.definition.CollectionDefaultIdTypes;
-import com.datastax.astra.client.collections.CollectionOptions;
 import com.datastax.astra.client.collections.commands.Update;
 import com.datastax.astra.client.collections.commands.Updates;
 import com.datastax.astra.client.core.query.Sort;

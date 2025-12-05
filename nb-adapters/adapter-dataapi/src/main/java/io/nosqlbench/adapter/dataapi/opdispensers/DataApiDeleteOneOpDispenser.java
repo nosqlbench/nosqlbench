@@ -42,7 +42,7 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            CollectionDeleteOneOptions options = getDeleteOneOptions(op, l);
+            CollectionDeleteOneOptions options = getCollectionDeleteOneOptions(op, l);
 
             return new DataApiDeleteOneOp(
                 db,
@@ -53,7 +53,7 @@ public class DataApiDeleteOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private CollectionDeleteOneOptions getDeleteOneOptions(ParsedOp op, long l) {
+    private CollectionDeleteOneOptions getCollectionDeleteOneOptions(ParsedOp op, long l) {
         CollectionDeleteOneOptions options = new CollectionDeleteOneOptions();
         Sort sort = getSortFromOp(op, l);
         float[] vector = getVectorFromOp(op, l);
