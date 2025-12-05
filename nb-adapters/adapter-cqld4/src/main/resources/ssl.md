@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/ssl.md
+
+title: "SSL"
+description: "Adapter doc for ssl."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # SSL
 
 Supported options:

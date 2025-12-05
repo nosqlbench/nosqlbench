@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     contentScriptType="application/ecmascript"
+     contentStyleType="text/css" height="865px" preserveAspectRatio="none"
+     style="width:930px;height:865px;" version="1.1" viewBox="0 0 930 865"
+     width="930px" zoomAndPan="magnify">
+  <defs>
+    <filter height="300%" id="f6q2vew7ewgyq" width="300%" x="-1" y="-1">
+      <feGaussianBlur result="blurOut" stdDeviation="2.5"/>
+      <feColorMatrix in="blurOut" result="blurOut2" type="matrix"
+                     values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/>
+      <feOffset dx="5.0" dy="5.0" in="blurOut2" result="blurOut3"/>
+      <feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/>
+    </filter>
+  </defs>
+  <g>
+    <rect fill="#FFFFFF" height="817.7353"
+          style="stroke: #A80036; stroke-width: 1.25;" width="346.875"
+          x="5" y="25.775"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          font-weight="bold" lengthAdjust="spacingAndGlyphs"
+          textLength="80" x="138.4375" y="43.1463">User View
+    </text>
+    <rect fill="#FFFFFF" height="817.7353"
+          style="stroke: #A80036; stroke-width: 1.25;" width="208.75"
+          x="390" y="25.775"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          font-weight="bold" lengthAdjust="spacingAndGlyphs"
+          textLength="110" x="439.375" y="43.1463">WebApp View
+    </text>
+    <rect fill="#FFFFFF" height="817.7353"
+          style="stroke: #A80036; stroke-width: 1.25;" width="283.75"
+          x="630.625" y="25.775"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          font-weight="bold" lengthAdjust="spacingAndGlyphs"
+          textLength="66.25" x="739.375" y="43.1463">DB View
+    </text>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="625.8854"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="166.25" y="202.6249"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="502.3553"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="302.5" y="264.39"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="378.8252"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="438.75" y="326.155"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="277.4276"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="544.375" y="365.7875"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="198.1626"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="651.875" y="405.42"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="118.8976"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="759.375" y="445.0526"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="39.6325"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="866.875" y="484.6851"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="33.75" x2="33.75" y1="160.4924" y2="851.0103"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="172.5" x2="172.5" y1="160.4924" y2="851.0103"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="308.125" x2="308.125" y1="160.4924" y2="851.0103"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="445" x2="445" y1="160.4924" y2="851.0103"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="550" x2="550" y1="160.4924" y2="851.0103"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="658.125" x2="658.125" y1="160.4924" y2="851.0103"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="765.625" x2="765.625" y1="160.4924" y2="851.0103"/>
+    <line
+        style="stroke: #A80036; stroke-width: 1.25; stroke-dasharray: 5.0,5.0;"
+        x1="873.125" x2="873.125" y1="160.4924" y2="851.0103"/>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="40" x="10"
+          y="155.3649">Alice
+    </text>
+    <ellipse cx="33.75" cy="65.4075" fill="#FEFECE"
+             filter="url(#f6q2vew7ewgyq)" rx="10" ry="10"
+             style="stroke: #A80036; stroke-width: 2.5;"/>
+    <path
+        d="M33.75,75.4075 L33.75,109.1575 M17.5,85.4075 L50,85.4075 M33.75,109.1575 L17.5,127.9075 M33.75,109.1575 L50,127.9075 "
+        fill="none" filter="url(#f6q2vew7ewgyq)"
+        style="stroke: #A80036; stroke-width: 2.5;"/>
+    <rect fill="#FEFECE" filter="url(#f6q2vew7ewgyq)" height="65.1698"
+          style="stroke: #A80036; stroke-width: 1.875;" width="67.5"
+          x="138.75" y="84.0726"/>
+    <rect fill="#FEFECE" filter="url(#f6q2vew7ewgyq)" height="65.1698"
+          style="stroke: #A80036; stroke-width: 1.875;" width="67.5"
+          x="133.75" y="89.0726"/>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="38.75" x="148.125"
+          y="116.53">User
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="50" x="142.5"
+          y="140.3649">Agent
+    </text>
+    <rect fill="#FEFECE" filter="url(#f6q2vew7ewgyq)" height="89.0047"
+          style="stroke: #A80036; stroke-width: 1.875;" width="66.25"
+          x="275.625" y="60.2377"/>
+    <rect fill="#FEFECE" filter="url(#f6q2vew7ewgyq)" height="89.0047"
+          style="stroke: #A80036; stroke-width: 1.875;" width="66.25"
+          x="270.625" y="65.2377"/>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="48.75" x="279.375"
+          y="92.6951">Client
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="36.25" x="285.625"
+          y="116.53">Side
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="33.75" x="286.875"
+          y="140.3649">App
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="92.5" x="395"
+          y="131.53">App Server
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="90" x="396.25"
+          y="155.3649">or node, ...
+    </text>
+    <path
+        d="M419.375,77.8226 L419.375,107.8226 M419.375,92.8226 L440.625,92.8226 "
+        fill="none" filter="url(#f6q2vew7ewgyq)"
+        style="stroke: #A80036; stroke-width: 2.5;"/>
+    <ellipse cx="455.625" cy="92.8226" fill="#FEFECE"
+             filter="url(#f6q2vew7ewgyq)" rx="15" ry="15"
+             style="stroke: #A80036; stroke-width: 2.5;"/>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="78.75" x="507.5"
+          y="131.53">Database
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="51.25" x="521.25"
+          y="155.3649">Driver
+    </text>
+    <path d="M525,77.8226 L525,107.8226 M525,92.8226 L546.25,92.8226 "
+          fill="none" filter="url(#f6q2vew7ewgyq)"
+          style="stroke: #A80036; stroke-width: 2.5;"/>
+    <ellipse cx="561.25" cy="92.8226" fill="#FEFECE"
+             filter="url(#f6q2vew7ewgyq)" rx="15" ry="15"
+             style="stroke: #A80036; stroke-width: 2.5;"/>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="23.75" x="642.5"
+          y="155.3649">DB
+    </text>
+    <path
+        d="M635.625,91.6575 C635.625,79.1575 658.125,79.1575 658.125,79.1575 C658.125,79.1575 680.625,79.1575 680.625,91.6575 L680.625,124.1575 C680.625,136.6575 658.125,136.6575 658.125,136.6575 C658.125,136.6575 635.625,136.6575 635.625,124.1575 L635.625,91.6575 "
+        fill="#FEFECE" filter="url(#f6q2vew7ewgyq)"
+        style="stroke: #000000; stroke-width: 1.875;"/>
+    <path
+        d="M635.625,91.6575 C635.625,104.1575 658.125,104.1575 658.125,104.1575 C658.125,104.1575 680.625,104.1575 680.625,91.6575 "
+        fill="none" style="stroke: #000000; stroke-width: 1.875;"/>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="65" x="729.375"
+          y="131.53">Storage
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="60" x="731.875"
+          y="155.3649">Service
+    </text>
+    <path d="M740,77.8226 L740,107.8226 M740,92.8226 L761.25,92.8226 "
+          fill="none" filter="url(#f6q2vew7ewgyq)"
+          style="stroke: #A80036; stroke-width: 2.5;"/>
+    <ellipse cx="776.25" cy="92.8226" fill="#FEFECE"
+             filter="url(#f6q2vew7ewgyq)" rx="15" ry="15"
+             style="stroke: #A80036; stroke-width: 2.5;"/>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="65" x="836.875"
+          y="131.53">Storage
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="17.5"
+          lengthAdjust="spacingAndGlyphs" textLength="55" x="841.875"
+          y="155.3649">Device
+    </text>
+    <ellipse cx="873.125" cy="92.8226" fill="#FEFECE"
+             filter="url(#f6q2vew7ewgyq)" rx="15" ry="15"
+             style="stroke: #A80036; stroke-width: 2.5;"/>
+    <line style="stroke: #A80036; stroke-width: 2.5;" x1="858.125"
+          x2="888.125" y1="110.3226" y2="110.3226"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="625.8854"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="166.25" y="202.6249"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="502.3553"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="302.5" y="264.39"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="378.8252"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="438.75" y="326.155"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="277.4276"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="544.375" y="365.7875"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="198.1626"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="651.875" y="405.42"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="118.8976"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="759.375" y="445.0526"/>
+    <rect fill="#FFFFFF" filter="url(#f6q2vew7ewgyq)" height="39.6325"
+          style="stroke: #A80036; stroke-width: 1.25;" width="12.5"
+          x="866.875" y="484.6851"/>
+    <polygon fill="#A80036"
+             points="151.25,197.6249,163.75,202.6249,151.25,207.6249,156.25,202.6249"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="33.75"
+          x2="158.75" y1="202.6249" y2="202.6249"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="105" x="42.5"
+          y="195.3637">user clicks link
+    </text>
+    <polygon fill="#A80036"
+             points="287.5,259.39,300,264.39,287.5,269.39,292.5,264.39"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="178.75"
+          x2="295" y1="264.39" y2="264.39"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="42.5" x="187.5"
+          y="234.9962">event
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="57.5" x="187.5"
+          y="257.1287">handler
+    </text>
+    <polygon fill="#A80036"
+             points="423.75,321.155,436.25,326.155,423.75,331.155,428.75,326.155"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="315"
+          x2="431.25" y1="326.155" y2="326.155"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="37.5" x="323.75"
+          y="296.7612">[http
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="62.5" x="323.75"
+          y="318.8938">request]
+    </text>
+    <polygon fill="#A80036"
+             points="529.375,360.7875,541.875,365.7875,529.375,370.7875,534.375,365.7875"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="451.25"
+          x2="536.875" y1="365.7875" y2="365.7875"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="57.5" x="460"
+          y="358.5263">read op
+    </text>
+    <polygon fill="#A80036"
+             points="636.875,400.42,649.375,405.42,636.875,410.42,641.875,405.42"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="556.875"
+          x2="644.375" y1="405.42" y2="405.42"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="71.25" x="565.625"
+          y="398.1588">read data
+    </text>
+    <polygon fill="#A80036"
+             points="744.375,440.0526,756.875,445.0526,744.375,450.0526,749.375,445.0526"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="664.375"
+          x2="751.875" y1="445.0526" y2="445.0526"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="71.25" x="673.125"
+          y="437.7913">read data
+    </text>
+    <polygon fill="#A80036"
+             points="851.875,479.6851,864.375,484.6851,851.875,489.6851,856.875,484.6851"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="771.875"
+          x2="859.375" y1="484.6851" y2="484.6851"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="71.25" x="780.625"
+          y="477.4238">read data
+    </text>
+    <polygon fill="#A80036"
+             points="785.625,519.3176,773.125,524.3176,785.625,529.3176,780.625,524.3176"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="778.125"
+          x2="871.875" y1="524.3176" y2="524.3176"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="43.75" x="793.125"
+          y="517.0564">[data]
+    </text>
+    <polygon fill="#A80036"
+             points="678.125,558.9501,665.625,563.9501,678.125,568.9501,673.125,563.9501"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="670.625"
+          x2="764.375" y1="563.9501" y2="563.9501"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="43.75" x="685.625"
+          y="556.6889">[data]
+    </text>
+    <polygon fill="#A80036"
+             points="570.625,598.5826,558.125,603.5826,570.625,608.5826,565.625,603.5826"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="563.125"
+          x2="656.875" y1="603.5826" y2="603.5826"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="43.75" x="578.125"
+          y="596.3214">[data]
+    </text>
+    <polygon fill="#A80036"
+             points="465,638.2152,452.5,643.2152,465,648.2152,460,643.2152"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="457.5"
+          x2="549.375" y1="643.2152" y2="643.2152"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="43.75" x="472.5"
+          y="635.9539">[data]
+    </text>
+    <polygon fill="#A80036"
+             points="328.75,699.9802,316.25,704.9802,328.75,709.9802,323.75,704.9802"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="321.25"
+          x2="443.75" y1="704.9802" y2="704.9802"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="93.75" x="336.25"
+          y="675.5864">web content
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="42.5" x="336.25"
+          y="697.719">[http]
+    </text>
+    <polygon fill="#A80036"
+             points="192.5,761.7453,180,766.7453,192.5,771.7453,187.5,766.7453"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="185" x2="307.5"
+          y1="766.7453" y2="766.7453"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="93.75" x="200"
+          y="737.3515">web content
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="42.5" x="200"
+          y="759.484">[http]
+    </text>
+    <polygon fill="#A80036"
+             points="47.5,823.5103,35,828.5103,47.5,833.5103,42.5,828.5103"
+             style="stroke: #A80036; stroke-width: 1.25;"/>
+    <line style="stroke: #A80036; stroke-width: 1.25;" x1="40" x2="171.25"
+          y1="828.5103" y2="828.5103"/>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="61.25" x="55"
+          y="799.1165">browser
+    </text>
+    <text fill="#000000" font-family="sans-serif" font-size="16.25"
+          lengthAdjust="spacingAndGlyphs" textLength="98.75" x="55"
+          y="821.249">renders page
+    </text>
+    <text fill="#888888" font-family="sans-serif" font-size="12.5"
+          lengthAdjust="spacingAndGlyphs" textLength="122.5" x="793.125"
+          y="17.1125">Layers of Messaging
+    </text><!--MD5=[349deb3338ea8e90f753903e3c65ec3b]
+@startuml
+header Layers of Messaging
+hide footbox
+
+box "User View" #clear
+actor Alice as user
+collections "User\nAgent" as agent
+collections "Client\nSide\nApp" as capp
+end box
+
+box "WebApp View" #clear
+boundary "App Server\nor node, ..." as sapp
+boundary "Database\nDriver" as driver
+end box
+
+box "DB View" #clear
+database DB as db
+boundary "Storage\nService" as store
+entity "Storage\nDevice" as device
+end box
+
+user -> agent: user clicks link [[{tooltip}]]
+activate agent
+agent -> capp: event\nhandler
+activate capp
+capp -> sapp: [http\nrequest]
+activate sapp
+sapp -> driver: read op
+activate driver
+driver -> db: read data
+activate db
+db -> store: read data
+activate store
+store -> device: read data
+activate device
+
+store <- device: [data]
+deactivate device
+db <- store: [data]
+deactivate store
+driver <- db: [data]
+deactivate db
+sapp <- driver: [data]
+deactivate driver
+capp <- sapp: web content\n[http]
+deactivate sapp
+agent <- capp: web content\n[http]
+deactivate capp
+user <- agent: browser\nrenders page
+deactivate agent
+
+
+@enduml
+
+PlantUML version 1.2020.09(Sun May 10 05:51:06 CDT 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 11.0.8+10-b944.31
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+-->
+  </g>
+</svg>

@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/curate_docs/advanced-cql.md
+
+title: "cql driver - advanced features"
+description: "Adapter doc for advanced-cql."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # cql driver - advanced features
 
 This is an addendum to the standard CQL Activity Type docs. For that,

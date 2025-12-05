@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-cqld4/src/main/resources/cqld4.md
+title: "Cqld4"
+description: "Adapter doc for cqld4."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # cqld4
 

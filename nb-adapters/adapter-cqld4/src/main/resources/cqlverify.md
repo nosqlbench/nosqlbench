@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/cqlverify.md
+
+title: "CQL Verify"
+description: "Adapter doc for cqlverify."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # CQL Verify
 
 The cqld4 adapter has the capability to verify data in a database by reading each row and comparing

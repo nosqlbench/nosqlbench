@@ -1,5 +1,17 @@
 ---
 source: nb-adapters/adapter-cqld4/src/main/resources/cqlgen.md
+title: "Cqlgen"
+description: "Adapter doc for cqlgen."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
 ---
 # cqlgen
 

@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-milvus/src/main/resources/milvus.md
+
+title: "Milvus Driver Adapter"
+description: "Usage guide for the Milvus/Zilliz vector adapter in NoSQLBench."
+audience: operator
+diataxis: howto
+tags:
+  - milvus
+  - vector
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # milvus driver adapter
 
 The milvus driver adapter is a nb adapter for the milvus driver, an open source Java driver for connecting to and

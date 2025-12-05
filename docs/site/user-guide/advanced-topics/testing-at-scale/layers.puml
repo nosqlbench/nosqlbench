@@ -1,0 +1,53 @@
+@startuml
+header Layers of Messaging
+hide footbox
+
+box "User View" #white
+actor Alice as user
+collections "User\nAgent" as agent
+collections "Client\nSide\nApp" as capp
+end box
+
+box "WebApp View" #white
+boundary "App Server\nor node, ..." as sapp
+boundary "Database\nDriver" as driver
+end box
+
+box "DB View" #white
+database DB as db
+boundary "Storage\nService" as store
+entity "Storage\nDevice" as device
+end box
+
+user -> agent: user clicks link
+activate agent
+agent -> capp: event\nhandler
+activate capp
+capp -> sapp: [http\nrequest]
+activate sapp
+sapp -> driver: read op
+activate driver
+driver -> db: read data
+activate db
+db -> store: read data
+activate store
+store -> device: read data
+activate device
+
+store <- device: [data]
+deactivate device
+db <- store: [data]
+deactivate store
+driver <- db: [data]
+deactivate db
+sapp <- driver: [data]
+deactivate driver
+capp <- sapp: web content\n[http]
+deactivate sapp
+agent <- capp: web content\n[http]
+deactivate capp
+user <- agent: browser\nrenders page
+deactivate agent
+
+
+@enduml

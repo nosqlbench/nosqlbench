@@ -1,8 +1,24 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/curate_docs/cql_olddocs.md
+
+title: "CQL driver (deprecated docs, use cqld4 instead)"
+description: "Adapter doc for cql olddocs."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # CQL driver (deprecated docs, use cqld4 instead)
 
 The cql driver functionality is now provided by the cqld4 driver adapter.
 Please see the cqld4 help topic with `nb5 help cqld4`
-
 ---
 
 This is a driver which allows for the execution of CQL statements. This driver supports both sync and async modes, with

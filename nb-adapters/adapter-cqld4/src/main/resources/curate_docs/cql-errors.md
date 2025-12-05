@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/curate_docs/cql-errors.md
+
+title: "cql error handling"
+description: "Adapter doc for cql-errors."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # cql error handling
 
 The error handling facility utilizes a type-aware error handler

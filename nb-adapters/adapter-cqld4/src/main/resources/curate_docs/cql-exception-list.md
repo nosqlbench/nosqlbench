@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/curate_docs/cql-exception-list.md
+
+title: "Cql-Exception-List"
+description: "Adapter doc for cql-exception-list."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 DriverException -> stop
   1   FrameTooLongException
   2   CodecNotFoundException

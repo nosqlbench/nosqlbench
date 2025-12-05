@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/curate_docs/cql.md
+
+title: "cql driver"
+description: "Adapter doc for cql."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # cql driver
 
 The cql driver functionality is now provided by the cqld4 driver adapter.

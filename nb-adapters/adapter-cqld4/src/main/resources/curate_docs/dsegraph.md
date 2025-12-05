@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/curate_docs/dsegraph.md
+
+title: "dsegraph activity type"
+description: "Adapter doc for dsegraph."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # dsegraph activity type
 
 # warning; These docs are a work in progress

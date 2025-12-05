@@ -1,3 +1,20 @@
+---
+source: nb-adapters/adapter-cqld4/src/main/resources/curate_docs/cql-loadbalancing.md
+
+title: "CQL Load Balancing Options"
+description: "Adapter doc for cql-loadbalancing."
+audience: operator
+diataxis: howto
+tags:
+  - cqld4
+  - drivers
+component: drivers
+topic: drivers
+status: live
+owner: "@nosqlbench/drivers"
+generated: false
+---
+
 # CQL Load Balancing Options
 
 WIth the CQL driver, you may configure the load balancing with the same options you might use in
