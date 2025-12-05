@@ -34,11 +34,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindOneAndReplaceOpDispenser.class);
+public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOneAndReplaceOpDispenser.class);
     private final LongFunction<DataApiFindOneAndReplaceOp> opFunction;
 
-    public DataApiFindOneAndReplaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionFindOneAndReplaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }

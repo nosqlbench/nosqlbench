@@ -31,10 +31,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiFindOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiFindOpDispenser.class);
+public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOpDispenser.class);
     private final LongFunction<DataApiFindOp> opFunction;
-    public DataApiFindOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionFindOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
