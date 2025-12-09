@@ -44,7 +44,7 @@ public class DataApiCreateCollectionWithClassOpDispenser extends DataApiOpDispen
     }
 
     private Class<?> getCreateClass(ParsedOp op, long l) {
-        String className = op.getAsFunctionOr("createClass", "com.datastax.astra.client.model.Document").apply(l);
+        String className = op.getAsFunctionOr("createClass", "com.datastax.astra.client.collections.definition.documents.Document").apply(l);
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
