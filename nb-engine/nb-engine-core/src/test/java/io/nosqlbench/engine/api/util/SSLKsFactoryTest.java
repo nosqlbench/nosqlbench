@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 
+import javax.net.ssl.SSLContext;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -307,6 +309,19 @@ public class SSLKsFactoryTest {
                 .isThrownBy(() -> SSLKsFactory.get().getContext(sslCfg))
                 .withMessageContaining("Unable to load key from")
                 .withCauseInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testJdkGetContextTLS13() {
+        String[] params = {
+            "ssl=jdk",
+            "tlsversion=TLSv1.3"
+       };
+        ActivityDef activityDef = ActivityDef.parseActivityDef(String.join(";", params));
+        NBConfiguration sslCfg = SSLKsFactory.get().getConfigModel().extractConfig(activityDef.getParams());
+        SSLContext ctx = SSLKsFactory.get().getContext(sslCfg);
+        assertThat(ctx).isNotNull();
+        assertThat(ctx.getProtocol()).isEqualTo("TLSv1.3");
     }
 
 }
