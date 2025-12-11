@@ -41,15 +41,28 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 
-/**
- * See {@link OpDispenser} for details on how to use this type.
- * <p>
- * Some details are tracked per op template, which aligns to the life-cycle of the op dispenser.
- * Thus, each op dispenser is where the stats for all related operations are kept.
- *
- * @param <OP>
- *     The type of operation
- */
+/// Base class for op synthesis that ties a parsed op template to a deterministic
+/// `cycle -> CycleOp` function. Per-template concerns live here (labels, verifiers,
+/// optional space naming, metrics); per-cycle/stride concerns remain in execution
+/// contexts to preserve associativity across spaces and strides.
+///
+/// ```text
+/// Activity
+/// └─ OpTemplate → ParsedOp
+///    └─ BaseOpDispenser subclass
+///       ├─ cycle -> space name (optional)
+///       ├─ cycle -> space instance (adapter-supplied)
+///       └─ getOp(cycle) -> CycleOp executable
+/// ```
+///
+/// Responsibilities
+/// - Keep dispensers immutable and template-scoped; no per-cycle or space-local state is stored.
+/// - Provide optional cycle→space naming for diagnostics while avoiding stride-level space caching.
+/// - Wire verifier functions and metrics once per template; reuse them across cycles and spaces.
+/// - Offer adapter hooks for instrumentation without relying on thread-local execution semantics.
+///
+/// @param <OP> The type of operation produced for execution
+/// @param <SPACE> Adapter-specific space type used during op construction
 public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space>
     extends NBBaseComponent implements OpDispenser<OP>, NBErrorContext
 {
@@ -72,6 +85,7 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     private final String[] timerStops;
     protected LongFunction<? extends SPACE> spaceF;
     protected LongFunction<String> spaceNameF;
+    protected LongToIntFunction spaceIndexF;
 
     /**
      * package imports used with "verifiers" or "expected-result" are accumulated here
@@ -96,6 +110,10 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
         labels = op.getLabels();
         this.spaceF = spaceF;
         this.spaceNameF = spaceNameF;
+        this.spaceIndexF = io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter.DEFAULT_CYCLE_TO_SPACE_F;
+        if (parentC instanceof io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter<?,?> adapter) {
+            this.spaceIndexF = adapter.getSpaceIndexFunc(op);
+        }
 
         // If parentC is a DriverAdapter and spaceNameF is null, get the naming function from it
         if (this.spaceNameF == null && parentC instanceof io.nosqlbench.adapters.api.activityimpl.uniform.BaseDriverAdapter) {
@@ -194,6 +212,16 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     @Override
     public String getOpName() {
         return this.opName;
+    }
+
+    public LongFunction<String> getSpaceNameFunction() {
+        return this.spaceNameF;
+    }
+
+    /// Optional cycle-to-space index resolver. Default resolves to the unnamed ("0") space.
+    /// Adapters that support numeric spaces provide a real resolver to avoid string lookups.
+    public LongToIntFunction getSpaceIndexFunction() {
+        return this.spaceIndexF;
     }
 
     private void configureInstrumentation(final ParsedOp pop) {

@@ -1,21 +1,24 @@
 Linearized Operations – staged plan (optimized, flow-aware)
 
-Stage 1: Flow context + capture/inject foundation
+- Stage 1: Flow context + capture/inject foundation
+- Docs & style
+  - All new code ships with markdown Javadocs using Java 25 `///` form and fenced diagrams where it aids understanding.
+  - Prefer concise diagrams that show activity→stride→cycle→space→op synthesis relationships without clutter.
 - Flow context
-  - Define `OpFlowContext` API (lifecycle per stride slot, optional space key, creation/clear hooks on stride boundaries).
-  - Storage: per-action flow maps keyed by flow-id (and space when present), using lock-free atomics with `ConcurrentHashMap`/primitive maps; pool context objects per stride to limit alloc churn; remain virtual-thread-friendly (no blocking monitors).
-  - Provide adapter-agnostic context accessors so capture/inject/bindings can migrate off `SharedState` without relying on thread-locals.
-  - Assign `opflow-id` for diagnostics/metrics.
+  - Define `OpFlowContext`/`OpFlowState` as stride-slot-scoped holders keyed by slot id and per-cycle space index; lifecycle is construct-once, clear-per-cycle.
+  - Storage: per-slot `Object[]` per space (0 = default) cleared with intrinsic array fills; avoid object pooling and thread-locals; keep virtual-thread-friendly and allocation-light.
+  - Provide adapter-agnostic context accessors so capture/inject/bindings can migrate off `SharedState`; assign `opflow-id` for diagnostics/metrics.
+  - Space resolution: prefer numbered spaces (`LongToIntFunction`) resolved once per cycle; fall back to name→index map only when dynamic names are required. Do not cache space values across cycles.
 - Capture wiring
   - Honor `[field]` / `[field as alias]` and explicit `capture:` lists/maps; avoid eager `getOp(0)` probing by using an adapter/op capability flag when wrapping.
-  - Capture wrapper writes into flow context while returning native result (verifiers/metrics intact).
+  - Capture wrapper writes into flow context while returning native result (verifiers/metrics intact); use ordinal handles instead of string lookups on hot paths.
   - Policies: required vs optional; multi-row selection (first/all/index); type coercion via casts; warnings on unused/undefined captures.
-  - Implementation: keep extractor pure; reuse small mutable maps behind unmodifiable views to cut per-row allocs; prefer generated lambdas over reflection.
+  - Implementation: keep extractor pure; pre-compile ordinals/index handles; reuse small mutable buffers behind unmodifiable views to cut per-row allocs; prefer generated lambdas over reflection.
 - Injection wiring
-  - Extend templating to parse `{[name]}` (with cast/alias) and resolve from `OpFlowContext`, with legacy-scope fallback only by opt-in.
+  - Extend templating to parse `{[name]}` (with cast/alias) and resolve from `OpFlowContext`, with legacy-scope fallback only by opt-in. Prefer ordinal resolvers that include space index when applicable.
   - Missing required → dependency-unmet marker; optional → null/empty; enforce casting on inject paths.
   - Provide adapter helpers so renderers can substitute context values without bespoke logic.
-  - Implementation: pre-compile injection lookups into lightweight resolvers (indices/handles) to avoid string map lookups; share parsed artifacts across flows when safe.
+  - Implementation: pre-compile injection lookups into lightweight resolvers (space index + ordinal) to avoid string map lookups; share parsed artifacts across flows when safe.
 - Metrics/errors for Stage 1
   - Add `opflow-id`/space labels on capture/inject events; introduce result codes for dependency-unmet vs hard fail at this layer.
 - Tests/QA

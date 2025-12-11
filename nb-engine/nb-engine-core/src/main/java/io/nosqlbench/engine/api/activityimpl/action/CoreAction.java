@@ -16,12 +16,12 @@
 
 package io.nosqlbench.engine.api.activityimpl.action;
 
-import io.nosqlbench.engine.api.activityapi.core.SyncAction;
+import io.nosqlbench.engine.api.activityapi.core.StrideAction;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-public class CoreAction implements SyncAction {
+public class CoreAction implements StrideAction {
     private final static Logger logger = LogManager.getLogger(CoreAction.class);
 
     private final int interval;

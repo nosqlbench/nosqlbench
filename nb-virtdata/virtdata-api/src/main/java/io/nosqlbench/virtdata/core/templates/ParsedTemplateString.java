@@ -217,6 +217,7 @@ public class ParsedTemplateString {
 
     }
 
+
     /**
      * Get the named anchors and their associated binding specifiers as found
      * in the raw template.

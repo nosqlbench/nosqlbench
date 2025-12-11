@@ -18,11 +18,10 @@ package io.nosqlbench.engine.core;
 
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
-import io.nosqlbench.engine.api.activityapi.core.Action;
 import io.nosqlbench.engine.api.activityapi.core.Activity;
 import io.nosqlbench.engine.api.activityapi.core.Motor;
-import io.nosqlbench.engine.api.activityapi.core.SyncAction;
-import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
+import io.nosqlbench.engine.api.activityapi.core.StrideAction;
+import io.nosqlbench.engine.api.activityimpl.motor.StrideMotor;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +40,15 @@ public class CoreMotorTest {
             ActivityDef.parseActivityDef("alias=foo")
         );
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        final Motor cm = new CoreMotor(activity, 5L, lockstepper);
         final AtomicLong observableAction = new AtomicLong(-3L);
-        cm.setAction(this.getTestConsumer(observableAction));
+        final Motor cm = new StrideMotor(activity, 5L, lockstepper,
+            new StrideAction() {
+                @Override
+                public int runCycle(long cyclenum) {
+                    observableAction.set(cyclenum);
+                    return 0;
+                }
+            }, null);
         final Thread t = new Thread(cm);
         t.setName("TestMotor");
         t.start();
@@ -61,10 +66,15 @@ public class CoreMotorTest {
     public void testIteratorStride() {
         Activity activity = new Activity(TestComponent.INSTANCE, "stride=3");
         final BlockingSegmentInput lockstepper = new BlockingSegmentInput();
-        final Motor cm1 = new CoreMotor(activity, 1L, lockstepper);
         final AtomicLongArray ary = new AtomicLongArray(10);
-        final Action a1 = this.getTestArrayConsumer(ary);
-        cm1.setAction(a1);
+        final Motor cm1 = new StrideMotor(activity, 1L, lockstepper,
+            new StrideAction() {
+                @Override
+                public int runCycle(long cyclenum) {
+                    ary.set((int) (cyclenum - 11), cyclenum);
+                    return 0;
+                }
+            }, null);
 
         final Thread t1 = new Thread(cm1);
         t1.setName("cm1");
@@ -83,30 +93,6 @@ public class CoreMotorTest {
         assertThat(ary.get(3)).isEqualTo(0L);
 
     }
-
-    private SyncAction getTestArrayConsumer(AtomicLongArray ary) {
-        return new SyncAction() {
-            private int offset;
-
-            @Override
-            public int runCycle(final long cycle) {
-                ary.set(this.offset, cycle);
-                this.offset++;
-                return 0;
-            }
-        };
-    }
-
-    private SyncAction getTestConsumer(AtomicLong atomicLong) {
-        return new SyncAction() {
-            @Override
-            public int runCycle(final long cycle) {
-                atomicLong.set(cycle);
-                return 0;
-            }
-        };
-    }
-
 
     private boolean awaitAryCondition(final Predicate<AtomicLongArray> atomicLongAryPredicate, final AtomicLongArray ary, final long millis, final long retry) {
         final long start = System.currentTimeMillis();
