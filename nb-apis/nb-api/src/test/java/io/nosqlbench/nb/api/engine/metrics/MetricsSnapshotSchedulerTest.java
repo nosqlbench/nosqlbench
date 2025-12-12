@@ -39,6 +39,7 @@ public class MetricsSnapshotSchedulerTest {
     private final NBComponent root = new NBBaseComponent(null);
     private final List<MetricsView> baseSnapshots = new ArrayList<>();
     private final List<MetricsView> coarseSnapshots = new ArrayList<>();
+    private final List<MetricsView> mediumSnapshots = new ArrayList<>();
     private MetricsSnapshotScheduler scheduler;
 
     private NBLabels counterLabels() {
@@ -59,6 +60,7 @@ public class MetricsSnapshotSchedulerTest {
         }
         baseSnapshots.clear();
         coarseSnapshots.clear();
+        mediumSnapshots.clear();
     }
 
     @Test
@@ -86,6 +88,47 @@ public class MetricsSnapshotSchedulerTest {
         MetricsView second = coarseSnapshots.get(1);
         MetricsView.PointSample secondSample = (MetricsView.PointSample) second.families().getFirst().samples().getFirst();
         assertThat(secondSample.value()).isEqualTo(15.0d);
+    }
+
+    @Test
+    public void testParallelCadenceAggregation() {
+        MetricsSnapshotScheduler.register(root, 100L, baseSnapshots::add);
+        MetricsSnapshotScheduler.register(root, 200L, mediumSnapshots::add);
+        MetricsSnapshotScheduler.register(root, 300L, coarseSnapshots::add);
+        scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        scheduler.injectSnapshotForTesting(counterView(1, 100L));
+        scheduler.injectSnapshotForTesting(counterView(2, 100L));
+        scheduler.injectSnapshotForTesting(counterView(3, 100L));
+        scheduler.injectSnapshotForTesting(counterView(4, 100L));
+        scheduler.injectSnapshotForTesting(counterView(5, 100L));
+        scheduler.injectSnapshotForTesting(counterView(6, 100L));
+
+        assertThat(baseSnapshots).hasSize(6);
+        assertThat(mediumSnapshots).hasSize(3);
+        assertThat(coarseSnapshots).hasSize(2);
+
+        MetricsView mediumFirst = mediumSnapshots.getFirst();
+        MetricsView.PointSample mediumFirstSample = (MetricsView.PointSample) mediumFirst
+            .families().getFirst().samples().getFirst();
+        assertThat(mediumFirst.intervalMillis()).isEqualTo(200L);
+        assertThat(mediumFirstSample.value()).isEqualTo(3.0d);
+
+        MetricsView mediumSecond = mediumSnapshots.get(1);
+        MetricsView.PointSample mediumSecondSample = (MetricsView.PointSample) mediumSecond
+            .families().getFirst().samples().getFirst();
+        assertThat(mediumSecondSample.value()).isEqualTo(7.0d);
+
+        MetricsView coarseFirst = coarseSnapshots.getFirst();
+        MetricsView.PointSample coarseFirstSample = (MetricsView.PointSample) coarseFirst
+            .families().getFirst().samples().getFirst();
+        assertThat(coarseFirst.intervalMillis()).isEqualTo(300L);
+        assertThat(coarseFirstSample.value()).isEqualTo(6.0d);
+
+        MetricsView coarseSecond = coarseSnapshots.get(1);
+        MetricsView.PointSample coarseSecondSample = (MetricsView.PointSample) coarseSecond
+            .families().getFirst().samples().getFirst();
+        assertThat(coarseSecondSample.value()).isEqualTo(15.0d);
     }
 
     @Test

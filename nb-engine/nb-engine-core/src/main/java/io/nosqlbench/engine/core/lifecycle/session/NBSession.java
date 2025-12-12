@@ -23,23 +23,35 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
+import io.nosqlbench.nb.api.components.core.NBComponentProps;
 import io.nosqlbench.nb.api.engine.metrics.reporters.MetricInstanceFilter;
 import io.nosqlbench.nb.api.engine.metrics.reporters.SqliteSnapshotReporter;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
+import io.nosqlbench.nb.mql.commands.SummaryCommand;
+import io.nosqlbench.nb.mql.format.OutputFormat;
+import io.nosqlbench.nb.mql.format.ResultFormatter;
+import io.nosqlbench.nb.mql.query.QueryResult;
+import io.nosqlbench.nb.mql.schema.MetricsDatabaseReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.management.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -61,6 +73,8 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
     private SqliteSnapshotReporter sessionSqliteReporter;
     private Thread sessionSqliteShutdownHook;
     private static final long DEFAULT_SQLITE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(30);
+    private Path sessionDbPath;
+    private long sessionSqliteIntervalMillis = DEFAULT_SQLITE_INTERVAL_MS;
 
     public enum STATUS {
         OK,
@@ -184,7 +198,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             ctx.controller().awaitCompletion(Long.MAX_VALUE);
             logger.debug("completed");
         }
-        metricsBuffer.printMetricSummary(this);
+        emitSqliteSummaryIfConfigured();
         return collector.toExecutionResult();
     }
 
@@ -199,6 +213,9 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             String sessionName = getLabels().valueOf("session");
             String sessionDbFilename = sessionName + "_metrics.db";
             Path sessionDbPath = logsDir.resolve(sessionDbFilename);
+            this.sessionDbPath = sessionDbPath;
+            this.sessionSqliteIntervalMillis = DEFAULT_SQLITE_INTERVAL_MS;
+            setComponentProp("metricsdb", sessionDbPath.toAbsolutePath().toString());
             String jdbcUrl = "jdbc:sqlite:" + sessionDbPath.toAbsolutePath();
 
             MetricInstanceFilter filter = new MetricInstanceFilter();
@@ -268,6 +285,120 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         }
     }
 
+    private void emitSqliteSummaryIfConfigured() {
+        flushSqliteReporter();
+        Optional<String> summarySpec = getComponentProp(NBComponentProps.SUMMARY);
+        if (summarySpec.isEmpty()) {
+            return;
+        }
+        Optional<String> summary = renderSummaryFromMetricsDb();
+        if (summary.isEmpty()) {
+            logger.warn("Skipping metrics summary because it could not be generated.");
+            return;
+        }
+        List<SummaryTarget> targets = parseSummaryTargets(summarySpec.get());
+        for (SummaryTarget target : targets) {
+            PrintStream out = target.stream();
+            try {
+                out.print(summary.get());
+                if (!summary.get().endsWith(System.lineSeparator())) {
+                    out.print(System.lineSeparator());
+                }
+                out.flush();
+            } catch (Exception e) {
+                logger.warn("Unable to write metrics summary: {}", e.toString(), e);
+            } finally {
+                if (target.closeAfterWrite()) {
+                    out.close();
+                }
+            }
+        }
+    }
+
+    private Optional<String> renderSummaryFromMetricsDb() {
+        if (sessionDbPath == null) {
+            logger.warn("No metrics database path set; skipping MQL summary.");
+            return Optional.empty();
+        }
+        if (!Files.exists(sessionDbPath)) {
+            logger.warn("Metrics database '{}' does not exist; skipping MQL summary.", sessionDbPath);
+            return Optional.empty();
+        }
+        try (Connection conn = MetricsDatabaseReader.connect(sessionDbPath)) {
+            SummaryCommand command = new SummaryCommand();
+            Map<String, Object> params = new LinkedHashMap<>();
+            params.put("keep-labels", "activity,session");
+            params.put("condense", true);
+            QueryResult result = command.execute(conn, params);
+            ResultFormatter formatter = OutputFormat.TABLE.createFormatter();
+            return Optional.of(formatter.format(result));
+        } catch (Exception e) {
+            logger.warn("Error rendering metrics summary from '{}': {}", sessionDbPath, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    private List<SummaryTarget> parseSummaryTargets(String reportSummaryTo) {
+        List<SummaryTarget> targets = new ArrayList<>();
+        String[] destinationSpecs = reportSummaryTo.split(", *");
+        for (String spec : destinationSpecs) {
+            if (spec == null || spec.isBlank()) {
+                continue;
+            }
+            String[] split = spec.split(":", 2);
+            String summaryTo = split[0];
+            try {
+                switch (summaryTo.toLowerCase()) {
+                    case "console":
+                    case "stdout":
+                        targets.add(new SummaryTarget(System.out, false));
+                        break;
+                    case "stderr":
+                        targets.add(new SummaryTarget(System.err, false));
+                        break;
+                    default:
+                        String outName = summaryTo
+                            .replaceAll("_SESSION_", getLabels().valueOf("session"))
+                            .replaceAll("_LOGS_", getComponentProp("logsdir").orElseThrow());
+                        PrintStream out = new PrintStream(new FileOutputStream(outName));
+                        targets.add(new SummaryTarget(out, true));
+                }
+            } catch (Exception e) {
+                logger.warn("Unable to open summary destination '{}': {}", spec, e.toString());
+            }
+        }
+        return targets;
+    }
+
+    private void flushSqliteReporter() {
+        if (sessionSqliteReporter != null) {
+            try {
+                MetricsView snapshot = MetricsView.capture(find().metrics(), sessionSqliteIntervalMillis);
+                sessionSqliteReporter.onMetricsSnapshot(snapshot);
+            } catch (Exception e) {
+                logger.warn("Unable to capture final metrics snapshot for SQLite reporter: {}", e.toString(), e);
+            }
+            try {
+                sessionSqliteReporter.close();
+            } catch (Exception e) {
+                logger.warn("Error closing SQLite snapshot reporter: {}", e.toString(), e);
+            } finally {
+                sessionSqliteReporter = null;
+            }
+        }
+        if (sessionSqliteShutdownHook != null) {
+            try {
+                Runtime.getRuntime().removeShutdownHook(sessionSqliteShutdownHook);
+            } catch (IllegalStateException ignored) {
+                // JVM is already shutting down
+            }
+            sessionSqliteShutdownHook = null;
+        }
+    }
+
+    private record SummaryTarget(PrintStream stream, boolean closeAfterWrite) {
+    }
+
 
     private NBBufferedContainer getContext(String name) {
         return containers.computeIfAbsent(
@@ -278,14 +409,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
 
     @Override
     protected void teardown() {
-        if (sessionSqliteShutdownHook != null) {
-            try {
-                Runtime.getRuntime().removeShutdownHook(sessionSqliteShutdownHook);
-            } catch (IllegalStateException ignored) {
-                // JVM is already shutting down
-            }
-            sessionSqliteShutdownHook = null;
-        }
+        flushSqliteReporter();
         super.teardown();
     }
 
