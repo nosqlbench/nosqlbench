@@ -1,0 +1,53 @@
+# Test workload demonstrating complex shared state management
+
+bindings:
+  # Initialize state using Groovy expressions
+  init_config: {{=
+        config = [mode: 'test', retries: 3, timeout: 5000]
+        return "Config initialized"
+    }}
+  init_stats: {{=
+        stats = [requests: 0, errors: 0, successes: 0]
+        return "Stats initialized"
+    }}
+  init_data: {{=
+        cache = [:]
+        return "Cache initialized"
+    }}
+
+scenarios:
+  default:
+    # Use shared state across operations
+    check_mode: {{= "Running in ${config.mode} mode"}}
+
+    # Simulate processing with shared state
+    process1: {{=
+        stats.requests++
+        cache['req1'] = 'result1'
+        stats.successes++
+        return "Processed request 1"
+    }}
+
+    process2: {{=
+        stats.requests++
+        cache['req2'] = 'result2'
+        stats.successes++
+        return "Processed request 2"
+    }}
+
+    process3: {{=
+        stats.requests++
+        // Simulate error
+        stats.errors++
+        return "Failed request 3"
+    }}
+
+    # Report using shared state
+    summary: {{=
+        total = stats.requests
+        success_rate = stats.successes / total * 100
+        return "Processed ${total} requests, ${success_rate}% success rate, ${stats.errors} errors"
+    }}
+
+    cache_size: {{= "Cache contains ${cache.size()} entries"}}
+    cache_keys: {{= cache.keySet().join(', ')}}

@@ -114,4 +114,11 @@ public final class DeltaHistogramSnapshot extends Snapshot {
                 "         p(25,50,75) = (" + getPctlSummary(0.25d, 0.5d, 0.75d) + ")\n" +
                 " p(90,99,9.99,99.99) = (" + getPctlSummary(0.9d, 0.99d, 0.999, 0.9999d) + ")";
     }
+
+    /**
+     * Expose the wrapped histogram so that callers can reuse the encoded form when needed.
+     */
+    public Histogram getHistogram() {
+        return histogram;
+    }
 }

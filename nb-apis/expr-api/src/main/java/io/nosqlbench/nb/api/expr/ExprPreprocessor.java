@@ -23,12 +23,40 @@ import java.util.Map;
  * Lightweight facade that prescans text for Groovy expression sigils before invoking the
  * heavyweight {@link GroovyExpressionProcessor}. This avoids building the expression runtime
  * when workloads contain no substitutions.
+ *
+ * <p>Expressions can be safely embedded in YAML using standard YAML string formats:</p>
+ * <pre>
+ * # Using pipe literal (recommended for multi-line expressions):
+ * key: |
+ *   {{=
+ *   def data = []
+ *   for (int i = 1; i <= 3; i++) {
+ *       data << i * i
+ *   }
+ *   return data.join('-')
+ *   }}
+ *
+ * # Using quoted strings:
+ * key: "{{= 1 + 2 }}"
+ *
+ * # Using folded scalar:
+ * key: >
+ *   {{= someExpression() }}
+ * </pre>
  */
 public final class ExprPreprocessor {
 
-    private static final String SIGIL = "{{=";
+    private static final String SIGIL_START = "{{";
 
-    private volatile GroovyExpressionProcessor processor;
+    private final GroovyExpressionProcessor processor;
+
+    /**
+     * Create a new expression preprocessor with its own Groovy expression processor.
+     * The lifetime of the processor is tied to this preprocessor instance.
+     */
+    public ExprPreprocessor() {
+        this.processor = new GroovyExpressionProcessor();
+    }
 
     /**
      * Render the provided source through the expression system only when a substitution sigil is
@@ -38,28 +66,32 @@ public final class ExprPreprocessor {
         if (!containsExpressions(source)) {
             return source;
         }
-        return getProcessor().process(source, sourceUri, parameters);
+        return processor.process(source, sourceUri, parameters);
     }
 
     /**
-     * @return {@code true} when the source contains the {@code {{=}}} sigil that requires
-     * expression expansion.
+     * Render the provided source through the expression system and return both the transformed
+     * output and the binding context. When no substitution sigil is detected, returns the original
+     * source with an empty binding.
+     *
+     * @param source raw workload text
+     * @param sourceUri workload origin if available
+     * @param parameters parameters supplied alongside the workload
+     * @return ProcessingResult containing both output and binding context
      */
-    public boolean containsExpressions(String source) {
-        return source != null && source.contains(SIGIL);
+    public ProcessingResult processWithContext(String source, URI sourceUri, Map<String, ?> parameters) {
+        if (!containsExpressions(source)) {
+            return new ProcessingResult(source, new groovy.lang.Binding());
+        }
+        return processor.processWithContext(source, sourceUri, parameters);
     }
 
-    private GroovyExpressionProcessor getProcessor() {
-        GroovyExpressionProcessor local = processor;
-        if (local == null) {
-            synchronized (this) {
-                local = processor;
-                if (local == null) {
-                    local = new GroovyExpressionProcessor();
-                    processor = local;
-                }
-            }
-        }
-        return local;
+    /**
+     * @return {@code true} when the source contains the {@code {{}} sigil that requires
+     * expression expansion. This detects all expression formats: {@code {{=}}, {@code {{var = ...}}},
+     * {@code {{@var}}}, etc.
+     */
+    public boolean containsExpressions(String source) {
+        return source != null && source.contains(SIGIL_START);
     }
 }

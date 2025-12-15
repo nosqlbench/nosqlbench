@@ -38,14 +38,16 @@ then
  exit
 fi
 
+DEFAULT_JAVA_FLAGS="--enable-preview -XX:+UseZGC --enable-native-access=ALL-UNNAMED"
+
 if [ "$1" = "-DN" ]
 then
  shift
- exec $DIR/jre/bin/java --enable-preview -XX:+UseZGC ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nb5.jar "$@"
+ exec $DIR/jre/bin/java ${DEFAULT_JAVA_FLAGS} ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar $DIR/nb5.jar "$@"
 elif [ "$1" = "-DY" ]
 then
  shift
- exec $DIR/jre/bin/java --enable-preview -XX:+UseZGC ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nb5.jar "$@"
+ exec $DIR/jre/bin/java ${DEFAULT_JAVA_FLAGS} ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar $DIR/nb5.jar "$@"
 else
- exec $DIR/jre/bin/java --enable-preview -XX:+UseZGC ${JAVA_OPTS} -jar $DIR/nb5.jar "$@"
+ exec $DIR/jre/bin/java ${DEFAULT_JAVA_FLAGS} ${JAVA_OPTS} -jar $DIR/nb5.jar "$@"
 fi

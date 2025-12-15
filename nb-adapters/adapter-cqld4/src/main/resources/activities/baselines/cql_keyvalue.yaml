@@ -23,10 +23,10 @@ scenarios:
     main: run driver=cql tags=='block:main-.*' cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
-  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
-  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
-  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+  seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)->int); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)->int); ToString() -> String
 
 blocks:
   schema:
@@ -63,11 +63,11 @@ blocks:
           values ({seq_key},{seq_value});
 #  verify:
 #    params:
-#      cl: <<read_cl:LOCAL_QUORUM>>
+#      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
 #    ops:
 #      verify_select:
 #        prepared: |
-#          select * from <<keyspace:baselines>>.<<table:keyvalue>> where key={seq_key};
+#          select * from TEMPLATE(keyspace,baselines).TEMPLATE(table,keyvalue) where key={seq_key};
 #        verify-fields: key->seq_key, value->seq_value
   main_read:
     params:

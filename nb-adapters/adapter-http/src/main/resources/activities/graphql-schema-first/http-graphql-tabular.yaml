@@ -20,20 +20,20 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
+  weighted_hosts: WeightedStrings('TEMPLATE(graphql_host,stargate)')
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
+  token: Discard(); Token('TEMPLATE(auth_token,)','TEMPLATE(auth_uri,http://localhost:8081/v1/auth)', 'TEMPLATE(auth_uid,cassandra)', 'TEMPLATE(auth_pswd,cassandra)');
 
-  part_layout: Div(<<partsize:1000000>>); ToString() -> String
-  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  part_layout: Div(TEMPLATE(partsize,1000000)); ToString() -> String
+  clust_layout: Mod(TEMPLATE(partsize,1000000)); ToString() -> String
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
   limit: Uniform(1,10) -> int
-  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_read: Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
 
-  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_write: Hash(); Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
 blocks:
@@ -41,33 +41,33 @@ blocks:
     ops:
       create_keyspace:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
-            "query":"mutation {\n  createKeyspace(name: \"<<keyspace:gqlsf_tabular>>\", replicas: <<rf:1>>, ifNotExists: true) \n}\n"
+            "query":"mutation {\n  createKeyspace(name: \"TEMPLATE(keyspace,gqlsf_tabular)\", replicas: TEMPLATE(rf,1), ifNotExists: true) \n}\n"
           }
 
       create-gql-schema:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-admin
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql-admin
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
-            "query":"mutation {\n  deploySchema(keyspace: \"<<keyspace:gqlsf_tabular>>\", schema: \"\"\"\n      type Tabular @cql_input {\n        part: String! @cql_column(partitionKey: true)\n        clust: String! @cql_column(partitionKey: true)\n        data: String! \n      }\n      type SelectTabularResult @cql_payload {\n    \t\tdata: [Tabular]\n    \t\tpagingState: String\n    }\n      type Query {\n        getTabulars(\n          part: String!,\n          clust: String!,\n          pagingState: String @cql_pagingState\n        ): SelectTabularResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertTabular(tabular: TabularInput): Tabular\n    }\n  \"\"\") {\n    version\n  }\n}\n"
+            "query":"mutation {\n  deploySchema(keyspace: \"TEMPLATE(keyspace,gqlsf_tabular)\", schema: \"\"\"\n      type Tabular @cql_input {\n        part: String! @cql_column(partitionKey: true)\n        clust: String! @cql_column(partitionKey: true)\n        data: String! \n      }\n      type SelectTabularResult @cql_payload {\n    \t\tdata: [Tabular]\n    \t\tpagingState: String\n    }\n      type Query {\n        getTabulars(\n          part: String!,\n          clust: String!,\n          pagingState: String @cql_pagingState\n        ): SelectTabularResult @cql_select(pageSize: 10)\n      }\n      type Mutation {\n    \t\tinsertTabular(tabular: TabularInput): Tabular\n    }\n  \"\"\") {\n    version\n  }\n}\n"
           }
 
   rampup:
     ops:
       rampup_insert:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlsf_tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -79,11 +79,11 @@ blocks:
 
   main_read:
     params:
-      ratio: <<read_ratio:1>>
+      ratio: TEMPLATE(read_ratio,1)
     ops:
       main_select:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlsf_tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -95,11 +95,11 @@ blocks:
 
   main_write:
     params:
-      ratio: <<write_ratio:9>>
+      ratio: TEMPLATE(write_ratio,9)
     ops:
       main_write:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlsf_tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlsf_tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"

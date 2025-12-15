@@ -36,11 +36,11 @@ blocks:
       prepared: false
     ops:
       create_keyspace: |
-        create keyspace if not exists <<keyspace:starter>>
-        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '<<rf:1>>'}
+        create keyspace if not exists TEMPLATE(keyspace,starter)
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
         AND durable_writes = true;
       create_table: |
-        create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
+        create table if not exists TEMPLATE(keyspace,starter).TEMPLATE(table,cqlstarter) (
         machine_id UUID,
         message text,
         time timestamp,
@@ -52,7 +52,7 @@ blocks:
       prepared: false
     ops:
       create_table_astra: |
-        create table if not exists <<keyspace:starter>>.<<table:cqlstarter>> (
+        create table if not exists TEMPLATE(keyspace,starter).TEMPLATE(table,cqlstarter) (
         machine_id UUID,
         message text,
         time timestamp,
@@ -61,32 +61,32 @@ blocks:
 
   rampup:
     params:
-      cl: <<write_cl:LOCAL_QUORUM>>
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
       idempotent: true
     ops:
       insert_rampup: |
-        insert into  <<keyspace:starter>>.<<table:cqlstarter>> (machine_id, message, time)
+        insert into  TEMPLATE(keyspace,starter).TEMPLATE(table,cqlstarter) (machine_id, message, time)
         values ({machine_id}, {rampup_message}, {time}) using timestamp {ts};
 
   rampdown:
     ops:
       truncate_table: |
-        truncate table <<keyspace:starter>>.<<table:cqlstarter>>;
+        truncate table TEMPLATE(keyspace,starter).TEMPLATE(table,cqlstarter);
 
   main_read:
     params:
-      ratio: <<read_ratio:1>>
-      cl: <<read_cl:LOCAL_QUORUM>>
+      ratio: TEMPLATE(read_ratio,1)
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
     ops:
       select_read: |
-        select * from <<keyspace:starter>>.<<table:cqlstarter>>
+        select * from TEMPLATE(keyspace,starter).TEMPLATE(table,cqlstarter)
         where machine_id={machine_id};
   main_write:
     params:
-      ratio: <<write_ratio:9>>
-      cl: <<write_cl:LOCAL_QUORUM>>
+      ratio: TEMPLATE(write_ratio,9)
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
       idempotent: true
     ops:
       insert_main: |
-        insert into <<keyspace:starter>>.<<table:cqlstarter>>
+        insert into TEMPLATE(keyspace,starter).TEMPLATE(table,cqlstarter)
         (machine_id, message, time) values ({machine_id}, {message}, {time}) using timestamp {ts};

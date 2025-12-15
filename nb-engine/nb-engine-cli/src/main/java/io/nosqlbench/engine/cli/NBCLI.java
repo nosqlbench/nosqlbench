@@ -66,6 +66,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.ServiceLoader.Provider;
@@ -180,6 +181,11 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             .setDedicatedVerificationLogger(globalOptions.isDedicatedVerificationLogger())
             .activate();
         ConfigurationFactory.setConfigurationFactory(NBCLI.loggerConfig); // THIS should be the first time log4j2 is invoked!
+
+        // Add shutdown handler to timestamp symlinks when session ends
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            NBCLI.loggerConfig.timestampSymlinksOnShutdown();
+        }, "symlink-timestamp-shutdown"));
 
         NBCLI.logger = LogManager.getLogger("NBCLI"); // TODO: Detect if the logger config was already initialized (error)
         NBCLI.loggerConfig.purgeOldFiles(LogManager.getLogger("SCENARIO"));
@@ -359,21 +365,56 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
                 .searchPrefixes(options.wantsIncludes())
                 .pathname(resourceToCopy).extensionSet(RawOpsLoader.YAML_EXTENSIONS).first();
 
-            if (tocopy.isEmpty()) tocopy = NBIO.classpath()
-                .searchPrefixes().searchPrefixes(options.wantsIncludes())
-                .searchPrefixes(options.wantsIncludes())
-                .pathname(resourceToCopy).first();
+            if (tocopy.isEmpty()) {
+                tocopy = NBIO.classpath()
+                    .searchPrefixes().searchPrefixes(options.wantsIncludes())
+                    .searchPrefixes(options.wantsIncludes())
+                    .pathname(resourceToCopy).first();
+            }
 
             final Content<?> data = tocopy.orElseThrow(
                 () -> new BasicError("Unable to find " + resourceToCopy + " in classpath to copy out")
             );
 
-            final Path writeTo = Path.of(data.asPath().getFileName().toString());
-            if (Files.exists(writeTo)) throw new BasicError("A file named " + writeTo + " exists. Remove it first.");
+            final Path sourceName = Optional.ofNullable(data.asPath().getFileName())
+                .orElseGet(() -> Path.of(resourceToCopy).getFileName());
+            final String filename = sourceName != null ? sourceName.toString() : resourceToCopy;
+
+            final Path writeTo;
+            final Optional<String> copyDestination = options.wantsToCopyDestination();
+            try {
+                if (copyDestination.isPresent()) {
+                    final Path destination = Path.of(copyDestination.get());
+                    if (Files.exists(destination) && Files.isDirectory(destination)) {
+                        writeTo = destination.resolve(filename);
+                    } else {
+                        writeTo = destination;
+                    }
+                } else {
+                    writeTo = Path.of(filename);
+                }
+            } catch (final InvalidPathException ipe) {
+                throw new BasicError("Destination path is invalid: " + ipe.getInput(), ipe);
+            }
+
+            final Path parent = writeTo.getParent();
+            if (parent != null) {
+                if (!Files.exists(parent)) {
+                    throw new BasicError("Destination directory '" + parent + "' does not exist.");
+                }
+                if (!Files.isDirectory(parent)) {
+                    throw new BasicError("Destination parent '" + parent + "' is not a directory.");
+                }
+            }
+
+            if (Files.exists(writeTo)) {
+                throw new BasicError("Destination file '" + writeTo + "' already exists. Remove it first or choose a different path.");
+            }
+
             try {
                 Files.writeString(writeTo, data.getCharBuffer(), StandardCharsets.UTF_8);
-            } catch (final IOException e) {
-                throw new BasicError("Unable to write to " + writeTo + ": " + e.getMessage());
+            } catch (final IOException ioe) {
+                throw new BasicError("Unable to write to '" + writeTo + "': " + ioe.getMessage(), ioe);
             }
             NBCLI.logger.info(() -> "Copied internal resource '" + data.asPath() + "' to '" + writeTo + '\'');
             return NBCLI.EXIT_OK;
@@ -402,6 +443,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         if (options.wantsTopicalHelp()) {
             String topic = options.wantsTopicalHelpFor();
+
+            if ("topics".equalsIgnoreCase(topic)) {
+                List<String> topics = MarkdownFinder.listRootTopics();
+                topics.forEach(System.out::println);
+                return NBCLI.EXIT_OK;
+            }
 
             Optional<? extends NBHelpTopic> infoFor = NBJavaCommandLoader.getInfoFor(topic);
 
@@ -433,14 +480,18 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
 
         NBCLI.logger.info(() -> "console logging level is " + options.getConsoleLogLevel());
 
-        Map<String, String> props = Map.of(
-            "summary", options.getReportSummaryTo(),
-            "logsdir", options.getLogsDirectory().toString(),
-            "progress", options.getProgressSpec(),
-            "prompush_cache", "prompush_cache.txt",
-            "heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs()),
-            "advisor", String.valueOf(options.getAdvisor())
-        );
+        Map<String, String> props = new LinkedHashMap<>();
+        props.put("summary", options.getReportSummaryTo());
+        props.put("logsdir", options.getLogsDirectory().toString());
+        props.put("progress", options.getProgressSpec());
+        props.put("prompush_cache", "prompush_cache.txt");
+        props.put("heartbeat", String.valueOf(options.wantsHeartbeatIntervalMs()));
+        props.put("advisor", String.valueOf(options.getAdvisor()));
+
+        // Add session metadata for SQLite metrics storage
+        props.put("nb.version", version);
+        props.put("nb.commandline", String.join(" ", args));
+        props.put("nb.hardware", SystemId.getHostSummary());
 
         try (
             NBSession session = new NBSession(
@@ -462,7 +513,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             options.wantsReportSqliteTo().ifPresent(cfg -> {
                 MetricInstanceFilter filter = new MetricInstanceFilter();
                 filter.addPattern(cfg.pattern);
-                session.create().sqliteReporter(session, cfg.url, cfg.millis, filter);
+                session.create().sqliteSnapshotReporter(session, cfg.url, cfg.millis, filter, cfg.includeHistograms);
             });
 
             options.wantsReportPromPushTo().ifPresent(cfg -> {

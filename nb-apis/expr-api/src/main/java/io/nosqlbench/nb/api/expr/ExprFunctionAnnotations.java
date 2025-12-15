@@ -25,7 +25,9 @@ import io.nosqlbench.nb.api.expr.annotations.ExprFunctionSpec;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,15 +36,17 @@ import java.util.Objects;
  */
 public final class ExprFunctionAnnotations {
 
+    // Ensure deterministic ordering of annotated methods; reflection order varies by runtime
+    private static final Comparator<Method> METHOD_COMPARATOR = Comparator
+        .comparing(Method::getName)
+        .thenComparing(m -> Arrays.toString(m.getParameterTypes()));
+
     private ExprFunctionAnnotations() {}
 
     public static void registerAnnotatedFunctions(ExprRuntimeContext context, Object provider) {
         Objects.requireNonNull(provider, "provider");
-        for (Method method : provider.getClass().getDeclaredMethods()) {
+        for (Method method : sortedAnnotatedMethods(provider.getClass())) {
             ExprFunctionSpec spec = method.getAnnotation(ExprFunctionSpec.class);
-            if (spec == null) {
-                continue;
-            }
             method.setAccessible(true);
             ExprFunctionMetadata metadata = metadataFor(spec, method, provider.getClass());
             ExprFunction function = adaptMethod(method, provider, context);
@@ -52,13 +56,18 @@ public final class ExprFunctionAnnotations {
 
     static Collection<ExprFunctionMetadata> extractMetadata(Class<?> providerClass) {
         List<ExprFunctionMetadata> metadata = new ArrayList<>();
-        for (Method method : providerClass.getDeclaredMethods()) {
+        for (Method method : sortedAnnotatedMethods(providerClass)) {
             ExprFunctionSpec spec = method.getAnnotation(ExprFunctionSpec.class);
-            if (spec != null) {
-                metadata.add(metadataFor(spec, method, providerClass));
-            }
+            metadata.add(metadataFor(spec, method, providerClass));
         }
         return metadata;
+    }
+
+    private static List<Method> sortedAnnotatedMethods(Class<?> providerClass) {
+        return Arrays.stream(providerClass.getDeclaredMethods())
+            .filter(method -> method.getAnnotation(ExprFunctionSpec.class) != null)
+            .sorted(METHOD_COMPARATOR)
+            .toList();
     }
 
     private static ExprFunctionMetadata metadataFor(ExprFunctionSpec spec, Method method, Class<?> providerClass) {

@@ -19,6 +19,8 @@ package io.nosqlbench.nb.api.expr;
 
 
 import groovy.lang.Binding;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -29,8 +31,14 @@ import java.util.Optional;
 /**
  * Default runtime context implementation that uses a Groovy {@link Binding} as
  * the storage mechanism for both variables and function adapters.
+ *
+ * <p>When multiple providers register functions with the same name, the last registration
+ * wins (allowing provider ordering to control precedence). A warning is logged when
+ * function shadowing occurs.</p>
  */
 final class GroovyExprRuntimeContext implements ExprRuntimeContext {
+
+    private static final Logger LOGGER = LogManager.getLogger(GroovyExprRuntimeContext.class);
 
     private final Binding binding;
     private final Optional<URI> sourceUri;
@@ -66,12 +74,60 @@ final class GroovyExprRuntimeContext implements ExprRuntimeContext {
     public void registerFunction(ExprFunctionMetadata metadata, ExprFunction function) {
         Objects.requireNonNull(metadata, "metadata");
         Objects.requireNonNull(function, "function");
-        this.metadata.put(metadata.name(), metadata);
-        binding.setVariable(metadata.name(), new GroovyExprFunctionAdapter(function));
+
+        String functionName = metadata.name();
+        if (this.metadata.containsKey(functionName)) {
+            ExprFunctionMetadata existing = this.metadata.get(functionName);
+            LOGGER.warn(
+                "Function name '{}' is being shadowed. " +
+                "Previous registration from provider '{}' is being replaced by provider '{}'. " +
+                "The last registered function will be used. " +
+                "Control provider order to manage function precedence.",
+                functionName, existing.provider(), metadata.provider()
+            );
+        }
+
+        this.metadata.put(functionName, metadata);
+        binding.setVariable(functionName, new GroovyExprFunctionAdapter(function));
     }
 
     @Override
     public Map<String, ExprFunctionMetadata> getRegisteredMetadata() {
         return Map.copyOf(metadata);
+    }
+
+    /**
+     * Register metadata for a function that is already available in the binding
+     * (e.g., from a Groovy script method). This allows library scripts to contribute
+     * function metadata without needing to wrap the functions in ExprFunction adapters.
+     *
+     * @param metadata the function metadata to register
+     */
+    void registerMetadataOnly(ExprFunctionMetadata metadata) {
+        Objects.requireNonNull(metadata, "metadata");
+
+        String functionName = metadata.name();
+        if (this.metadata.containsKey(functionName)) {
+            ExprFunctionMetadata existing = this.metadata.get(functionName);
+            LOGGER.warn(
+                "Function name '{}' is being shadowed. " +
+                "Previous registration from provider '{}' is being replaced by library script '{}'. " +
+                "The last registered function will be used. " +
+                "Control provider order to manage function precedence.",
+                functionName, existing.provider(), metadata.provider()
+            );
+        }
+
+        this.metadata.put(functionName, metadata);
+    }
+
+    @Override
+    public Object getVariable(String name) {
+        return binding.hasVariable(name) ? binding.getVariable(name) : null;
+    }
+
+    @Override
+    public boolean hasVariable(String name) {
+        return binding.hasVariable(name);
     }
 }

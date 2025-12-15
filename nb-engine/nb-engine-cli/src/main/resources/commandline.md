@@ -4,6 +4,9 @@ Help ( You're looking at it. )
 
     --help
 
+For a full command reference, including every global flag and command syntax,
+see [`commandline_reference.md`](commandline_reference.md) in this directory.
+
 Short options, like '-v' represent simple options, like verbosity. Using multiples increases the
 level of the option, like '-vvv'.
 
@@ -157,6 +160,14 @@ Specify the graphite destination and enable reporting
 
     --report-graphite-to <addr>[:<port>]
 
+Push metrics to a Prometheus Pushgateway endpoint:
+
+    --report-prom-push-to <uri[,interval]>
+
+Record snapshots to a session-specific SQLite database (or add additional ones):
+
+    --report-sqlite-to <jdbc-url>[,<interval>][,<pattern>]
+
 Specify the interval for graphite or CSV reporting in seconds:
 
     --report-interval 10
@@ -234,6 +245,14 @@ By default, summaries are always reported to a summary file in the logs director
 It is highly recommended that you use this form in general. Users are often more interested
 in seeing play-by-play high-level details on console, and more human-readable forms of metrics
 summaries are easily created with other options.
+
+### SQLite Metrics Archive
+
+Each session now records a metrics snapshot stream to an SQLite database in the logs directory.
+The database file is named `<session>_metrics.db`, and a `metrics.db` symlink in the same directory
+always points at the active session file (mirroring how `session.log` is linked). This ensures a
+stable path for tooling while keeping per-session archives available. Use `--report-sqlite-to`
+if you need to add more SQLite reporters in parallel or change their cadence and location.
 
 Examples:
 

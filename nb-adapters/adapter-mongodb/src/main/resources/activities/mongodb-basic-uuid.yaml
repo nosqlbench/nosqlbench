@@ -5,12 +5,12 @@ scenarios:
     rampup: run driver=mongodb tags==block:rampup cycles===TEMPLATE(rampup-cycles,100000000) threads=auto
     main: run driver=mongodb tags==block:main cycles===TEMPLATE(main-cycles,100000000) threads=auto
 bindings:
-  seq_uuid: Mod(<<uuidCount:100000000>>L); ToHashedUUID() -> java.util.UUID; ToString() -> String
-  rw_uuid: <<uuidDist:Uniform(0,100000000)->long>>; ToHashedUUID() -> java.util.UUID; ToString() -> String
-  seq_key: Mod(<<keyCount:1000000>>L); ToInt()
-  seq_value: Mod(<<valueCount:1000000000>>L); <<valueSizeDist:Hash()>>; ToLong()
-  rw_key: <<keyDist:Uniform(0,1000000)->long>>; ToInt()
-  rw_value: <<valDist:Uniform(0,1000000000)->long>>; <<valueSizeDist:Hash()>>; ToLong()
+  seq_uuid: Mod(TEMPLATE(uuidCount,100000000)L); ToHashedUUID() -> java.util.UUID; ToString() -> String
+  rw_uuid: TEMPLATE(uuidDist,Uniform(0,100000000)->long); ToHashedUUID() -> java.util.UUID; ToString() -> String
+  seq_key: Mod(TEMPLATE(keyCount,1000000)L); ToInt()
+  seq_value: Mod(TEMPLATE(valueCount,1000000000)L); TEMPLATE(valueSizeDist,Hash()); ToLong()
+  rw_key: TEMPLATE(keyDist,Uniform(0,1000000)->long); ToInt()
+  rw_value: TEMPLATE(valDist,Uniform(0,1000000000)->long); TEMPLATE(valueSizeDist,Hash()); ToLong()
 blocks:
   params:
     readPreference: primary
@@ -18,7 +18,7 @@ blocks:
     ops:
       rampup_insert: |
         {
-          insert: "<<collection:keyvalueuuid>>",
+          insert: "TEMPLATE(collection,keyvalueuuid)",
           documents: [ { _id: UUID("{seq_uuid}"),
                          key: {seq_key},
                          value: NumberLong({seq_value}) } ]
@@ -26,34 +26,34 @@ blocks:
   verify:
     params:
       type: read
-      cl: <<read_cl:LOCAL_QUORUM>>
+      cl: TEMPLATE(read_cl,LOCAL_QUORUM)
       verify-fields: _id->seq_uuid, key->seq_key, value->seq_value
     ops:
       verify-find: |
         {
-          find: "<<collection:keyvalueuuid>>",
+          find: "TEMPLATE(collection,keyvalueuuid)",
           filter: { _id: UUID("{seq_uuid}") }
         }
   main_read:
     params:
-      ratio: <<read_ratio:1>>
+      ratio: TEMPLATE(read_ratio,1)
       type: read
       readPreference: primary
     ops:
       main-find: |
         {
-          find: "<<collection:keyvalueuuid>>",
+          find: "TEMPLATE(collection,keyvalueuuid)",
           filter: { _id: UUID("{rw_uuid}") }
         }
   main_write:
     params:
-      ratio: <<write_ratio:1>>
+      ratio: TEMPLATE(write_ratio,1)
       type: write
       readPreference: primary
     ops:
       main_insert: |
         {
-          insert: "<<collection:keyvalueuuid>>",
+          insert: "TEMPLATE(collection,keyvalueuuid)",
           documents: [ { _id: UUID("{rw_uuid}")
                          key: {rw_key},
                          value: NumberLong({rw_value}) } ]

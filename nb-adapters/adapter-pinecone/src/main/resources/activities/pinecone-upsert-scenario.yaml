@@ -4,8 +4,8 @@ scenarios:
     query: run driver=pinecone tags==block:query cycles===TEMPLATE(query-cycles,10000000) threads=auto
 
 bindings:
-  id: Mod(<<keycount:1000000000>>); ToString() -> String
-  vector_value: ListSizedHashed(<<dimensions:5>>,HashRange(0.0f,100.0f) -> float)
+  id: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
+  vector_value: ListSizedHashed(TEMPLATE(dimensions,5),HashRange(0.0f,100.0f) -> float)
   city: Cities()
 
 blocks:

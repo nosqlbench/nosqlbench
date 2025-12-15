@@ -36,6 +36,6 @@ class ExprFunctionProviderServiceLoadingTest {
         loader.forEach(provider -> implementations.add(provider.getClass()));
 
         assertTrue(implementations.contains(CoreExprFunctionsProvider.class));
-        assertTrue(implementations.contains(ParameterExprFunctionsProvider.class));
+        assertTrue(implementations.contains(UnifiedParameterProvider.class));
     }
 }

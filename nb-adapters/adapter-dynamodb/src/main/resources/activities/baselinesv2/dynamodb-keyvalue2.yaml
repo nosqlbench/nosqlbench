@@ -16,10 +16,10 @@ scenarios:
     table: run driver=dynamodb tags==block:delete threads==1 cycles==UNDEF
 
 bindings:
-  seq_key: Mod(<<keycount:1000000000>>); ToString() -> String
-  seq_value: Hash(); Mod(<<valuecount:1000000000>>); ToString() -> String
-  rw_key: <<keydist:Uniform(0,1000000000)->int>>; ToString() -> String
-  rw_value: Hash(); <<valdist:Uniform(0,1000000000)->int>>; ToString() -> String
+  seq_key: Mod(TEMPLATE(keycount,1000000000)); ToString() -> String
+  seq_value: Hash(); Mod(TEMPLATE(valuecount,1000000000)); ToString() -> String
+  rw_key: TEMPLATE(keydist,Uniform(0,1000000000)->int); ToString() -> String
+  rw_value: Hash(); TEMPLATE(valdist,Uniform(0,1000000000)->int); ToString() -> String
 
 blocks:
   schema:

@@ -15,7 +15,7 @@ scenarios:
 
 bindings:
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
+  token: Discard(); Token('TEMPLATE(auth_token,)','TEMPLATE(auth_uri,http://localhost:8081/v1/auth)', 'TEMPLATE(auth_uid,cassandra)', 'TEMPLATE(auth_pswd,cassandra)');
 
   seq_key: Mod(10000000); ToString() -> String
   seq_value: Hash(); Mod(1000000000); ToString() -> String
@@ -29,7 +29,7 @@ blocks:
     ops:
       create_keyspace:
         method: POST
-        uri: http://<<stargate_host>>:8082/v2/schemas/keyspaces
+        uri: http://TEMPLATE(stargate_host):8082/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -42,7 +42,7 @@ blocks:
 
       drop-table:
         method: DELETE
-        uri: http://<<stargate_host>>:8082/v2/schemas/keyspaces/starter/tables/http_rest_starter
+        uri: http://TEMPLATE(stargate_host):8082/v2/schemas/keyspaces/starter/tables/http_rest_starter
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -51,7 +51,7 @@ blocks:
 
       create_table:
         method: POST
-        uri: http://<<stargate_host>>:8082/v2/schemas/keyspaces/starter/tables
+        uri: http://TEMPLATE(stargate_host):8082/v2/schemas/keyspaces/starter/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -81,7 +81,7 @@ blocks:
     ops:
       rampup_insert:
         method: POST
-        uri: http://<<stargate_host>>:8082/v2/keyspaces/starter/http_rest_starter
+        uri: http://TEMPLATE(stargate_host):8082/v2/keyspaces/starter/http_rest_starter
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -98,7 +98,7 @@ blocks:
     ops:
       main_select:
         method: GET
-        uri: http://<<stargate_host>>:8082/v2/keyspaces/starter/http_rest_starter/{rw_key}
+        uri: http://TEMPLATE(stargate_host):8082/v2/keyspaces/starter/http_rest_starter/{rw_key}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -111,7 +111,7 @@ blocks:
     ops:
       main_write:
         method: POST
-        uri: http://<<stargate_host>>:8082/v2/keyspaces/starter/http_rest_starter
+        uri: http://TEMPLATE(stargate_host):8082/v2/keyspaces/starter/http_rest_starter
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"

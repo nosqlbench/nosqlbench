@@ -17,8 +17,10 @@
 package io.nosqlbench.nb.api.engine.metrics;
 
 import com.codahale.metrics.Snapshot;
+import org.HdrHistogram.EncodableHistogram;
 
 import java.io.OutputStream;
+import java.util.Optional;
 
 public class ConvenientSnapshot extends Snapshot {
 
@@ -70,6 +72,16 @@ public class ConvenientSnapshot extends Snapshot {
     @Override
     public void dump(OutputStream output) {
         snapshot.dump(output);
+    }
+
+    /**
+     * @return the wrapped snapshot if it provides an encodable histogram payload.
+     */
+    public Optional<EncodableHistogram> asEncodableHistogram() {
+        if (snapshot instanceof DeltaHistogramSnapshot deltaHistogramSnapshot) {
+            return Optional.of(deltaHistogramSnapshot.getHistogram());
+        }
+        return Optional.empty();
     }
 
 

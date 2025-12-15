@@ -1,0 +1,51 @@
+# Test workload demonstrating shared collections across expressions
+
+scenarios:
+  default:
+    # Initialize a list in the shared context
+    init: {{=
+        items = []
+        return "List initialized"
+    }}
+
+    # Add items across multiple expressions
+    add1: {{=
+        items << 'apple'
+        return "Added apple"
+    }}
+    add2: {{=
+        items << 'banana'
+        return "Added banana"
+    }}
+    add3: {{=
+        items << 'cherry'
+        return "Added cherry"
+    }}
+
+    # Access the shared list
+    count: {{= items.size()}}
+    list: {{= items.join(', ')}}
+
+    # Initialize a map in the shared context
+    setup_map: {{=
+        scores = [:]
+        return "Map initialized"
+    }}
+
+    # Add entries across multiple expressions
+    score1: {{=
+        scores['alice'] = 95
+        return "Added alice"
+    }}
+    score2: {{=
+        scores['bob'] = 87
+        return "Added bob"
+    }}
+    score3: {{=
+        scores['charlie'] = 92
+        return "Added charlie"
+    }}
+
+    # Access the shared map
+    total: {{= scores.values().sum()}}
+    average: {{= scores.values().sum() / scores.size()}}

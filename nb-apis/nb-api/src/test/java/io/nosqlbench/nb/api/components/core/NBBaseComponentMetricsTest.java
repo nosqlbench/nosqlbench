@@ -32,13 +32,13 @@ class NBBaseComponentMetricsTest {
     @Test
     void testBasicAddAndLookup() {
         NBBaseComponentMetrics cm = new NBBaseComponentMetrics();
-        NBMetric m1 = new NBBaseMetric(NBLabels.forKV("k","20"),"test metric", MetricCategory.Verification);
+        NBMetric m1 = new NBBaseMetric(NBLabels.forKV("k","20"),"test metric", "", MetricCategory.Verification);
         String m1Handle = cm.addComponentMetric(
             m1,
             MetricCategory.Verification,
             "testing metric"
         );
-        NBMetric m2 = new NBBaseMetric(NBLabels.forKV("k","27","l","62"),"test metric", MetricCategory.Verification);
+        NBMetric m2 = new NBBaseMetric(NBLabels.forKV("k","27","l","62"),"test metric", "", MetricCategory.Verification);
         String m2Handle = cm.addComponentMetric(
             m2,
             MetricCategory.Verification,
@@ -51,13 +51,13 @@ class NBBaseComponentMetricsTest {
     @Test
     void find() {
         NBBaseComponentMetrics cm = new NBBaseComponentMetrics();
-        NBMetric m1 = new NBBaseMetric(NBLabels.forKV("k","20"),"test metric", MetricCategory.Verification);
+        NBMetric m1 = new NBBaseMetric(NBLabels.forKV("k","20"),"test metric", "", MetricCategory.Verification);
         String m1Handle = cm.addComponentMetric(
             m1,
             MetricCategory.Verification,
             "testing metric"
         );
-        NBMetric m2 = new NBBaseMetric(NBLabels.forKV("k","27","l","62"),"test metric", MetricCategory.Verification);
+        NBMetric m2 = new NBBaseMetric(NBLabels.forKV("k","27","l","62"),"test metric", "", MetricCategory.Verification);
         String m2Handle = cm.addComponentMetric(
             m2,
             MetricCategory.Verification,

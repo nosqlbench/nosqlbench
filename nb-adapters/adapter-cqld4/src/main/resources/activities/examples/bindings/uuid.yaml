@@ -23,7 +23,7 @@ bindings:
  id: Identity(); ToHashedUUID()
 
 ##    Station ID (100 unique UUID values, can override stations on the command-line)
- station_id: Mod(<<stations:100>>); ToHashedUUID()
+ station_id: Mod(TEMPLATE(stations,100)); ToHashedUUID()
 
 #  Example output:
 

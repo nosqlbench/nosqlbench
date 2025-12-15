@@ -14,8 +14,8 @@ scenarios:
 
 bindings:
   # for ramp-up and verify phases
-  part_layout: Div(<<partsize:1000000>>); ToString() -> String
-  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  part_layout: Div(TEMPLATE(partsize,1000000)); ToString() -> String
+  clust_layout: Mod(TEMPLATE(partsize,1000000)); ToString() -> String
   # todo: update these definitions to use the simpler 10,0.1, 20, 0.2, ...
   data0: Add(10); HashedFileExtractToString('data/lorem_ipsum_full.txt',9,11); EscapeJSON();
   data1: Add(20); HashedFileExtractToString('data/lorem_ipsum_full.txt',18,22); EscapeJSON();
@@ -28,14 +28,14 @@ bindings:
 
   # for main phase
   # for write
-  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_write: Hash(); Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150) -> String
 
   # for read
   limit: Uniform(1,10) -> int
-  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_read: Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
 
 params:
   instrument: true

@@ -26,11 +26,11 @@
 
     <properties>
 
-        <revision>5.25.0-SNAPSHOT</revision>
+        <revision>5.25.1-SNAPSHOT</revision>
         <!-- Set this level to override the logging level for tests during build -->
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
-        <project.test_logstatuslevel>INFO</project.test_logstatuslevel>
+        <project.test_logstatuslevel>ERROR</project.test_logstatuslevel>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench ${revision}</javadoc.name>
@@ -180,6 +180,11 @@
                 <groupId>com.mitchtalmadge</groupId>
                 <artifactId>ascii-data</artifactId>
                 <version>1.4.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xerial</groupId>
+                <artifactId>sqlite-jdbc</artifactId>
+                <version>3.46.0.0</version>
             </dependency>
             <!-- For CQL compression option -->
             <dependency>

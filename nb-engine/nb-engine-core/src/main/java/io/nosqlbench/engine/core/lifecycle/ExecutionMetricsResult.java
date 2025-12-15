@@ -23,6 +23,7 @@ import com.codahale.metrics.MetricFilter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 import io.nosqlbench.nb.api.engine.metrics.reporters.ConsoleReporter;
 import io.nosqlbench.nb.api.engine.metrics.reporters.Log4JMetricsReporter;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.components.core.NBCreators;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.core.NBComponentTraversal;
@@ -68,7 +69,8 @@ public class ExecutionMetricsResult extends ExecutionResult {
             if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
             builder.disabledMetricAttributes(disabled);
             final ConsoleReporter consoleReporter = builder.build();
-            consoleReporter.report();
+            MetricsView snapshot = MetricsView.capture(component.find().metrics(), 0L);
+            consoleReporter.report(snapshot);
             consoleReporter.close();
         }
         final String result = os.toString(StandardCharsets.UTF_8);

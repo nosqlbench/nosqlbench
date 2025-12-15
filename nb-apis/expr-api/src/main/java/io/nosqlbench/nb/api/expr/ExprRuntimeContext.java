@@ -63,4 +63,22 @@ public interface ExprRuntimeContext {
     }
 
     Map<String, ExprFunctionMetadata> getRegisteredMetadata();
+
+    /**
+     * Get a variable from the shared binding context.
+     * This allows functions to access lexically scoped variables that persist
+     * across all expression evaluations within a workload.
+     *
+     * @param name variable name to retrieve
+     * @return the variable value, or null if not set
+     */
+    Object getVariable(String name);
+
+    /**
+     * Check if a variable exists in the shared binding context.
+     *
+     * @param name variable name to check
+     * @return true if the variable has been set
+     */
+    boolean hasVariable(String name);
 }

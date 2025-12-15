@@ -16,27 +16,40 @@
 
 package io.nosqlbench.nb.api.engine.metrics.reporters;
 
-import com.codahale.metrics.*;
-import io.nosqlbench.nb.api.labels.NBLabels;
-import io.nosqlbench.nb.api.components.core.NBCreators;
+import com.codahale.metrics.MetricAttribute;
+import com.codahale.metrics.MetricFilter;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.components.core.NBFinders;
-import io.nosqlbench.nb.api.components.core.PeriodicTaskComponent;
-import io.nosqlbench.nb.api.engine.metrics.instruments.*;
+import io.nosqlbench.nb.api.components.core.NBCreators;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.MeterSample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.MetricFamily;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.PointSample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.RateStatistics;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.Sample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummarySample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummaryStatistics;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricMeter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
+import io.nosqlbench.nb.api.labels.NBLabels;
 import org.apache.logging.log4j.Marker;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is a Log4J targeted metrics logging reporter, derived from
- * {@link Slf4jReporter}. This implementation
- * was built to allow for consolidating internal logging dependencies
- * to log4j only.
+ * Log4J reporter that logs metrics snapshots emitted by the shared scheduler to a specified logger proxy.
  */
-public class Log4JMetricsReporter extends PeriodicTaskComponent {
+public class Log4JMetricsReporter extends MetricsSnapshotReporterBase {
 
     public enum LoggingLevel { TRACE, DEBUG, INFO, WARN, ERROR }
+
     private final NBCreators.LoggerProxy loggerProxy;
     private final Marker marker;
     private final TimeUnit rateUnit = TimeUnit.NANOSECONDS;
@@ -49,128 +62,200 @@ public class Log4JMetricsReporter extends PeriodicTaskComponent {
                                 final Marker marker,
                                 final MetricFilter filter,
                                 final NBLabels extraLabels,
-                                final long millis,
+                                final long intervalMillis,
                                 final boolean oneLastTime) {
-        super(component, extraLabels, millis, "REPORT-LOG4J", FirstReport.OnInterval, LastReport.OnInterrupt);
+        super(component, extraLabels, intervalMillis);
         this.loggerProxy = loggerProxy;
         this.marker = marker;
     }
 
     @Override
-    protected void task() {
-        report(NBFinders.allMetricsWithType(NBMetricGauge.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricCounter.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricHistogram.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricMeter.class, getParent()),
-            NBFinders.allMetricsWithType(NBMetricTimer.class, getParent())
-        );
+    public void onMetricsSnapshot(MetricsView view) {
+        report(view);
     }
 
-
-    public void report( List<NBMetricGauge> gauges,
-                        List<NBMetricCounter> counters,
-                        List<NBMetricHistogram> histograms,
-                        List<NBMetricMeter> meters,
-                        List<NBMetricTimer> timers) {
-        if (this.loggerProxy.isEnabled(this.marker)) {
-            for (NBMetricGauge gauge : gauges)
-                this.logGauge(gauge.getLabels().linearizeAsMetrics(), gauge);
-
-            for (NBMetricCounter counter : counters)
-                this.logCounter(counter.getLabels().linearizeAsMetrics(), counter);
-
-            for (NBMetricHistogram histogram : histograms)
-                this.logHistogram(histogram.getLabels().linearizeAsMetrics(), histogram);
-
-            for (NBMetricMeter meter : meters)
-                this.logMeter(meter.getLabels().linearizeAsMetrics(), meter);
-
-            for (NBMetricTimer timer : timers)
-                this.logTimer(timer.getLabels().linearizeAsMetrics(), timer);
+    public void report(MetricsView view) {
+        if (!this.loggerProxy.isEnabled(this.marker)) {
+            return;
+        }
+        for (MetricFamily family : view.families()) {
+            switch (family.type()) {
+                case GAUGE -> logGaugeFamily(family);
+                case COUNTER -> logCounterFamily(family);
+                case SUMMARY -> logSummaryFamily(family);
+                default -> {
+                }
+            }
         }
     }
 
-    private void logTimer(final String name, final Timer timer) {
-        Snapshot snapshot = timer.getSnapshot();
-        this.loggerProxy.log(this.marker,
-                "type={}, name={}, count={}, min={}, max={}, mean={}, stddev={}, median={}, " +
-                        "p75={}, p95={}, p98={}, p99={}, p999={}, mean_rate={}, m1={}, m5={}, " +
-                        "m15={}, rate_unit={}, duration_unit={}",
-                "TIMER",
-            this.prefix(name),
-                timer.getCount(),
-            this.convertDuration(snapshot.getMin()),
-            this.convertDuration(snapshot.getMax()),
-            this.convertDuration(snapshot.getMean()),
-            this.convertDuration(snapshot.getStdDev()),
-            this.convertDuration(snapshot.getMedian()),
-            this.convertDuration(snapshot.get75thPercentile()),
-            this.convertDuration(snapshot.get95thPercentile()),
-            this.convertDuration(snapshot.get98thPercentile()),
-            this.convertDuration(snapshot.get99thPercentile()),
-            this.convertDuration(snapshot.get999thPercentile()),
-            this.convertRate(timer.getMeanRate()),
-            this.convertRate(timer.getOneMinuteRate()),
-            this.convertRate(timer.getFiveMinuteRate()),
-            this.convertRate(timer.getFifteenMinuteRate()),
-            this.getRateUnit(),
-            this.durationUnit);
+    public void report(List<NBMetricGauge> gauges,
+                       List<NBMetricCounter> counters,
+                       List<NBMetricHistogram> histograms,
+                       List<NBMetricMeter> meters,
+                       List<NBMetricTimer> timers) {
+        ArrayList<NBMetric> combined = new ArrayList<>(
+            gauges.size() + counters.size() + histograms.size() + meters.size() + timers.size()
+        );
+        combined.addAll(gauges);
+        combined.addAll(counters);
+        combined.addAll(histograms);
+        combined.addAll(meters);
+        combined.addAll(timers);
+        MetricsView view = MetricsView.capture(combined, getIntervalMillis());
+        report(view);
+    }
+
+    private void logGaugeFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof MeterSample meterSample) {
+                logMeter(family, meterSample);
+            } else if (sample instanceof PointSample pointSample) {
+                logGauge(family, pointSample);
+            }
+        }
+    }
+
+    private void logCounterFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof PointSample pointSample) {
+                logCounter(family, pointSample);
+            }
+        }
+    }
+
+    private void logSummaryFamily(MetricFamily family) {
+        for (Sample sample : family.samples()) {
+            if (sample instanceof SummarySample summarySample) {
+                if (summarySample.rates() != null) {
+                    logTimer(family, summarySample);
+                } else {
+                    logHistogram(family, summarySample);
+                }
+            }
+        }
+    }
+
+    private void logGauge(MetricFamily family, PointSample sample) {
+        this.loggerProxy.log(
+            this.marker,
+            "type={}, name={}, value={}",
+            "GAUGE",
+            renderMetricIdentity(family, sample),
+            sample.value()
+        );
+    }
+
+    private void logCounter(MetricFamily family, PointSample sample) {
+        this.loggerProxy.log(
+            this.marker,
+            "type={}, name={}, count={}",
+            "COUNTER",
+            renderMetricIdentity(family, sample),
+            (long) sample.value()
+        );
+    }
+
+    private void logMeter(MetricFamily family, MeterSample sample) {
+        this.loggerProxy.log(
+            this.marker,
+            "type={}, name={}, count={}, mean_rate={}, m1={}, m5={}, m15={}, rate_unit={}",
+            "METER",
+            renderMetricIdentity(family, sample),
+            sample.count(),
+            convertRate(sample.meanRate()),
+            convertRate(sample.oneMinuteRate()),
+            convertRate(sample.fiveMinuteRate()),
+            convertRate(sample.fifteenMinuteRate()),
+            getRateUnit()
+        );
+    }
+
+    private void logHistogram(MetricFamily family, SummarySample sample) {
+        SummaryStatistics stats = sample.statistics();
+        this.loggerProxy.log(
+            this.marker,
+            "type={}, name={}, count={}, min={}, max={}, mean={}, stddev={}, median={}, p75={}, p95={}, p98={}, p99={}, p999={}",
+            "HISTOGRAM",
+            renderMetricIdentity(family, sample),
+            stats.count(),
+            (long) stats.min(),
+            (long) stats.max(),
+            stats.mean(),
+            stats.stddev(),
+            sample.quantiles().getOrDefault(0.5d, Double.NaN),
+            sample.quantiles().getOrDefault(0.75d, Double.NaN),
+            sample.quantiles().getOrDefault(0.95d, Double.NaN),
+            sample.quantiles().getOrDefault(0.98d, Double.NaN),
+            sample.quantiles().getOrDefault(0.99d, Double.NaN),
+            sample.quantiles().getOrDefault(0.999d, Double.NaN)
+        );
+    }
+
+    private void logTimer(MetricFamily family, SummarySample sample) {
+        SummaryStatistics stats = sample.statistics();
+        RateStatistics rates = sample.rates();
+        this.loggerProxy.log(
+            this.marker,
+            "type={}, name={}, count={}, min={}, max={}, mean={}, stddev={}, median={}, p75={}, p95={}, p98={}, p99={}, p999={}, mean_rate={}, m1={}, m5={}, m15={}, rate_unit={}, duration_unit={}",
+            "TIMER",
+            renderMetricIdentity(family, sample),
+            stats.count(),
+            convertDuration(stats.min()),
+            convertDuration(stats.max()),
+            convertDuration(stats.mean()),
+            convertDuration(stats.stddev()),
+            convertDuration(sample.quantiles().getOrDefault(0.5d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.75d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.95d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.98d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.99d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.999d, Double.NaN)),
+            (rates != null) ? convertRate(rates.mean()) : Double.NaN,
+            (rates != null) ? convertRate(rates.oneMinute()) : Double.NaN,
+            (rates != null) ? convertRate(rates.fiveMinute()) : Double.NaN,
+            (rates != null) ? convertRate(rates.fifteenMinute()) : Double.NaN,
+            getRateUnit(),
+            durationUnit
+        );
     }
 
     protected double convertDuration(double duration) {
         return duration / durationFactor;
     }
+
     protected double convertRate(double rate) {
         return rate * rateFactor;
-    }
-
-    private void logMeter(final String name, final Meter meter) {
-        this.loggerProxy.log(this.marker,
-                "type={}, name={}, count={}, mean_rate={}, m1={}, m5={}, m15={}, rate_unit={}",
-                "METER",
-            this.prefix(name),
-                meter.getCount(),
-            this.convertRate(meter.getMeanRate()),
-            this.convertRate(meter.getOneMinuteRate()),
-            this.convertRate(meter.getFiveMinuteRate()),
-            this.convertRate(meter.getFifteenMinuteRate()),
-            this.getRateUnit());
-    }
-
-    private void logHistogram(final String name, final Histogram histogram) {
-        Snapshot snapshot = histogram.getSnapshot();
-        this.loggerProxy.log(this.marker,
-                "type={}, name={}, count={}, min={}, max={}, mean={}, stddev={}, " +
-                        "median={}, p75={}, p95={}, p98={}, p99={}, p999={}",
-                "HISTOGRAM",
-            this.prefix(name),
-                histogram.getCount(),
-                snapshot.getMin(),
-                snapshot.getMax(),
-                snapshot.getMean(),
-                snapshot.getStdDev(),
-                snapshot.getMedian(),
-                snapshot.get75thPercentile(),
-                snapshot.get95thPercentile(),
-                snapshot.get98thPercentile(),
-                snapshot.get99thPercentile(),
-                snapshot.get999thPercentile());
-    }
-
-    private void logCounter(final String name, final Counter counter) {
-        this.loggerProxy.log(this.marker, "type={}, name={}, count={}", "COUNTER", this.prefix(name), counter.getCount());
-    }
-
-    private void logGauge(final String name, final Gauge<?> gauge) {
-        this.loggerProxy.log(this.marker, "type={}, name={}, value={}", "GAUGE", this.prefix(name), gauge.getValue());
     }
 
     protected String getRateUnit() {
         return "events/" + rateUnit;
     }
 
-    private String prefix(final String... components) {
-        return NBLabels.forKV((Object[]) components).linearizeAsMetrics();
+    private String renderMetricIdentity(MetricFamily family, Sample sample) {
+        String baseName = (family.originalName() == null || family.originalName().isBlank())
+            ? family.familyName()
+            : family.originalName();
+        NBLabels labels = sample.labels();
+        if (labels == null || labels.isEmpty()) {
+            return baseName;
+        }
+        Map<String, String> labelMap = new LinkedHashMap<>(labels.asMap());
+        labelMap.remove("name");
+        labelMap.remove("unit");
+        if (labelMap.isEmpty()) {
+            return baseName;
+        }
+        StringBuilder sb = new StringBuilder(baseName);
+        sb.append('{');
+        labelMap.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .forEach(entry -> sb.append(entry.getKey())
+                .append("=\"")
+                .append(entry.getValue())
+                .append("\","));
+        sb.setLength(sb.length() - 1);
+        sb.append('}');
+        return sb.toString();
     }
-
 }

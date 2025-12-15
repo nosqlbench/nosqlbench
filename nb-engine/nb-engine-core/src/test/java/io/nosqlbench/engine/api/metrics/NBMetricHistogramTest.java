@@ -36,6 +36,7 @@ public class NBMetricHistogramTest {
                 4
             ),
             "test nicer histogram values",
+            "nanoseconds",
             MetricCategory.Verification
         );
         for (int i = 1; 100 >= i; i++) {

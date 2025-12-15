@@ -18,11 +18,12 @@ package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.nosqlbench.nb.api.expr.ExprPreprocessor;
+import io.nosqlbench.nb.api.expr.TemplateRewriter;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.errors.OpConfigError;
-import io.nosqlbench.adapters.api.templating.StrInterpolator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.snakeyaml.engine.v2.api.Load;
@@ -33,6 +34,7 @@ import java.util.function.Function;
 
 public class RawOpsLoader {
     private final static Logger logger = LogManager.getLogger(RawOpsLoader.class);
+    private static final ExprPreprocessor EXPRESSION_PREPROCESSOR = new ExprPreprocessor();
 
     public static String[] YAML_EXTENSIONS = new String[]{"yaml", "yml"};
 
@@ -48,7 +50,7 @@ public class RawOpsLoader {
     }
 
     public RawOpsLoader() {
-        addTransformer(new StrInterpolator());
+        // No default transformers - template processing is handled by OpsLoader
     }
 
     public boolean isJson(String workload) {
@@ -145,6 +147,23 @@ public class RawOpsLoader {
             }
         }
         return maps;
+    }
+
+    /**
+     * Apply template rewriting and expr processing to a string.
+     * This is useful for tests that need template processing without going through
+     * the full OpsLoader pipeline.
+     *
+     * @param source the source text with potential template variables
+     * @param params parameters for template substitution
+     * @return the processed text with templates resolved
+     */
+    public static String processTemplates(String source, Map<String, ?> params) {
+        // Phase 1: Rewrite TEMPLATE syntax to expr function calls
+        String templateRewritten = TemplateRewriter.rewrite(source);
+
+        // Phase 2: Process expr expressions (including the rewritten template calls)
+        return EXPRESSION_PREPROCESSOR.process(templateRewritten, null, params);
     }
 
 }

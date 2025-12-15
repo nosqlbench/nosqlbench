@@ -7,10 +7,10 @@ scenarios:
     read: run driver=mongodb tags==block:"read.*", cycles===TEMPLATE(read-cycles,10) threads=auto errors=timer,warn
 
 bindings:
-  seq_key: Mod(<<keyCount:1000000>>); ToString();
-  seq_value: Mod(<<valueCount:1000000000>>); <<valueSizeDist:Hash()>>; ToString();
-  rw_key: <<keyDist:Uniform(0,1000000)>>; ToString();
-  rw_value: <<valDist:Uniform(0,1000000000)>>; <<valueSizeDist:Hash()>>; ToString();
+  seq_key: Mod(TEMPLATE(keyCount,1000000)); ToString();
+  seq_value: Mod(TEMPLATE(valueCount,1000000000)); TEMPLATE(valueSizeDist,Hash()); ToString();
+  rw_key: TEMPLATE(keyDist,Uniform(0,1000000)); ToString();
+  rw_value: TEMPLATE(valDist,Uniform(0,1000000000)); TEMPLATE(valueSizeDist,Hash()); ToString();
 
 blocks:
   rampup: 
@@ -19,7 +19,7 @@ blocks:
     ops:      
       insert:  >2
         {
-          insert: "<<collection:keyvalue>>",
+          insert: "TEMPLATE(collection,keyvalue)",
           documents: [ { _id: {seq_key}, value: {seq_value} } ]
         }
 
@@ -27,20 +27,20 @@ blocks:
     ops:     
       find: >2
         {
-          find: "<<collection:keyvalue>>",
+          find: "TEMPLATE(collection,keyvalue)",
           filter: { _id: {rw_key} }
         }
     params:
-      ratio: <<read_ratio:1>>
+      ratio: TEMPLATE(read_ratio,1)
       readPreference: primary
 
   write:
     ops:     
       insert: >2
         {
-          insert: "<<collection:keyvalue>>",
+          insert: "TEMPLATE(collection,keyvalue)",
           documents: [ { _id: {rw_key}, value: {rw_value} } ]
         }
     params:
-      ratio: <<write_ratio:1>>
+      ratio: TEMPLATE(write_ratio,1)
       readPreference: primary

@@ -23,6 +23,8 @@ import io.nosqlbench.engine.core.lifecycle.scenario.container.NBCommandParams;
 import io.nosqlbench.engine.core.lifecycle.scenario.container.NBContainer;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBInvokableCommand;
+import io.nosqlbench.nb.api.engine.metrics.reporters.MetricInstanceFilter;
+import io.nosqlbench.nb.api.engine.metrics.reporters.SqliteSnapshotReporter;
 import io.nosqlbench.nb.api.components.decorators.NBTokenWords;
 import io.nosqlbench.nb.api.components.status.NBHeartbeatComponent;
 import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
@@ -31,10 +33,15 @@ import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.lang.management.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -50,6 +57,10 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
     private OperatingSystemMXBean osbean = ManagementFactory.getOperatingSystemMXBean();
 
     private final Map<String, NBBufferedContainer> containers = new ConcurrentHashMap<>();
+    private final long sessionStartNanos;
+    private SqliteSnapshotReporter sessionSqliteReporter;
+    private Thread sessionSqliteShutdownHook;
+    private static final long DEFAULT_SQLITE_INTERVAL_MS = TimeUnit.SECONDS.toMillis(30);
 
     public enum STATUS {
         OK,
@@ -69,6 +80,8 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             props,
             "session"
         );
+
+        this.sessionStartNanos = System.nanoTime();
 
         new NBSessionSafetyMetrics(this);
 
@@ -125,11 +138,12 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
 
         create().gauge(
             "session_time",
-            () -> (double) System.nanoTime(),
+            () -> (double) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - this.sessionStartNanos),
             MetricCategory.Core,
-            "session time in nanoseconds"
+            "elapsed session time in milliseconds"
         );
 
+        initializeDefaultSqliteReporter();
         bufferOrphanedMetrics = true;
     }
 
@@ -174,6 +188,86 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         return collector.toExecutionResult();
     }
 
+    private void initializeDefaultSqliteReporter() {
+        getComponentProp("logsdir").ifPresent(logsDirValue -> {
+            Path logsDir = Path.of(logsDirValue);
+            try {
+                Files.createDirectories(logsDir);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to create logs directory '" + logsDir + "'", e);
+            }
+            String sessionName = getLabels().valueOf("session");
+            String sessionDbFilename = sessionName + "_metrics.db";
+            Path sessionDbPath = logsDir.resolve(sessionDbFilename);
+            String jdbcUrl = "jdbc:sqlite:" + sessionDbPath.toAbsolutePath();
+
+            MetricInstanceFilter filter = new MetricInstanceFilter();
+            boolean includeHistograms = getComponentProp("sqlite_histograms")
+                .or(() -> getComponentProp("metrics.sqlite.histograms"))
+                .map(Boolean::parseBoolean)
+                .orElse(false);
+            sessionSqliteReporter = create().sqliteSnapshotReporter(
+                this,
+                jdbcUrl,
+                DEFAULT_SQLITE_INTERVAL_MS,
+                filter,
+                includeHistograms
+            );
+
+            // Send session metadata to the reporter
+            sendSessionMetadata(sessionSqliteReporter);
+
+            sessionSqliteShutdownHook = new Thread(() -> {
+                try {
+                    sessionSqliteReporter.close();
+                } catch (Exception ignored) {
+                }
+            }, "sqlite-metrics-shutdown");
+
+            try {
+                Runtime.getRuntime().addShutdownHook(sessionSqliteShutdownHook);
+            } catch (IllegalStateException ignored) {
+                // if runtime is already shutting down, nothing to do
+            }
+
+            updateMetricsSymlink(logsDir, sessionDbFilename);
+        });
+    }
+
+    private void updateMetricsSymlink(Path logsDir, String sessionDbFilename) {
+        Path linkPath = logsDir.resolve("metrics.db");
+        Path target = logsDir.resolve(sessionDbFilename);
+        try {
+            Files.deleteIfExists(linkPath);
+            Files.createSymbolicLink(linkPath, target.getFileName());
+        } catch (UnsupportedOperationException e) {
+            logger.debug("Symbolic links are not supported; skipping metrics symlink creation.");
+        } catch (IOException e) {
+            logger.warn("Unable to update metrics symlink '{}' -> '{}'", linkPath, target, e);
+        }
+    }
+
+    private void sendSessionMetadata(SqliteSnapshotReporter reporter) {
+        Map<String, String> metadata = new LinkedHashMap<>();
+
+        // Add NoSQLBench version
+        getComponentProp("nb.version").ifPresent(version ->
+            metadata.put("nb.version", version));
+
+        // Add command-line
+        getComponentProp("nb.commandline").ifPresent(cmdline ->
+            metadata.put("nb.commandline", cmdline));
+
+        // Add hardware/system info
+        getComponentProp("nb.hardware").ifPresent(hardware ->
+            metadata.put("nb.hardware", hardware));
+
+        // Send metadata with session labels
+        if (!metadata.isEmpty()) {
+            reporter.onSessionMetadata(getLabels(), metadata);
+        }
+    }
+
 
     private NBBufferedContainer getContext(String name) {
         return containers.computeIfAbsent(
@@ -182,5 +276,17 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
         );
     }
 
-}
+    @Override
+    protected void teardown() {
+        if (sessionSqliteShutdownHook != null) {
+            try {
+                Runtime.getRuntime().removeShutdownHook(sessionSqliteShutdownHook);
+            } catch (IllegalStateException ignored) {
+                // JVM is already shutting down
+            }
+            sessionSqliteShutdownHook = null;
+        }
+        super.teardown();
+    }
 
+}

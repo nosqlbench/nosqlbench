@@ -16,11 +16,11 @@
 
 package io.nosqlbench.nb.api.engine.metrics.reporters;
 
+import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.errors.BasicError;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.system.NBEnvironment;
-import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.components.core.PeriodicTaskComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,7 +42,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 
-public class PromPushReporterComponent extends PeriodicTaskComponent {
+public class PromPushReporterComponent extends MetricsSnapshotReporterBase {
     private static final Logger logger = LogManager.getLogger(PromPushReporterComponent.class);
     private final Path keyfilePath;
     private HttpClient client;
@@ -50,7 +50,7 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
     private String bearerToken;
 
     public PromPushReporterComponent(NBComponent parent, String endpoint,long intervalMs, NBLabels nbLabels, String prompushApikeyfile) {
-        super(parent, nbLabels.andPairs("_type", "prom_push"), intervalMs,  "REPORT-PROMPUSH",FirstReport.OnInterval, LastReport.OnInterrupt);
+        super(parent, nbLabels.andPairs("_type", "prom_push"), intervalMs);
         String jobname = getLabels().valueOfOptional("jobname").orElse("default");
         String instance = getLabels().valueOfOptional("instance").orElse("default");
         if (jobname.equals("default") || instance.equals("default")) {
@@ -99,17 +99,14 @@ public class PromPushReporterComponent extends PeriodicTaskComponent {
         }
     }
 
-    public void task() {
-        final Clock nowclock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
+    @Override
+    public void onMetricsSnapshot(MetricsView snapshot) {
+        final Clock nowclock = Clock.fixed(snapshot.capturedAt(), ZoneId.systemDefault());
 
         StringBuilder sb = new StringBuilder(1024 * 1024); // 1M pre-allocated to reduce heap churn
-
-        int total = 0;
-        for (final Object metric : getParent().find().metrics()) {
-            sb = PromExpositionFormat.format(nowclock, sb, metric);
-            total++;
-        }
-        PromPushReporterComponent.logger.debug("formatted {} metrics in prom expo format", total);
+        PromExpositionFormat.format(nowclock, sb, snapshot);
+        int total = snapshot.families().stream().mapToInt(f -> f.samples().size()).sum();
+        PromPushReporterComponent.logger.debug("formatted {} metric samples in prom expo format", total);
         final String exposition = sb.toString();
 //        logger.trace(() -> "prom exposition format:\n" + exposition);
 

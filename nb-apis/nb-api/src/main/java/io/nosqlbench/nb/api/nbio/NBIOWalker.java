@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -74,20 +75,26 @@ public class NBIOWalker {
 
     public static void walk(Path root, Path p, PathVisitor v, DirectoryStream.Filter<Path> filter, boolean fullpath) {
 
-        try {
-            FileSystemProvider provider = p.getFileSystem().provider();
-            DirectoryStream<Path> paths = provider.newDirectoryStream(p, (Path r) -> true);
-            List<Path> pathlist = new ArrayList<>();
+        FileSystemProvider provider = p.getFileSystem().provider();
+        List<Path> pathlist = new ArrayList<>();
 
+        try (DirectoryStream<Path> paths = provider.newDirectoryStream(p, entry -> true)) {
             for (Path path : paths) {
                 pathlist.add(path);
             }
+        } catch (AccessDeniedException ade) {
+            logger.debug("Access denied while walking '{}', skipping.", p);
+            return;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            for (Path path : pathlist) {
-                if (fullpath && root != null) {
-                    path = root.resolve(path);
-                }
+        for (Path path : pathlist) {
+            if (fullpath && root != null) {
+                path = root.resolve(path);
+            }
 
+            try {
                 if (path.getFileSystem().provider().readAttributes(path, BasicFileAttributes.class).isDirectory()) {
                     v.preVisitDir(path);
                     walk(root, path, v, filter, fullpath);
@@ -97,10 +104,11 @@ public class NBIOWalker {
                     v.visit(path);
                     v.postVisitFile(path);
                 }
-
+            } catch (AccessDeniedException ade) {
+                logger.debug("Access denied while reading attributes for '{}', skipping.", path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

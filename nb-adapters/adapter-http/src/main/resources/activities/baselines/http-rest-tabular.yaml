@@ -15,23 +15,23 @@ scenarios:
     main: run driver=http tags==block:"main.*" cycles===TEMPLATE(main-cycles,10) threads=auto
 
 bindings:
-  weighted_hosts: WeightedStrings('<<stargate_host:stargate>>')
+  weighted_hosts: WeightedStrings('TEMPLATE(stargate_host,stargate)')
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
+  token: Discard(); Token('TEMPLATE(auth_token,)','TEMPLATE(auth_uri,http://localhost:8081/v1/auth)', 'TEMPLATE(auth_uid,cassandra)', 'TEMPLATE(auth_pswd,cassandra)');
 
   # for ramp-up and verify
-  part_layout: Div(<<partsize:1000000>>); ToString() -> String
-  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  part_layout: Div(TEMPLATE(partsize,1000000)); ToString() -> String
+  clust_layout: Mod(TEMPLATE(partsize,1000000)); ToString() -> String
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
   # for read
   limit: Uniform(1,10) -> int
-  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_read: Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
 
   # for write
-  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_write: Hash(); Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
 blocks:
@@ -39,20 +39,20 @@ blocks:
     ops:
       create_keyspace:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(restapi_port,8082)TEMPLATE(path_prefix,)/v2/schemas/keyspaces
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
-            "name": "<<keyspace:baselines>>",
-            "replicas": <<rf:1>>
+            "name": "TEMPLATE(keyspace,baselines)",
+            "replicas": TEMPLATE(rf,1)
           }
 
       drop-table:
         method: DELETE
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables/<<table:tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(restapi_port,8082)TEMPLATE(path_prefix,)/v2/schemas/keyspaces/TEMPLATE(keyspace,baselines)/tables/TEMPLATE(table,tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -61,14 +61,14 @@ blocks:
 
       create_table:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/schemas/keyspaces/<<keyspace:baselines>>/tables
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(restapi_port,8082)TEMPLATE(path_prefix,)/v2/schemas/keyspaces/TEMPLATE(keyspace,baselines)/tables
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
           {
-            "name": "<<table:tabular>>",
+            "name": "TEMPLATE(table,tabular)",
             "columnDefinitions": [
               {
                 "name": "part",
@@ -98,7 +98,7 @@ blocks:
     ops:
       rampup_insert:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(restapi_port,8082)TEMPLATE(path_prefix,)/v2/keyspaces/TEMPLATE(keyspace,baselines)/TEMPLATE(table,tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -116,7 +116,7 @@ blocks:
     ops:
       main_select:
         method: GET
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>/{part_read}&page-size={limit}
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(restapi_port,8082)TEMPLATE(path_prefix,)/v2/keyspaces/TEMPLATE(keyspace,baselines)/TEMPLATE(table,tabular)/{part_read}&page-size={limit}
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
@@ -128,7 +128,7 @@ blocks:
     ops:
       main_write:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<restapi_port:8082>><<path_prefix:>>/v2/keyspaces/<<keyspace:baselines>>/<<table:tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(restapi_port,8082)TEMPLATE(path_prefix,)/v2/keyspaces/TEMPLATE(keyspace,baselines)/TEMPLATE(table,tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"

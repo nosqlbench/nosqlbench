@@ -16,20 +16,20 @@ scenarios:
     main_write: run driver=http tags==block:"main-write.*" cycles===TEMPLATE(main-cycles,12) threads=auto
 
 bindings:
-  weighted_hosts: WeightedStrings('<<graphql_host:stargate>>')
+  weighted_hosts: WeightedStrings('TEMPLATE(graphql_host,stargate)')
   request_id: ToHashedUUID(); ToString();
-  token: Discard(); Token('<<auth_token:>>','<<auth_uri:http://localhost:8081/v1/auth>>', '<<auth_uid:cassandra>>', '<<auth_pswd:cassandra>>');
+  token: Discard(); Token('TEMPLATE(auth_token,)','TEMPLATE(auth_uri,http://localhost:8081/v1/auth)', 'TEMPLATE(auth_uid,cassandra)', 'TEMPLATE(auth_pswd,cassandra)');
 
-  part_layout: Div(<<partsize:1000000>>); ToString() -> String
-  clust_layout: Mod(<<partsize:1000000>>); ToString() -> String
+  part_layout: Div(TEMPLATE(partsize,1000000)); ToString() -> String
+  clust_layout: Mod(TEMPLATE(partsize,1000000)); ToString() -> String
   data: HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
   limit: Uniform(1,10) -> int
-  part_read: Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_read: Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_read: Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_read: Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
 
-  part_write: Hash(); Uniform(0,<<partcount:100>>)->int; ToString() -> String
-  clust_write: Hash(); Add(1); Uniform(0,<<partsize:1000000>>)->int; ToString() -> String
+  part_write: Hash(); Uniform(0,TEMPLATE(partcount,100))->int; ToString() -> String
+  clust_write: Hash(); Add(1); Uniform(0,TEMPLATE(partsize,1000000))->int; ToString() -> String
   data_write: Hash(); HashedFileExtractToString('data/lorem_ipsum_full.txt',50,150); URLEncode();
 
 blocks:
@@ -37,35 +37,35 @@ blocks:
     ops:
       create_keyspace:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
-          {"query":"mutation {\n  createKeyspace(name:\"<<keyspace:gqlcf_tabular>>\", replicas: <<rf:1>>, ifNotExists: true)\n}"}
+          {"query":"mutation {\n  createKeyspace(name:\"TEMPLATE(keyspace,gqlcf_tabular)\", replicas: TEMPLATE(rf,1), ifNotExists: true)\n}"}
 
       create_table:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql-schema
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql-schema
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
-          {"query":"mutation {\n  createTable(\n    keyspaceName: \"<<keyspace:gqlcf_tabular>>\"\n    tableName: \"<<table:tabular>>\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
+          {"query":"mutation {\n  createTable(\n    keyspaceName: \"TEMPLATE(keyspace,gqlcf_tabular)\"\n    tableName: \"TEMPLATE(table,tabular)\"\n    partitionKeys: [{ name: \"part\", type: { basic: TEXT } }]\n    clusteringKeys: [{ name: \"clust\", type: { basic: TEXT } }]\n    values: [{ name: \"data\", type: { basic: TEXT } }]\n    ifNotExists: true\n  )\n}\n"}
 
   rampup_insert:
     ops:
       action:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlcf_tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
-          {"query":"mutation {\n  insert<<table:tabular>>( value: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {value {part, clust, data}}}"}
+          {"query":"mutation {\n  insertTEMPLATE(table,tabular)( value: {part: \"{part_layout}\", clust: \"{clust_layout}\", data: \"{data}\"}) {value {part, clust, data}}}"}
 
   main_read:
     params:
@@ -73,13 +73,13 @@ blocks:
     ops:
       action:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlcf_tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
-          {"query":"{<<table:tabular>>(value: {part: \"{part_read}\"}, options: { pageSize: <<limit:10>> }) {values {part, clust, data}}}"}
+          {"query":"{TEMPLATE(table,tabular)(value: {part: \"{part_read}\"}, options: { pageSize: TEMPLATE(limit,10) }) {values {part, clust, data}}}"}
 
 
   main_write:
@@ -88,10 +88,10 @@ blocks:
     ops:
       action:
         method: POST
-        uri: <<protocol:http>>://{weighted_hosts}:<<graphql_port:8080>><<path_prefix:>>/graphql/<<keyspace:gqlcf_tabular>>
+        uri: TEMPLATE(protocol,http)://{weighted_hosts}:TEMPLATE(graphql_port,8080)TEMPLATE(path_prefix,)/graphql/TEMPLATE(keyspace,gqlcf_tabular)
         Accept: "application/json"
         X-Cassandra-Request-Id: "{request_id}"
         X-Cassandra-Token: "{token}"
         Content-Type: "application/json"
         body: >2
-          {"query":"mutation {\n  insert<<table:tabular>>( value: {part: \"{part_write}\", clust: \"{clust_write}\", data: \"{data_write}\"}) {value {part, clust, data}}}"}
+          {"query":"mutation {\n  insertTEMPLATE(table,tabular)( value: {part: \"{part_write}\", clust: \"{clust_write}\", data: \"{data_write}\"}) {value {part, clust, data}}}"}

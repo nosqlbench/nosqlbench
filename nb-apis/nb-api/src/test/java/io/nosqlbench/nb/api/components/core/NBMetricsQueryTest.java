@@ -35,6 +35,7 @@ class NBMetricsQueryTest {
     private final static NBMetric m1 = new NBBaseMetric(
         NBLabels.forKV("m1", "m1"),
         "test metric",
+        "",
         MetricCategory.Verification
     );
     private final static String m1Handle = root.addComponentMetric(
@@ -45,6 +46,7 @@ class NBMetricsQueryTest {
     private final static NBMetric m2 = new NBBaseMetric(
         NBLabels.forKV("m2", "m2"),
         "test metric",
+        "",
         MetricCategory.Verification
         );
     private final static String m2Handle = root_c2.addComponentMetric(
@@ -55,6 +57,7 @@ class NBMetricsQueryTest {
     private final static NBMetric m3 = new NBBaseMetric(
         NBLabels.forKV("m3", "m3"),
         "test metric",
+        "",
         MetricCategory.Verification
     );
     private final static String m3Handle = root_c3.addComponentMetric(

@@ -269,14 +269,14 @@ public abstract class BaseOpDispenser<OP extends CycleOp<?>, SPACE extends Space
     /**
      * Get the name of the space for a given cycle value.
      * This method uses the spaceNameF function to convert a cycle value to a name.
-     * If spaceNameF is null, it returns the string value of the cycle.
+     * If spaceNameF is null (no space binding configured), it returns "0" since that's the default space index.
      *
      * @param cycleValue The cycle value to get the name for
-     * @return The name of the space for the given cycle value, or the string value of the cycle if spaceNameF is null
+     * @return The name of the space for the given cycle value, or "0" if spaceNameF is null (default space)
      */
     public String getSpaceNameForCycle(long cycleValue) {
         if (spaceNameF == null) {
-            return String.valueOf(cycleValue);
+            return "0";  // Default space when no space binding is configured
         }
         return spaceNameF.apply(cycleValue);
     }

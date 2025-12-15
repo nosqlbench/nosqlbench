@@ -1,0 +1,42 @@
+# Test workload demonstrating YAML-safe multi-line expressions
+# This shows how to embed Groovy expressions in YAML without breaking YAML parsing
+
+scenarios:
+  # Using pipe literal (recommended for multi-line expressions)
+  pipe_literal:
+    script: |
+      {{=
+      def data = []
+      for (int i = 1; i <= 3; i++) {
+          data << i * i
+      }
+      return data.join('-')
+      }}
+
+  # Using quoted strings for inline expressions
+  quoted_inline:
+    value: "{{= 10 + 20 }}"
+
+  # Using folded scalar (note: > folds newlines to spaces, so use simple expressions)
+  folded_scalar: >
+    {{= "This is a test".toUpperCase() }}
+
+  # Complex multi-line with assignments and references
+  complex_multiline: |
+    {{computedValue =
+      def sum = 0
+      [1, 2, 3, 4, 5].each { sum += it }
+      sum * 2
+    }}
+    Result: {{@computedValue}}
+
+  # Multi-line with Groovy map and list syntax
+  groovy_collections: |
+    {{=
+    def config = [
+        name: 'test',
+        count: 100,
+        tags: ['tag1', 'tag2']
+    ]
+    return "Config: ${config.name}, count=${config.count}"
+    }}

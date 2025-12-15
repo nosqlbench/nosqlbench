@@ -1,0 +1,29 @@
+# Test workload demonstrating shared variable context across expressions
+# Variables set in one Groovy expression should be accessible in subsequent Groovy expressions
+
+scenarios:
+  default:
+    # Set a counter variable in the shared Groovy binding
+    setup: {{=
+        counter = 0
+        return "Initialized"
+    }}
+
+    # Increment the counter in multiple places
+    step1: {{=
+        counter = counter + 1
+        return counter
+    }}
+
+    step2: {{=
+        counter = counter + 10
+        return counter
+    }}
+
+    step3: {{=
+        counter = counter * 2
+        return counter
+    }}
+
+    # Use the counter in a complex expression
+    final: {{= "Counter reached: ${counter}"}}

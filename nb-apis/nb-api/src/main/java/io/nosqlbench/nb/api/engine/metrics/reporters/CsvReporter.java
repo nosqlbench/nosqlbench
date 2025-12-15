@@ -16,12 +16,15 @@
 
 package io.nosqlbench.nb.api.engine.metrics.reporters;
 
-import com.codahale.metrics.*;
-import io.nosqlbench.nb.api.labels.NBLabelUtils;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import io.nosqlbench.nb.api.components.core.PeriodicTaskComponent;
-import io.nosqlbench.nb.api.engine.metrics.instruments.*;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.MeterSample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.MetricFamily;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.PointSample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.Sample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummarySample;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView.SummaryStatistics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,19 +33,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class CsvReporter extends PeriodicTaskComponent {
+public class CsvReporter extends MetricsSnapshotReporterBase {
     private static final Logger logger = LogManager.getLogger(CsvReporter.class);
     private final Path reportTo;
     private final String separator = ",";
     private final MetricInstanceFilter filter;
     private final Locale locale = Locale.US;
-    private final Clock clock = Clock.defaultClock();
     private final String histogramFormat;
     private final String meterFormat;
     private final String timerFormat;
@@ -54,15 +53,13 @@ public class CsvReporter extends PeriodicTaskComponent {
     private final TimeUnit durationUnit = TimeUnit.NANOSECONDS;
     private final long durationFactor;
     private final long rateFactor;
-    private final NBComponent component;
     private Map<Path, PrintWriter> outstreams = new HashMap<>();
 
     public CsvReporter(NBComponent node, Path reportTo, long intervalMs, MetricInstanceFilter filter,
                        NBLabels extraLabels) {
-        super(node, extraLabels, intervalMs, "REPORT-CSV", FirstReport.OnInterval, LastReport.OnInterrupt);
-        this.component = node;
+        super(node, extraLabels, intervalMs);
         this.reportTo = reportTo;
-        this.filter = filter;
+        this.filter = (filter != null) ? filter : new MetricInstanceFilter();
         this.durationFactor = durationUnit.toNanos(1);
         this.rateFactor = rateUnit.toSeconds(1);
         this.histogramFormat = String.join(separator, "%d", "%d", "%f", "%d", "%f", "%f", "%f", "%f", "%f", "%f", "%f");
@@ -91,111 +88,98 @@ public class CsvReporter extends PeriodicTaskComponent {
     }
 
     @Override
-    public void task() {
-        List<NBMetric> metrics = component.find().metrics();
-        final long timestamp = TimeUnit.MILLISECONDS.toSeconds(clock.getTime());
-        NBLabels commonLabels = NBLabelUtils.commonLabels(metrics);
+    public void onMetricsSnapshot(MetricsView view) {
+        long timestampSeconds = TimeUnit.MILLISECONDS.toSeconds(view.capturedAtEpochMillis());
+        NBLabels commonLabels = computeCommonLabels(view);
         logger.info("Factoring out common labels for CSV metrics logging: " + commonLabels.linearizeAsMetrics());
 
-        for (NBMetric metric : metrics) {
-            String name = metric.getLabels().difference(commonLabels).linearize_bare("scenario","activity","name");
-//            metric.getLabels().difference(commonLabels);
-            switch (metric) {
-                case NBMetricGauge gauge:
-                    reportGauge(timestamp, name, gauge);
-                    break;
-                case NBMetricCounter counter:
-                    reportCounter(timestamp, name, counter);
-                    break;
-                case NBMetricHistogram histogram:
-                    reportHistogram(timestamp, name, histogram);
-                    break;
-                case NBMetricTimer timer:
-                    reportTimer(timestamp, name, timer);
-                    break;
-                case NBMetricMeter meter:
-                    reportMeter(timestamp, name, meter);
-                    break;
-                default:
-                    throw new RuntimeException("Unrecognized metric type to report '" + metric.getClass().getSimpleName() + "'");
+        for (MetricFamily family : view.families()) {
+            for (Sample sample : family.samples()) {
+                NBLabels diff = sample.labels().difference(commonLabels);
+                String name = diff.linearize_bare("scenario", "activity", "name");
+                String handle = sample.labels().linearizeAsMetrics();
+                if (!filter.matches(handle, sample.labels())) {
+                    continue;
+                }
+                switch (sample) {
+                    case PointSample pointSample -> reportGauge(timestampSeconds, name, pointSample);
+                    case MeterSample meterSample -> reportMeter(timestampSeconds, name, meterSample);
+                    case SummarySample summarySample -> {
+                        if (summarySample.rates() != null) {
+                            reportTimer(timestampSeconds, name, summarySample);
+                        } else {
+                            reportHistogram(timestampSeconds, name, summarySample);
+                        }
+                    }
+                    default -> throw new RuntimeException("Unrecognized metric sample type to report '" + sample.getClass().getSimpleName() + "'");
+                }
             }
         }
-    }
-
-
-    protected double convertDuration(double duration) {
-        return duration / durationFactor;
     }
 
     protected double convertRate(double rate) {
         return rate * rateFactor;
     }
 
-    private void reportTimer(long timestamp, String name, Timer timer) {
-        final Snapshot snapshot = timer.getSnapshot();
-
+    private void reportTimer(long timestamp, String name, SummarySample sample) {
+        SummaryStatistics stats = sample.statistics();
         report(timestamp,
             name,
             timerHeader,
             timerFormat,
-            timer.getCount(),
-            convertDuration(snapshot.getMax()),
-            convertDuration(snapshot.getMean()),
-            convertDuration(snapshot.getMin()),
-            convertDuration(snapshot.getStdDev()),
-            convertDuration(snapshot.getMedian()),
-            convertDuration(snapshot.get75thPercentile()),
-            convertDuration(snapshot.get95thPercentile()),
-            convertDuration(snapshot.get98thPercentile()),
-            convertDuration(snapshot.get99thPercentile()),
-            convertDuration(snapshot.get999thPercentile()),
-            convertRate(timer.getMeanRate()),
-            convertRate(timer.getOneMinuteRate()),
-            convertRate(timer.getFiveMinuteRate()),
-            convertRate(timer.getFifteenMinuteRate()),
+            stats.count(),
+            convertDuration(stats.max()),
+            convertDuration(stats.mean()),
+            convertDuration(stats.min()),
+            convertDuration(stats.stddev()),
+            convertDuration(sample.quantiles().getOrDefault(0.5d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.75d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.95d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.98d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.99d, Double.NaN)),
+            convertDuration(sample.quantiles().getOrDefault(0.999d, Double.NaN)),
+            convertRate(sample.rates() != null ? sample.rates().mean() : 0.0d),
+            convertRate(sample.rates() != null ? sample.rates().oneMinute() : 0.0d),
+            convertRate(sample.rates() != null ? sample.rates().fiveMinute() : 0.0d),
+            convertRate(sample.rates() != null ? sample.rates().fifteenMinute() : 0.0d),
             this.rateUnit,
             this.durationUnit);
     }
 
-    private void reportMeter(long timestamp, String name, Meter meter) {
+    private void reportMeter(long timestamp, String name, MeterSample meter) {
         report(timestamp,
             name,
             meterHeader,
             meterFormat,
-            meter.getCount(),
-            convertRate(meter.getMeanRate()),
-            convertRate(meter.getOneMinuteRate()),
-            convertRate(meter.getFiveMinuteRate()),
-            convertRate(meter.getFifteenMinuteRate()),
+            meter.count(),
+            convertRate(meter.meanRate()),
+            convertRate(meter.oneMinuteRate()),
+            convertRate(meter.fiveMinuteRate()),
+            convertRate(meter.fifteenMinuteRate()),
             this.rateUnit);
     }
 
-    private void reportHistogram(long timestamp, String name, Histogram histogram) {
-        final Snapshot snapshot = histogram.getSnapshot();
-
+    private void reportHistogram(long timestamp, String name, SummarySample sample) {
+        SummaryStatistics stats = sample.statistics();
         report(timestamp,
             name,
             histogramHeader,
             histogramFormat,
-            histogram.getCount(),
-            snapshot.getMax(),
-            snapshot.getMean(),
-            snapshot.getMin(),
-            snapshot.getStdDev(),
-            snapshot.getMedian(),
-            snapshot.get75thPercentile(),
-            snapshot.get95thPercentile(),
-            snapshot.get98thPercentile(),
-            snapshot.get99thPercentile(),
-            snapshot.get999thPercentile());
+            stats.count(),
+            stats.max(),
+            stats.mean(),
+            stats.min(),
+            stats.stddev(),
+            sample.quantiles().getOrDefault(0.5d, Double.NaN),
+            sample.quantiles().getOrDefault(0.75d, Double.NaN),
+            sample.quantiles().getOrDefault(0.95d, Double.NaN),
+            sample.quantiles().getOrDefault(0.98d, Double.NaN),
+            sample.quantiles().getOrDefault(0.99d, Double.NaN),
+            sample.quantiles().getOrDefault(0.999d, Double.NaN));
     }
 
-    private void reportCounter(long timestamp, String name, Counter counter) {
-        report(timestamp, name, "count", "%d", counter.getCount());
-    }
-
-    private void reportGauge(long timestamp, String name, Gauge<?> gauge) {
-        report(timestamp, name, "value", "%s", gauge.getValue());
+    private void reportGauge(long timestamp, String name, PointSample sample) {
+        report(timestamp, name, "value", "%s", sample.value());
     }
 
     private void report(long timestamp, String name, String header, String line, Object... values) {
@@ -224,9 +208,39 @@ public class CsvReporter extends PeriodicTaskComponent {
         }
     }
 
-    public void teardown() {
+    private double convertDuration(double duration) {
+        return duration / durationFactor;
+    }
+
+    @Override
+    protected void teardown() {
+        outstreams.values().forEach(PrintWriter::close);
+        outstreams.clear();
         super.teardown();
     }
 
+    private NBLabels computeCommonLabels(MetricsView view) {
+        Map<String, String> common = null;
+        for (MetricFamily family : view.families()) {
+            for (Sample sample : family.samples()) {
+                Map<String, String> labels = new LinkedHashMap<>(sample.labels().asMap());
+                if (common == null) {
+                    common = new LinkedHashMap<>(labels);
+                } else {
+                    Set<String> keys = new HashSet<>(common.keySet());
+                    for (String key : keys) {
+                        String current = labels.get(key);
+                        if (!Objects.equals(common.get(key), current)) {
+                            common.remove(key);
+                        }
+                    }
+                }
+            }
+        }
+        if (common == null || common.isEmpty()) {
+            return NBLabels.forMap(Map.of());
+        }
+        return NBLabels.forMap(common);
+    }
 
 }

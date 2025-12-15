@@ -29,6 +29,7 @@ public class NBVariableGauge implements NBMetricGauge {
     private final NBLabeledElement parent;
     private final NBLabels labels;
     private String description;
+    private String unit;
     private MetricCategory[] categories;
 
     public NBVariableGauge(
@@ -37,12 +38,14 @@ public class NBVariableGauge implements NBMetricGauge {
         double initialValue,
         NBLabels additionalLabels,
         String description,
+        String unit,
         MetricCategory... categories
     ) {
         this.parent = parent;
         this.labels = additionalLabels.andPairs("name", metricFamilyName);
         this.value = initialValue;
         this.description = description;
+        this.unit = unit;
         this.categories = categories;
 
     }
@@ -65,6 +68,11 @@ public class NBVariableGauge implements NBMetricGauge {
     @Override
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getUnit() {
+        return this.unit;
     }
 
     @Override

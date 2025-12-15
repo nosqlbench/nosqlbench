@@ -46,6 +46,11 @@
             <artifactId>nb-api</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>org.snakeyaml</groupId>
+            <artifactId>snakeyaml-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

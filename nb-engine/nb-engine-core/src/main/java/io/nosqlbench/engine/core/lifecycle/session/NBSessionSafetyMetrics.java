@@ -55,31 +55,31 @@ public class NBSessionSafetyMetrics extends NBBaseComponent {
             "cpu_user",
             reader::getUserTime,
             MetricCategory.Internals,
-            ""
+            "normal processes executing in user mode"
         );
         NBMetricGauge cpuSystemGauge = create().gauge(
             "cpu_system",
             reader::getSystemTime,
             MetricCategory.Internals,
-            ""
+            "processes executing in kernel mode"
         );
         NBMetricGauge cpuIdleGauge = create().gauge(
             "cpu_idle",
             reader::getIdleTime,
             MetricCategory.Internals,
-            ""
+            "time spent running the idle task when no process is runnable"
         );
         NBMetricGauge cpuIoWaitGauge = create().gauge(
             "cpu_iowait",
             reader::getIoWaitTime,
             MetricCategory.Internals,
-            ""
+            "estimate of time spent waiting for I/O to complete"
         );
         NBMetricGauge cpuTotalGauge = create().gauge(
             "cpu_total",
             reader::getTotalTime,
             MetricCategory.Internals,
-            ""
+            "sum of all other cpu utilization metrics, which should be close to 100%"
         );
         // add checking for percent of time spent in user space; TODO: Modify percent threshold
         metricsChecker.addRatioMetricToCheck(
@@ -100,17 +100,17 @@ public class NBSessionSafetyMetrics extends NBBaseComponent {
                 device + "_transactions",
                 () -> reader.getTransactionsForDevice(device),
                 MetricCategory.Internals,
-                ""
+                "sum of reads and writes completed for this device"
             );
             create().gauge(device + "_kB_read",
                 () -> reader.getKbReadForDevice(device),
                 MetricCategory.Internals,
-                ""
+                "kilobytes read by this device"
             );
             create().gauge(device + "_kB_written",
                 () -> reader.getKbWrittenForDevice(device),
                 MetricCategory.Internals,
-                ""
+                "kilobytes written by this device"
             );
         }
     }
@@ -124,25 +124,25 @@ public class NBSessionSafetyMetrics extends NBBaseComponent {
                 iface + "_rx_bytes",
                 () -> reader.getBytesReceived(iface),
                 MetricCategory.Internals,
-                ""
+                "bytes received on this interface"
             );
             create().gauge(
                 iface + "_rx_packets",
                 () -> reader.getPacketsReceived(iface),
                 MetricCategory.Internals,
-                ""
+                "packets received on this interface"
             );
             create().gauge(
                 iface + "_tx_bytes",
                 () -> reader.getBytesTransmitted(iface),
                 MetricCategory.Internals,
-                ""
+                "bytes transmitted on this interface"
             );
             create().gauge(
                 iface + "_tx_packets",
                 () -> reader.getPacketsTransmitted(iface),
                 MetricCategory.Internals,
-                ""
+                "packets transmitted on this interface"
             );
         }
     }
@@ -188,38 +188,38 @@ public class NBSessionSafetyMetrics extends NBBaseComponent {
             "mem_total",
             reader::getMemTotalkB,
             MetricCategory.Internals,
-            ""
+            "total memory in kb"
 
         );
         NBMetricGauge memUsedGauge = create().gauge(
             "mem_used",
             reader::getMemUsedkB,
             MetricCategory.Internals,
-            ""
+            "used memory in kb"
         );
         NBMetricGauge memFreeGauge = create().gauge(
             "mem_free",
             reader::getMemFreekB,
             MetricCategory.Internals,
-            ""
+            "free memory in kb"
         );
         NBMetricGauge memAvailableGauge = create().gauge(
             "mem_available",
             reader::getMemAvailablekB,
             MetricCategory.Internals,
-            ""
+            "available memory in kb"
         );
         NBMetricGauge memCachedGauge = create().gauge(
             "mem_cache",
             reader::getMemCachedkB,
             MetricCategory.Internals,
-            ""
+            "cached memory in kb"
         );
         NBMetricGauge memBufferedGauge = create().gauge(
             "mem_buffered",
             reader::getMemBufferskB,
             MetricCategory.Internals,
-            ""
+            "buffer memory in kb"
         );
         // add checking for percent memory used at some given time; TODO: Modify percent threshold
         metricsChecker.addRatioMetricToCheck(
@@ -233,19 +233,19 @@ public class NBSessionSafetyMetrics extends NBBaseComponent {
             "swap_total",
             reader::getSwapTotalkB,
             MetricCategory.Internals,
-            ""
+            "total swap memory in kb"
         );
         NBMetricGauge swapFreeGauge = create().gauge(
             "swap_free",
             reader::getSwapFreekB,
             MetricCategory.Internals,
-            ""
+            "free swap memory in kb"
         );
         NBMetricGauge swapUsedGauge = create().gauge(
             "swap_used",
             reader::getSwapUsedkB,
             MetricCategory.Internals,
-            ""
+            "used swap memory in kb"
         );
     }
 
