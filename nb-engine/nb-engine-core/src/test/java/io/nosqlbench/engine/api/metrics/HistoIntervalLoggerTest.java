@@ -22,6 +22,8 @@ import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
 import io.nosqlbench.nb.api.engine.metrics.HistoIntervalLogger;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.engine.metrics.MetricsSnapshotScheduler;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;
@@ -39,11 +41,12 @@ public class HistoIntervalLoggerTest {
 
     @Test
     public void testBasicLogger() throws IOException {
-//        File tempFile = new File("/tmp/testhistointlog.hdr");
         File tempFile = File.createTempFile("testhistointlog", "hdr", new File("/tmp"));
         tempFile.deleteOnExit();
 
-        HistoIntervalLogger hil = new HistoIntervalLogger(new NBBaseComponent(null), "loggertest", tempFile, Pattern.compile(".*"), 1000);
+        NBBaseComponent root = new NBBaseComponent(null);
+        HistoIntervalLogger hil = new HistoIntervalLogger(root, "loggertest", tempFile, Pattern.compile(".*"), 1000);
+        MetricsSnapshotScheduler scheduler = MetricsSnapshotScheduler.lookup(root);
 
         final int significantDigits = 4;
 
@@ -58,16 +61,17 @@ public class HistoIntervalLoggerTest {
             MetricCategory.Verification
         );
 
-        hil.onHistogramAdded("histo1", NBHistogram);
-
         NBHistogram.update(1L);
-        delay(1001);
+        scheduler.injectSnapshotForTesting(MetricsView.capture(List.of(NBHistogram), 1000L));
+        delay(5);
+
         NBHistogram.update(1000000L);
-        delay(1001);
-        NBHistogram.update(1000L);
-        hil.onHistogramRemoved("histo1");
+        scheduler.injectSnapshotForTesting(MetricsView.capture(List.of(NBHistogram), 1000L));
 
         hil.closeMetrics();
+        if (scheduler != null) {
+            scheduler.teardown();
+        }
 
         HistogramLogReader hlr = new HistogramLogReader(tempFile.getAbsolutePath());
         List<EncodableHistogram> histos = new ArrayList<>();
@@ -86,15 +90,10 @@ public class HistoIntervalLoggerTest {
     }
 
     private void delay(int i) {
-        long now = System.currentTimeMillis();
-        long target = now + i;
-        while (System.currentTimeMillis() < target) {
-            try {
-                Thread.sleep(target - System.currentTimeMillis());
-            } catch (InterruptedException ignored) {
-            }
+        try {
+            Thread.sleep(i);
+        } catch (InterruptedException ignored) {
         }
-        System.out.println("delayed " + (System.currentTimeMillis() - now) + " millis");
     }
 
 }

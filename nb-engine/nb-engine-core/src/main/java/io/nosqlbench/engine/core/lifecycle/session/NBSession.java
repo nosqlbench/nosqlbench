@@ -219,8 +219,7 @@ public class NBSession extends NBHeartbeatComponent implements Function<List<Cmd
             String jdbcUrl = "jdbc:sqlite:" + sessionDbPath.toAbsolutePath();
 
             MetricInstanceFilter filter = new MetricInstanceFilter();
-            boolean includeHistograms = getComponentProp("sqlite_histograms")
-                .or(() -> getComponentProp("metrics.sqlite.histograms"))
+            boolean includeHistograms = getComponentProp("metrics.sqlite.histograms")
                 .map(Boolean::parseBoolean)
                 .orElse(false);
             sessionSqliteReporter = create().sqliteSnapshotReporter(

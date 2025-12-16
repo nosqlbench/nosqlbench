@@ -73,6 +73,15 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         void onMetricsSnapshot(MetricsView view);
 
         /**
+         * Indicates whether the consumer requires HDR histogram payloads for summary samples.
+         * When enabled, the scheduler retains (and combines) interval-bounded HDR histograms so that
+         * consumers can safely encode/write distributions without directly snapshotting reservoirs.
+         */
+        default boolean requiresHdrPayload() {
+            return false;
+        }
+
+        /**
          * Called to provide session-level metadata associated with a label set.
          * This metadata persists across the session and can include information like:
          * - NoSQLBench version
@@ -156,7 +165,7 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         return baseIntervalMillis;
     }
 
-    static MetricsSnapshotScheduler lookup(NBComponent component) {
+    public static MetricsSnapshotScheduler lookup(NBComponent component) {
         NBComponent root = findRoot(component);
         return schedulers.get(root);
     }
@@ -259,11 +268,13 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         if (metrics.isEmpty()) {
             return;
         }
-        MetricsView snapshot = MetricsView.capture(metrics, baseIntervalMillis);
+        boolean includeHdrPayload = consumerIntervals.keySet().stream()
+            .anyMatch(MetricsSnapshotConsumer::requiresHdrPayload);
+        MetricsView snapshot = MetricsView.capture(metrics, baseIntervalMillis, includeHdrPayload);
         processSnapshot(snapshot);
     }
 
-    void injectSnapshotForTesting(MetricsView view) {
+    public void injectSnapshotForTesting(MetricsView view) {
         processSnapshot(view);
     }
 

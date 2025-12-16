@@ -22,9 +22,12 @@ import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.engine.metrics.reporters.MetricsSnapshotReporterBase;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.HdrHistogram.EncodableHistogram;
+import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -191,6 +194,32 @@ public class MetricsSnapshotSchedulerTest {
         }
     }
 
+    @Test
+    public void testMultipleHdrConsumersSeeIdenticalPayload() {
+        RecordingHdrConsumer consumer1 = new RecordingHdrConsumer();
+        RecordingHdrConsumer consumer2 = new RecordingHdrConsumer();
+        MetricsSnapshotScheduler.register(root, 100L, consumer1);
+        MetricsSnapshotScheduler.register(root, 100L, consumer2);
+        scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        NBLabels labels = NBLabels.forKV("name", "hist_metric", "scenario", "scenario", "activity", "activity");
+        DeltaHdrHistogramReservoir reservoir = new DeltaHdrHistogramReservoir(labels, 3);
+        NBMetricHistogram histogram = new NBMetricHistogram(labels, reservoir, "hist", "nanoseconds", MetricCategory.Core);
+        histogram.update(10);
+        histogram.update(20);
+
+        scheduler.injectSnapshotForTesting(MetricsView.capture(List.of(histogram), 100L, true));
+
+        assertThat(consumer1.snapshots).hasSize(1);
+        assertThat(consumer2.snapshots).hasSize(1);
+        assertThat(consumer1.snapshots.getFirst()).isSameAs(consumer2.snapshots.getFirst());
+
+        MetricsView.SummarySample sample = (MetricsView.SummarySample) consumer1.snapshots.getFirst()
+            .families().getFirst().samples().getFirst();
+        EncodableHistogram payload = sample.snapshot().asEncodableHistogram().orElseThrow();
+        assertThat(payload).isInstanceOf(Histogram.class);
+    }
+
     private static final class RecordingReporter extends MetricsSnapshotReporterBase {
         private final List<MetricsView> snapshots = new ArrayList<>();
 
@@ -205,6 +234,20 @@ public class MetricsSnapshotSchedulerTest {
 
         public List<MetricsView> snapshots() {
             return snapshots;
+        }
+    }
+
+    private static final class RecordingHdrConsumer implements MetricsSnapshotScheduler.MetricsSnapshotConsumer {
+        private final List<MetricsView> snapshots = new ArrayList<>();
+
+        @Override
+        public void onMetricsSnapshot(MetricsView view) {
+            snapshots.add(view);
+        }
+
+        @Override
+        public boolean requiresHdrPayload() {
+            return true;
         }
     }
 }
