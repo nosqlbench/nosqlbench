@@ -16,42 +16,45 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCreateCollectionOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindVectorOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCreateCollectionOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCreateCollectionOpDispenser.class);
-    private final LongFunction<DataApiCreateCollectionOp> opFunction;
-
-    public DataApiCreateCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionFindVectorOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindVectorOpDispenser.class);
+    private final LongFunction<DataApiCollectionFindVectorOp> opFunction;
+    public DataApiCollectionFindVectorOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCreateCollectionOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionFindVectorOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            DataApiCreateCollectionOp dataApiCreateCollectionOp =
-                new DataApiCreateCollectionOp(
-                    spaceFunction.apply(l).getDatabase(),
-                    targetFunction.apply(l),
-                    this.getCollectionDefinitionFromOp(op, l)
-                );
-
-            return dataApiCreateCollectionOp;
+            Database db = spaceFunction.apply(l).getDatabase();
+            float[] vector = getVectorValues(op, l);
+            int limit = getLimit(op, l);
+            return new DataApiCollectionFindVectorOp(
+                db,
+                db.getCollection(targetFunction.apply(l)),
+                vector,
+                limit
+            );
         };
+    }
+
+    private int getLimit(ParsedOp op, long l) {
+        return op.getConfigOr("limit", 100, l);
     }
 
     @Override
     public DataApiBaseOp getOp(long cycle) {
         return opFunction.apply(cycle);
     }
-
-
 }

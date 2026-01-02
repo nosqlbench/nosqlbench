@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,26 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.collections.commands.options.CollectionInsertManyOptions;
 
 import java.util.List;
 
-public class DataApiListCollectionNamesOp extends DataApiBaseOp {
+public class DataApiCollectionInsertManyOp extends DataApiBaseOp {
+    private final List<? extends Document> documents;
+    private final String collectionName;
+    private final CollectionInsertManyOptions options;
 
-    public DataApiListCollectionNamesOp(Database db) {
+
+    public DataApiCollectionInsertManyOp(Database db, String collectionName, List<? extends Document> documents, CollectionInsertManyOptions options) {
         super(db);
+        this.collectionName = collectionName;
+        this.documents = documents;
+        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        List<String> response;
-        response = db.listCollectionNames();
-        return response;
+        return db.getCollection(collectionName).insertMany(documents, options);
     }
 }

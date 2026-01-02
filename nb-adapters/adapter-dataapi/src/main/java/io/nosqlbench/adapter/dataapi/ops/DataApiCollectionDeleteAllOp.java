@@ -16,16 +16,19 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public abstract class DataApiBaseOp implements CycleOp<Object> {
-    protected static final Logger logger = LogManager.getLogger(DataApiBaseOp.class);
-    protected final Database db;
+public class DataApiCollectionDeleteAllOp extends DataApiBaseOp {
+    private final Collection collection;
 
-    public DataApiBaseOp(Database db) {
-        this.db = db;
+    public DataApiCollectionDeleteAllOp(Database db, Collection collection) {
+        super(db);
+        this.collection = collection;
+    }
+
+    @Override
+    public Object apply(long value) {
+        return collection.deleteAll();
     }
 }

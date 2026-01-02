@@ -16,21 +16,21 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Database;
-import com.datastax.astra.client.model.CollectionOptions;
+import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.CollectionDefinition;
 
 public class DataApiCreateCollectionOp extends DataApiBaseOp {
     private final String collectionName;
-    private final CollectionOptions options;
+    private final CollectionDefinition definition;
 
-    public DataApiCreateCollectionOp(Database db, String collectionName, CollectionOptions options) {
+    public DataApiCreateCollectionOp(Database db, String collectionName, CollectionDefinition definition) {
         super(db);
         this.collectionName = collectionName;
-        this.options = options;
+        this.definition = definition;
     }
 
     @Override
     public Object apply(long value) {
-        return db.createCollection(collectionName, options);
+        return db.createCollection(collectionName, definition);
     }
 }
