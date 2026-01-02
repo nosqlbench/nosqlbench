@@ -246,6 +246,38 @@ public class MetricsReporterIntegrationTest {
         }
     }
 
+    @Test
+    public void testSqliteSnapshotReporterStoresHistogramsForAggregatedCadence(@TempDir Path tempDir) throws SQLException {
+        NBComponent root = new NBBaseComponent(null);
+        Path db = tempDir.resolve("coarse_histo.db");
+        String url = "jdbc:sqlite:" + db;
+
+        MetricsSnapshotScheduler.register(root, 100L, view -> {
+        });
+        SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
+            root,
+            url,
+            200L,
+            new MetricInstanceFilter(),
+            true
+        );
+        MetricsSnapshotScheduler scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        try {
+            scheduler.injectSnapshotForTesting(timerView(100L, 12L, 18L, 25L));
+            scheduler.injectSnapshotForTesting(timerView(100L, 4L, 9L, 33L));
+        } finally {
+            reporter.close();
+            if (scheduler != null) {
+                scheduler.teardown();
+            }
+        }
+
+        try (Connection connection = DriverManager.getConnection(url)) {
+            assertThat(readHistogramBase64(connection)).isNotEmpty();
+        }
+    }
+
     private void emitSnapshots(MetricsSnapshotScheduler scheduler, long... values) {
         for (long value : values) {
             scheduler.injectSnapshotForTesting(counterView(value, 100L));

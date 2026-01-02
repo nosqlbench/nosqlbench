@@ -218,41 +218,22 @@ public abstract class BaseDriverAdapter<RESULT
         }
     }
 
+    /// Expose the numeric space index resolver used for a parsed op. Returns the default
+    /// zero-space resolver when no space binding is configured.
+    public LongToIntFunction getSpaceIndexFunc(ParsedOp pop) {
+        return buildSpaceMapping(pop).cycleToSpaceF;
+    }
+
     @Override
     public LongFunction<SPACE> getSpaceFunc(ParsedOp pop) {
 
-        Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space", Object.class);
-        ConcurrentIndexCacheWrapperWithName wrapper = null;
-        LongFunction<String> namerF = null;
-        LongToIntFunction cycleToSpaceF;
-
-        if (spaceFuncTest.isEmpty()) {
-            cycleToSpaceF = DEFAULT_CYCLE_TO_SPACE_F;
-        } else {
-            Object example = spaceFuncTest.get().apply(0L);
-            if (example instanceof Number n) {
-                logger.trace("mapping space indirectly with Number type");
-                LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
-                cycleToSpaceF = l -> numberF.apply(l).intValue();
-            } else {
-                logger.trace("mapping space indirectly through hash table to index pool");
-                LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
-                final LongFunction<?> finalSourceF = sourceF;
-                namerF = l -> finalSourceF.apply(l).toString();
-                wrapper = new ConcurrentIndexCacheWrapperWithName();
-                final ConcurrentIndexCacheWrapperWithName finalWrapper = wrapper;
-                final LongFunction<String> finalNamerF = namerF;
-                cycleToSpaceF = l -> finalWrapper.mapKeyToIndex(finalNamerF.apply(l));
-            }
-        }
-
+        SpaceMapping mapping = buildSpaceMapping(pop);
         ConcurrentSpaceCache<SPACE> spaceCache1 = getSpaceCache();
-        final LongToIntFunction finalCycleToSpaceF = cycleToSpaceF;
+        final LongToIntFunction finalCycleToSpaceF = mapping.cycleToSpaceF;
+        final ConcurrentIndexCacheWrapperWithName finalWrapper = mapping.wrapper;
+        final LongFunction<String> finalNamerF = mapping.namerF;
 
-        // If we're using the wrapper, capture it in the final variables for the lambda
-        final ConcurrentIndexCacheWrapperWithName finalWrapper = wrapper;
-
-        if (finalWrapper != null) {
+        if (finalWrapper != null && finalNamerF != null) {
             return l -> {
                 int spaceIndex = finalCycleToSpaceF.applyAsInt(l);
                 SPACE space = spaceCache1.get(spaceIndex);
@@ -278,6 +259,46 @@ public abstract class BaseDriverAdapter<RESULT
 
                 return space;
             };
+        }
+    }
+
+    private SpaceMapping buildSpaceMapping(ParsedOp pop) {
+        Optional<LongFunction<Object>> spaceFuncTest = pop.getAsOptionalFunction("space", Object.class);
+        ConcurrentIndexCacheWrapperWithName wrapper = null;
+        LongFunction<String> namerF = null;
+        LongToIntFunction cycleToSpaceF;
+
+        if (spaceFuncTest.isEmpty()) {
+            cycleToSpaceF = DEFAULT_CYCLE_TO_SPACE_F;
+        } else {
+            Object example = spaceFuncTest.get().apply(0L);
+            if (example instanceof Number) {
+                logger.trace("mapping space indirectly with Number type");
+                LongFunction<Number> numberF = pop.getAsRequiredFunction("space", Number.class);
+                cycleToSpaceF = l -> numberF.apply(l).intValue();
+            } else {
+                logger.trace("mapping space indirectly through hash table to index pool");
+                LongFunction<?> sourceF = pop.getAsRequiredFunction("space", String.class);
+                final LongFunction<?> finalSourceF = sourceF;
+                namerF = l -> finalSourceF.apply(l).toString();
+                wrapper = new ConcurrentIndexCacheWrapperWithName();
+                final ConcurrentIndexCacheWrapperWithName finalWrapper = wrapper;
+                final LongFunction<String> finalNamerF = namerF;
+                cycleToSpaceF = l -> finalWrapper.mapKeyToIndex(finalNamerF.apply(l));
+            }
+        }
+        return new SpaceMapping(cycleToSpaceF, wrapper, namerF);
+    }
+
+    private static class SpaceMapping {
+        final LongToIntFunction cycleToSpaceF;
+        final ConcurrentIndexCacheWrapperWithName wrapper;
+        final LongFunction<String> namerF;
+
+        SpaceMapping(LongToIntFunction cycleToSpaceF, ConcurrentIndexCacheWrapperWithName wrapper, LongFunction<String> namerF) {
+            this.cycleToSpaceF = cycleToSpaceF;
+            this.wrapper = wrapper;
+            this.namerF = namerF;
         }
     }
 

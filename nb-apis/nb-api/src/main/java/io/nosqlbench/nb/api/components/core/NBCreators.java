@@ -205,7 +205,6 @@ public class NBCreators {
             new HistoIntervalLogger(base, sessionName, logfile, compiledPattern, millis);
         logger.debug(() -> "Adding " + histoIntervalLogger + " to session " + sessionName);
         base.addMetricsCloseable(histoIntervalLogger);
-        base.addListener(histoIntervalLogger);
     }
 
     public void histoStatsLogger(String sessionName, String pattern, String filename, long millis) {
@@ -219,7 +218,6 @@ public class NBCreators {
             new HistoStatsLogger(base, sessionName, logfile, compiledPattern, millis, TimeUnit.NANOSECONDS);
         logger.debug(() -> "Adding " + histoStatsLogger + " to session " + sessionName);
         base.addMetricsCloseable(histoStatsLogger);
-        base.addListener(histoStatsLogger);
     }
 
     public SqliteSnapshotReporter sqliteSnapshotReporter(NBComponent component,

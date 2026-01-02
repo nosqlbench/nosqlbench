@@ -16,16 +16,19 @@
 
 package io.nosqlbench.adapters.api.activityimpl.uniform.opwrappers;
 
-import io.nosqlbench.adapters.api.activityimpl.uniform.Validator;
+import io.nosqlbench.adapters.api.activityimpl.flow.FlowContextAwareOp;
+import io.nosqlbench.adapters.api.activityimpl.flow.OpFlowContext;
 import io.nosqlbench.adapters.api.activityimpl.uniform.flowtypes.CycleOp;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class CapturingOp<T> implements CycleOp<Map<String,?>> {
+public class CapturingOp<T> implements CycleOp<Map<String,?>>, FlowContextAwareOp {
 
     private final CycleOp<T> op;
     private final Function<T, Map<String, ?>> extractorF;
+    private OpFlowContext flowContext;
+    private int spaceIndex = 0;
 
     public CapturingOp(CycleOp<T> op, Function<T, Map<String,?>> extractorF) {
         this.op = op;
@@ -36,6 +39,17 @@ public class CapturingOp<T> implements CycleOp<Map<String,?>> {
     public Map<String,?> apply(long value) {
         T result = op.apply(value);
         Map<String, ?> map = extractorF.apply(result);
+        if (flowContext != null && map != null) {
+            map.forEach((name, val) -> {
+                flowContext.set(name, val, spaceIndex);
+            });
+        }
         return map;
+    }
+
+    @Override
+    public void setFlowContext(OpFlowContext context, int spaceIndex) {
+        this.flowContext = context;
+        this.spaceIndex = spaceIndex;
     }
 }

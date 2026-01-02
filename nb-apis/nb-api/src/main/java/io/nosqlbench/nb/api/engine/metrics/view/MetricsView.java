@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.engine.metrics.view;
 
 import io.nosqlbench.nb.api.engine.metrics.ConvenientSnapshot;
+import io.nosqlbench.nb.api.engine.metrics.DeltaHistogramSnapshot;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
@@ -25,6 +26,7 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricMeter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.HdrHistogram.Histogram;
 
 import java.time.Instant;
 import java.util.ArrayDeque;
@@ -136,6 +138,12 @@ public final class MetricsView {
     }
 
     public static MetricsView capture(Collection<? extends NBMetric> metrics, long intervalMillis) {
+        return capture(metrics, intervalMillis, true);
+    }
+
+    public static MetricsView capture(Collection<? extends NBMetric> metrics,
+                                      long intervalMillis,
+                                      boolean includeHdrPayload) {
         if (metrics.isEmpty()) {
             Instant now = Instant.now();
             return new MetricsView(now, intervalMillis, List.of());
@@ -160,7 +168,7 @@ public final class MetricsView {
                 )
             );
 
-            builder.addSample(createSample(metric, classification, familyName, effectiveWindow));
+            builder.addSample(createSample(metric, classification, familyName, effectiveWindow, includeHdrPayload));
         }
 
         List<MetricFamily> families = new ArrayList<>(builders.size());
@@ -240,11 +248,12 @@ public final class MetricsView {
     private static Sample createSample(NBMetric metric,
                                        MetricClassification classification,
                                        String familyName,
-                                       long cacheWindowMillis) {
+                                       long cacheWindowMillis,
+                                       boolean includeHdrPayload) {
         return switch (classification.type()) {
             case COUNTER -> createCounterSample((NBMetricCounter) metric, classification, familyName);
             case GAUGE -> createGaugeSample(metric, classification, familyName);
-            case SUMMARY -> createSummarySample(metric, classification, familyName, cacheWindowMillis);
+            case SUMMARY -> createSummarySample(metric, classification, familyName, cacheWindowMillis, includeHdrPayload);
             case HISTOGRAM -> throw new UnsupportedOperationException("Histogram type is not supported yet");
             case UNKNOWN -> createUnknownSample(metric, classification, familyName);
         };
@@ -282,7 +291,8 @@ public final class MetricsView {
     private static Sample createSummarySample(NBMetric metric,
                                               MetricClassification classification,
                                               String familyName,
-                                              long cacheWindowMillis) {
+                                              long cacheWindowMillis,
+                                              boolean includeHdrPayload) {
         NBLabels labels = filteredLabels(metric.getLabels());
         ConvenientSnapshot snapshot;
         long observationCount;
@@ -320,6 +330,10 @@ public final class MetricsView {
             );
         }
 
+        ConvenientSnapshot storedSnapshot = includeHdrPayload
+            ? snapshot
+            : new ConvenientSnapshot(new AggregatedSnapshot(stats, quantiles));
+
         return new SummarySample(
             familyName,
             labels,
@@ -327,7 +341,7 @@ public final class MetricsView {
             stats,
             quantiles,
             rates,
-            snapshot
+            storedSnapshot
         );
     }
 
@@ -695,6 +709,10 @@ public final class MetricsView {
         private double oneMinuteWeighted = 0.0d;
         private double fiveMinuteWeighted = 0.0d;
         private double fifteenMinuteWeighted = 0.0d;
+        private boolean hdrMergeEligible = true;
+        private Histogram mergedHistogram;
+        private long hdrStartTimestamp = Long.MAX_VALUE;
+        private long hdrEndTimestamp = Long.MIN_VALUE;
 
         private SummarySampleAccumulator(String sampleName, NBLabels labels) {
             this.sampleName = sampleName;
@@ -733,6 +751,27 @@ public final class MetricsView {
                 fiveMinuteWeighted += rates.fiveMinute() * weight;
                 fifteenMinuteWeighted += rates.fifteenMinute() * weight;
             }
+
+            if (hdrMergeEligible) {
+                summarySample.snapshot().asEncodableHistogram()
+                    .filter(Histogram.class::isInstance)
+                    .map(Histogram.class::cast)
+                    .ifPresentOrElse(
+                        histogram -> {
+                            if (mergedHistogram == null) {
+                                mergedHistogram = histogram.copy();
+                            } else {
+                                mergedHistogram.add(histogram);
+                            }
+                            hdrStartTimestamp = Math.min(hdrStartTimestamp, histogram.getStartTimeStamp());
+                            hdrEndTimestamp = Math.max(hdrEndTimestamp, histogram.getEndTimeStamp());
+                        },
+                        () -> {
+                            hdrMergeEligible = false;
+                            mergedHistogram = null;
+                        }
+                    );
+            }
         }
 
         @Override
@@ -749,8 +788,20 @@ public final class MetricsView {
             SummaryStatistics aggregatedStats = new SummaryStatistics(totalCount, resolvedMin, resolvedMax, mean, stddev);
 
             Map<Double, Double> aggregatedQuantiles = new LinkedHashMap<>();
-            for (Entry<Double, WeightedValue> entry : quantileWeights.entrySet()) {
-                aggregatedQuantiles.put(entry.getKey(), entry.getValue().value());
+            if (hdrMergeEligible && mergedHistogram != null) {
+                if (hdrStartTimestamp != Long.MAX_VALUE) {
+                    mergedHistogram.setStartTimeStamp(hdrStartTimestamp);
+                }
+                if (hdrEndTimestamp != Long.MIN_VALUE) {
+                    mergedHistogram.setEndTimeStamp(hdrEndTimestamp);
+                }
+                for (Double quantile : quantileWeights.keySet()) {
+                    aggregatedQuantiles.put(quantile, (double) mergedHistogram.getValueAtPercentile(quantile * 100.0d));
+                }
+            } else {
+                for (Entry<Double, WeightedValue> entry : quantileWeights.entrySet()) {
+                    aggregatedQuantiles.put(entry.getKey(), entry.getValue().value());
+                }
             }
 
             RateStatistics aggregatedRates = null;
@@ -764,7 +815,9 @@ public final class MetricsView {
                 );
             }
 
-            ConvenientSnapshot snapshot = new ConvenientSnapshot(new AggregatedSnapshot(aggregatedStats, aggregatedQuantiles));
+            ConvenientSnapshot snapshot = (hdrMergeEligible && mergedHistogram != null)
+                ? new ConvenientSnapshot(new DeltaHistogramSnapshot(mergedHistogram))
+                : new ConvenientSnapshot(new AggregatedSnapshot(aggregatedStats, aggregatedQuantiles));
 
             return new SummarySample(
                 sampleName,

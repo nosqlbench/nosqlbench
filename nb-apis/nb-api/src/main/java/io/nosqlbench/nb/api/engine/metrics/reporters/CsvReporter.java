@@ -62,7 +62,7 @@ public class CsvReporter extends MetricsSnapshotReporterBase {
         this.filter = (filter != null) ? filter : new MetricInstanceFilter();
         this.durationFactor = durationUnit.toNanos(1);
         this.rateFactor = rateUnit.toSeconds(1);
-        this.histogramFormat = String.join(separator, "%d", "%d", "%f", "%d", "%f", "%f", "%f", "%f", "%f", "%f", "%f");
+        this.histogramFormat = String.join(separator, "%d", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f");
         this.meterFormat = String.join(separator, "%d", "%f", "%f", "%f", "%f", "events/%s");
         this.timerFormat = String.join(separator, "%d", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "%f", "calls/%s", "%s");
 

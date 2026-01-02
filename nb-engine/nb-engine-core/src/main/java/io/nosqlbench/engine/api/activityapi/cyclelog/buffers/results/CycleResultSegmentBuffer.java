@@ -58,10 +58,16 @@ public class CycleResultSegmentBuffer {
     }
 
     public CycleResultsSegment toReader() {
-        buf.flip();
-        CycleResultsSegmentReadable readable = new CycleResultsSegmentReadable(buf);
-        buf=null;
+        ByteBuffer readBuf = buf.asReadOnlyBuffer();
+        readBuf.flip();
+        CycleResultsSegmentReadable readable = new CycleResultsSegmentReadable(readBuf);
+        buf.clear();
         return readable;
+    }
+
+    /// Reset this buffer for reuse with the same capacity.
+    public void reset() {
+        buf.clear();
     }
 
     public boolean hasRemaining() {

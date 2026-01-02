@@ -133,6 +133,7 @@ public class NBCLIOptions {
     private static final String REPORT_SUMMARY_TO = "--report-summary-to";
     private static final String SUMMARY = "--summary";
     private static final String REPORT_SUMMARY_TO_DEFAULT = "_LOGS_/_SESSION__summary.txt";
+    private static final String SQLITE_HISTOGRAMS = "--sqlite-histograms";
     private static final String PROGRESS = "--progress";
     private static final String WITH_LOGGING_PATTERN = "--with-logging-pattern";
     private static final String LOGGING_PATTERN = "--logging-pattern";
@@ -215,6 +216,7 @@ public class NBCLIOptions {
     private Path statepath;
     private final String hdrForChartFileName = NBCLIOptions.DEFAULT_CHART_HDR_LOG_NAME;
     private String reportSummaryTo = NBCLIOptions.REPORT_SUMMARY_TO_DEFAULT;
+    private boolean sqliteHistograms = true;
     private boolean enableAnsi = (null != System.getenv("TERM")) && !System.getenv("TERM").isEmpty();
     private Maturity minMaturity = Maturity.Unspecified;
     private NBAdvisorLevel advisor = NBAdvisorLevel.none;
@@ -264,6 +266,10 @@ public class NBCLIOptions {
 
     public String getReportSummaryTo() {
         return this.reportSummaryTo;
+    }
+
+    public boolean wantsSqliteHistograms() {
+        return sqliteHistograms;
     }
 
     public void setWantsStackTraces(final boolean wantsStackTraces) {
@@ -641,6 +647,16 @@ public class NBCLIOptions {
                     arglist.removeFirst();
                     final String logStatsTo = arglist.removeFirst();
                     this.statsLoggerConfigs.add(logStatsTo);
+                    break;
+                case NBCLIOptions.SQLITE_HISTOGRAMS:
+                    arglist.removeFirst();
+                    String sqliteHistoSetting = arglist.peekFirst();
+                    if (sqliteHistoSetting == null || sqliteHistoSetting.startsWith("--")) {
+                        this.sqliteHistograms = true;
+                        break;
+                    }
+                    sqliteHistoSetting = this.readWordOrThrow(arglist, "enable/disable sqlite histogram payloads");
+                    this.sqliteHistograms = sqliteHistoSetting.toLowerCase(Locale.ROOT).matches("enabled|enable|true|yes|1");
                     break;
                 case NBCLIOptions.CLASSIC_HISTOGRAMS:
                     arglist.removeFirst();
@@ -1129,10 +1145,10 @@ public class NBCLIOptions {
                 }
                 String normalized = option.toLowerCase(Locale.ROOT);
                 switch (normalized) {
-                    case "hist", "histograms", "histograms=true", "hist=true":
+                    case "hist":
                         includeHistograms = true;
                         break;
-                    case "nohist", "no-hist", "histograms=false", "hist=false":
+                    case "nohist":
                         includeHistograms = false;
                         break;
                     default:

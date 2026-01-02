@@ -63,12 +63,12 @@ public class ScenarioSummary {
                         }
                 }
 
-
-                if (result.getElapsedMillis() > summaryWhen) fullChannels.add(out);
-                else {
-                    logger.debug("Summarizing counting metrics only to {} with scenario duration of {}ms (<{})", spec, summaryWhen, summaryWhen);
-                    briefChannels.add(out);
-                }
+                fullChannels.add(out);
+//                if (result.getElapsedMillis() > summaryWhen) fullChannels.add(out);
+//                else {
+//                    logger.debug("Summarizing counting metrics only to {} with scenario duration of {}ms (<{})", spec, summaryWhen, summaryWhen);
+//                    briefChannels.add(out);
+//                }
             }
         for (PrintStream fullChannel : fullChannels) {
             result.reportMetricsSummaryTo(scenario, fullChannel);

@@ -25,7 +25,7 @@ import io.nosqlbench.engine.api.activityapi.core.MotorDispenser;
 import io.nosqlbench.engine.api.activityapi.input.InputDispenser;
 import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
-import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
+import io.nosqlbench.engine.api.activityimpl.motor.StrideMotorDispenser;
 import io.nosqlbench.engine.api.activityimpl.uniform.StandardActionDispenser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,7 +70,7 @@ public class ActivityLoader {
         }
         activity.setOutputDispenser(outputDispenser);
 
-        final MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(activity, inputDispenser, actionDispenser, outputDispenser);
+        final MotorDispenser<?> motorDispenser = new StrideMotorDispenser<>(activity, inputDispenser, actionDispenser, outputDispenser);
         if (motorDispenser instanceof ActivitiesAware) {
             ((ActivitiesAware) motorDispenser).setActivitiesMap(activityMap);
         }

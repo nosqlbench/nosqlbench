@@ -100,23 +100,24 @@ Progress is automatically disabled if verbose console logging is requested.
 
 ## Metrics, Telemetry & Reporting
 
-| Option | Description |
-|--------|-------------|
-| `--report-csv-to <dir>` | Write metrics snapshots to CSV files in `<dir>`. |
-| `--report-graphite-to <host[:port]>` | Publish metrics to Graphite/Carbon. |
-| `--report-prom-push-to <uri[,interval]>` | Push metrics to a Prometheus Pushgateway. |
-| `--report-sqlite-to <jdbc-url[,interval][,pattern]>` | Create an additional SQLite snapshot channel (beyond the default session database). |
-| `--report-interval <seconds>` | Default interval for CSV/Graphite reporting. |
-| `--metrics-prefix <prefix>` | Prefix metric names for Graphite exports. |
-| `--log-histograms <file[:regex[:interval]]>` | Persist raw HDR histograms. |
-| `--log-histostats <file[:regex[:interval]]>` | Persist histogram summary stats as CSV. |
-| `--hdr-digits <digits>` | Configure histogram precision (default `3`). |
-| `--classic-histograms <prefix[:regex]>` | Enable legacy (decaying) histogram emitters. |
-| `--add-labels key=value,...` | Append additional labels to every metric. |
-| `--set-labels key=value,...` | Replace the default label set entirely. |
-| `--summary` | Force console summary output when the session finishes. |
-| `--report-summary-to <dest>` | Configure summary destinations (comma-separated). |
-| `--session-name <name>` | Override the auto-generated session identifier. |
+| Option                                                        | Description                                                                                                                                                     |
+|---------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--report-csv-to <dir>`                                       | Write metrics snapshots to CSV files in `<dir>`.                                                                                                                |
+| `--report-graphite-to <host[:port]>`                          | Publish metrics to Graphite/Carbon.                                                                                                                             |
+| `--report-prom-push-to <uri[,interval]>`                      | Push metrics to a Prometheus Pushgateway.                                                                                                                       |
+| `--report-sqlite-to <jdbc-url[,filter[,interval[,options]]]>` | Create an additional SQLite snapshot channel (beyond the default session database).                                                                             |
+| `--report-interval <seconds>`                                 | Default interval for CSV/Graphite reporting.                                                                                                                    |
+| `--metrics-prefix <prefix>`                                   | Prefix metric names for Graphite exports.                                                                                                                       |
+| `--log-histograms <file[:regex[:interval]]>`                  | Persist raw HDR histograms.                                                                                                                                     |
+| `--log-histostats <file[:regex[:interval]]>`                  | Persist histogram summary stats as CSV.                                                                                                                         |
+| `--hdr-digits <digits>`                                       | Configure histogram precision (default `3`).                                                                                                                    |
+| <code>--sqlite-histograms[=enabled&#124;disabled]</code>      | Enable/disable storing HDR histogram payloads in the default session SQLite database via the `metrics.sqlite.histograms` component property (default: enabled). |
+| `--classic-histograms <prefix[:regex]>`                       | Enable legacy (decaying) histogram emitters.                                                                                                                    |
+| `--add-labels key=value,...`                                  | Append additional labels to every metric.                                                                                                                       |
+| `--set-labels key=value,...`                                  | Replace the default label set entirely.                                                                                                                         |
+| `--summary`                                                   | Force console summary output when the session finishes.                                                                                                         |
+| `--report-summary-to <dest>`                                  | Configure summary destinations (comma-separated).                                                                                                               |
+| `--session-name <name>`                                       | Override the auto-generated session identifier.                                                                                                                 |
 
 ### SQLite Snapshot Behaviour
 
@@ -124,6 +125,8 @@ Progress is automatically disabled if verbose console logging is requested.
   directory. A `metrics.db` symlink mirrors the active session file.
 - Use `--report-sqlite-to jdbc:sqlite:/path/to/custom.db` to add more channels
   with different intervals or label filters.
+- For additional SQLite channels, include histograms with an option like `,hist` (and disable with `,nohist`).
+- The default SQLite database includes HDR histogram payloads by default; disable with `--sqlite-histograms=disabled`.
 
 Summary destinations support:
 

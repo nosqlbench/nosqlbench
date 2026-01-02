@@ -493,6 +493,11 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         props.put("nb.commandline", String.join(" ", args));
         props.put("nb.hardware", SystemId.getHostSummary());
 
+        // Enable HDR histogram payloads in the default session metrics DB by default.
+        // Override with `--sqlite-histograms=disabled`.
+        String sqliteHistogramSetting = Boolean.toString(options.wantsSqliteHistograms());
+        props.put("metrics.sqlite.histograms", sqliteHistogramSetting);
+
         try (
             NBSession session = new NBSession(
                 new NBBaseComponent(null,

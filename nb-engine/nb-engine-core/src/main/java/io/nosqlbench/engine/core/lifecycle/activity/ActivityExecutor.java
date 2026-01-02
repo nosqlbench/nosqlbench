@@ -544,12 +544,7 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
     }
 
     private void startMotorExecutorService() {
-        this.executorService = new ThreadPoolExecutor(
-            0, Integer.MAX_VALUE,
-            0L, TimeUnit.SECONDS,
-            new SynchronousQueue<>(),
-            new IndexedThreadFactory(activity.getAlias(), new ActivityExceptionHandler(this))
-        );
+        this.executorService = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().factory());
     }
 
 

@@ -105,4 +105,10 @@ public class HistoStatsCSVWriter {
         writer.println(csvLine);
 
     }
+
+    public void close() {
+        if (writer != null) {
+            writer.close();
+        }
+    }
 }

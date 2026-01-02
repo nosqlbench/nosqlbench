@@ -129,6 +129,7 @@ public class Templatizer {
             this.function = mapper;
         }
 
+
         public Object getValue() {
             return value;
         }
@@ -136,6 +137,7 @@ public class Templatizer {
         public LongFunction<?> getFunction() {
             return this.function;
         }
+
     }
 
 

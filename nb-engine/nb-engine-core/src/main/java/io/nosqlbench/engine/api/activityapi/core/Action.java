@@ -19,8 +19,7 @@ package io.nosqlbench.engine.api.activityapi.core;
  * An action is the core logic that occurs within an activity.
  * Within a thread slot, a motor will continuously ask an action to process its input.
  *
- * To do anything useful in your action, you should implement {@link AsyncAction} or
- * {@link SyncAction} directly.
+ * To do anything useful in your action, you should implement {@link StrideAction} directly.
  */
 public interface Action {
     default void init() {
