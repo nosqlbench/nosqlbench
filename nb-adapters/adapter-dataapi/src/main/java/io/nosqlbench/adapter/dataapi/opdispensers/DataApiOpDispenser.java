@@ -231,12 +231,12 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         if (providerFunc.isPresent() && modeFunc.isPresent()) {
             LongFunction<String> pf = providerFunc.get();
             LongFunction<String> mf = modeFunc.get();
-            if (apiKeyFunc.isPresent()){
+            if (apiKeyFunc.isPresent()) {
                 LongFunction<String> ak = apiKeyFunc.get();
                 optionsBldr = paramFunc.isPresent() ?
                     optionsBldr.vectorize(pf.apply(l), mf.apply(l), ak.apply(l), paramFunc.get().apply(l)) :
                     optionsBldr.vectorize(pf.apply(l), mf.apply(l), ak.apply(l));
-            }else{
+            } else {
                 // paramFunc ignored (due to signature of vectorize method)
                 optionsBldr = optionsBldr.vectorize(pf.apply(l), mf.apply(l));
             }
