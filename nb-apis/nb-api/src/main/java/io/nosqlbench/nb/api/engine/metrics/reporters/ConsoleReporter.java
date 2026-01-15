@@ -73,9 +73,9 @@ public class ConsoleReporter extends MetricsSnapshotReporterBase {
         this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM, locale);
         this.dateFormat.setTimeZone(TimeZone.getDefault());
         this.disabledMetricAttributes = disabledMetricAttributes != null ? disabledMetricAttributes : Set.of();
-        String s = TimeUnit.NANOSECONDS.toString().toLowerCase(Locale.US);
+        String s = TimeUnit.SECONDS.toString().toLowerCase(Locale.US);
         this.rateUnit = s.substring(0, s.length() - 1);
-        this.rateFactor = TimeUnit.NANOSECONDS.toSeconds(1);
+        this.rateFactor = TimeUnit.SECONDS.toSeconds(1);
     }
 
     @Override
@@ -244,16 +244,16 @@ public class ConsoleReporter extends MetricsSnapshotReporterBase {
     private void printSummary(SummarySample sample) {
         SummaryStatistics stats = sample.statistics();
         printIfEnabled(MetricAttribute.COUNT, String.format(locale, "             count = %d", stats.count()));
-        printIfEnabled(MetricAttribute.MIN, String.format(locale, "               min = %2.2f", stats.min()));
-        printIfEnabled(MetricAttribute.MAX, String.format(locale, "               max = %2.2f", stats.max()));
-        printIfEnabled(MetricAttribute.MEAN, String.format(locale, "              mean = %2.2f", stats.mean()));
-        printIfEnabled(MetricAttribute.STDDEV, String.format(locale, "            stddev = %2.2f", stats.stddev()));
-        printIfEnabled(MetricAttribute.P50, String.format(locale, "            median = %2.2f", quantileValue(sample, 0.5d)));
-        printIfEnabled(MetricAttribute.P75, String.format(locale, "              75%% <= %2.2f", quantileValue(sample, 0.75d)));
-        printIfEnabled(MetricAttribute.P95, String.format(locale, "              95%% <= %2.2f", quantileValue(sample, 0.95d)));
-        printIfEnabled(MetricAttribute.P98, String.format(locale, "              98%% <= %2.2f", quantileValue(sample, 0.98d)));
-        printIfEnabled(MetricAttribute.P99, String.format(locale, "              99%% <= %2.2f", quantileValue(sample, 0.99d)));
-        printIfEnabled(MetricAttribute.P999, String.format(locale, "            99.9%% <= %2.2f", quantileValue(sample, 0.999d)));
+        printIfEnabled(MetricAttribute.MIN, String.format(locale, "               min = %2.2f %s", stats.min(), getDurationUnit()));
+        printIfEnabled(MetricAttribute.MAX, String.format(locale, "               max = %2.2f %s", stats.max(), getDurationUnit()));
+        printIfEnabled(MetricAttribute.MEAN, String.format(locale, "              mean = %2.2f %s", stats.mean(), getDurationUnit()));
+        printIfEnabled(MetricAttribute.STDDEV, String.format(locale, "            stddev = %2.2f %s", stats.stddev(), getDurationUnit()));
+        printIfEnabled(MetricAttribute.P50, String.format(locale, "            median = %2.2f %s", quantileValue(sample, 0.5d), getDurationUnit()));
+        printIfEnabled(MetricAttribute.P75, String.format(locale, "              75%% <= %2.2f %s", quantileValue(sample, 0.75d), getDurationUnit()));
+        printIfEnabled(MetricAttribute.P95, String.format(locale, "              95%% <= %2.2f %s", quantileValue(sample, 0.95d), getDurationUnit()));
+        printIfEnabled(MetricAttribute.P98, String.format(locale, "              98%% <= %2.2f %s", quantileValue(sample, 0.98d), getDurationUnit()));
+        printIfEnabled(MetricAttribute.P99, String.format(locale, "              99%% <= %2.2f %s", quantileValue(sample, 0.99d), getDurationUnit()));
+        printIfEnabled(MetricAttribute.P999, String.format(locale, "            99.9%% <= %2.2f %s", quantileValue(sample, 0.999d), getDurationUnit()));
 
         RateStatistics rates = sample.rates();
         if (rates != null) {
@@ -286,6 +286,11 @@ public class ConsoleReporter extends MetricsSnapshotReporterBase {
     private String getRateUnit() {
         return rateUnit;
     }
+
+    private String getDurationUnit() {
+        return durationUnit;
+    }
+
 
     private double convertDuration(double duration) {
         return duration / durationFactor;
