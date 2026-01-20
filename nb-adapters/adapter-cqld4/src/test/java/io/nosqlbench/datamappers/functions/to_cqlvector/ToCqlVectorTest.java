@@ -19,11 +19,13 @@ package io.nosqlbench.datamappers.functions.to_cqlvector;
 import com.datastax.oss.driver.api.core.data.CqlVector;
 import io.nosqlbench.datamappers.functions.to_cqlvector.from_number_list.ToCqlVector;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ToCqlVectorTest {
 
 

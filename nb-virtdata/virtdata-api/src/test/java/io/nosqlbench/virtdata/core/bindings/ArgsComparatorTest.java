@@ -17,11 +17,13 @@
 package io.nosqlbench.virtdata.core.bindings;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Constructor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ArgsComparatorTest {
 
 

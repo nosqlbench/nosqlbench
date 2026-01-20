@@ -22,6 +22,7 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricTimer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,7 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class NBComponentServicesTest {
 
     @Test

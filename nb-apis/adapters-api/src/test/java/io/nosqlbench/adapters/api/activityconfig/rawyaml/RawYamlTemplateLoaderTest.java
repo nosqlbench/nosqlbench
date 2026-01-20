@@ -20,12 +20,14 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class RawYamlTemplateLoaderTest {
     private final static Logger logger = LogManager.getLogger(RawYamlTemplateLoaderTest.class);
 

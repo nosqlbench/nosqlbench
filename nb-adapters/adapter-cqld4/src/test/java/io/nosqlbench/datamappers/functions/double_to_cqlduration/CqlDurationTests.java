@@ -20,12 +20,14 @@ import com.datastax.oss.driver.api.core.data.CqlDuration;
 import io.nosqlbench.datamappers.functions.long_to_cqlduration.CqlDurationFunctions;
 import io.nosqlbench.datamappers.functions.long_to_cqlduration.ToCqlDurationNanos;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CqlDurationTests {
 
     @Test

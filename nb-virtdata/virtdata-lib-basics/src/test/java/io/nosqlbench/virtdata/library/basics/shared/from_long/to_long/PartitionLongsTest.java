@@ -18,10 +18,12 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Tag("unit")
 public class PartitionLongsTest {
 
     @Test

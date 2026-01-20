@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Phase 3: Testing rollup functions with window calculations</p>
  */
 @Tag("mql")
+@Tag("unit")
 class RollupFunctionIntegrationTest {
 
     private Connection conn;

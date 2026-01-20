@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -32,6 +33,7 @@ import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class IntegerDistributionsValuesTest {
     private final static Logger logger = LogManager.getLogger(IntegerDistributionsValuesTest.class);
 

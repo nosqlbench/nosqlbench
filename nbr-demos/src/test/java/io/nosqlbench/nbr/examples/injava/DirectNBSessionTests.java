@@ -22,6 +22,7 @@ import io.nosqlbench.engine.core.lifecycle.session.CmdParser;
 import io.nosqlbench.engine.core.lifecycle.session.NBSession;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("unit")
 public class DirectNBSessionTests {
 
     @Test

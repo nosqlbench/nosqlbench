@@ -17,11 +17,13 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_time_types;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class ToDateTest {
 
     @Test

@@ -20,12 +20,14 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.LongToDoubleFunction;
 import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class HashMixTest {
 
     private final static LongToDoubleFunction TO_UNIT_INTERVAL =

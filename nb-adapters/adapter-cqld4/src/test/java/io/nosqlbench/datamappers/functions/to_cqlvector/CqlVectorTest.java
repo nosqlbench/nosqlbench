@@ -19,9 +19,11 @@ package io.nosqlbench.datamappers.functions.to_cqlvector;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.ListSizedStepped;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_float.HashRange;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CqlVectorTest {
 
     @Test

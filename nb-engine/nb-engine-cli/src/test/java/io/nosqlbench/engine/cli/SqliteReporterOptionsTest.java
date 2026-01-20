@@ -19,10 +19,12 @@ package io.nosqlbench.engine.cli;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class SqliteReporterOptionsTest {
 
     @Test

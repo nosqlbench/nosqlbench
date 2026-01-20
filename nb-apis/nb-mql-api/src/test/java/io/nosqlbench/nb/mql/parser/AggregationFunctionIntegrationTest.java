@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Phase 4: Testing aggregation functions with multi-dimensional data</p>
  */
 @Tag("mql")
+@Tag("unit")
 class AggregationFunctionIntegrationTest {
 
     private Connection conn;

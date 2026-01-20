@@ -20,6 +20,7 @@ import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.cqlgen.core.CGElementNamer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
+@Tag("unit")
 public class CGElementNamerTest {
 
     @Test

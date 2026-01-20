@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.expr;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URI;
 import java.util.Map;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - The line within the Groovy script that caused the error
  * - Visual indicators pointing to the error location
  */
+@Tag("unit")
 class EnhancedErrorReportingTest {
 
     private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();

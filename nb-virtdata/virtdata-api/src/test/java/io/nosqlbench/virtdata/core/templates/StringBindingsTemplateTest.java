@@ -18,9 +18,11 @@ package io.nosqlbench.virtdata.core.templates;
 
 import io.nosqlbench.virtdata.core.bindings.BindingsTemplate;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class StringBindingsTemplateTest {
 
     // , expectedExceptionsMessageRegExp = ".*not provided in the bindings: \\[two, three\\]")

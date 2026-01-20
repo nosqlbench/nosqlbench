@@ -32,6 +32,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("mql")
+@Tag("unit")
 class AggregateCommandTest {
 
     @Test

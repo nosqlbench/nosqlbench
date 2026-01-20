@@ -20,9 +20,11 @@ import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import io.nosqlbench.nb.addins.s3.s3urlhandler.S3UrlStreamHandlerTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.file.Path;
 
+@Tag("unit")
 public class S3UploaderTest {
 
     @Disabled

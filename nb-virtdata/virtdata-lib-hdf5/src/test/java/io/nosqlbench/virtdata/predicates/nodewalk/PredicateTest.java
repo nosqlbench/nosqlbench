@@ -19,11 +19,13 @@ package io.nosqlbench.virtdata.predicates.nodewalk;
 import io.nosqlbench.vectordata.spec.predicates.*;
 import io.nosqlbench.virtdata.predicates.nodewalk.repr.CqlNodeRenderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.ByteBuffer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class PredicateTest {
   @Test
   public void testPred() {

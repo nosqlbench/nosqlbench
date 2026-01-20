@@ -19,9 +19,11 @@ package io.nosqlbench.nb.api.filtering;
 import io.nosqlbench.nb.api.filtering.FilteringSieve;
 import io.nosqlbench.nb.api.filtering.TristateFilter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class FilteringSieveTest {
     @Test
     public void testStringFilteringSieve() {

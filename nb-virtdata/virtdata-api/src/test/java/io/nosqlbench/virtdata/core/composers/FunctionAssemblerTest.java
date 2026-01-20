@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.core.composers;
 
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.Function;
 import java.util.function.LongFunction;
@@ -26,6 +27,7 @@ import java.util.function.LongUnaryOperator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class FunctionAssemblerTest {
 
     @Test

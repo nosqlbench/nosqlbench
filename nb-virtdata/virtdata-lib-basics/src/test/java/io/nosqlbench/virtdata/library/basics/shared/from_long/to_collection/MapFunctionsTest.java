@@ -17,6 +17,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 import java.util.function.LongFunction;
@@ -24,6 +25,7 @@ import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class MapFunctionsTest {
 
     @Test

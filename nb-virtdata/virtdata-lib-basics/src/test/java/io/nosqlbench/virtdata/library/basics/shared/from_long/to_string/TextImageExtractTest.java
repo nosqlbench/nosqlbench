@@ -19,7 +19,9 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class TextImageExtractTest {
     private final static Logger logger = LogManager.getLogger(TextImageExtractTest.class);
 

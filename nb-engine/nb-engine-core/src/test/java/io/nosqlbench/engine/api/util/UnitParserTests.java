@@ -19,9 +19,11 @@ package io.nosqlbench.engine.api.util;
 import io.nosqlbench.nb.api.engine.util.Unit;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class UnitParserTests {
 
     @Test

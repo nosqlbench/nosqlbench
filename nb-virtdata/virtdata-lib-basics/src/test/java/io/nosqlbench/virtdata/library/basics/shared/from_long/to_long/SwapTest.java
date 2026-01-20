@@ -18,9 +18,11 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import io.nosqlbench.virtdata.library.basics.shared.stateful.Clear;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class SwapTest {
 
     @Test

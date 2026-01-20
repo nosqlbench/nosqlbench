@@ -17,9 +17,11 @@
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_list;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
+@Tag("unit")
 public class HdfFileToVectorTest {
 
     @Test

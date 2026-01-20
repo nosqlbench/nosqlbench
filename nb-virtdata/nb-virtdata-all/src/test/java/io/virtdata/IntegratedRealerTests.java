@@ -19,9 +19,11 @@ package io.virtdata;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class IntegratedRealerTests {
 
     @Test

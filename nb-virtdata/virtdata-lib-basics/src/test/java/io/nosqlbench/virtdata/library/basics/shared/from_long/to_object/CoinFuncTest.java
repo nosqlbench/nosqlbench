@@ -22,10 +22,12 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.NumberNa
 import io.nosqlbench.virtdata.library.basics.shared.functionadapters.ToLongFunction;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+@Tag("unit")
 public class CoinFuncTest {
 
     // sanity checks on ctor usage only

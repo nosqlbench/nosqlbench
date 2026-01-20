@@ -19,9 +19,11 @@ package io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate;
 import io.nosqlbench.nb.api.filtering.TristateFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.ResultReadable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class EnumReadableMappingFilterTest {
 
     @Test

@@ -19,6 +19,7 @@ package io.nosqlbench.engine.core.script;
 import io.nosqlbench.cli.testing.ProcessInvoker;
 import io.nosqlbench.cli.testing.ProcessResult;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -26,6 +27,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NBCliIntegrationTests {
 
     private final static String JARNAME = "target/nbr.jar";

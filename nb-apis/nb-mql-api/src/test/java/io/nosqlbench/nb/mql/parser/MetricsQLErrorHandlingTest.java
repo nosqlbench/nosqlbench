@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.mql.parser;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for MetricsQL error handling and user-friendly error messages.
  */
+@Tag("unit")
 class MetricsQLErrorHandlingTest {
 
     private final MetricsQLQueryParser parser = new MetricsQLQueryParser();

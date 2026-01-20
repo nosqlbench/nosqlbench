@@ -26,6 +26,7 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -33,6 +34,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("accuracy")
+@Tag("statistics")
 public class MetricsViewTest {
 
     private NBLabels labels(String name) {

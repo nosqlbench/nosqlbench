@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests edge cases like empty groups, single values, very large aggregations.
  */
 @Tag("mql")
+@Tag("unit")
 class AggregationBoundaryTest {
 
     private Connection conn;

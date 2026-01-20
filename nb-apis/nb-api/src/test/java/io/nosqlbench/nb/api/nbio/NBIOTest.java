@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.nbio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NBIOTest {
     private final static Logger logger = LogManager.getLogger(NBIOTest.class);
 

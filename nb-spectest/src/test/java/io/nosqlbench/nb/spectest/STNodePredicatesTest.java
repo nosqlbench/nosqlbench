@@ -24,12 +24,14 @@ import io.nosqlbench.nb.spectest.loaders.STDefaultNodeLoader;
 import io.nosqlbench.nb.spectest.traversal.STNodePredicates;
 import io.nosqlbench.nb.spectest.api.STNodeLoader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static io.nosqlbench.nb.spectest.traversal.STPredicateVerbs.ref;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class STNodePredicatesTest {
 
     @Test

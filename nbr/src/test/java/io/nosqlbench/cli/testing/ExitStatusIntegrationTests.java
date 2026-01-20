@@ -17,11 +17,13 @@
 package io.nosqlbench.cli.testing;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class ExitStatusIntegrationTests {
 
     private final String java = Optional.ofNullable(System.getenv(

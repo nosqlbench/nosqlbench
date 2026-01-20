@@ -17,12 +17,14 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 
+@Tag("unit")
 public class JoinTest {
 
     @Test

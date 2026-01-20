@@ -20,9 +20,11 @@ import io.nosqlbench.virtdata.lib.vectors.dnn.types.CircleVectors;
 import io.nosqlbench.virtdata.lib.vectors.algorithms.GoldenAngle;
 import io.nosqlbench.virtdata.lib.vectors.algorithms.LatLonBased;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 public class CircleVectorsTest {
 
     @Test

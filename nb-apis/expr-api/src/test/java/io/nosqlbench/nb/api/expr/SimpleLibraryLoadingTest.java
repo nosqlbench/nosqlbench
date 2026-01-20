@@ -21,6 +21,7 @@ import groovy.lang.Binding;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Tag;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * Simple unit tests for Groovy library loading functionality.
  */
+@Tag("unit")
 class SimpleLibraryLoadingTest {
 
     @Test

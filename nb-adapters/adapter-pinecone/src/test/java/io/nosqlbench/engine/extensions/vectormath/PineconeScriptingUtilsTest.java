@@ -23,10 +23,12 @@ import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.pinecone.proto.QueryResponse;
 import io.pinecone.proto.ScoredVector;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag("unit")
 public class PineconeScriptingUtilsTest {
 
 

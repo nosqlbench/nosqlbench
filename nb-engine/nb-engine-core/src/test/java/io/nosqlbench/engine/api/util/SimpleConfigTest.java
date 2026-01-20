@@ -17,9 +17,11 @@
 package io.nosqlbench.engine.api.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class SimpleConfigTest {
 
     @Test

@@ -17,11 +17,13 @@
 package io.nosqlbench.nb.mql.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 class LabelSetTreeTest {
 
     @Test

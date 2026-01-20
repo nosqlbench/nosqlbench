@@ -19,9 +19,11 @@ package io.nosqlbench.virtdata.library.curves4.continuous;
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Levy;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class LevyTest {
 
     @Test

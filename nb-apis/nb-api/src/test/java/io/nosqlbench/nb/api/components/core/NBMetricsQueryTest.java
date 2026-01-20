@@ -22,12 +22,14 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBBaseMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 class NBMetricsQueryTest {
     private final static TestComponent root = new TestComponent("root","root","type","rootelement");
     private final static TestComponent root_c2 = new TestComponent(root,"c2","c2");

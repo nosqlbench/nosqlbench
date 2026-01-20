@@ -17,11 +17,13 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_string;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class MatchFuncTest {
 
     @Test

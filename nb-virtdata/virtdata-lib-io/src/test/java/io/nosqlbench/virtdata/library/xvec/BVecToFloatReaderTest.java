@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.library.xvec;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Tag;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,6 +34,7 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 public class BVecToFloatReaderTest {
 
     @TempDir

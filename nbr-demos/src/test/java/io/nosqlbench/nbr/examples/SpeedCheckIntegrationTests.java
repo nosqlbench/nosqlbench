@@ -19,12 +19,14 @@ import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import io.nosqlbench.nbr.examples.injavascript.ScriptExampleTests;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 
 /**
  * These is here for experimentation on microbench scripts without requiring
  * them to be included in builds
  */
+@Tag("unit")
 public class SpeedCheckIntegrationTests {
 
     @Test

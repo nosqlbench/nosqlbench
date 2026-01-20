@@ -19,7 +19,9 @@ package io.nosqlbench.engine.clients.grafana.analyzer;
 import io.nosqlbench.engine.clients.grafana.transfer.GDashboard;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class GrafanaRegionAnalyzerTest {
 
     @Test

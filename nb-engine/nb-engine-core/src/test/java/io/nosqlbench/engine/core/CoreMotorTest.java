@@ -24,6 +24,7 @@ import io.nosqlbench.engine.api.activityapi.core.StrideAction;
 import io.nosqlbench.engine.api.activityimpl.motor.StrideMotor;
 import io.nosqlbench.engine.core.fortesting.BlockingSegmentInput;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -31,6 +32,7 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CoreMotorTest {
 
     @Test

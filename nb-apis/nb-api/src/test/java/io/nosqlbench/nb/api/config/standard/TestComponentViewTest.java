@@ -18,9 +18,11 @@ package io.nosqlbench.nb.api.config.standard;
 
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class TestComponentViewTest {
 
     @Test

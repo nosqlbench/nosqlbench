@@ -17,11 +17,13 @@
 package io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CycleResultArraySegmentBufferTest {
 
     @Test

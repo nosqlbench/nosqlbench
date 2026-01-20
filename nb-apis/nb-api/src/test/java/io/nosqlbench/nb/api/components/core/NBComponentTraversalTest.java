@@ -20,12 +20,14 @@ import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.core.NBComponentTraversal;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NBComponentTraversalTest {
 
     /**

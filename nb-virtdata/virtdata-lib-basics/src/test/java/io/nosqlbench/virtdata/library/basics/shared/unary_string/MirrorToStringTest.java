@@ -2,6 +2,7 @@ package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@Tag("unit")
 public class MirrorToStringTest {
 
     @Test

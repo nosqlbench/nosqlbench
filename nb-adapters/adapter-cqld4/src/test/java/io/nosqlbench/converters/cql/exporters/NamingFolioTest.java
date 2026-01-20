@@ -18,11 +18,13 @@ package io.nosqlbench.converters.cql.exporters;
 
 import io.nosqlbench.cqlgen.binders.NamingFolio;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NamingFolioTest {
 
     @Test

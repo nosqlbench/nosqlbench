@@ -17,6 +17,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.conversions.from_double;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.DoubleFunction;
 import java.util.function.DoubleUnaryOperator;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ToStringTest {
 
     @Test

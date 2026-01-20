@@ -22,6 +22,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.tristate.ResultFilt
 import io.nosqlbench.nb.api.filtering.TristateFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ResultFilteringSieveTest {
 
     @Test

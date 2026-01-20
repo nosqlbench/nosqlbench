@@ -30,6 +30,7 @@ import io.nosqlbench.nb.api.engine.metrics.reporters.PromExpositionFormat;
 import io.nosqlbench.nb.api.engine.metrics.reporters.SqliteSnapshotReporter;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -52,6 +53,8 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("accuracy")
+@Tag("metrics")
 public class MetricsReporterIntegrationTest {
 
     static {

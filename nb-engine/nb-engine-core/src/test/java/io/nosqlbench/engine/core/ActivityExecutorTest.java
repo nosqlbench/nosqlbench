@@ -34,12 +34,14 @@ import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+@Tag("unit")
 class ActivityExecutorTest {
     private static final Logger logger = LogManager.getLogger(ActivityExecutorTest.class);
 

@@ -23,6 +23,7 @@ import io.nosqlbench.nb.api.expr.annotations.ExprFunctionSpec;
 import io.nosqlbench.nb.api.expr.ExprFunctionParamsAware;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URI;
 import java.util.List;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("unit")
 class GroovyExpressionProcessorTest {
 
     private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();

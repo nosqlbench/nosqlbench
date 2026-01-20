@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.engine.metrics.reporters;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -37,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for session metadata storage in SqliteSnapshotReporter.
  * Verifies that metadata can be stored and retrieved correctly from the label_metadata table.
  */
+@Tag("accuracy")
+@Tag("metrics")
 class SessionMetadataTest {
 
     @TempDir

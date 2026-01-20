@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Phase 8: Advanced feature - regex label matching</p>
  */
 @Tag("mql")
+@Tag("unit")
 class RegexLabelMatchingTest {
 
     private Connection conn;

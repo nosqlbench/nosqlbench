@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.Tag;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 @Disabled
 @Execution(ExecutionMode.SAME_THREAD)
+@Tag("unit")
 public class ScriptExampleTests {
 
     public static NBCommandResult runScriptCommands(String scriptname, String... params) {

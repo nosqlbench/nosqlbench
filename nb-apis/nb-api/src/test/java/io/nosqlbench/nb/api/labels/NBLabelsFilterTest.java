@@ -19,9 +19,11 @@ package io.nosqlbench.nb.api.labels;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.labels.NBLabelsFilter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class NBLabelsFilterTest {
 
     @Test

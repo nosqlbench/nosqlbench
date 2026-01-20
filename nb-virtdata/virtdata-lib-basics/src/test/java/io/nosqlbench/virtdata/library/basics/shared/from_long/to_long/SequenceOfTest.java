@@ -19,10 +19,12 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 public class SequenceOfTest {
 
     @Test

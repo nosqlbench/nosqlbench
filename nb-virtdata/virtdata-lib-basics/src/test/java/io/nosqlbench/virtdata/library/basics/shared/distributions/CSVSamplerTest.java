@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -40,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * alpha,6,this is sparta
  * } </pre>
  */
+@Tag("unit")
 public class CSVSamplerTest {
     private final static Logger logger = LogManager.getLogger(CSVSamplerTest.class);
 

@@ -103,6 +103,13 @@ apply to all files, directories, modules, or sub-projects contained within this 
   the purpose of doing this is to ensure that other code paths are used during tests which would
   otherwise be missed. When doing this, the special code paths need to be very well documented.
 * Use the latest junit jupiter API and assertions for unit tests.
+* Use JUnit Jupiter `@Tag` to classify tests that fall into the kind/aspect scheme: kinds include
+  `accuracy`, `performance`, `microbench`; aspects include `engine`, `variates`, `metrics`,
+  `statistics`, `unit`, and similar areas. Use `statistics` for numerical accuracy tests and
+  `unit` for tests without a kind tag.
+  When a kind tag is used, also include one aspect tag.
+* By default, only `unit` tests run. Use Maven profiles `accuracy`, `performance`, `microbench`,
+  or `alltests`, or set `-Dnb.junit.tags="accuracy & variates"` to filter by tag expression.
 * Implement test for every requirement. Strive for good coverage in unit test.
 * Favor building native test fixtures in the code base rather than pulling in Mockito for tests.
   Only use mockito for things which are challenging to test because fixtures require remote system
@@ -114,4 +121,3 @@ apply to all files, directories, modules, or sub-projects contained within this 
   src/test/resource path of the respective module. Any tests associated with it should presume that
   as the logical root of tests. Access to these files should be granted via the system class loader
   as a resource stream during tests.
-

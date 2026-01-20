@@ -21,6 +21,7 @@ import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import io.nosqlbench.virtdata.core.templates.StringCompositor;
 import io.nosqlbench.virtdata.core.bindings.DataMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -46,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
  * captured values, not mapper recipes). The last tests below guard that these ref-types do not get passed into
  * {@code VirtData.getOptionalMapper(...)}.</p>
  */
+@Tag("unit")
 public class StringCompositorDedupBehaviorTest {
 
     @Test

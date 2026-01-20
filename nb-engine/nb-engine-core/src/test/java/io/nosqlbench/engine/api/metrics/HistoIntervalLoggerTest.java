@@ -27,6 +27,7 @@ import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -37,6 +38,8 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("accuracy")
+@Tag("statistics")
 public class HistoIntervalLoggerTest {
 
     @Test

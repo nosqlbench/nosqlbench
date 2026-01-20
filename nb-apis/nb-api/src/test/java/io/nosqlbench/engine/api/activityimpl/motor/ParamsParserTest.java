@@ -18,12 +18,14 @@ package io.nosqlbench.engine.api.activityimpl.motor;
 
 import io.nosqlbench.nb.api.config.params.ParamsParser;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class ParamsParserTest {
 
     @Test

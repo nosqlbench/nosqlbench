@@ -21,9 +21,11 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.AddHashRan
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.CycleRange;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.HashRange;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class RangeTests {
 
     @Test

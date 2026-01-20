@@ -21,6 +21,7 @@ import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 
 // test for dots and underscores in names
+@Tag("unit")
 class CmdParserTest {
 
     @Test

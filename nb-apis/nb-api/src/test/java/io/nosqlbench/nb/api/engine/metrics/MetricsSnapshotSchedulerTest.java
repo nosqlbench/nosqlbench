@@ -29,6 +29,7 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("accuracy")
+@Tag("metrics")
 public class MetricsSnapshotSchedulerTest {
 
     private final NBComponent root = new NBBaseComponent(null);

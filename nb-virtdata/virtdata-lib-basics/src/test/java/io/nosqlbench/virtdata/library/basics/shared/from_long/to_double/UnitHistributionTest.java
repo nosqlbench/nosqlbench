@@ -21,12 +21,14 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_double;
 import io.nosqlbench.virtdata.library.basics.shared.from_double.to_long.UnitHistribution;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 public class UnitHistributionTest {
 
     @Test

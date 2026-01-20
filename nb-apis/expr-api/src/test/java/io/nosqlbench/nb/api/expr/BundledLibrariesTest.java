@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.expr;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for bundled Groovy libraries in src/main/resources/lib/groovy/.
  * These libraries should be automatically loaded and available in expressions.
  */
+@Tag("unit")
 class BundledLibrariesTest {
 
     private GroovyExpressionProcessor processor;

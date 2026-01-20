@@ -17,10 +17,12 @@
 package io.nosqlbench.nb.api.engine.activityimpl;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 public class CyclesSpecTest {
 
     @Test

@@ -18,6 +18,7 @@ package io.nosqlbench.datamappers.functions.long_localdate;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class EpochMillisToJavaLocalDateTest {
 
     @Test

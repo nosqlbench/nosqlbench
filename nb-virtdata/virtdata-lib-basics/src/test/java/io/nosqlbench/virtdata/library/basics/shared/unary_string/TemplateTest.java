@@ -18,11 +18,13 @@ package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Template;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class TemplateTest {
 
 

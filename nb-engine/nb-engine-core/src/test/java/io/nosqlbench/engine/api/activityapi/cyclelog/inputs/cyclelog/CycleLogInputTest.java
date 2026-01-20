@@ -20,11 +20,13 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegmen
 import io.nosqlbench.engine.api.activityapi.cyclelog.outputs.cyclelog.CycleLogOutput;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CycleLogInputTest {
 
     private final static String filepath="cycle-log-reader-test";

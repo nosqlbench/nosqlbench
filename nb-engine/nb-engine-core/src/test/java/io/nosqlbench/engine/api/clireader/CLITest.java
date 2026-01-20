@@ -17,7 +17,9 @@
 package io.nosqlbench.engine.api.clireader;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 class CLITest {
 
     @Test

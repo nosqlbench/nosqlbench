@@ -23,10 +23,12 @@ import io.nosqlbench.nb.api.config.standard.TestComponent;
 import io.nosqlbench.engine.core.lifecycle.scenario.execution.NBCommandResult;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class DirectRuntimeScenarioTests {
 
     private final TestComponent testC = new TestComponent("testroot", "testroot");

@@ -20,9 +20,11 @@ import io.nosqlbench.virtdata.library.basics.shared.distributions.DelimFrequency
 import io.nosqlbench.virtdata.library.basics.shared.distributions.WeightedStringsFromCSV;
 import io.nosqlbench.virtdata.library.basics.shared.distributions.CSVFrequencySampler;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class IntegratedAliasMethodTests {
 
     @Test
