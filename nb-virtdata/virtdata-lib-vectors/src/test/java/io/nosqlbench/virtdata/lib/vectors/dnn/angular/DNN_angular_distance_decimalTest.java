@@ -17,9 +17,11 @@
 package io.nosqlbench.virtdata.lib.vectors.dnn.angular;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Arrays;
 
+@Tag("unit")
 public class DNN_angular_distance_decimalTest {
 
     @Test

@@ -17,12 +17,14 @@
 package io.nosqlbench.adapter.milvus;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("unit")
 class MilvusAdapterUtilsTest {
 
     @Test

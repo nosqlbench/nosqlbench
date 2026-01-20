@@ -16,10 +16,12 @@
 package io.nosqlbench.virtdata.library.basics.shared.unary_string;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 
+@Tag("unit")
 class FirstLinesTest {
 
     private static final String EXPECTED_SINGLELINE_CONTENTS = "test-data-entry";

@@ -18,9 +18,11 @@ package io.nosqlbench.nb.api.stats;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class StatBucketTest {
     @Test
     public void testStreamingMean() {

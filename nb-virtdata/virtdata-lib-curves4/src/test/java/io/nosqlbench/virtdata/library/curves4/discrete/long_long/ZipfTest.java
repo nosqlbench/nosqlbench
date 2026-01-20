@@ -18,7 +18,9 @@ package io.nosqlbench.virtdata.library.curves4.discrete.long_long;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class ZipfTest {
 
     @Test

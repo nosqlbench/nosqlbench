@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @ExtendWith(ThreadLeakDetectorExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("unit")
 public class ThreadLeakDetectorExtensionTest {
 
     /**

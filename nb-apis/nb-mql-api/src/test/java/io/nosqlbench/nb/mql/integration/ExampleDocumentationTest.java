@@ -24,6 +24,7 @@ import io.nosqlbench.nb.mql.schema.MetricsDatabaseReader;
 import io.nosqlbench.nb.mql.testdata.TestDatabaseLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -42,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test parses the markdown file, executes the commands, and verifies
  * the results match the documented expectations.
  */
+@Tag("unit")
 class ExampleDocumentationTest {
 
     private static Path examplesDb;

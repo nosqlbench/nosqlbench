@@ -16,7 +16,7 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
-import com.datastax.astra.client.Database;
+import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.DatabaseAdmin;
 
 public class DataApiDropNamespaceOp extends DataApiDBAdminOp {
@@ -29,7 +29,7 @@ public class DataApiDropNamespaceOp extends DataApiDBAdminOp {
 
     @Override
     public Object apply(long value) {
-        admin.dropNamespace(namespace);
+        admin.dropKeyspace(namespace);
         return true;
     }
 }

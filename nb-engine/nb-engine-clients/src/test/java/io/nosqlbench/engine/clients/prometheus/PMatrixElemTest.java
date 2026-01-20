@@ -22,11 +22,13 @@ import com.google.gson.reflect.TypeToken;
 import io.nosqlbench.nb.api.nbio.NBIO;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Type;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class PMatrixElemTest {
 
     @Test

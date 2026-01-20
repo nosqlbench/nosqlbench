@@ -21,6 +21,7 @@ import org.HdrHistogram.DoubleRecorder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.DoubleSummaryStatistics;
 import java.util.Random;
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * when summarizing results. This is just easier to show people rather than go through
  * a proof, so we can get on with testing!
  */
+@Tag("unit")
 public class AggregateTests {
     private final static Logger logger = LogManager.getLogger(AggregateTests.class);
     double[][] data = new double[][]{

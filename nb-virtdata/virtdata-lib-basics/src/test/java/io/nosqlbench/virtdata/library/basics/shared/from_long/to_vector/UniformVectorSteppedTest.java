@@ -18,12 +18,14 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_vector;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class UniformVectorSteppedTest {
 
 

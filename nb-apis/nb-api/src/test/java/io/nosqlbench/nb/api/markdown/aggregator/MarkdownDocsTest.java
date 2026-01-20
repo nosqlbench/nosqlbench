@@ -20,6 +20,7 @@ import io.nosqlbench.nb.api.nbio.PathContent;
 import io.nosqlbench.nb.api.markdown.types.MarkdownInfo;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URL;
 import java.nio.file.*;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class MarkdownDocsTest {
 
     @Test

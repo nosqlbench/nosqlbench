@@ -19,7 +19,9 @@ package io.nosqlbench.virtdata.core;
 import io.nosqlbench.virtdata.core.bindings.ResolverDiagnostics;
 import io.nosqlbench.virtdata.core.bindings.VirtDataComposer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class VirtDataComposerTest {
 
     @Test

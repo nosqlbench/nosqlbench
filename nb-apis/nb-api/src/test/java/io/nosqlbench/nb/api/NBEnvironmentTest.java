@@ -18,12 +18,14 @@ package io.nosqlbench.nb.api;
 
 import io.nosqlbench.nb.api.system.NBEnvironment;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NBEnvironmentTest {
 
     @Test

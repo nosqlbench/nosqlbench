@@ -21,6 +21,7 @@ import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class RealDistributionsConcurrencyTests {
     private final static Logger logger = LogManager.getLogger(RealDistributionsConcurrencyTests.class);
 

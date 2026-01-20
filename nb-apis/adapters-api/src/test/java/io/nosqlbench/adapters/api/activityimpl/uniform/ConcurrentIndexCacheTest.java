@@ -19,6 +19,7 @@ package io.nosqlbench.adapters.api.activityimpl.uniform;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -31,6 +32,7 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 public class ConcurrentIndexCacheTest {
 
     @Test

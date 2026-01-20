@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.time.Instant;
 import java.util.function.LongFunction;
@@ -25,6 +26,7 @@ import java.util.function.LongFunction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 public class MapTest {
 
     @Test

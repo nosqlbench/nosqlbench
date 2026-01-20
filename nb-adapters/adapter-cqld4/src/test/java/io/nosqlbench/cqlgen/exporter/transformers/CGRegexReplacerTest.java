@@ -17,12 +17,14 @@
 package io.nosqlbench.cqlgen.exporter.transformers;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CGRegexReplacerTest {
 
     @Test

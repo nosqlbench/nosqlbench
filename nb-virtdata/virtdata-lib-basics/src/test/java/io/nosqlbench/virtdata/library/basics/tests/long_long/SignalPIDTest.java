@@ -20,9 +20,11 @@ import io.nosqlbench.virtdata.library.basics.shared.unary_int.SignalPID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class SignalPIDTest {
     private final static Logger logger = LogManager.getLogger(SignalPIDTest.class);
 

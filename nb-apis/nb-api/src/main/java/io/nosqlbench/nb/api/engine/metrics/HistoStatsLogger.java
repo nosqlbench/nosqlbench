@@ -17,47 +17,45 @@
 package io.nosqlbench.nb.api.engine.metrics;
 
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.nb.api.components.core.NBBaseComponent;
+import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
- * HistoIntervalLogger runs a separate thread to snapshotAndWrite encoded histograms on a regular interval.
- * It listens to the metrics registry for any new metrics that match the pattern. Any metrics
- * which both match the pattern and which are {@link EncodableHistogram}s are written the configured
- * logfile at the configured interval.
+ * HistoStatsLogger consumes immutable {@link MetricsView} snapshots from {@link MetricsSnapshotScheduler}
+ * and writes interval histogram stats into a CSV file.
+ *
+ * <p>This avoids directly snapshotting (consume-and-advance) reservoirs from multiple concurrent consumers.</p>
  */
-public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment>
-        implements Runnable, MetricsCloseable  {
+public class HistoStatsLogger extends NBBaseComponent
+        implements MetricsSnapshotScheduler.MetricsSnapshotConsumer, MetricsCloseable  {
     private final static Logger logger = LogManager.getLogger(HistoStatsLogger.class);
 
     private final String sessionName;
     private final TimeUnit timeUnit;
-    //    private final long intervalMillis;
-    private final long intervalLength;
+    private final long intervalMillis;
     private final File logfile;
     private HistoStatsCSVWriter writer;
     private final Pattern pattern;
-
-    private final List<WriterTarget> targets = new CopyOnWriteArrayList<>();
-    private PeriodicRunnable<HistoStatsLogger> executor;
-    private long lastRunTime=0L;
+    private final MetricsSnapshotScheduler scheduler;
 
     public HistoStatsLogger(NBComponent parent, String sessionName, File file, Pattern pattern, long intervalLength, TimeUnit timeUnit) {
         super(parent);
         this.sessionName = sessionName;
         this.logfile = file;
         this.pattern = pattern;
-        this.intervalLength = intervalLength;
+        this.intervalMillis = intervalLength;
         this.timeUnit = timeUnit;
         startLogging();
+        this.scheduler = MetricsSnapshotScheduler.register(this, intervalMillis, this);
     }
 
     public boolean matches(String metricName) {
@@ -79,74 +77,72 @@ public class HistoStatsLogger extends CapabilityHook<HdrDeltaHistogramAttachment
         writer.outputTimeUnit(timeUnit);
         writer.setBaseTime(currentTimeMillis);
         writer.outputLegend();
-
-        this.executor = new PeriodicRunnable<HistoStatsLogger>(this.getInterval(), this);
-        executor.startDaemonThread();
     }
 
     public String toString() {
-        return "HistoLogger:" + this.pattern + ":" + this.logfile.getPath() + ":" + this.intervalLength;
+        return "HistoLogger:" + this.pattern + ":" + this.logfile.getPath() + ":" + this.intervalMillis;
     }
 
     public long getInterval() {
-        return intervalLength;
-    }
-
-    @Override
-    public void onCapableAdded(String name, HdrDeltaHistogramAttachment chainedHistogram) {
-        if (pattern.matcher(name).matches()) {
-            this.targets.add(new WriterTarget(name, chainedHistogram.attachHdrDeltaHistogram()));
-        }
-    }
-
-    @Override
-    public void onCapableRemoved(String name, HdrDeltaHistogramAttachment capable) {
-        this.targets.remove(new WriterTarget(name,null));
-    }
-
-    @Override
-    protected Class<HdrDeltaHistogramAttachment> getCapabilityClass() {
-        return HdrDeltaHistogramAttachment.class;
-    }
-
-    @Override
-    public void run() {
-        for (WriterTarget target : this.targets) {
-            Histogram nextHdrHistogram = target.histoProvider.getNextHdrDeltaHistogram();
-            writer.writeInterval(nextHdrHistogram);
-        }
-        this.lastRunTime = System.currentTimeMillis();
+        return intervalMillis;
     }
 
     @Override
     public void closeMetrics() {
-        long now = System.currentTimeMillis();
-        if (lastRunTime+1000<now) {
-            logger.debug("Writing last partial interval: " + this);
-            run();
-        } else {
-            logger.debug("Not writing last partial interval <1s: " + this);
+        try {
+            scheduler.unregisterConsumer(this);
+        } catch (Exception e) {
+            logger.debug("Error while unregistering histo stats logger consumer.", e);
+        }
+        if (writer != null) {
+            writer.close();
         }
     }
 
-    private static class WriterTarget implements Comparable<WriterTarget> {
+    @Override
+    public boolean requiresHdrPayload() {
+        return true;
+    }
 
-        public String name;
-        public HdrDeltaHistogramProvider histoProvider;
-
-        public WriterTarget(String name, HdrDeltaHistogramProvider attach) {
-            this.name = name;
-            this.histoProvider = attach;
+    @Override
+    public void onMetricsSnapshot(MetricsView view) {
+        if (view == null || view.isEmpty()) {
+            return;
         }
-
-        @Override
-        public boolean equals(Object obj) {
-            return name.equals(((WriterTarget)obj).name);
+        for (MetricsView.MetricFamily family : view.families()) {
+            if (family.type() != MetricsView.MetricType.SUMMARY) {
+                continue;
+            }
+            for (MetricsView.Sample sample : family.samples()) {
+                if (!(sample instanceof MetricsView.SummarySample summarySample)) {
+                    continue;
+                }
+                if (!matchesAny(family, summarySample)) {
+                    continue;
+                }
+                Optional<EncodableHistogram> histogram = summarySample.snapshot().asEncodableHistogram();
+                if (histogram.isEmpty()) {
+                    continue;
+                }
+                EncodableHistogram encodable = histogram.get();
+                if (!(encodable instanceof Histogram hdrHistogram)) {
+                    continue;
+                }
+                writer.writeInterval(hdrHistogram);
+            }
         }
+    }
 
-        @Override
-        public int compareTo(WriterTarget obj) {
-            return name.compareTo(obj.name);
+    private boolean matchesAny(MetricsView.MetricFamily family, MetricsView.SummarySample sample) {
+        if (matches(family.familyName())) {
+            return true;
         }
+        if (matches(family.originalName())) {
+            return true;
+        }
+        if (matches(sample.labels().linearizeAsMetrics())) {
+            return true;
+        }
+        return sample.labels().valueOfOptional("name").map(this::matches).orElse(false);
     }
 }

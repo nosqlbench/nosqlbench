@@ -17,12 +17,14 @@
 package io.nosqlbench.engine.cli.atfiles;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.LinkedList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 class NBAtFileTest {
 
     @Test

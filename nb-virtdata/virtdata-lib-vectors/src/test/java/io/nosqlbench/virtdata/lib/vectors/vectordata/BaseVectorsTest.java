@@ -20,11 +20,13 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 public class BaseVectorsTest {
 
     @Test

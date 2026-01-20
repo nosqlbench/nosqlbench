@@ -18,12 +18,14 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bigdecimal;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ToBigDecimalTest {
 
     @Test

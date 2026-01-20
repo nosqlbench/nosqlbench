@@ -30,6 +30,7 @@ import io.nosqlbench.nb.api.engine.metrics.reporters.PromExpositionFormat;
 import io.nosqlbench.nb.api.engine.metrics.reporters.SqliteSnapshotReporter;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -52,6 +53,8 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("accuracy")
+@Tag("metrics")
 public class MetricsReporterIntegrationTest {
 
     static {
@@ -243,6 +246,38 @@ public class MetricsReporterIntegrationTest {
                 assertThat(encoded).isNotBlank();
                 Base64.getDecoder().decode(encoded);
             }
+        }
+    }
+
+    @Test
+    public void testSqliteSnapshotReporterStoresHistogramsForAggregatedCadence(@TempDir Path tempDir) throws SQLException {
+        NBComponent root = new NBBaseComponent(null);
+        Path db = tempDir.resolve("coarse_histo.db");
+        String url = "jdbc:sqlite:" + db;
+
+        MetricsSnapshotScheduler.register(root, 100L, view -> {
+        });
+        SqliteSnapshotReporter reporter = new SqliteSnapshotReporter(
+            root,
+            url,
+            200L,
+            new MetricInstanceFilter(),
+            true
+        );
+        MetricsSnapshotScheduler scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        try {
+            scheduler.injectSnapshotForTesting(timerView(100L, 12L, 18L, 25L));
+            scheduler.injectSnapshotForTesting(timerView(100L, 4L, 9L, 33L));
+        } finally {
+            reporter.close();
+            if (scheduler != null) {
+                scheduler.teardown();
+            }
+        }
+
+        try (Connection connection = DriverManager.getConnection(url)) {
+            assertThat(readHistogramBase64(connection)).isNotEmpty();
         }
     }
 

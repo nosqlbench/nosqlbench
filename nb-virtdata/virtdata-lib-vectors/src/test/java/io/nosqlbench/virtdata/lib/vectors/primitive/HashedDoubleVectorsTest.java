@@ -19,7 +19,9 @@ package io.nosqlbench.virtdata.lib.vectors.primitive;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class HashedDoubleVectorsTest {
     private final static Logger logger = LogManager.getLogger(HashedDoubleVectorsTest.class);
     @Test

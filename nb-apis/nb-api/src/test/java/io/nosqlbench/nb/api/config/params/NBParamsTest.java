@@ -18,6 +18,7 @@ package io.nosqlbench.nb.api.config.params;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Date;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@Tag("unit")
 public class NBParamsTest {
 
     @Test

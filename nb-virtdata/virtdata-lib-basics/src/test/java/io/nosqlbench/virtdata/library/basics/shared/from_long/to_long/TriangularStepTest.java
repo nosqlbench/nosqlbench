@@ -17,6 +17,7 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_long;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class TriangularStepTest {
 
     private static final int LABEL=0;

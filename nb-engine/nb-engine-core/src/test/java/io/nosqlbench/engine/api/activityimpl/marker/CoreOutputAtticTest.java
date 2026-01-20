@@ -17,7 +17,9 @@
 package io.nosqlbench.engine.api.activityimpl.marker;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class CoreOutputAtticTest {
 
     @Test

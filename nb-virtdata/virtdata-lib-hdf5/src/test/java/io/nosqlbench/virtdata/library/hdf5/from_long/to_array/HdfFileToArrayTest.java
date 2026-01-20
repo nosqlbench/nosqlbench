@@ -17,7 +17,9 @@
 package io.nosqlbench.virtdata.library.hdf5.from_long.to_array;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class HdfFileToArrayTest {
 
     @Test

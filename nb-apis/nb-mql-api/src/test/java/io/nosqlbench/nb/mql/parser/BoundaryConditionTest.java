@@ -58,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * </ol>
  */
 @Tag("mql")
+@Tag("unit")
 class BoundaryConditionTest {
 
     private Connection conn;

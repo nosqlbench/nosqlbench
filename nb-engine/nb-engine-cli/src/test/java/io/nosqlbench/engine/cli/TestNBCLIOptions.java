@@ -208,6 +208,15 @@ public class TestNBCLIOptions {
     }
 
     @Test
+    public void testSqliteHistogramDefaultEnabledAndCanDisable() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{}, NBCLIOptions.Mode.ParseAllOptions);
+        assertThat(opts.wantsSqliteHistograms()).isTrue();
+
+        opts = new NBCLIOptions(new String[]{ "--sqlite-histograms=disabled" }, NBCLIOptions.Mode.ParseAllOptions);
+        assertThat(opts.wantsSqliteHistograms()).isFalse();
+    }
+
+    @Test
     public void listWorkloads() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{ "--list-workloads"}, NBCLIOptions.Mode.ParseAllOptions);
         assertThat(opts.wantsWorkloadsList()).isTrue();

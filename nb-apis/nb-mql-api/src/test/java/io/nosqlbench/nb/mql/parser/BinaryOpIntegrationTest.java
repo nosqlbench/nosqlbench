@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Phase 7: Testing binary operations with metric-to-metric and metric-to-scalar</p>
  */
 @Tag("mql")
+@Tag("unit")
 class BinaryOpIntegrationTest {
 
     private Connection conn;

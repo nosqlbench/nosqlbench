@@ -44,6 +44,9 @@ public class StringCompositor implements LongFunction<String> {
         Map<String, Integer> specs = new HashMap<>();
         List<BindPoint> bindpoints = template.getBindPoints();
         for (BindPoint bindPoint : bindpoints) {
+            if (bindPoint.getType() == BindPoint.Type.localref || bindPoint.getType() == BindPoint.Type.globalref) {
+                continue;
+            }
             String spec = bindPoint.getBindspec();
             specs.compute(spec, (s, i) -> i == null ? specs.size() : i);
         }

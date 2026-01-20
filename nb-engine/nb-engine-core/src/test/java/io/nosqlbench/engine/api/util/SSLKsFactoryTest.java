@@ -20,12 +20,14 @@ import io.nosqlbench.nb.api.engine.activityimpl.ActivityDef;
 import io.nosqlbench.nb.api.engine.util.SSLKsFactory;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.FileNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class SSLKsFactoryTest {
     @Test
     public void testJdkGetContext() {

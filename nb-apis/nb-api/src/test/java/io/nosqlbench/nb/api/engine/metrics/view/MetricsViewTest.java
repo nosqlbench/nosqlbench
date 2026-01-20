@@ -24,6 +24,9 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGaugeWrapper;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.HdrHistogram.EncodableHistogram;
+import org.HdrHistogram.Histogram;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -31,6 +34,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("accuracy")
+@Tag("statistics")
 public class MetricsViewTest {
 
     private NBLabels labels(String name) {
@@ -173,5 +178,56 @@ public class MetricsViewTest {
         assertThat(aggregated.oneMinuteRate()).isEqualTo(14.0d / 3.0d);
         assertThat(aggregated.fiveMinuteRate()).isEqualTo(17.0d / 3.0d);
         assertThat(aggregated.fifteenMinuteRate()).isEqualTo(20.0d / 3.0d);
+    }
+
+    @Test
+    public void testCaptureCanExcludeHdrPayload() {
+        DeltaHdrHistogramReservoir reservoir = new DeltaHdrHistogramReservoir(labels("hist_metric"), 3);
+        NBMetricHistogram histogram = new NBMetricHistogram(labels("hist_metric"), reservoir, "hist", "nanoseconds", MetricCategory.Core);
+        histogram.update(10);
+        histogram.update(20);
+
+        MetricsView view = MetricsView.capture(List.of(histogram), 1_000L, false);
+        MetricsView.SummarySample sample = (MetricsView.SummarySample) view.families().getFirst().samples().getFirst();
+
+        assertThat(sample.snapshot().asEncodableHistogram()).isEmpty();
+        assertThat(sample.statistics().count()).isEqualTo(2L);
+        assertThat(sample.quantiles()).isNotEmpty();
+    }
+
+    @Test
+    public void testCombineSummariesMergesHdrQuantilesWhenPresent() {
+        DeltaHdrHistogramReservoir reservoir1 = new DeltaHdrHistogramReservoir(labels("hist_metric"), 3);
+        NBMetricHistogram histogram1 = new NBMetricHistogram(labels("hist_metric"), reservoir1, "hist", "nanoseconds", MetricCategory.Core);
+        histogram1.update(1);
+        histogram1.update(1);
+        histogram1.update(100);
+        MetricsView view1 = MetricsView.capture(List.of(histogram1), 1_000L, true);
+
+        DeltaHdrHistogramReservoir reservoir2 = new DeltaHdrHistogramReservoir(labels("hist_metric"), 3);
+        NBMetricHistogram histogram2 = new NBMetricHistogram(labels("hist_metric"), reservoir2, "hist", "nanoseconds", MetricCategory.Core);
+        histogram2.update(50);
+        histogram2.update(50);
+        histogram2.update(50);
+        MetricsView view2 = MetricsView.capture(List.of(histogram2), 1_000L, true);
+
+        MetricsView combined = MetricsView.combine(List.of(view1, view2));
+        MetricsView.SummarySample sample = (MetricsView.SummarySample) combined.families().getFirst().samples().getFirst();
+
+        EncodableHistogram payload = sample.snapshot().asEncodableHistogram().orElseThrow();
+        assertThat(payload).isInstanceOf(Histogram.class);
+        Histogram merged = (Histogram) payload;
+        assertThat(merged.getTotalCount()).isEqualTo(6L);
+
+        Histogram expected = new Histogram(3);
+        expected.recordValue(1);
+        expected.recordValue(1);
+        expected.recordValue(100);
+        expected.recordValue(50);
+        expected.recordValue(50);
+        expected.recordValue(50);
+
+        assertThat(sample.quantiles()).containsKey(0.5d);
+        assertThat(sample.quantiles().get(0.5d)).isEqualTo((double) expected.getValueAtPercentile(50.0d));
     }
 }

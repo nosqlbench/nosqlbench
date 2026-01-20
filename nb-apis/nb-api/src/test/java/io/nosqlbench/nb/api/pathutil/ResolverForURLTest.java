@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.nbio.ResolverForClasspath;
 import io.nosqlbench.nb.api.nbio.ResolverForFilesystem;
 import io.nosqlbench.nb.api.nbio.ResolverForURL;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ResolverForURLTest {
 
     @Test

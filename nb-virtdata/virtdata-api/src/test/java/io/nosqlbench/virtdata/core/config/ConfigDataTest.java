@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.core.config;
 
 import io.nosqlbench.nb.api.config.standard.ConfigData;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ConfigDataTest {
 
     @Test

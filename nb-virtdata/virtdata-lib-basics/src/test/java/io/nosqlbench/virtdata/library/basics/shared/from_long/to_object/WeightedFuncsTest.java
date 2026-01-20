@@ -20,9 +20,11 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_long.FixedValue
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Arrays;
 
+@Tag("unit")
 public class WeightedFuncsTest {
     private final static Logger logger = LogManager.getLogger(WeightedFuncsTest.class);
 

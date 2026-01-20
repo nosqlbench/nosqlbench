@@ -18,9 +18,11 @@ package io.nosqlbench.nb.api.annotations;
 
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class AnnotationBuilderTest {
 
     private static final long time = 1600000000000L;

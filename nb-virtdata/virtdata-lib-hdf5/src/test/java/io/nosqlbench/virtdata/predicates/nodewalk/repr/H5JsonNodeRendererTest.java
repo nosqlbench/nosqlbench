@@ -20,11 +20,13 @@ import io.nosqlbench.vectordata.spec.predicates.ConjugateNode;
 import io.nosqlbench.vectordata.spec.predicates.OpType;
 import io.nosqlbench.vectordata.spec.predicates.PredicateNode;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.ByteBuffer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class H5JsonNodeRendererTest {
 
   public static final String test1 = """

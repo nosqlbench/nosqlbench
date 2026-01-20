@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Matches VictoriaMetrics test coverage for rollup_test.go.
  */
 @Tag("mql")
+@Tag("unit")
 class RollupBoundaryTest {
 
     private Connection conn;

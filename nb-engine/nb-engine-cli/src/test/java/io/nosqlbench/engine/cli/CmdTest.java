@@ -19,12 +19,14 @@ package io.nosqlbench.engine.cli;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.PathCanonicalizer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CmdTest {
 
     private final static PathCanonicalizer p = new PathCanonicalizer();

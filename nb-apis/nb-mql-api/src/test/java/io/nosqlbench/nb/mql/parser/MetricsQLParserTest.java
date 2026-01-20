@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for MetricsQL parser grammar and basic transformation.
  * Phase 1: Validates parser can handle basic selectors and expression structure.
  */
+@Tag("unit")
 class MetricsQLParserTest {
 
     /**

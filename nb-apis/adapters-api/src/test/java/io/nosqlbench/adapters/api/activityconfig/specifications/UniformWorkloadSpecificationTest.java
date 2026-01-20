@@ -21,9 +21,11 @@ import io.nosqlbench.nb.spectest.core.SpecTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static io.nosqlbench.nb.spectest.traversal.STPredicateVerbs.*;
 
+@Tag("unit")
 public class UniformWorkloadSpecificationTest {
 
     private final static Logger logger = LogManager.getLogger(UniformWorkloadSpecificationTest.class);

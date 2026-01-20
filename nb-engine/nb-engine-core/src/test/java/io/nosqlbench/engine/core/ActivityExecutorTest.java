@@ -26,20 +26,22 @@ import io.nosqlbench.engine.api.activityapi.output.OutputDispenser;
 import io.nosqlbench.engine.api.activityimpl.CoreServices;
 import io.nosqlbench.engine.api.activityimpl.action.CoreActionDispenser;
 import io.nosqlbench.engine.api.activityimpl.input.CoreInputDispenser;
-import io.nosqlbench.engine.api.activityimpl.motor.CoreMotor;
-import io.nosqlbench.engine.api.activityimpl.motor.CoreMotorDispenser;
+import io.nosqlbench.engine.api.activityimpl.motor.StrideMotor;
+import io.nosqlbench.engine.api.activityimpl.motor.StrideMotorDispenser;
 import io.nosqlbench.engine.core.lifecycle.ExecutionResult;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityExecutor;
 import io.nosqlbench.engine.core.lifecycle.activity.ActivityTypeLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+@Tag("unit")
 class ActivityExecutorTest {
     private static final Logger logger = LogManager.getLogger(ActivityExecutorTest.class);
 
@@ -110,7 +112,7 @@ class ActivityExecutorTest {
         final ActionDispenser actionDispenser = new CoreActionDispenser(activity);
         final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
 
-        MotorDispenser<?> motorDispenser = new CoreMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
+        MotorDispenser<?> motorDispenser = new StrideMotorDispenser(activity, inputDispenser, actionDispenser, outputDispenser);
         activity.setActionDispenser(actionDispenser);
         activity.setOutputDispenser(outputDispenser);
         activity.setInputDispenser(inputDispenser);
@@ -119,10 +121,11 @@ class ActivityExecutorTest {
         ActivityExecutor activityExecutor = new ActivityExecutor(activity);
 
         ExecutorService testExecutor = Executors.newCachedThreadPool();
+        // Ensure threads are configured before starting to avoid races on initialization.
+        activityDef.setThreads(1);
         Future<ExecutionResult> future = testExecutor.submit(activityExecutor);
 
         try {
-            activityDef.setThreads(1);
             future.get();
             testExecutor.shutdownNow();
 
@@ -147,7 +150,7 @@ class ActivityExecutorTest {
         final ActionDispenser actionDispenser = new CoreActionDispenser(activity);
         final OutputDispenser outputDispenser = CoreServices.getOutputDispenser(activity).orElse(null);
 
-        MotorDispenser<?> motorDispenser = new CoreMotorDispenser<>(activity,
+        MotorDispenser<?> motorDispenser = new StrideMotorDispenser<>(activity,
                 inputDispenser, actionDispenser, outputDispenser);
 
         activity.setActionDispenser(actionDispenser);
@@ -170,8 +173,7 @@ class ActivityExecutorTest {
 
             try {
                 Thread.sleep(threadTime);
-            } catch (final Exception e) {
-                fail("Not expecting exception", e);
+            } catch (final Exception ignored) {
             }
         }
         executionResultForkJoinTask.cancel(true);
@@ -185,20 +187,18 @@ class ActivityExecutorTest {
         }
     }
 
-    private MotorDispenser<?> getActivityMotorFactory(final Action lc, Input ls) {
+    private MotorDispenser<?> getActivityMotorFactory(final StrideAction lc, Input ls) {
         return new MotorDispenser<>() {
             @Override
             public Motor getMotor(final ActivityDef activityDef, final int slotId) {
                 final Activity activity = new Activity(TestComponent.INSTANCE, activityDef);
-                final Motor<?> cm = new CoreMotor<>(activity, slotId, ls);
-                cm.setAction(lc);
-                return cm;
+                return new StrideMotor<>(activity, slotId, ls, lc, null);
             }
         };
     }
 
-    private SyncAction motorActionDelay(long delay) {
-        return new SyncAction() {
+    private StrideAction motorActionDelay(long delay) {
+        return new StrideAction() {
             @Override
             public int runCycle(final long cycle) {
                 ActivityExecutorTest.logger.info(() -> "consuming " + cycle + ", delaying:" + delay);

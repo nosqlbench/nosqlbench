@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.expr;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URI;
 import java.util.Map;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests verifying that variables can be accessed directly in Groovy expressions
  * without requiring special prefixes or reference syntax.
  */
+@Tag("unit")
 class DirectVariableAccessTest {
 
     private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();

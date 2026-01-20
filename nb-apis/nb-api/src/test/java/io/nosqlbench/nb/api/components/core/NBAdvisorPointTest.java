@@ -21,9 +21,11 @@ package io.nosqlbench.nb.api.components.core;
 import io.nosqlbench.nb.api.advisor.NBAdvisorPoint;
 import io.nosqlbench.nb.api.advisor.conditions.Conditions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NBAdvisorPointTest {
 
     @Test

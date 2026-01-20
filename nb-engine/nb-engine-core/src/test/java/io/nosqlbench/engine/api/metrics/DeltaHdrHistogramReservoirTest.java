@@ -18,7 +18,10 @@ package io.nosqlbench.engine.api.metrics;
 
 import com.codahale.metrics.Snapshot;
 import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
+import org.junit.jupiter.api.Tag;
 
+@Tag("accuracy")
+@Tag("statistics")
 public class DeltaHdrHistogramReservoirTest {
 
 //    @Test

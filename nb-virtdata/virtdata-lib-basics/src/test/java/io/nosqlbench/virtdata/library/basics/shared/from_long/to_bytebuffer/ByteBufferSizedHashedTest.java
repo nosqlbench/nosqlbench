@@ -18,12 +18,14 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_bytebuffer;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_int.HashRange;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.ByteBuffer;
 import java.util.function.LongToIntFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ByteBufferSizedHashedTest {
 
     @Test

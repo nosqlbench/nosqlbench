@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.util;
 
 import io.nosqlbench.virtdata.api.bindings.VirtDataFunctions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.security.InvalidParameterException;
 import java.util.function.Function;
@@ -25,6 +26,7 @@ import java.util.function.LongFunction;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class VirtDataFunctionsTest  {
 
     @Test

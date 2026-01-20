@@ -29,7 +29,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class DeltaHistogramSnapshot extends Snapshot {
     private final Histogram histogram;
 
-    DeltaHistogramSnapshot(Histogram histogram) {
+    public DeltaHistogramSnapshot(Histogram histogram) {
         this.histogram = histogram;
     }
 

@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.templating;
 
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ParsedTemplateMapTest {
 
 //    @Test

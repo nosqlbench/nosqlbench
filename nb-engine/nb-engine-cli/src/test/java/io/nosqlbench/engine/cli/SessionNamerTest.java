@@ -18,9 +18,11 @@ package io.nosqlbench.engine.cli;
 
 import io.nosqlbench.nb.api.metadata.SessionNamer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class SessionNamerTest {
 
     @Test

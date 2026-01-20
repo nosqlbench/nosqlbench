@@ -18,6 +18,7 @@
 package io.nosqlbench.nb.api.expr;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
@@ -34,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * string formats (pipe literal, quoted strings, folded scalar) without breaking
  * YAML parsing.
  */
+@Tag("unit")
 class YamlSafeExpressionsTest {
 
     private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();

@@ -17,6 +17,7 @@
 package io.nosqlbench.nb.api.expr;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Unit tests for {@link TemplateRewriter}, verifying TEMPLATE syntax rewriting to expr function calls.
  */
+@Tag("unit")
 class TemplateRewriterTest {
 
     // ==================== TEMPLATE Function Syntax Tests ====================

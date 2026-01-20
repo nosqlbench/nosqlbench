@@ -20,6 +20,7 @@ package io.nosqlbench.nb.api.expr;
 
 import groovy.lang.Binding;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URI;
 import java.util.List;
@@ -30,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for ContextFormatter functionality.
  */
+@Tag("unit")
 class ContextFormatterTest {
 
     private static final int MAX_LINES_BEFORE_ABBREVIATION = 10;

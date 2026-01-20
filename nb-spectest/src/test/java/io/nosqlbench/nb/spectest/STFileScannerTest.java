@@ -18,12 +18,14 @@ package io.nosqlbench.nb.spectest;
 
 import io.nosqlbench.nb.spectest.loaders.STFileScanner;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class STFileScannerTest {
 
     @Test

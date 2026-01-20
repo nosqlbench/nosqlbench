@@ -22,11 +22,13 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.function.LongToIntFunction;
 
+@Tag("unit")
 public class HashedByteBufferExtractTest {
     private final static Logger logger = LogManager.getLogger(HashedByteBufferExtractTest.class);
 

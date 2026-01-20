@@ -22,11 +22,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ParsedWorkloadTemplateTest {
     private static final Logger logger = LogManager.getLogger(ParsedWorkloadTemplateTest.class);
     private static OpsDocList doclist;

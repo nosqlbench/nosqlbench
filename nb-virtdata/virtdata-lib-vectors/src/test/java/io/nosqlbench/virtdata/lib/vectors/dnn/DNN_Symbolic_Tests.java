@@ -18,12 +18,14 @@ package io.nosqlbench.virtdata.lib.vectors.dnn;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 //import org.matheclipse.core.eval.ExprEvaluator;
 //import org.matheclipse.core.expression.F;
 //import org.matheclipse.core.interfaces.IExpr;
 //import org.matheclipse.core.interfaces.ISymbol;
 //import org.matheclipse.core.interfaces.IAST;
 
+@Tag("unit")
 public class DNN_Symbolic_Tests {
 //
 //    @Disabled

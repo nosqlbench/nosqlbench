@@ -22,11 +22,13 @@ import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class MetricsIntegrationTest {
 
     @Disabled("until this is reimplemented")

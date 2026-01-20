@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.expr;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * This ensures that variables, functions, and state set in one expression are accessible in
  * subsequent expressions within the same workload processing session.
  */
+@Tag("unit")
 class SharedContextWorkloadTest {
 
     private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();

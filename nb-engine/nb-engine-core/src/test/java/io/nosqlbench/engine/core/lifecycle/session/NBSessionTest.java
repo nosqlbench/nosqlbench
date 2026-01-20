@@ -21,12 +21,14 @@ import io.nosqlbench.engine.cmdstream.CmdArg;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 public class NBSessionTest implements NBLabeledElement {
 
     @Test

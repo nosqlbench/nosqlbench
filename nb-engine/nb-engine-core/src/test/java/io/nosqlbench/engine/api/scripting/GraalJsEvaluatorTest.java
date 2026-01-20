@@ -17,11 +17,13 @@
 package io.nosqlbench.engine.api.scripting;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class GraalJsEvaluatorTest {
 
     // TODO:

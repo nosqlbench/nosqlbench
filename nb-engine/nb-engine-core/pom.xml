@@ -98,6 +98,11 @@
             <artifactId>nb-virtdata-all</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>io.nosqlbench</groupId>
+            <artifactId>nb-mql-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.openjdk.jmh</groupId>

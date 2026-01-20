@@ -21,6 +21,7 @@ package io.nosqlbench.nb.api.expr;
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.expr.annotations.ExprFunctionSpec;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URI;
 import java.util.List;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test function shadowing behavior and provider ordering.
  * When multiple providers define the same function, the last one wins (with a warning).
  */
+@Tag("unit")
 class DuplicateFunctionDetectionTest {
 
     /**

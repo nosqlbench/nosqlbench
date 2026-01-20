@@ -18,11 +18,13 @@ package io.nosqlbench.engine.extensions.computefunctions;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class ComputeFunctionsIntTest {
 
   private final static Offset<Double> offset = Offset.offset(0.001d);

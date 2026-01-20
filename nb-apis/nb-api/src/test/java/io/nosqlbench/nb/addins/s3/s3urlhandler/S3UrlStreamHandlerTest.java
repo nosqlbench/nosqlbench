@@ -22,6 +22,7 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -30,6 +31,7 @@ import java.net.URL;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class S3UrlStreamHandlerTest {
 
     public static String bucketName = "nb-extension-test";

@@ -38,13 +38,13 @@ public class DataApiCreateCollectionWithClassOpDispenser extends DataApiOpDispen
         return (l) -> new DataApiCreateCollectionWithClassOp(
             spaceFunction.apply(l).getDatabase(),
             targetFunction.apply(l),
-            this.getCollectionOptionsFromOp(op, l),
+            this.getCollectionDefinitionFromOp(op, l),
             getCreateClass(op, l)
         );
     }
 
     private Class<?> getCreateClass(ParsedOp op, long l) {
-        String className = op.getAsFunctionOr("createClass", "com.datastax.astra.client.model.Document").apply(l);
+        String className = op.getAsFunctionOr("createClass", "com.datastax.astra.client.collections.definition.documents.Document").apply(l);
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {

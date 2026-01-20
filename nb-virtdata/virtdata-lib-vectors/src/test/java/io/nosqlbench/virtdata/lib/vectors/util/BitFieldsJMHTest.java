@@ -16,10 +16,22 @@
 
 package io.nosqlbench.virtdata.lib.vectors.util;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+@Tag("microbench")
+@Tag("variates")
 @State(Scope.Benchmark)
 public class BitFieldsJMHTest {
 
@@ -59,5 +71,24 @@ public class BitFieldsJMHTest {
         BitFields.reverseBits3(inputs);
     }
 
+    @Test
+    public void runJmhBenchmarks() throws RunnerException {
+        new Runner(buildJmhOptions("jmh-bitfields.json")).run();
+    }
+
+    private static Options buildJmhOptions(String resultFileName) {
+        Path resultPath = Path.of("target", resultFileName);
+        try {
+            Files.createDirectories(resultPath.getParent());
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to create JMH results directory", e);
+        }
+        return new OptionsBuilder()
+            .include(BitFieldsJMHTest.class.getSimpleName())
+            .forks(0)
+            .resultFormat(ResultFormatType.JSON)
+            .result(resultPath.toString())
+            .build();
+    }
 
 }

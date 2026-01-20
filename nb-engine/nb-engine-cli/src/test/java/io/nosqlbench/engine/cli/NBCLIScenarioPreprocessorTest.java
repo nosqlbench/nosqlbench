@@ -21,6 +21,7 @@ import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.nb.api.errors.BasicError;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class NBCLIScenarioPreprocessorTest {
 
     @Test

@@ -18,9 +18,11 @@ package io.nosqlbench.engine.api.activityimpl.input;
 
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleSegment;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class InputIntervalTest {
 
     @Test

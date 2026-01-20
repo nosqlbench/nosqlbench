@@ -17,11 +17,13 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_uuid;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ToUUIDTest {
 
     @Test

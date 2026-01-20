@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * and collapse others, matching VictoriaMetrics/PromQL semantics.
  */
 @Tag("mql")
+@Tag("unit")
 class CanonicalLabelGroupingTest {
     private Connection conn;
 

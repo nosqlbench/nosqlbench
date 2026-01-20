@@ -19,12 +19,14 @@ package io.nosqlbench.adapters.api.evalcontext;
 import io.nosqlbench.adapters.api.evalctx.CompoundCycleFunction;
 import io.nosqlbench.adapters.api.evalctx.GroovyCycleFunction;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CompoundCycleFunctionTest {
 
     private final GroovyCycleFunction<Boolean> truthy = new GroovyCycleFunction<>("truthy", "true;", Map.of(), List.of(), List.of(),null);

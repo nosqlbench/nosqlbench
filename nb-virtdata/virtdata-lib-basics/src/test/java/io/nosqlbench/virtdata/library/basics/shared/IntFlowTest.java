@@ -30,6 +30,7 @@ import io.nosqlbench.virtdata.library.basics.shared.unary_string.StringFlow;
 import io.nosqlbench.virtdata.library.basics.shared.unary_string.Suffix;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.IntUnaryOperator;
 import java.util.function.LongFunction;
@@ -37,6 +38,7 @@ import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class IntFlowTest {
 
     @Test

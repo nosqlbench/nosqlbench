@@ -28,12 +28,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.Map;
 
 @Disabled
 @Execution(ExecutionMode.SAME_THREAD)
+@Tag("unit")
 public class ScenarioExampleTests {
 
     public static ExecutionResult runScenarioTest(String... params) {

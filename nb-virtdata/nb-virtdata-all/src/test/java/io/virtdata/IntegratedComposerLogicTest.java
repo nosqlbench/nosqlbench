@@ -25,6 +25,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,6 +35,7 @@ import java.util.function.LongUnaryOperator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class IntegratedComposerLogicTest {
     private final static Logger logger = LogManager.getLogger(IntegratedComposerLogicTest.class);
 
