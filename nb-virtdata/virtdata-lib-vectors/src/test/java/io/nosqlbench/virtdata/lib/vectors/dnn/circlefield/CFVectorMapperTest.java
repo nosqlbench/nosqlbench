@@ -18,9 +18,11 @@ package io.nosqlbench.virtdata.lib.vectors.dnn.circlefield;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CFVectorMapperTest {
 
     private final static CFVectorSpace vs32 = new CFVectorSpace(32);

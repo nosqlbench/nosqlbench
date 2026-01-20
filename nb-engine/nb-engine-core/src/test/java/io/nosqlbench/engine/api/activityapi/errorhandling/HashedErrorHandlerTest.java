@@ -18,6 +18,7 @@ package io.nosqlbench.engine.api.activityapi.errorhandling;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class HashedErrorHandlerTest {
 
     HashedErrorHandler<Throwable, Boolean> handler;

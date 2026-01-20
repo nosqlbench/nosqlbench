@@ -18,11 +18,13 @@ package io.nosqlbench.virtdata.library.basics.tests.long_collections;
 
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.HashedRangeToLongList;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class HashedRangeToLongListTest {
 
     @Test

@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.expr;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Verifies that Groovy scripts marked with @Library are automatically loaded
  * and their functions become available in expressions.
  */
+@Tag("unit")
 class GroovyLibraryAutoLoaderTest {
 
     @Test

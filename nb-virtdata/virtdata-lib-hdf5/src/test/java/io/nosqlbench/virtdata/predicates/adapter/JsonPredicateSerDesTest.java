@@ -24,11 +24,13 @@ import io.nosqlbench.virtdata.predicates.ast.PredicateExpr;
 import io.nosqlbench.virtdata.predicates.ast.PredicateTerm;
 import io.nosqlbench.virtdata.predicates.types.PredicateSerDes;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("unit")
 public class JsonPredicateSerDesTest {
 
     public static final String test1 = """

@@ -17,11 +17,13 @@
 package io.nosqlbench.nb.api.config.standard;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NBConfigSplitterTest {
 
     @Test

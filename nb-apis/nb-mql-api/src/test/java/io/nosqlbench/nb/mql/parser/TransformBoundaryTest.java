@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests edge cases like negative values for logs, division by zero, infinity, NaN.
  */
 @Tag("mql")
+@Tag("unit")
 class TransformBoundaryTest {
 
     private Connection conn;

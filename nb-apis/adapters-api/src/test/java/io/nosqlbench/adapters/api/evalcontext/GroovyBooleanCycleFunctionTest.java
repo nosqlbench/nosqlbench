@@ -21,6 +21,7 @@ import io.nosqlbench.adapters.api.evalctx.GroovyBooleanCycleFunction;
 import io.nosqlbench.adapters.api.evalctx.GroovyCycleFunction;
 import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 public class GroovyBooleanCycleFunctionTest {
 
     @Test

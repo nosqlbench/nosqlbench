@@ -17,9 +17,11 @@
 package io.nosqlbench.virtdata.lib.vectors.dnn.angular;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class DNNAngular1NeighborsTest {
 
     @Test

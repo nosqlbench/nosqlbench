@@ -18,11 +18,13 @@ package io.nosqlbench.virtdata.core;
 
 import io.nosqlbench.virtdata.core.bindings.ResolvedFunction;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ResolvedFunctionTest {
 
     @Test

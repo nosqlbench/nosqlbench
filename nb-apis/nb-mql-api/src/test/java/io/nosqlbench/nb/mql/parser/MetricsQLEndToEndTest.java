@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Comprehensive test coverage for real-world query scenarios.</p>
  */
 @Tag("mql")
+@Tag("unit")
 class MetricsQLEndToEndTest {
 
     private Connection conn;

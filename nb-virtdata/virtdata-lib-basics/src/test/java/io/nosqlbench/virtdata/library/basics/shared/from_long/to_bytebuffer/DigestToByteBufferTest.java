@@ -20,11 +20,13 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.ByteBuffer;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Tag("unit")
 class DigestToByteBufferTest {
 
     @Test

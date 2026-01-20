@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Uses simple_counter.db: activity_ops_total with activity={read,write} labels</p>
  */
 @Tag("mql")
+@Tag("unit")
 class MetricsQLSelectorIntegrationTest {
 
     private Connection conn;

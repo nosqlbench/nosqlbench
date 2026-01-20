@@ -17,6 +17,7 @@
 package io.nosqlbench.engine.api.activityapi.planning;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.function.ToLongFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class IntervalSequencerTest {
 
     private static final ElementSequencer<AnEvent> seqr = new IntervalSequencer<>();

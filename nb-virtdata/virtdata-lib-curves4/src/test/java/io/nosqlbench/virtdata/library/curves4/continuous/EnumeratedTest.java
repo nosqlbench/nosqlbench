@@ -18,12 +18,14 @@ package io.nosqlbench.virtdata.library.curves4.continuous;
 
 import io.nosqlbench.virtdata.library.curves4.continuous.long_double.Enumerated;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class EnumeratedTest {
 
     @Test

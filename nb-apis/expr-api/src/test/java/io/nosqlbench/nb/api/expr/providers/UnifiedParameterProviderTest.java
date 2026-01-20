@@ -24,6 +24,7 @@ import io.nosqlbench.nb.api.expr.ExprFunctionMetadata;
 import io.nosqlbench.nb.api.expr.TestExprRuntimeContext;
 import io.nosqlbench.nb.api.expr.TemplateContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Comprehensive test suite for UnifiedParameterProvider that validates all canonical
  * test requirements from both ParameterExprFunctionsProvider and TemplateExprFunctionsProvider.
  */
+@Tag("unit")
 class UnifiedParameterProviderTest {
 
     // ============================================================

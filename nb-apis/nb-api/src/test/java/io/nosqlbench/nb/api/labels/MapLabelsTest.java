@@ -18,12 +18,14 @@ package io.nosqlbench.nb.api.labels;
 
 import io.nosqlbench.nb.api.labels.MapLabels;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 public class MapLabelsTest {
 
     @Test

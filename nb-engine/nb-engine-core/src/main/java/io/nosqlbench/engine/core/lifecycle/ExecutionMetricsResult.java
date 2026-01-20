@@ -33,7 +33,6 @@ import io.nosqlbench.engine.core.metrics.NBMetricsSummary;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -65,8 +64,7 @@ public class ExecutionMetricsResult extends ExecutionResult {
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         try (final PrintStream ps = new PrintStream(os)) {
             final NBCreators.ConsoleReporterBuilder builder = new NBCreators.ConsoleReporterBuilder(component, ps);
-            final Set<MetricAttribute> disabled = new HashSet<>(ExecutionMetricsResult.INTERVAL_ONLY_METRICS);
-            if (60000 > this.getElapsedMillis()) disabled.addAll(ExecutionMetricsResult.OVER_ONE_MINUTE_METRICS);
+            final Set<MetricAttribute> disabled = Set.of();
             builder.disabledMetricAttributes(disabled);
             final ConsoleReporter consoleReporter = builder.build();
             MetricsView snapshot = MetricsView.capture(component.find().metrics(), 0L);

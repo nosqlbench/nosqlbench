@@ -21,10 +21,13 @@ package io.nosqlbench.nb.api.engine.metrics.reporters;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("accuracy")
+@Tag("metrics")
 class MetricInstanceFilterTest {
 
     private NBMetricCounter counterWith(String name, String activity) {

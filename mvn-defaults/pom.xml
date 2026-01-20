@@ -31,6 +31,8 @@
         <project.testlevel>INFO</project.testlevel>
         <!-- Set this level to override the logging level for tests logging configuration during build -->
         <project.test_logstatuslevel>ERROR</project.test_logstatuslevel>
+        <!-- JUnit tag expression for selective runs -->
+        <nb.junit.tags>unit</nb.junit.tags>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <javadoc.name>nosqlbench ${revision}</javadoc.name>
@@ -567,7 +569,9 @@
                         </Log4jContextSelector>
                     </systemPropertyVariables>
                     <parallel>methods</parallel>
+                    <groups>${nb.junit.tags}</groups>
                     <excludes>
+                        <exclude>**/jmh_generated/**</exclude>
                         <exclude>**/*Integrated*Test*.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
                         <exclude>**/*IntegrationTests.java</exclude>
@@ -1004,6 +1008,46 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>accuracy</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <nb.junit.tags>accuracy</nb.junit.tags>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>performance</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <nb.junit.tags>performance</nb.junit.tags>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>microbench</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <nb.junit.tags>microbench</nb.junit.tags>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>alltests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <nb.junit.tags>unit | accuracy | performance | microbench</nb.junit.tags>
+            </properties>
         </profile>
 
     </profiles>

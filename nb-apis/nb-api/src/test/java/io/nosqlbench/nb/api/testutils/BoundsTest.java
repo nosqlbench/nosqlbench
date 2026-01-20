@@ -17,9 +17,11 @@
 package io.nosqlbench.nb.api.testutils;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class BoundsTest {
 
     @Test

@@ -21,6 +21,7 @@ import io.nosqlbench.virtdata.core.bindings.VirtData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Date;
 import java.util.UUID;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * They are pure functions, even though not always one-to-one functions.
  */
 
+@Tag("unit")
 public class IntegratedTemporalExamplesTest {
 
     /**

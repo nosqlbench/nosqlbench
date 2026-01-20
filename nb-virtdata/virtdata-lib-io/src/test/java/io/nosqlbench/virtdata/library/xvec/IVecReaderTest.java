@@ -17,6 +17,7 @@
 package io.nosqlbench.virtdata.library.xvec;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 class IVecReaderTest {
 
 @Test

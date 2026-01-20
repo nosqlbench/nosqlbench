@@ -17,11 +17,13 @@
 package io.nosqlbench.adapter.stdout;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class TemplateFormatTest {
 
     @Test

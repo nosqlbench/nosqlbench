@@ -20,11 +20,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.LongSummaryStatistics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class HashRangeScaledTest {
 
     private final static Logger logger = LogManager.getLogger(HashRangeScaledTest.class);

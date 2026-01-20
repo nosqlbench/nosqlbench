@@ -18,9 +18,11 @@ package io.nosqlbench.virtdata.core.templates;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
+@Tag("unit")
 public class FastStringCompositorTest {
 
     @Test

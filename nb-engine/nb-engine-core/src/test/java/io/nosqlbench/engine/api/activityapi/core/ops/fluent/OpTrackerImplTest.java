@@ -23,7 +23,9 @@ import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.EventedOpIm
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.StartedOp;
 import io.nosqlbench.engine.api.activityapi.core.ops.fluent.opfacets.TrackedOp;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class OpTrackerImplTest {
 
     @Test

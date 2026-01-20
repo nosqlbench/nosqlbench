@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Phase 6: Label manipulation for full MetricsQL feature parity</p>
  */
 @Tag("mql")
+@Tag("unit")
 class LabelManipulationTest {
 
     private Connection conn;

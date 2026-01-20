@@ -20,10 +20,12 @@ import io.nosqlbench.engine.cmdstream.BasicScriptBuffer;
 import io.nosqlbench.engine.cmdstream.Cmd;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class BasicScriptBufferTest {
 
     @Test

@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Phase 5: Testing transform functions with simple counter data</p>
  */
 @Tag("mql")
+@Tag("unit")
 class TransformFunctionIntegrationTest {
 
     private Connection conn;

@@ -20,12 +20,14 @@ import io.nosqlbench.virtdata.library.basics.shared.from_long.to_string.Weighted
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class WeightedStringsTest {
 
     private final static Logger logger = LogManager.getLogger(WeightedStringsTest.class);

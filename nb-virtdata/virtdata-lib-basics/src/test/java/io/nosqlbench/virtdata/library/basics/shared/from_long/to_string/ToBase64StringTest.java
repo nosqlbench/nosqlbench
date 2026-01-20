@@ -19,11 +19,13 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_string;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_uuid.ToUUID;
 import io.nosqlbench.virtdata.library.basics.shared.from_uuid.ToBase64String;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ToBase64StringTest {
 
     @Test

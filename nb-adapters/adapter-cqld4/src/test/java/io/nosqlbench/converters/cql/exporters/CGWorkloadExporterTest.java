@@ -18,9 +18,11 @@ package io.nosqlbench.converters.cql.exporters;
 
 import io.nosqlbench.cqlgen.core.CGColumnRebinder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CGWorkloadExporterTest {
 
     @Test

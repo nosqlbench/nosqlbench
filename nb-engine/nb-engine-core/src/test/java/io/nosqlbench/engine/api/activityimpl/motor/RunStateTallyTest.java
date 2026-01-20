@@ -22,6 +22,7 @@ import org.junit.jupiter.api.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("unit")
 public class RunStateTallyTest {
 
     volatile boolean awaited = false;

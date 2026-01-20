@@ -350,6 +350,11 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
     }
 
     @Override
+    public boolean requiresHdrPayload() {
+        return includeHistograms;
+    }
+
+    @Override
     public void onMetricsSnapshot(MetricsView view) {
         long epochMillis = view.capturedAtEpochMillis();
         try {

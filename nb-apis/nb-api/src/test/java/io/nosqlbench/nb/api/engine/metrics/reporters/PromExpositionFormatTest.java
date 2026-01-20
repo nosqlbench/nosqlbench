@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.*;
 import io.nosqlbench.nb.api.engine.metrics.reporters.PromExpositionFormat;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
@@ -31,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("accuracy")
+@Tag("metrics")
 public class PromExpositionFormatTest {
 
     private final Clock nowclock = Clock.fixed(Instant.now(), ZoneId.systemDefault());

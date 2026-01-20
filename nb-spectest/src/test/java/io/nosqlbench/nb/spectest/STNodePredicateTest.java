@@ -18,11 +18,13 @@ package io.nosqlbench.nb.spectest;
 
 import io.nosqlbench.nb.spectest.traversal.STNodePredicate;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 public class STNodePredicateTest {
 
     @Test

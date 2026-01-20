@@ -22,11 +22,13 @@ import io.nosqlbench.nb.api.engine.metrics.instruments.NBBaseMetric;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetric;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class NBBaseComponentMetricsTest {
 
     @Test

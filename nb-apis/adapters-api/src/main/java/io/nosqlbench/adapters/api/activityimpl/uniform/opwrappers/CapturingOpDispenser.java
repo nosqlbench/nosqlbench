@@ -30,12 +30,11 @@ public class CapturingOpDispenser<S extends Space, RESULT> extends BaseOpDispens
 
     private final OpDispenser<CycleOp<RESULT>> realDispenser;
     private final Function<RESULT, Map<String, ?>> extractorF;
-
     public CapturingOpDispenser(
         DriverAdapter<CycleOp<RESULT>, S> adapter,
         ParsedOp pop,
         OpDispenser<CycleOp<RESULT>> realDispenser,
-        Function<RESULT, Map<String,?>> extractorF
+        Function<RESULT,Map<String,?>> extractorF
     ) {
         super(adapter, pop, adapter.getSpaceFunc(pop));
         this.realDispenser = realDispenser;
@@ -45,6 +44,6 @@ public class CapturingOpDispenser<S extends Space, RESULT> extends BaseOpDispens
     @Override
     public CycleOp<Map<String,?>> getOp(long cycle) {
         CycleOp<RESULT> op = realDispenser.getOp(cycle);
-        return new CapturingOp<>(op,extractorF);
+        return new CapturingOp<>(op, extractorF);
     }
 }

@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.expr;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests demonstrating execution of Groovy block statements within expression syntax.
  */
+@Tag("unit")
 class GroovyBlockStatementsTest {
 
     private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();

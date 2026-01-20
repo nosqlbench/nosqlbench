@@ -17,6 +17,7 @@
 package io.nosqlbench.virtdata.api.bindings;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.*;
 
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Some of these are comment out as they are non-sensical in most cases, but they have been left
  * here as an illustration of the coverage.
  */
+@Tag("unit")
 public class VirtDataConversionsTest {
 
 

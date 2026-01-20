@@ -19,12 +19,14 @@ package io.nosqlbench.scenarios;
 import io.nosqlbench.scenarios.simframe.capture.SimFrameCapture;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class PerfFrameSamplerTest {
 
     @Test

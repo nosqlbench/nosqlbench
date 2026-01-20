@@ -18,9 +18,11 @@ package io.nosqlbench.virtdata.library.basics.shared.from_string;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class EscapeJSONTest {
 
     @Test

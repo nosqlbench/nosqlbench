@@ -104,7 +104,7 @@ public interface ActivityInstrumentation {
      * {@link Future}, this is simply the amount of time it takes to acquire the future.
      *
      * When possible, APIs should be used via their async methods, even if you are implementing
-     * a {@link SyncAction}. This allows the execute timer to measure the hand-off to the underlying API,
+     * a {@link StrideAction}. This allows the execute timer to measure the hand-off to the underlying API,
      * and the result timer to measure the blocking calls to aquire the result.
      * @return a new or existing {@link Timer}
      */

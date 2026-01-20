@@ -19,7 +19,9 @@ package io.nosqlbench.virtdata.library.basics.core.stathelpers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
+@Tag("unit")
 public class DiscreteProbabilityBufferTest {
 
     private final static Logger logger = LogManager.getLogger(DiscreteProbabilityBufferTest.class);

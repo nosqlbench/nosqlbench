@@ -22,10 +22,14 @@ import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
 import io.nosqlbench.nb.api.engine.metrics.reporters.MetricsSnapshotReporterBase;
 import io.nosqlbench.nb.api.labels.NBLabels;
+import org.HdrHistogram.EncodableHistogram;
+import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -34,11 +38,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("accuracy")
+@Tag("metrics")
 public class MetricsSnapshotSchedulerTest {
 
     private final NBComponent root = new NBBaseComponent(null);
     private final List<MetricsView> baseSnapshots = new ArrayList<>();
     private final List<MetricsView> coarseSnapshots = new ArrayList<>();
+    private final List<MetricsView> mediumSnapshots = new ArrayList<>();
     private MetricsSnapshotScheduler scheduler;
 
     private NBLabels counterLabels() {
@@ -59,6 +66,7 @@ public class MetricsSnapshotSchedulerTest {
         }
         baseSnapshots.clear();
         coarseSnapshots.clear();
+        mediumSnapshots.clear();
     }
 
     @Test
@@ -86,6 +94,47 @@ public class MetricsSnapshotSchedulerTest {
         MetricsView second = coarseSnapshots.get(1);
         MetricsView.PointSample secondSample = (MetricsView.PointSample) second.families().getFirst().samples().getFirst();
         assertThat(secondSample.value()).isEqualTo(15.0d);
+    }
+
+    @Test
+    public void testParallelCadenceAggregation() {
+        MetricsSnapshotScheduler.register(root, 100L, baseSnapshots::add);
+        MetricsSnapshotScheduler.register(root, 200L, mediumSnapshots::add);
+        MetricsSnapshotScheduler.register(root, 300L, coarseSnapshots::add);
+        scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        scheduler.injectSnapshotForTesting(counterView(1, 100L));
+        scheduler.injectSnapshotForTesting(counterView(2, 100L));
+        scheduler.injectSnapshotForTesting(counterView(3, 100L));
+        scheduler.injectSnapshotForTesting(counterView(4, 100L));
+        scheduler.injectSnapshotForTesting(counterView(5, 100L));
+        scheduler.injectSnapshotForTesting(counterView(6, 100L));
+
+        assertThat(baseSnapshots).hasSize(6);
+        assertThat(mediumSnapshots).hasSize(3);
+        assertThat(coarseSnapshots).hasSize(2);
+
+        MetricsView mediumFirst = mediumSnapshots.getFirst();
+        MetricsView.PointSample mediumFirstSample = (MetricsView.PointSample) mediumFirst
+            .families().getFirst().samples().getFirst();
+        assertThat(mediumFirst.intervalMillis()).isEqualTo(200L);
+        assertThat(mediumFirstSample.value()).isEqualTo(3.0d);
+
+        MetricsView mediumSecond = mediumSnapshots.get(1);
+        MetricsView.PointSample mediumSecondSample = (MetricsView.PointSample) mediumSecond
+            .families().getFirst().samples().getFirst();
+        assertThat(mediumSecondSample.value()).isEqualTo(7.0d);
+
+        MetricsView coarseFirst = coarseSnapshots.getFirst();
+        MetricsView.PointSample coarseFirstSample = (MetricsView.PointSample) coarseFirst
+            .families().getFirst().samples().getFirst();
+        assertThat(coarseFirst.intervalMillis()).isEqualTo(300L);
+        assertThat(coarseFirstSample.value()).isEqualTo(6.0d);
+
+        MetricsView coarseSecond = coarseSnapshots.get(1);
+        MetricsView.PointSample coarseSecondSample = (MetricsView.PointSample) coarseSecond
+            .families().getFirst().samples().getFirst();
+        assertThat(coarseSecondSample.value()).isEqualTo(15.0d);
     }
 
     @Test
@@ -148,6 +197,32 @@ public class MetricsSnapshotSchedulerTest {
         }
     }
 
+    @Test
+    public void testMultipleHdrConsumersSeeIdenticalPayload() {
+        RecordingHdrConsumer consumer1 = new RecordingHdrConsumer();
+        RecordingHdrConsumer consumer2 = new RecordingHdrConsumer();
+        MetricsSnapshotScheduler.register(root, 100L, consumer1);
+        MetricsSnapshotScheduler.register(root, 100L, consumer2);
+        scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        NBLabels labels = NBLabels.forKV("name", "hist_metric", "scenario", "scenario", "activity", "activity");
+        DeltaHdrHistogramReservoir reservoir = new DeltaHdrHistogramReservoir(labels, 3);
+        NBMetricHistogram histogram = new NBMetricHistogram(labels, reservoir, "hist", "nanoseconds", MetricCategory.Core);
+        histogram.update(10);
+        histogram.update(20);
+
+        scheduler.injectSnapshotForTesting(MetricsView.capture(List.of(histogram), 100L, true));
+
+        assertThat(consumer1.snapshots).hasSize(1);
+        assertThat(consumer2.snapshots).hasSize(1);
+        assertThat(consumer1.snapshots.getFirst()).isSameAs(consumer2.snapshots.getFirst());
+
+        MetricsView.SummarySample sample = (MetricsView.SummarySample) consumer1.snapshots.getFirst()
+            .families().getFirst().samples().getFirst();
+        EncodableHistogram payload = sample.snapshot().asEncodableHistogram().orElseThrow();
+        assertThat(payload).isInstanceOf(Histogram.class);
+    }
+
     private static final class RecordingReporter extends MetricsSnapshotReporterBase {
         private final List<MetricsView> snapshots = new ArrayList<>();
 
@@ -162,6 +237,20 @@ public class MetricsSnapshotSchedulerTest {
 
         public List<MetricsView> snapshots() {
             return snapshots;
+        }
+    }
+
+    private static final class RecordingHdrConsumer implements MetricsSnapshotScheduler.MetricsSnapshotConsumer {
+        private final List<MetricsView> snapshots = new ArrayList<>();
+
+        @Override
+        public void onMetricsSnapshot(MetricsView view) {
+            snapshots.add(view);
+        }
+
+        @Override
+        public boolean requiresHdrPayload() {
+            return true;
         }
     }
 }

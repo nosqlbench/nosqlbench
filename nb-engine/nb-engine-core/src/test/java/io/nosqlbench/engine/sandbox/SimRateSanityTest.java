@@ -21,14 +21,22 @@ import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRate;
 import io.nosqlbench.engine.api.activityapi.simrate.SimRateSpec;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+@Tag("microbench")
+@Tag("engine")
 @State(Scope.Group)
 @Measurement(time = 10,timeUnit = TimeUnit.SECONDS)
 public class SimRateSanityTest {
@@ -36,13 +44,7 @@ public class SimRateSanityTest {
     private final NBComponent parent = new TestComponent("rltest","rltest");
 
     public static void main(String[] args) {
-        Options jmhOptions = new OptionsBuilder()
-//            .include("simrate[0-9]+")
-//            .include("simrate(1|24|240)")
-            .forks(1)
-            .warmupBatchSize(1)
-            .warmupIterations(0)
-            .build();
+        Options jmhOptions = buildJmhOptions("jmh-simrate-sanity.json");
         try {
             new Runner(jmhOptions).run();
         } catch (RunnerException e) {
@@ -74,6 +76,30 @@ public class SimRateSanityTest {
     @Disabled
     public void at250ops240threads() {
         rl.block();
+    }
+
+    @Test
+    public void runJmhBenchmarks() throws RunnerException {
+        new Runner(buildJmhOptions("jmh-simrate-sanity.json")).run();
+    }
+
+    private static Options buildJmhOptions(String resultFileName) {
+        Path resultPath = Path.of("target", resultFileName);
+        try {
+            Files.createDirectories(resultPath.getParent());
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to create JMH results directory", e);
+        }
+        return new OptionsBuilder()
+            .include(SimRateSanityTest.class.getSimpleName())
+//            .include("simrate[0-9]+")
+//            .include("simrate(1|24|240)")
+            .forks(0)
+            .warmupBatchSize(1)
+            .warmupIterations(0)
+            .resultFormat(ResultFormatType.JSON)
+            .result(resultPath.toString())
+            .build();
     }
 
 }

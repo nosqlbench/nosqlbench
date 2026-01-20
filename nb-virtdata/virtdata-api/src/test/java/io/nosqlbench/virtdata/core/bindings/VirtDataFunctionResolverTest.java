@@ -17,6 +17,7 @@
 package io.nosqlbench.virtdata.core.bindings;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class VirtDataFunctionResolverTest {
 
     @Test

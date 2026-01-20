@@ -17,11 +17,13 @@
 package io.nosqlbench.engine.api.activityimpl;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CpuInfoTest {
 
     @Test

@@ -21,6 +21,7 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleRe
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results_rle.CycleResultsRLEBufferTarget;
 import io.nosqlbench.engine.api.activityapi.cyclelog.buffers.results.CycleResult;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CycleResultsRLEBufferReadableTest {
 
     @Test

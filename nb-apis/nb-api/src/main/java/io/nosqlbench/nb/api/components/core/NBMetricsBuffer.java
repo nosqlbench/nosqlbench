@@ -111,11 +111,12 @@ public class NBMetricsBuffer {
                             }
                     }
 
-                    if (seconds > summaryWhen) fullChannels.add(out);
-                    else {
-                        logger.debug("Summarizing counting metrics only to {} with scenario duration of {}S (<{})", spec, summaryWhen, summaryWhen);
-                        briefChannels.add(out);
-                    }
+                    fullChannels.add(out);
+//                    if (seconds > summaryWhen) fullChannels.add(out);
+//                    else {
+//                        logger.debug("Summarizing counting metrics only to {} with scenario duration of {}S (<{})", spec, summaryWhen, summaryWhen);
+//                        briefChannels.add(out);
+//                    }
                 }
 
         }

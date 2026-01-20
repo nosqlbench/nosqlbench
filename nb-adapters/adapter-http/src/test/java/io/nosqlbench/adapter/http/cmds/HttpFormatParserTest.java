@@ -18,11 +18,13 @@ package io.nosqlbench.adapter.http.cmds;
 
 import io.nosqlbench.adapter.http.core.HttpFormatParser;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class HttpFormatParserTest {
 
     @Test

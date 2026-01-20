@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Equivalent to VictoriaMetrics TestRemoveCounterResets functionality.
  */
 @Tag("mql")
+@Tag("unit")
 class CounterResetTest {
     private Connection conn;
 

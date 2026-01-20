@@ -18,10 +18,12 @@ package io.nosqlbench.virtdata.library.basics.shared.stateful;
 
 import io.nosqlbench.virtdata.library.basics.core.threadstate.SharedState;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class NullOrPassTest {
 
     @Test

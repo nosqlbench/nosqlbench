@@ -18,9 +18,11 @@ package io.nosqlbench.virtdata.predicates.adapter;
 
 import io.nosqlbench.virtdata.predicates.ast.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 class ExamplePredicateAdapterTest {
 
     public static PredicateExpr exampleExpr =

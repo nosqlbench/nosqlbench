@@ -19,12 +19,14 @@ package io.nosqlbench.datamappers.functions.geometry;
 import com.datastax.oss.driver.api.core.data.CqlVector;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NormalizeCqlVectorTest {
 
     @Test

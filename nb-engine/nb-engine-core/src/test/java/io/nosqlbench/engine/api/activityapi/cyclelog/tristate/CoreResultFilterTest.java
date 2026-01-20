@@ -22,11 +22,13 @@ import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultValueFilterTy
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.CoreResultValueFilter;
 import io.nosqlbench.engine.api.activityapi.cyclelog.filters.ResultFilterDispenser;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class CoreResultFilterTest {
 
     @Test

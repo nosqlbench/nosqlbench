@@ -21,8 +21,11 @@ import com.codahale.metrics.Snapshot;
 import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.engine.metrics.DeltaHdrHistogramReservoir;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("accuracy")
+@Tag("statistics")
 public class TestHistoTypes {
 
     @Test

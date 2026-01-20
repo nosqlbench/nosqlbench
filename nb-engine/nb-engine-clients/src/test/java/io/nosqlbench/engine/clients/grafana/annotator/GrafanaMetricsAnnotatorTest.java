@@ -23,9 +23,11 @@ import io.nosqlbench.nb.api.labels.NBLabels;
 import io.nosqlbench.nb.api.system.NBStatePath;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
+@Tag("unit")
 public class GrafanaMetricsAnnotatorTest implements NBLabeledElement {
 
 

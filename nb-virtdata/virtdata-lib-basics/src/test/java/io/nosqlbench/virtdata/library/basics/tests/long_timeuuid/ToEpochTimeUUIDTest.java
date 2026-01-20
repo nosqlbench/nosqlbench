@@ -23,10 +23,12 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag("unit")
 public class ToEpochTimeUUIDTest {
     private final static Logger logger = LogManager.getLogger(ToEpochTimeUUIDTest.class);
 

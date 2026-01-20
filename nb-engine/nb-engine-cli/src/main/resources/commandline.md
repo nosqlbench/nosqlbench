@@ -166,7 +166,10 @@ Push metrics to a Prometheus Pushgateway endpoint:
 
 Record snapshots to a session-specific SQLite database (or add additional ones):
 
-    --report-sqlite-to <jdbc-url>[,<interval>][,<pattern>]
+    --report-sqlite-to <jdbc-url>[,<filter>[,<interval>[,<options>]]]
+    --sqlite-histograms                        # enable HDR payloads in default session sqlite (default)
+    --sqlite-histograms=disabled               # disable HDR payloads in default session sqlite
+                                                # (for additional sqlite channels, use options like ",hist" or ",nohist")
 
 Specify the interval for graphite or CSV reporting in seconds:
 

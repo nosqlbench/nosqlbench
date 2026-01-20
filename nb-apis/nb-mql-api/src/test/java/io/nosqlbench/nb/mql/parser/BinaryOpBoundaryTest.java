@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests edge cases like division by zero, metric mismatches, overflow.
  */
 @Tag("mql")
+@Tag("unit")
 class BinaryOpBoundaryTest {
 
     private Connection conn;

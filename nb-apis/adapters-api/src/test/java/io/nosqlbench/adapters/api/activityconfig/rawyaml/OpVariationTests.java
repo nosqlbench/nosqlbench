@@ -19,11 +19,13 @@ package io.nosqlbench.adapters.api.activityconfig.rawyaml;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class OpVariationTests {
 
     private final static Logger logger = LogManager.getLogger(OpVariationTests.class);

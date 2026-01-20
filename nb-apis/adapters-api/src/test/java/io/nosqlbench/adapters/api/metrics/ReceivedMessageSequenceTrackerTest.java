@@ -18,11 +18,13 @@ package io.nosqlbench.adapters.api.metrics;
 
 import com.codahale.metrics.Counter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("unit")
 class ReceivedMessageSequenceTrackerTest {
     Counter msgErrOutOfSeqCounter = new Counter();
     Counter msgErrDuplicateCounter = new Counter();

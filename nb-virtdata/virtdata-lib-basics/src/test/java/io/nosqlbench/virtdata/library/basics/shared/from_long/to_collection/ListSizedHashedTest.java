@@ -20,6 +20,7 @@ package io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.function.LongFunction;
@@ -27,6 +28,7 @@ import java.util.function.LongToIntFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ListSizedHashedTest {
     private final static Logger logger = LogManager.getLogger(ListSizedHashedTest.class);
 

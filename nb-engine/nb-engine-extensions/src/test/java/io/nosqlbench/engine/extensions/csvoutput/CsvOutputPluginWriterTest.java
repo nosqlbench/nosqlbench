@@ -21,10 +21,12 @@ import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import org.assertj.core.util.Files;
 import org.graalvm.polyglot.Value;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 import java.util.Map;
 
+@Tag("unit")
 public class CsvOutputPluginWriterTest {
 
     @Test

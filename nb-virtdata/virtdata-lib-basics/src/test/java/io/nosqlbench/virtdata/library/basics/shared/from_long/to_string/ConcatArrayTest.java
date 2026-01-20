@@ -20,12 +20,14 @@ import io.nosqlbench.virtdata.library.basics.shared.conversions.from_any.ToJSONF
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.ListSized;
 import io.nosqlbench.virtdata.library.basics.shared.from_long.to_collection.ListSizedStepped;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.function.LongFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 public class ConcatArrayTest {
     @Test
     public void testConcatArray() {

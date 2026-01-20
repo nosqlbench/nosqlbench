@@ -18,9 +18,11 @@ package io.nosqlbench.virtdata.core.templates;
 
 import io.nosqlbench.virtdata.core.bindings.ValueType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ValueTypeTest {
 
     @Test

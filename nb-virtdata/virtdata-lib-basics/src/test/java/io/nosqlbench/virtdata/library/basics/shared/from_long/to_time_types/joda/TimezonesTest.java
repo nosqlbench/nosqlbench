@@ -17,9 +17,11 @@
 package io.nosqlbench.virtdata.library.basics.shared.from_long.to_time_types.joda;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Tag("unit")
 public class TimezonesTest {
 
     @Test

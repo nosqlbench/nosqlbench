@@ -18,12 +18,14 @@ package io.nosqlbench.virtdata.util;
 
 import io.nosqlbench.virtdata.core.bindings.StringObjectPromoter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class StringObjectPromoterTest {
 
     @Test

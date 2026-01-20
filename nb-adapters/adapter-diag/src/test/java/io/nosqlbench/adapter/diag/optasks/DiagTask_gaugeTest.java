@@ -22,11 +22,13 @@ import io.nosqlbench.nb.api.labels.NBLabeledElement;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class DiagTask_gaugeTest {
 
     private NBComponent parent = new TestComponent("DiagTask_gaugeTest","DiagTask_gauge");

@@ -22,6 +22,8 @@ import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.components.core.NBComponentFormats;
 import io.nosqlbench.nb.api.config.standard.TestComponent;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+@Tag("unit")
 public class NBComponentFormatsTest {
 
     @Test

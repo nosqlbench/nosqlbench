@@ -22,12 +22,14 @@ import io.nosqlbench.virtdata.core.bindings.FunctionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.*;
 
+@Tag("unit")
 public class FunctionAssemblerMatrixTest {
     private final static Logger logger = LogManager.getLogger(FunctionAssemblerMatrixTest.class);
 

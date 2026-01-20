@@ -21,6 +21,7 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for annotated library functions in Groovy scripts.
  */
+@Tag("unit")
 public class AnnotatedLibraryTest {
 
     @Test

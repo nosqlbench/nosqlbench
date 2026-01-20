@@ -22,9 +22,11 @@ import com.vladsch.flexmark.util.ast.Node;
 import io.nosqlbench.nb.spectest.loaders.STHeadingScanner;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
+@Tag("unit")
 public class STHeadingScannerTest {
     Parser parser = Parser.builder().extensions(List.of(YamlFrontMatterExtension.create())).build();
 

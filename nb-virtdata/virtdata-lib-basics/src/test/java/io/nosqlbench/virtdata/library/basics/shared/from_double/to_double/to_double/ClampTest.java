@@ -19,9 +19,11 @@ package io.nosqlbench.virtdata.library.basics.shared.from_double.to_double.to_do
 import io.nosqlbench.virtdata.library.basics.shared.from_double.to_double.Clamp;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class ClampTest {
 
     @Test

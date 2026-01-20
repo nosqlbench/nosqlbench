@@ -18,9 +18,11 @@ package io.nosqlbench.nb.api.labels;
 
 import io.nosqlbench.nb.api.labels.NBLabels;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("unit")
 public class NBLabeledElementTest {
 
     @Test

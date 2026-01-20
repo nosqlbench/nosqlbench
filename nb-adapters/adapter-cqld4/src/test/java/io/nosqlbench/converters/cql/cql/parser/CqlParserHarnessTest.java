@@ -20,6 +20,7 @@ import io.nosqlbench.cqlgen.core.CGWorkloadExporter;
 import io.nosqlbench.cqlgen.parser.CqlModelParser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+@Tag("unit")
 public class CqlParserHarnessTest {
 
     private final static String ksddl = """
