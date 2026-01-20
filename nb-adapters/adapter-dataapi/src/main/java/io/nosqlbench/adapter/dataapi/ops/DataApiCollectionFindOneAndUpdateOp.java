@@ -16,22 +16,26 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.Update;
 
-import java.util.UUID;
-import java.util.regex.Pattern;
+public class DataApiCollectionFindOneAndUpdateOp extends DataApiBaseOp {
+    private final Collection<Document> collection;
+    private final Filter filter;
+    private final Update update;
 
-public class DataApiGetDatabaseInfoOp extends DataApiAdminOp {
-    private final UUID uuid;
-
-    public DataApiGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
-        super(db, admin);
-        this.uuid = uuid;
+    public DataApiCollectionFindOneAndUpdateOp(Database db, Collection<Document> collection, Filter filter, Update update) {
+        super(db);
+        this.collection = collection;
+        this.filter = filter;
+        this.update = update;
     }
 
     @Override
     public Object apply(long value) {
-        return admin.getDatabaseInfo(uuid);
+        return collection.findOneAndUpdate(filter, update);
     }
 }

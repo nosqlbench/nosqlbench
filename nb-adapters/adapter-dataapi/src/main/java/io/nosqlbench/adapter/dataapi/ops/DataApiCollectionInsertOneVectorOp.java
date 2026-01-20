@@ -16,22 +16,25 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.collections.commands.results.CollectionInsertOneResult;
 
-import java.util.UUID;
-import java.util.regex.Pattern;
+public class DataApiCollectionInsertOneVectorOp extends DataApiBaseOp {
+    private final Document doc;
+    private final String collectionName;
 
-public class DataApiGetDatabaseInfoOp extends DataApiAdminOp {
-    private final UUID uuid;
-
-    public DataApiGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
-        super(db, admin);
-        this.uuid = uuid;
+    public DataApiCollectionInsertOneVectorOp(Database db, String collectionName, Document doc, float[] vector) {
+        super(db);
+        this.collectionName = collectionName;
+        this.doc = doc.vector(vector);
     }
 
     @Override
     public Object apply(long value) {
-        return admin.getDatabaseInfo(uuid);
+        Collection<Document> collection = db.getCollection(collectionName);
+        CollectionInsertOneResult result = collection.insertOne(doc);
+        return result;
     }
 }

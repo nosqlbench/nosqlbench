@@ -16,22 +16,26 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.datastax.astra.client.core.query.Filter;
 
-import java.util.UUID;
-import java.util.regex.Pattern;
+public class DataApiCollectionFindDistinctOp extends DataApiBaseOp {
+    private final Collection collection;
+    private final String fieldName;
+    private final Filter filter;
+    private final Class<?> resultClass;
 
-public class DataApiGetDatabaseInfoOp extends DataApiAdminOp {
-    private final UUID uuid;
-
-    public DataApiGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
-        super(db, admin);
-        this.uuid = uuid;
+    public DataApiCollectionFindDistinctOp(Database db, Collection collection, String fieldName, Filter filter, Class<?> resultClass) {
+        super(db);
+        this.collection = collection;
+        this.fieldName = fieldName;
+        this.filter = filter;
+        this.resultClass = resultClass;
     }
 
     @Override
     public Object apply(long value) {
-        return admin.getDatabaseInfo(uuid);
+        return collection.distinct(fieldName, filter, resultClass);
     }
 }

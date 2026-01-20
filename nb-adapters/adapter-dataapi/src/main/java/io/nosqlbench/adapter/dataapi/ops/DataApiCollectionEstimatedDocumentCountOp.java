@@ -1,5 +1,5 @@
 /*
- * Copyright (c) nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.datastax.astra.client.collections.definition.documents.Document;
 
-import java.util.UUID;
-import java.util.regex.Pattern;
-
-public class DataApiGetDatabaseInfoOp extends DataApiAdminOp {
-    private final UUID uuid;
-
-    public DataApiGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
-        super(db, admin);
-        this.uuid = uuid;
+public class DataApiCollectionEstimatedDocumentCountOp extends DataApiBaseOp {
+    private final String collectionName;
+    public DataApiCollectionEstimatedDocumentCountOp(Database db, String collectionName) {
+        super(db);
+        this.collectionName = collectionName;
     }
 
     @Override
     public Object apply(long value) {
-        return admin.getDatabaseInfo(uuid);
+        long response;
+        Collection<Document> collection = db.getCollection(collectionName);
+        response = collection.estimatedDocumentCount();
+        return response;
     }
 }

@@ -16,22 +16,25 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.datastax.astra.client.collections.commands.options.CollectionDeleteOneOptions;
+import com.datastax.astra.client.core.query.Filter;
 
-import java.util.UUID;
-import java.util.regex.Pattern;
+public class DataApiCollectionDeleteOneOp extends DataApiBaseOp {
+    private final Collection collection;
+    private final Filter filter;
+    private final CollectionDeleteOneOptions options;
 
-public class DataApiGetDatabaseInfoOp extends DataApiAdminOp {
-    private final UUID uuid;
-
-    public DataApiGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
-        super(db, admin);
-        this.uuid = uuid;
+    public DataApiCollectionDeleteOneOp(Database db, Collection collection, Filter filter, CollectionDeleteOneOptions options) {
+        super(db);
+        this.collection = collection;
+        this.filter = filter;
+        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        return admin.getDatabaseInfo(uuid);
+        return collection.deleteOne(filter, options);
     }
 }
