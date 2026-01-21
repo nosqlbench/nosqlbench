@@ -19,6 +19,9 @@ package io.nosqlbench.nb.api.expr;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
+import java.net.URI;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -308,5 +311,162 @@ class TemplateRewriterTest {
         assertTrue(output.contains("{{= 1 + 2 }}"));
         // Template should be rewritten
         assertTrue(output.contains("{{= paramOr('key', 'value') }}"));
+    }
+
+    // ==================== End-to-End TEMPLATE Semantics Tests ====================
+    //
+    // These tests verify the complete TEMPLATE resolution behavior through actual
+    // expression evaluation. The resolution priority is:
+    //   1. Provided parameter (always takes precedence)
+    //   2. Default on the current TEMPLATE instance (if provided)
+    //   3. Default from a previous TEMPLATE (only if current has no default)
+
+    private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();
+
+    /**
+     * When a parameter is provided externally, ALL TEMPLATEs for that variable
+     * should use the provided value, regardless of what default they specify.
+     */
+    @Test
+    void templateSemantics_providedParameterAlwaysTakesPrecedence() {
+        String input = """
+            first: TEMPLATE(myvar,default1)
+            second: TEMPLATE(myvar,default2)
+            third: TEMPLATE(myvar)
+            """;
+
+        String rewritten = TemplateRewriter.rewrite(input);
+        String processed = processor.process(rewritten, URI.create("test://params"), Map.of("myvar", "provided"));
+
+        // All three should use the provided parameter value
+        assertTrue(processed.contains("first: provided"), "First TEMPLATE should use provided param");
+        assertTrue(processed.contains("second: provided"), "Second TEMPLATE should use provided param");
+        assertTrue(processed.contains("third: provided"), "Third TEMPLATE should use provided param");
+    }
+
+    /**
+     * When NO parameter is provided, each TEMPLATE with an explicit default
+     * should use ITS OWN default - not a cached default from an earlier TEMPLATE.
+     * This is the key semantic: TEMPLATE(var,default2) uses default2, not default1.
+     */
+    @Test
+    void templateSemantics_eachTemplateUsesItsOwnDefault() {
+        String input = """
+            first: TEMPLATE(myvar,default1)
+            second: TEMPLATE(myvar,default2)
+            third: TEMPLATE(myvar,default3)
+            """;
+
+        String rewritten = TemplateRewriter.rewrite(input);
+        String processed = processor.process(rewritten, URI.create("test://defaults"), Map.of());
+
+        // Each TEMPLATE should use its own default value
+        assertTrue(processed.contains("first: default1"), "First TEMPLATE should use default1");
+        assertTrue(processed.contains("second: default2"), "Second TEMPLATE should use default2, NOT default1");
+        assertTrue(processed.contains("third: default3"), "Third TEMPLATE should use default3");
+    }
+
+    /**
+     * When a TEMPLATE has no default (just TEMPLATE(var)), it should fall back
+     * to the default that was set by a previous TEMPLATE for that variable.
+     */
+    @Test
+    void templateSemantics_noDefaultFallsBackToPreviousDefault() {
+        String input = """
+            first: TEMPLATE(myvar,remembered)
+            second: TEMPLATE(myvar)
+            """;
+
+        String rewritten = TemplateRewriter.rewrite(input);
+        String processed = processor.process(rewritten, URI.create("test://fallback"), Map.of());
+
+        // First sets the default, second (with no default) should find it
+        assertTrue(processed.contains("first: remembered"), "First TEMPLATE should use its default");
+        assertTrue(processed.contains("second: remembered"), "Second TEMPLATE (no default) should use first's default");
+    }
+
+    /**
+     * Combined scenario: TEMPLATE(var,A) then TEMPLATE(var,B) then TEMPLATE(var)
+     * The third should find B (the most recent stored default), not A.
+     */
+    @Test
+    void templateSemantics_noDefaultFallsBackToMostRecentDefault() {
+        String input = """
+            first: TEMPLATE(myvar,alpha)
+            second: TEMPLATE(myvar,beta)
+            third: TEMPLATE(myvar)
+            """;
+
+        String rewritten = TemplateRewriter.rewrite(input);
+        String processed = processor.process(rewritten, URI.create("test://recent"), Map.of());
+
+        assertTrue(processed.contains("first: alpha"), "First TEMPLATE should use alpha");
+        assertTrue(processed.contains("second: beta"), "Second TEMPLATE should use beta");
+        assertTrue(processed.contains("third: beta"), "Third TEMPLATE (no default) should use beta (most recent)");
+    }
+
+    /**
+     * Realistic workload scenario: Multiple bindings that might reference the same
+     * template variable with different contextual defaults.
+     */
+    @Test
+    void templateSemantics_realisticWorkloadScenario() {
+        String input = """
+            read_cycles: TEMPLATE(cycles,1000)
+            write_cycles: TEMPLATE(cycles,500)
+            verify_cycles: TEMPLATE(cycles)
+            """;
+
+        String rewritten = TemplateRewriter.rewrite(input);
+
+        // Without providing cycles parameter - each uses its own default
+        String withoutParam = processor.process(rewritten, URI.create("test://workload1"), Map.of());
+        assertTrue(withoutParam.contains("read_cycles: 1000"), "read_cycles should use 1000");
+        assertTrue(withoutParam.contains("write_cycles: 500"), "write_cycles should use 500");
+        assertTrue(withoutParam.contains("verify_cycles: 500"), "verify_cycles should use 500 (most recent)");
+
+        // With cycles parameter - all use provided value
+        String withParam = processor.process(rewritten, URI.create("test://workload2"), Map.of("cycles", "2000"));
+        assertTrue(withParam.contains("read_cycles: 2000"), "read_cycles should use provided 2000");
+        assertTrue(withParam.contains("write_cycles: 2000"), "write_cycles should use provided 2000");
+        assertTrue(withParam.contains("verify_cycles: 2000"), "verify_cycles should use provided 2000");
+    }
+
+    /**
+     * Shell-style syntax should have the same semantics as TEMPLATE() function syntax.
+     */
+    @Test
+    void templateSemantics_shellSyntaxHasSameSemantics() {
+        String input = """
+            first: ${myvar:shell1}
+            second: ${myvar:shell2}
+            third: ${myvar}
+            """;
+
+        String rewritten = TemplateRewriter.rewrite(input);
+        String processed = processor.process(rewritten, URI.create("test://shell"), Map.of());
+
+        assertTrue(processed.contains("first: shell1"), "First should use shell1");
+        assertTrue(processed.contains("second: shell2"), "Second should use shell2");
+        assertTrue(processed.contains("third: shell2"), "Third (no default) should use shell2");
+    }
+
+    /**
+     * Mixed TEMPLATE() and ${} syntax should work together consistently.
+     */
+    @Test
+    void templateSemantics_mixedSyntaxWorksConsistently() {
+        String input = """
+            first: TEMPLATE(myvar,fromTemplate)
+            second: ${myvar:fromShell}
+            third: TEMPLATE(myvar)
+            """;
+
+        String rewritten = TemplateRewriter.rewrite(input);
+        String processed = processor.process(rewritten, URI.create("test://mixed"), Map.of());
+
+        assertTrue(processed.contains("first: fromTemplate"), "First TEMPLATE should use fromTemplate");
+        assertTrue(processed.contains("second: fromShell"), "Second (shell) should use fromShell");
+        assertTrue(processed.contains("third: fromShell"), "Third (no default) should use fromShell (most recent)");
     }
 }
