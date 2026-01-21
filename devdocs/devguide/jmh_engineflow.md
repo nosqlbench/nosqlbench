@@ -21,52 +21,25 @@ There is a JMH suite intended to quantify the steady-state overhead of the new s
 
 ## Running
 
-The simplest way is to run the runner from your IDE after building the module:
+The simplest way is to run the JUnit microbench test so `mvn test` can select it:
 
-- Runner: `io.nosqlbench.engine.api.activityapi.sysperf.engineflow.EngineFlowPerfBaseliner`
-- Optional arg0: a JMH include regex (defaults to `.*(engineflow\\..*Bench|StrideContextJmhBench).*`)
-- Optional arg1: a JMH results file (does not suppress console output)
+- Test: `io.nosqlbench.engine.api.activityapi.sysperf.engineflow.EngineFlowJmhTest`
+- Tags: `microbench`, `engine`
+- Default include regex: `.*(engineflow\\..*Bench|StrideContextJmhBench).*`
 
-Offline build (no downloads) to compile the benchmarks:
+### Maven `test` examples
 
-```bash
-mvn -o -pl nb-engine/nb-engine-core -am test -DskipTests
-```
-
-### Maven `exec:java` examples
-
-In a multi-module reactor, `exec:java` runs once per module; use a build step + a single-module exec step (chained with `&&`) so the exec only happens for `nb-engine-core`:
+Run only the engine-flow JMH suite:
 
 ```bash
-mvn -pl nb-engine/nb-engine-core -am -DskipTests test-compile \
-  && mvn -pl nb-engine/nb-engine-core -DskipTests exec:java \
-    -Dexec.mainClass=io.nosqlbench.engine.api.activityapi.sysperf.engineflow.EngineFlowPerfBaseliner
+mvn -pl nb-engine/nb-engine-core -Pmicrobench -Dtest=EngineFlowJmhTest test
 ```
 
-Run the baseliner with an explicit include regex and a JMH results file:
+Run all microbench-tagged tests:
 
 ```bash
-mvn -pl nb-engine/nb-engine-core -am -DskipTests test-compile \
-  && mvn -pl nb-engine/nb-engine-core -DskipTests exec:java \
-    -Dexec.mainClass=io.nosqlbench.engine.api.activityapi.sysperf.engineflow.EngineFlowPerfBaseliner \
-    -Dexec.args='\".*engineflow\\\\..*Bench.*\" /tmp/jmh_engineflow.json'
+mvn -pl nb-engine/nb-engine-core -Pmicrobench test
 ```
 
-List available benchmarks (JMH `-l`):
-
-```bash
-mvn -pl nb-engine/nb-engine-core -am -DskipTests test-compile \
-  && mvn -pl nb-engine/nb-engine-core -DskipTests exec:java \
-    -Dexec.mainClass=org.openjdk.jmh.Main -Dexec.args='-l'
-```
-
-Run only the engine-flow benchmarks (JMH include regex):
-
-```bash
-mvn -pl nb-engine/nb-engine-core -am -DskipTests test-compile \
-  && mvn -pl nb-engine/nb-engine-core -DskipTests exec:java \
-    -Dexec.mainClass=org.openjdk.jmh.Main \
-    -Dexec.args='-wi 2 -i 3 -f 1 \".*(engineflow\\\\..*Bench|StrideContextJmhBench).*\"'
-```
-
-Offline variants: add `-o` to both Maven invocations (requires the needed plugin/deps to already be present in your local repo).
+You can also set `-Dnb.junit.tags=microbench` instead of `-Pmicrobench`.
+Offline variants: add `-o` (requires the needed plugin/deps to already be present in your local repo).
