@@ -123,8 +123,9 @@ public class UnifiedParameterProvider implements ExprFunctionProvider {
         name = "paramOr",
         synopsis = "paramOr(name, default)",
         description = "Return the value of a workload parameter or the provided default when absent or null. " +
-            "Supports lexical scoping: once a parameter is resolved (from params or default), subsequent " +
-            "calls without a default will reuse that value."
+            "Resolution priority: (1) provided parameter, (2) the default on the current TEMPLATE instance " +
+            "if provided, (3) the default from a previous TEMPLATE for that variable but only if no default " +
+            "is provided for the current TEMPLATE."
     )
     private Object paramOr(ExprRuntimeContext context, Object[] args) {
         if (args.length < 1 || args.length > 2) {
@@ -132,8 +133,40 @@ public class UnifiedParameterProvider implements ExprFunctionProvider {
         }
         String name = String.valueOf(args[0]);
 
-        // Lexical scoping: check if this parameter was already resolved in the workload
+        // First priority: check if parameter was provided externally
+        Object value = resolveParameter(context, name, false);
+        if (value != null) {
+            trackAccess(name, String.valueOf(value));
+            return value;
+        }
+
+        // Parameter was not provided - now we need to decide between current default and stored default
         String bindingKey = "__param_" + name;
+
+        // Check if current call provides an explicit default (not the UNSET marker)
+        boolean hasExplicitDefault = false;
+        Object currentDefault = null;
+        if (args.length == 2) {
+            currentDefault = args[1];
+            // Check if this is NOT the "no default" marker (UNSET:varname)
+            if (currentDefault == null ||
+                !(currentDefault instanceof String str && str.startsWith("UNSET:"))) {
+                hasExplicitDefault = true;
+            }
+        }
+
+        // Second priority: if current TEMPLATE has an explicit default, use it
+        if (hasExplicitDefault) {
+            // Store this default for later use by TEMPLATEs without defaults
+            context.setVariable(bindingKey, currentDefault);
+
+            if (currentDefault != null) {
+                trackAccess(name, String.valueOf(currentDefault));
+            }
+            return currentDefault;
+        }
+
+        // Third priority: look for previously stored default (only when no explicit default)
         if (context.hasVariable(bindingKey)) {
             Object cached = context.getVariable(bindingKey);
             if (cached != null) {
@@ -142,24 +175,11 @@ public class UnifiedParameterProvider implements ExprFunctionProvider {
             return cached;
         }
 
-        // Not yet resolved - determine the value
-        Object value = resolveParameter(context, name, false);
-        Object result;
-        if (value == null && args.length == 2) {
-            result = args[1];
-        } else {
-            result = value;
+        // No default at all - return the UNSET marker or null
+        if (args.length == 2) {
+            return args[1];  // This will be 'UNSET:key'
         }
-
-        // Store in binding for lexical scoping
-        context.setVariable(bindingKey, result);
-
-        // Track template variable access for workload validation
-        if (result != null) {
-            trackAccess(name, String.valueOf(result));
-        }
-
-        return result;
+        return null;
     }
 
     @ExprExample(args = {"\"mode\""}, expect = "true")
