@@ -49,7 +49,7 @@ public class SSLKsFactory implements NBMapConfigurable {
             "{1,10}([a-z0-9+/=\\r\\n]+)-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", Pattern.CASE_INSENSITIVE);
 
     public static final String SSL = "ssl";
-    public static final String DEFAULT_TLSVERSION = "TLSv1.2";
+    public static final String DEFAULT_TLSVERSION = "TLSv1.3";
 
     private static final TrustManager[] trustAllCerts = new TrustManager[]{
             new X509TrustManager() {
