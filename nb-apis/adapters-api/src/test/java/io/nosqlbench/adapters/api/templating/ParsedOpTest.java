@@ -26,6 +26,8 @@ import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfiguration;
 import io.nosqlbench.nb.api.config.standard.Param;
 import io.nosqlbench.nb.api.components.core.NBComponent;
+import io.nosqlbench.virtdata.core.templates.CapturePoint;
+import io.nosqlbench.virtdata.core.templates.ParsedTemplateString;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
@@ -212,6 +214,46 @@ public class ParsedOpTest {
             )
         );
 
+    }
+
+    @Test
+    public void testReservedFieldsSkipCaptureParsing() {
+        ParsedOp pc = new ParsedOp(
+            new OpData().applyFields(
+                Map.of(
+                    "op", Map.of(
+                        "stmt", "select [field1] from table where id={dyna1}",
+                        "verifier", "assert result[0] == {dyna1}",
+                        "expected-result", "[{dyna1}]"
+                    ),
+                    "bindings", Map.of(
+                        "dyna1", "NumberNameToString()"
+                    )
+                )
+            ),
+            ConfigModel.of(ParsedOpTest.class)
+                .asReadOnly()
+                .apply(Map.of()),
+            List.of(),
+            getParent()
+        );
+
+        // Standard field should parse captures
+        assertThat(pc.getCaptures()).hasSize(1);
+        assertThat(((CapturePoint<?>)pc.getCaptures().get(0)).getSourceName()).isEqualTo("field1");
+        ParsedTemplateString stmtTpl = pc.getAsTemplate("stmt").orElseThrow();
+        assertThat(stmtTpl.getPositionalStatement()).isEqualTo("select field1 from table where id=dyna1");
+
+        // Reserved fields should NOT parse captures (brackets preserved)
+        ParsedTemplateString verifierTpl = pc.getTemplateMap().getAsStringTemplate("verifier").orElseThrow();
+        // The [0] should still be there, and NO capture should be added from it
+        assertThat(verifierTpl.getPositionalStatement()).isEqualTo("assert result[0] == dyna1");
+        assertThat(verifierTpl.getCaptures()).isEmpty();
+
+        ParsedTemplateString expectedTpl = pc.getTemplateMap().getAsStringTemplate("expected-result").orElseThrow();
+        // The outer brackets should still be there
+        assertThat(expectedTpl.getPositionalStatement()).isEqualTo("[dyna1]");
+        assertThat(expectedTpl.getCaptures()).isEmpty();
     }
 
 

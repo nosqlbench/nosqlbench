@@ -113,7 +113,7 @@ public class ParsedTemplateString {
     private final List<BindPoint> bindpoints;
 
     public static ParsedTemplateString of(String rawtemplate, Map<String, String> bindings) {
-        return new ParsedTemplateString(rawtemplate, bindings);
+        return new ParsedTemplateString(rawtemplate, bindings, true);
     }
 
     /**
@@ -135,14 +135,25 @@ public class ParsedTemplateString {
      * @param availableBindings The bindings which are provided by the user to fulfill the named anchors in this raw template
      */
     public ParsedTemplateString(String rawtemplate, Map<String, String> availableBindings) {
+        this(rawtemplate, availableBindings, true);
+    }
+
+    public ParsedTemplateString(String rawtemplate, Map<String, String> availableBindings, boolean parseCaptures) {
         this.bindings.putAll(availableBindings);
-        CapturePointParser capturePointParser = new CapturePointParser();
-        CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
-        this.captures.addAll(captureData.getCaptures());
-        this.rawtemplate = captures.isEmpty() ? rawtemplate : captureData.getRawTemplate();
+        String templateForBindings = rawtemplate;
+
+        if (parseCaptures) {
+            CapturePointParser capturePointParser = new CapturePointParser();
+            CapturePointParser.Result captureData = capturePointParser.apply(rawtemplate);
+            this.captures.addAll(captureData.getCaptures());
+            this.rawtemplate = captures.isEmpty() ? rawtemplate : captureData.getRawTemplate();
+            templateForBindings = this.rawtemplate;
+        } else {
+            this.rawtemplate = rawtemplate;
+        }
 
         BindPointParser bindPointParser = new BindPointParser();
-        BindPointParser.Result bindPointsResult = bindPointParser.apply(captureData.getRawTemplate(), availableBindings);
+        BindPointParser.Result bindPointsResult = bindPointParser.apply(templateForBindings, availableBindings);
         this.spans = bindPointsResult.getSpans().toArray(new String[0]);
         this.bindpoints = bindPointsResult.getBindpoints();
     }

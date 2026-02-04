@@ -32,11 +32,15 @@ import java.util.function.LongFunction;
 public class Templatizer {
 
     public static Result make(Map<String, String> bindings, Object v, String name, List<Map<String, Object>> cfgsources) {
+        return make(bindings, v, name, cfgsources, true);
+    }
+
+    public static Result make(Map<String, String> bindings, Object v, String name, List<Map<String, Object>> cfgsources, boolean parseCaptures) {
         Result result = new Result();
         result.setName(name);
 
         if (v instanceof CharSequence) {
-            ParsedTemplateString pt = ParsedTemplateString.of(((CharSequence) v).toString(), bindings);
+            ParsedTemplateString pt = new ParsedTemplateString(((CharSequence) v).toString(), bindings, parseCaptures);
             result.addCaptures(pt.getCaptures());
             result.setType(pt.getType());
             switch (pt.getType()) {
@@ -63,7 +67,7 @@ public class Templatizer {
                 }
             });
             Map<String, Object> submap = (Map<String, Object>) v;
-            ParsedTemplateMap subtpl = new ParsedTemplateMap(name, submap, bindings, cfgsources);
+            ParsedTemplateMap subtpl = new ParsedTemplateMap(name, submap, bindings, cfgsources, parseCaptures);
             if (subtpl.isStatic()) {
                 result.setValue(submap);
             } else {
@@ -71,7 +75,7 @@ public class Templatizer {
             }
         } else if (v instanceof List) {
             List<Object> sublist = (List<Object>) v;
-            ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources);
+            ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources, parseCaptures);
             if (subtpl.isStatic()) {
                 result.setValue(sublist);
             } else {

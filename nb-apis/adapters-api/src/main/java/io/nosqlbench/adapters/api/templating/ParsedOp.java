@@ -383,6 +383,9 @@ prepared: false
 public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String, ?>>, NBComponent, StaticFieldReader, DynamicFieldReader {
 
     private static final Logger logger = LogManager.getLogger(ParsedOp.class);
+    public static final Set<String> RESERVED_FIELDS = Set.of(
+        "verifier", "verifier-init", "expected-result", "verifier-imports", "labels"
+    );
 
     /**
      The names of payload values in the result of the operation which should be saved.
@@ -435,7 +438,8 @@ public class ParsedOp extends NBBaseComponent implements LongFunction<Map<String
 
         this.tmap = new ParsedTemplateMap(
             getName(), map, opTemplate.getBindings(),
-                                          List.of(opTemplate.getParams(), activityCfg.getMap())
+            List.of(opTemplate.getParams(), activityCfg.getMap()),
+            RESERVED_FIELDS
         );
 
         NBLabels opLabels = parent.getLabels().andPairs(
