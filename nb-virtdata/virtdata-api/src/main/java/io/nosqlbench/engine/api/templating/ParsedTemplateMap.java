@@ -106,13 +106,39 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
      */
     private Map<String, String> bindings;
     private final String name;
+    private final Set<String> nonCaptureFields;
+    private final boolean parseCaptures;
 
     public ParsedTemplateMap(
         String name, Map<String, Object> map, Map<String, String> bindings,
         List<Map<String, Object>> cfgsources
     ) {
+        this(name, map, bindings, cfgsources, Set.of(), true);
+    }
+
+    public ParsedTemplateMap(
+        String name, Map<String, Object> map, Map<String, String> bindings,
+        List<Map<String, Object>> cfgsources, boolean parseCaptures
+    ) {
+        this(name, map, bindings, cfgsources, Set.of(), parseCaptures);
+    }
+
+    public ParsedTemplateMap(
+        String name, Map<String, Object> map, Map<String, String> bindings,
+        List<Map<String, Object>> cfgsources, Set<String> nonCaptureFields
+    ) {
+        this(name, map, bindings, cfgsources, nonCaptureFields, true);
+    }
+
+    public ParsedTemplateMap(
+        String name, Map<String, Object> map, Map<String, String> bindings,
+        List<Map<String, Object>> cfgsources, Set<String> nonCaptureFields,
+        boolean parseCaptures
+    ) {
         this.name = name;
         this.cfgsources = cfgsources;
+        this.nonCaptureFields = nonCaptureFields;
+        this.parseCaptures = parseCaptures;
         applyTemplateFields(map, bindings);
         mapsize = statics.size() + dynamics.size();
     }
@@ -124,8 +150,9 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         this.originalTemplateObject = map;
         this.bindings = bindings;
         map.forEach((k, v) -> {
+            boolean parseChildCaptures = this.parseCaptures && !nonCaptureFields.contains(k);
             if (v instanceof CharSequence charvalue) {
-                ParsedTemplateString pt = ParsedTemplateString.of(charvalue.toString(), bindings);
+                ParsedTemplateString pt = new ParsedTemplateString(charvalue.toString(), bindings, parseChildCaptures);
                 this.captures.addAll(pt.getCaptures());
                 switch (pt.getType()) {
                     case literal:
@@ -155,7 +182,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 });
                 Map<String, Object> submap = (Map<String, Object>) v;
                 ParsedTemplateMap subtpl = new ParsedTemplateMap(
-                    getName(), submap, bindings, cfgsources);
+                    getName(), submap, bindings, cfgsources, nonCaptureFields, parseChildCaptures);
                 this.captures.addAll(subtpl.getCaptures());
                 if (subtpl.isStatic()) {
                     statics.put(k, submap);
@@ -166,7 +193,7 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
                 }
             } else if (v instanceof List listvalue) {
                 List<Object> sublist = listvalue;
-                ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources);
+                ParsedTemplateList subtpl = new ParsedTemplateList(sublist, bindings, cfgsources, parseChildCaptures);
                 this.captures.addAll(subtpl.getCaptures());
                 if (subtpl.isStatic()) {
                     statics.put(k, sublist);
@@ -830,10 +857,12 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
             });
         }
         Map<String, ParsedTemplateString> parsedStringTemplates = new LinkedHashMap<>();
+        boolean parseFieldCaptures = this.parseCaptures && !nonCaptureFields.contains(fieldname);
+
         elements.forEach((k, v) -> {
             if (v instanceof CharSequence chars) {
                 parsedStringTemplates.put(
-                    k, new ParsedTemplateString(chars.toString(), this.bindings));
+                    k, new ParsedTemplateString(chars.toString(), this.bindings, parseFieldCaptures));
             }
         });
         return parsedStringTemplates;
@@ -844,7 +873,8 @@ public class ParsedTemplateMap implements LongFunction<Map<String, ?>>, StaticFi
         if (originalTemplateObject.containsKey(fieldname)) {
             Object fval = originalTemplateObject.get(fieldname);
             if (fval instanceof CharSequence) {
-                return Optional.of(new ParsedTemplateString(fval.toString(), this.bindings));
+                boolean parseFieldCaptures = this.parseCaptures && !nonCaptureFields.contains(fieldname);
+                return Optional.of(new ParsedTemplateString(fval.toString(), this.bindings, parseFieldCaptures));
             } else {
                 throw new RuntimeException(
                     "Can not make a parsed text template from op template field '" + fieldname + "' of type '" + fval.getClass().getSimpleName() + "'");

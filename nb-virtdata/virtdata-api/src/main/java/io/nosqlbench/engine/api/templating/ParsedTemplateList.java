@@ -31,6 +31,10 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
     private final List<CapturePoint> captures = new ArrayList<>();
 
     public ParsedTemplateList(List<Object> list, Map<String, String> bindings, List<Map<String, Object>> cfgsources) {
+        this(list, bindings, cfgsources, true);
+    }
+
+    public ParsedTemplateList(List<Object> list, Map<String, String> bindings, List<Map<String, Object>> cfgsources, boolean parseCaptures) {
 
         List<LongFunction<?>> funcs = new ArrayList<>();
         List<Integer> dindexes = new ArrayList<>();
@@ -38,7 +42,7 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
 
         for (int i = 0; i < list.size(); i++) {
             Object item = list.get(i);
-            Templatizer.Result result = Templatizer.make(bindings, item, null, cfgsources);
+            Templatizer.Result result = Templatizer.make(bindings, item, null, cfgsources, parseCaptures);
             this.captures.addAll(result.getCaptures());
 
             if (item instanceof String string) {
@@ -52,7 +56,7 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
                         dindexes.add(i);
                 }
             } else if (item instanceof List sublist) {
-                ParsedTemplateList listTemplate = new ParsedTemplateList(sublist, bindings, cfgsources);
+                ParsedTemplateList listTemplate = new ParsedTemplateList(sublist, bindings, cfgsources, parseCaptures);
                 if (listTemplate.isStatic()) {
                     protolist[i]=sublist;
                 } else {
@@ -60,7 +64,7 @@ public class ParsedTemplateList implements LongFunction<List<?>> {
                     dindexes.add(i);
                 }
             } else if (item instanceof Map submap) {
-                ParsedTemplateMap mapTemplate = new ParsedTemplateMap("anonymous", submap, bindings, cfgsources);
+                ParsedTemplateMap mapTemplate = new ParsedTemplateMap("anonymous", submap, bindings, cfgsources, parseCaptures);
                 if (mapTemplate.isStatic()) {
                     protolist[i]=submap;
                 } else {
