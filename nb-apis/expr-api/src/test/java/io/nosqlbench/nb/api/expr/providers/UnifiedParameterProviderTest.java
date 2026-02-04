@@ -411,7 +411,7 @@ class UnifiedParameterProviderTest {
     }
 
     @Test
-    void paramOr_shouldSupportLexicalScoping() {
+    void paramOr_shouldUseLaterExplicitDefault() {
         Map<String, Object> params = new HashMap<>();
         TestExprRuntimeContext context = new TestExprRuntimeContext(params);
 
@@ -420,13 +420,77 @@ class UnifiedParameterProviderTest {
 
         ExprFunction paramOr = context.function("paramOr");
 
-        // First call with default
+        // First call with default - should return default1
+        Object result1 = paramOr.apply("scoped_var", "default1");
+        assertEquals("default1", result1);
+
+        // Second call with different explicit default - should use default2, NOT cached default1
+        Object result2 = paramOr.apply("scoped_var", "default2");
+        assertEquals("default2", result2, "Should use current TEMPLATE's explicit default");
+    }
+
+    @Test
+    void paramOr_shouldUseCachedDefaultWhenNoExplicitDefault() {
+        Map<String, Object> params = new HashMap<>();
+        TestExprRuntimeContext context = new TestExprRuntimeContext(params);
+
+        UnifiedParameterProvider provider = new UnifiedParameterProvider();
+        ExprFunctionAnnotations.registerAnnotatedFunctions(context, provider);
+
+        ExprFunction paramOr = context.function("paramOr");
+
+        // First call with explicit default
         Object result1 = paramOr.apply("scoped_var", "initial_value");
         assertEquals("initial_value", result1);
 
-        // Second call should reuse the cached value
-        Object result2 = paramOr.apply("scoped_var", "different_value");
-        assertEquals("initial_value", result2, "Should return cached value from first call");
+        // Second call without explicit default (UNSET marker) should use cached value
+        Object result2 = paramOr.apply("scoped_var", "UNSET:scoped_var");
+        assertEquals("initial_value", result2, "Should return cached value when no explicit default");
+    }
+
+    @Test
+    void paramOr_shouldAlwaysUseProvidedParameter() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("myvar", "provided_value");
+        TestExprRuntimeContext context = new TestExprRuntimeContext(params);
+
+        UnifiedParameterProvider provider = new UnifiedParameterProvider();
+        ExprFunctionAnnotations.registerAnnotatedFunctions(context, provider);
+
+        ExprFunction paramOr = context.function("paramOr");
+
+        // All calls should return the provided parameter value, regardless of default
+        Object result1 = paramOr.apply("myvar", "default1");
+        assertEquals("provided_value", result1, "Should use provided parameter over default1");
+
+        Object result2 = paramOr.apply("myvar", "default2");
+        assertEquals("provided_value", result2, "Should use provided parameter over default2");
+
+        Object result3 = paramOr.apply("myvar", "UNSET:myvar");
+        assertEquals("provided_value", result3, "Should use provided parameter over UNSET marker");
+    }
+
+    @Test
+    void paramOr_shouldStoreLatestDefaultForSubsequentUnsetCalls() {
+        Map<String, Object> params = new HashMap<>();
+        TestExprRuntimeContext context = new TestExprRuntimeContext(params);
+
+        UnifiedParameterProvider provider = new UnifiedParameterProvider();
+        ExprFunctionAnnotations.registerAnnotatedFunctions(context, provider);
+
+        ExprFunction paramOr = context.function("paramOr");
+
+        // First TEMPLATE(var,default1) sets default1
+        Object result1 = paramOr.apply("myvar", "default1");
+        assertEquals("default1", result1);
+
+        // Second TEMPLATE(var,default2) uses and stores default2
+        Object result2 = paramOr.apply("myvar", "default2");
+        assertEquals("default2", result2);
+
+        // Third TEMPLATE(var) without default should find default2 (the most recent stored default)
+        Object result3 = paramOr.apply("myvar", "UNSET:myvar");
+        assertEquals("default2", result3, "Should return the most recently stored default");
     }
 
     @Test
