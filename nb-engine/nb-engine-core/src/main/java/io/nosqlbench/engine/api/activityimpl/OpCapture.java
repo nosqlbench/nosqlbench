@@ -59,7 +59,7 @@ public class OpCapture {
             return new CapturingOpDispenser(adapter, pop, dispenser, function);
         } else {
             throw new OpConfigError(
-                "variable capture configuration failed because adapter " + adapter + " does not " +
+                "variable capture configuration failed because op " + op.getClass().getSimpleName() + " in adapter " + adapter + " does not " +
                     "implement " + UniformVariableCapture.class.getSimpleName()
             );
         }
