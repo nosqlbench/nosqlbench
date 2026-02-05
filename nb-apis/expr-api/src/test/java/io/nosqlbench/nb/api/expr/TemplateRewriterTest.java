@@ -282,6 +282,33 @@ class TemplateRewriterTest {
         assertEquals("result: {{= paramOr('result', a * b) }}", output);
     }
 
+    // ==================== Nested Template Tests ====================
+
+    @Test
+    void testNestedTemplateFunctions() {
+        String input = "TEMPLATE(a,TEMPLATE(b,c))";
+        String output = TemplateRewriter.rewrite(input);
+        assertEquals("{{= paramOr('a', paramOr('b', 'c')) }}", output);
+    }
+
+    @Test
+    void testNestedShellVars() {
+        String input = "${a:${b:c}}";
+        String output = TemplateRewriter.rewrite(input);
+        assertEquals("{{= paramOr('a', paramOr('b', 'c')) }}", output);
+    }
+
+    @Test
+    void testMixedNestedTemplates() {
+        String input = "TEMPLATE(a,${b:c})";
+        String output = TemplateRewriter.rewrite(input);
+        assertEquals("{{= paramOr('a', paramOr('b', 'c')) }}", output);
+
+        String input2 = "${a:TEMPLATE(b,c)}";
+        String output2 = TemplateRewriter.rewrite(input2);
+        assertEquals("{{= paramOr('a', paramOr('b', 'c')) }}", output2);
+    }
+
     // ==================== Preserve Non-Template Content ====================
 
     @Test

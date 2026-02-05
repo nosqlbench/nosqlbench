@@ -19,6 +19,7 @@ package io.nosqlbench.nb.api.expr;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -51,7 +52,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>This serves as both a functional test and living documentation of the expr system's
  * capabilities.</p>
  */
-class ComprehensiveExprFeaturesIT {
+@Tag("unit")
+class ComprehensiveExprFeaturesIntegrationTest {
 
     private final GroovyExpressionProcessor processor = new GroovyExpressionProcessor();
     private String workload;
@@ -266,6 +268,13 @@ class ComprehensiveExprFeaturesIT {
     void shouldProcessExpressionResult() {
         assertTrue(processed.contains("expr_in_template_setup: 420"), "Should compute expression (10*42)");
         assertTrue(processed.contains("expr_in_template: 420"), "Should use computed value in template");
+    }
+
+    @Test
+    void shouldProcessNestedTemplatesRecursively() {
+        assertTrue(processed.contains("nested_template_func: default_nested_func"), "Should process nested TEMPLATE() calls");
+        assertTrue(processed.contains("nested_shell_var: default_nested_shell"), "Should process nested ${} calls");
+        assertTrue(processed.contains("mixed_nested_template: default_mixed"), "Should process mixed nested calls");
     }
 
     @Test
