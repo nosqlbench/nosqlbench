@@ -30,13 +30,12 @@ import java.util.function.Function;
  * a given adapter.
  */
 
-/// Any type implementing [[UniformVariableCapture]] will allow
-/// a caller to extract a map of names and values from it.
-/// The implementor of [[#capture(List)]] is responsible for extracting the dynamic values,
-/// but the caller is expected to use a standard component to do type verification
+/// Any type implementing [[UniformVariableCapture]] will allow a caller to extract a map of names and values from it.
+/// The implementor of [[#initCaptureF(List)]] is responsible for providing a function to extract dynamic values.
+/// This function will be cached in the runtime and used when needed.
 ///
 /// In cases where a type assertion is provided, the values captured dynamically will be subject to an
-/// additional phase of type validation and coercion. If required types are not compatible a
+/// additional phase of type validation and coercion. If required types are not compatible, a
 /// variable capture error should be thrown.
 public interface UniformVariableCapture<RESULT> {
     Function<RESULT,Map<String,?>> initCaptureF(CapturePoints<RESULT> points);

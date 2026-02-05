@@ -160,7 +160,7 @@ public final class TemplateRewriter {
             } else {
                 // TEMPLATE(key,default) with non-empty default
                 replacement = String.format("{{= paramOr('%s', %s) }}",
-                    key, quoteValue(defaultValue));
+                    key, quoteValue(rewrite(defaultValue)));
             }
 
             result.append(replacement);
@@ -217,39 +217,26 @@ public final class TemplateRewriter {
             // Append text before ${
             result.append(source, pos, matcher.start());
 
-            // Find the matching closing brace, accounting for nested {{ }} expressions
+            // Find the matching closing brace, accounting for nested ${ } and {{ }} expressions
             int startPos = matcher.end(); // Position after "${"
-            int braceDepth = 0; // Track nesting of {{ }} expressions
+            int braceDepth = 1; // Track nesting of { }
             int endPos = startPos;
             boolean foundColon = false;
             int colonPos = -1;
 
-            while (endPos < source.length()) {
+            while (endPos < source.length() && braceDepth > 0) {
                 char c = source.charAt(endPos);
 
-                // Check for start of expr reference {{
-                if (endPos < source.length() - 1 && c == '{' && source.charAt(endPos + 1) == '{') {
+                if (c == '{') {
                     braceDepth++;
-                    endPos += 2;
-                    continue;
-                }
-
-                // Check for end of expr reference }}
-                if (endPos < source.length() - 1 && c == '}' && source.charAt(endPos + 1) == '}') {
+                } else if (c == '}') {
                     braceDepth--;
-                    endPos += 2;
-                    continue;
-                }
-
-                // Only recognize : and } when not inside an expr reference
-                if (braceDepth == 0) {
-                    if (c == ':' && colonPos == -1) {
-                        foundColon = true;
-                        colonPos = endPos;
-                    } else if (c == '}') {
-                        // Found the closing brace
+                    if (braceDepth == 0) {
                         break;
                     }
+                } else if (c == ':' && braceDepth == 1 && colonPos == -1) {
+                    foundColon = true;
+                    colonPos = endPos;
                 }
 
                 endPos++;
@@ -281,7 +268,7 @@ public final class TemplateRewriter {
             } else {
                 // ${key:default} with default value
                 replacement = String.format("{{= paramOr('%s', %s) }}",
-                    key, quoteValue(defaultValue));
+                    key, quoteValue(rewrite(defaultValue)));
             }
 
             result.append(replacement);

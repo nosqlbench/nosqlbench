@@ -213,6 +213,15 @@ scenarios:
 
     # === SECTION 8: Complex Nested Expressions ===
 
+    # Nested TEMPLATE calls (pre-processor recursion)
+    nested_template_func: TEMPLATE(outer_func,TEMPLATE(inner_func,default_nested_func))
+
+    # Nested shell-style calls
+    nested_shell_var: ${outer_shell:${inner_shell:default_nested_shell}}
+
+    # Mixed nested calls
+    mixed_nested_template: TEMPLATE(mixed_outer,${mixed_inner:default_mixed})
+
     # Nested function calls
     nested_functions: {{= upper(paramOr('prefix', 'default')) + '_' + upper(paramOr('suffix', 'SUFFIX')) }}
 
