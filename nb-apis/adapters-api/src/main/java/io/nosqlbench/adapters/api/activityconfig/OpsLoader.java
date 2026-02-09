@@ -42,6 +42,7 @@ import java.io.PrintStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -209,6 +210,7 @@ public class OpsLoader {
             return Dryrun.valueOf(dryrunStr);
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid dryrun value: '" + dryrunStr + "', defaulting to 'none'");
+            logger.warn("Valid options are " + Arrays.toString(Dryrun.values()));
             return Dryrun.none;
         }
     }
