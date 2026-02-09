@@ -149,4 +149,25 @@ public class OpsLoaderTest {
         assertThat(result.getTemplateVariables()).containsKey("username");
     }
 
+    @Test
+    public void testTemplateProcessingDoesNotMutateParams() {
+        String yaml = """
+            ops:
+              - stmt: "value is TEMPLATE(cmd_line_param,theDefault)"
+            """;
+
+        Map<String, String> params = new HashMap<>();
+        params.put("cmd_line_param", "TheProvidedParameter");
+
+        OpsDocList first = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, params, null);
+        assertThat(params).containsEntry("cmd_line_param", "TheProvidedParameter");
+        assertThat(first.getStmtDocs().get(0).getOpTemplates().get(0).getStmt())
+            .hasValue("value is TheProvidedParameter");
+
+        OpsDocList second = OpsLoader.loadString(yaml, OpTemplateFormat.yaml, params, null);
+        assertThat(params).containsEntry("cmd_line_param", "TheProvidedParameter");
+        assertThat(second.getStmtDocs().get(0).getOpTemplates().get(0).getStmt())
+            .hasValue("value is TheProvidedParameter");
+    }
+
 }

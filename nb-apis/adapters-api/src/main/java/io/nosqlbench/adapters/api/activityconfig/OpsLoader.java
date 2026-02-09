@@ -76,14 +76,17 @@ public class OpsLoader {
         if (srcuri != null) {
             logger.info("workload URI: '" + srcuri + "'");
         }
-        Map<String, ?> expressionParams = params == null ? Map.of() : Map.copyOf(params);
+        // Defensive copy so template processing never mutates caller-owned params
+        Map<String, Object> mutableParams =
+            (params == null) ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(params);
+        Map<String, ?> expressionParams = Map.copyOf(mutableParams);
 
         // Use TemplateContext to automatically manage template state lifecycle
         try (TemplateContext ctx = TemplateContext.enter()) {
             // PHASE 1: Rewrite TEMPLATE syntax to expr function calls
             // This converts TEMPLATE(k,v) and ${key:value} to expr paramOr() calls
             String templateRewritten = switch (fmt) {
-                case jsonnet -> evaluateJsonnet(srcuri, params); // Jsonnet doesn't need template rewriting
+                case jsonnet -> evaluateJsonnet(srcuri, mutableParams); // Jsonnet doesn't need template rewriting
                 case yaml, json, inline, stmt -> TemplateRewriter.rewrite(sourceData);
             };
 
@@ -103,7 +106,6 @@ public class OpsLoader {
             Map<String, String> templateAccesses = ctx.getAccesses();
             templateAccesses.forEach((k, v) -> {
                 layered.addTemplateVariable(k, v);
-                params.remove(k);
             });
 
             return layered;

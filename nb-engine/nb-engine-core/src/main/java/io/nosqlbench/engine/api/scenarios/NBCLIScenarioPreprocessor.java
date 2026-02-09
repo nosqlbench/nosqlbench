@@ -128,7 +128,10 @@ public class NBCLIScenarioPreprocessor {
                 .first().orElseThrow();
 
             // TODO: The yaml needs to be parsed with arguments from each command independently to support template vars
-            OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, new LinkedHashMap<>(userProvidedParams));
+            // Avoid triggering dryrun modes during scenario parsing; these should apply to the final activity load
+            LinkedHashMap<String, String> paramsForScenarioParsing = new LinkedHashMap<>(userProvidedParams);
+            paramsForScenarioParsing.remove("dryrun");
+            OpsDocList scenariosYaml = OpsLoader.loadContent(yamlWithNamedScenarios, paramsForScenarioParsing);
             Scenarios scenarios = scenariosYaml.getDocScenarios();
 
             String[] nameparts = scenarioName.split("\\.",2);

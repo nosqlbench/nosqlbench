@@ -1,0 +1,11 @@
+scenarios:
+  the_scenario:
+    the_activity: run driver=stdout tags==block:the_block threads==1 cycles==1 cmd_line_param=TEMPLATE(cmd_line_param, firstone)
+blocks:
+  the_block:
+    ops:
+      the_only_op:
+        stmt: |
+          ================================================
+          The command-line-parameter is: "TEMPLATE(cmd_line_param, theDefault)".
+          ================================================
