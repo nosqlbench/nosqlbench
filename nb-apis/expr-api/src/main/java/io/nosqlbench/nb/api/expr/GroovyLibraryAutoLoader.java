@@ -161,22 +161,29 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
             return;
         }
 
-        List<Path> libraryFiles = findLibraryFiles(libraryPath);
+        try (Stream<Path> paths = Files.walk(libraryPath)) {
+            List<Path> libraryFiles = paths.filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".groovy"))
+                .toList();
 
-        if (libraryFiles.isEmpty()) {
-            LOGGER.debug("No Groovy library files found in: {}", libraryPath.toAbsolutePath());
-            return;
-        }
-
-        LOGGER.debug("Loading {} Groovy library file(s) from filesystem: {}", libraryFiles.size(), libraryPath.toAbsolutePath());
-
-        for (Path libraryFile : libraryFiles) {
-            try {
-                loadLibraryFile(shell, libraryFile);
-            } catch (Exception ex) {
-                LOGGER.error("Failed to load Groovy library: {}", libraryFile, ex);
-                throw new RuntimeException("Failed to load Groovy library: " + libraryFile, ex);
+            if (libraryFiles.isEmpty()) {
+                LOGGER.debug("No Groovy files found in: {}", libraryPath.toAbsolutePath());
+                return;
             }
+
+            for (Path libraryFile : libraryFiles) {
+                try {
+                    String content = Files.readString(libraryFile);
+                    if (content.contains(LIBRARY_MARKER)) {
+                        loadLibraryScript(shell, libraryFile.getFileName().toString(), content);
+                    }
+                } catch (Exception ex) {
+                    LOGGER.error("Failed to load Groovy library: {}", libraryFile, ex);
+                    throw new RuntimeException("Failed to load Groovy library: " + libraryFile, ex);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error scanning for Groovy libraries in: {}", libraryPath, e);
         }
     }
 
@@ -207,45 +214,87 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
      */
     private void loadLibrariesFromResource(GroovyShell shell, URL resource, String libraryDirPath) throws IOException, URISyntaxException {
         URI uri = resource.toURI();
-        Path libraryPath;
-        FileSystem fileSystem = null;
+        Map<String, String> scriptsToLoad = new LinkedHashMap<>();
 
-        try {
-            if (uri.getScheme().equals("jar")) {
-                // Resource is inside a JAR file
-                fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                libraryPath = fileSystem.getPath(libraryDirPath);
-            } else {
-                // Resource is in the regular filesystem (IDE/test environment)
-                libraryPath = Paths.get(uri);
-            }
-
-            List<Path> libraryFiles = findLibraryFiles(libraryPath);
-
-            if (libraryFiles.isEmpty()) {
-                LOGGER.debug("No library files found in classpath resource: {}", resource);
-                return;
-            }
-
-            LOGGER.debug("Loading {} Groovy library file(s) from classpath: {}", libraryFiles.size(), resource);
-
-            for (Path libraryFile : libraryFiles) {
-                try {
-                    loadLibraryFile(shell, libraryFile);
-                } catch (Exception ex) {
-                    LOGGER.error("Failed to load classpath library: {}", libraryFile, ex);
-                    throw new RuntimeException("Failed to load classpath library: " + libraryFile, ex);
+        synchronized (GroovyLibraryAutoLoader.class) {
+            FileSystem fileSystem = null;
+            boolean created = false;
+            try {
+                Path libraryPath;
+                if (uri.getScheme().equals("jar")) {
+                    // Resource is inside a JAR file
+                    try {
+                        fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                        created = true;
+                    } catch (FileSystemAlreadyExistsException e) {
+                        fileSystem = FileSystems.getFileSystem(uri);
+                        created = false;
+                    }
+                    libraryPath = fileSystem.getPath(libraryDirPath);
+                } else {
+                    // Resource is in the regular filesystem (IDE/test environment)
+                    libraryPath = Paths.get(uri);
                 }
-            }
-        } finally {
-            if (fileSystem != null) {
-                try {
-                    fileSystem.close();
-                } catch (IOException ex) {
-                    LOGGER.warn("Failed to close filesystem for: {}", uri, ex);
+
+                if (!Files.exists(libraryPath)) {
+                    return;
+                }
+
+                // Scan and read all library files while the filesystem is open (if JAR)
+                try (Stream<Path> paths = Files.walk(libraryPath)) {
+                    List<Path> candidates = paths.filter(Files::isRegularFile)
+                        .filter(path -> path.toString().endsWith(".groovy"))
+                        .toList();
+
+                    for (Path candidate : candidates) {
+                        String content = Files.readString(candidate);
+                        if (content.contains(LIBRARY_MARKER)) {
+                            scriptsToLoad.put(candidate.getFileName().toString(), content);
+                        }
+                    }
+                }
+            } finally {
+                if (created && fileSystem != null) {
+                    try {
+                        fileSystem.close();
+                    } catch (IOException ex) {
+                        LOGGER.warn("Failed to close filesystem for: {}", uri, ex);
+                    }
                 }
             }
         }
+
+        if (!scriptsToLoad.isEmpty()) {
+            LOGGER.debug("Loading {} Groovy library file(s) from classpath resource: {}", scriptsToLoad.size(), resource);
+            for (Map.Entry<String, String> entry : scriptsToLoad.entrySet()) {
+                try {
+                    loadLibraryScript(shell, entry.getKey(), entry.getValue());
+                } catch (Exception ex) {
+                    LOGGER.error("Failed to load classpath library script: {} from {}", entry.getKey(), resource, ex);
+                    throw new RuntimeException("Failed to load classpath library script: " + entry.getKey(), ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * Loads and executes a Groovy library script from its content.
+     */
+    private void loadLibraryScript(GroovyShell shell, String name, String content) {
+        LOGGER.debug("Loading Groovy library script: {}", name);
+
+        // Parse and evaluate the script - this makes the methods available in subsequent evaluations
+        // using the same GroovyShell/Binding
+        Script script = shell.parse(content, name);
+        script.run();
+
+        // Copy script methods to the binding so they're available for subsequent evaluations
+        copyScriptMethodsToBinding(script, shell.getContext());
+
+        // Extract metadata from the script class
+        extractMetadataFromScript(script.getClass(), name);
+
+        LOGGER.debug("Successfully loaded Groovy library script: {}", name);
     }
 
     /**
@@ -276,24 +325,23 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
             return;
         }
 
-        List<Path> libraryFiles = findLibraryFiles(libraryPath);
-
-        if (libraryFiles.isEmpty()) {
-            LOGGER.debug("No Groovy library files found in: {}", libraryPath.toAbsolutePath());
-            return;
-        }
-
-        LOGGER.debug("Loading {} Groovy library file(s) from: {}", libraryFiles.size(), libraryPath.toAbsolutePath());
-
         GroovyShell shell = new GroovyShell(binding, compilerConfiguration);
 
-        for (Path libraryFile : libraryFiles) {
-            try {
-                loadLibraryFileStatic(shell, libraryFile);
-            } catch (Exception ex) {
-                LOGGER.error("Failed to load Groovy library: {}", libraryFile, ex);
-                throw new RuntimeException("Failed to load Groovy library: " + libraryFile, ex);
-            }
+        try (Stream<Path> paths = Files.walk(libraryPath)) {
+            paths.filter(Files::isRegularFile)
+                 .filter(path -> path.toString().endsWith(".groovy"))
+                 .forEach(path -> {
+                     try {
+                         String content = Files.readString(path);
+                         if (content.contains(LIBRARY_MARKER)) {
+                             loadLibraryFileStatic(shell, path.getFileName().toString(), content);
+                         }
+                     } catch (IOException e) {
+                         LOGGER.error("Failed to load Groovy library: {}", path, e);
+                     }
+                 });
+        } catch (IOException ex) {
+            LOGGER.error("Error scanning for Groovy libraries in: {}", libraryPath, ex);
         }
     }
 
@@ -301,80 +349,10 @@ public class GroovyLibraryAutoLoader implements ExprFunctionProvider {
      * Static helper for loading a library file without extracting metadata.
      * Used by deprecated static methods.
      */
-    private static void loadLibraryFileStatic(GroovyShell shell, Path libraryFile) throws IOException {
-        LOGGER.debug("Loading Groovy library: {}", libraryFile);
-        String scriptContent = Files.readString(libraryFile);
-        shell.evaluate(scriptContent, libraryFile.getFileName().toString());
-        LOGGER.debug("Successfully loaded Groovy library: {}", libraryFile);
-    }
-
-    /**
-     * Finds all Groovy library files in the specified directory.
-     * A file is considered a library if it has a .groovy extension and contains
-     * the @Library marker.
-     *
-     * @param libraryPath the directory to search
-     * @return list of library file paths
-     */
-    private static List<Path> findLibraryFiles(Path libraryPath) {
-        List<Path> libraries = new ArrayList<>();
-
-        try (Stream<Path> paths = Files.walk(libraryPath)) {
-            paths.filter(Files::isRegularFile)
-                 .filter(path -> path.toString().endsWith(".groovy"))
-                 .filter(GroovyLibraryAutoLoader::isLibraryFile)
-                 .forEach(libraries::add);
-        } catch (IOException ex) {
-            LOGGER.error("Error scanning for Groovy libraries in: {}", libraryPath, ex);
-        }
-
-        return libraries;
-    }
-
-    /**
-     * Checks if a file is marked as a library by looking for the @Library marker.
-     *
-     * @param path the file to check
-     * @return true if the file contains the @Library marker
-     */
-    private static boolean isLibraryFile(Path path) {
-        try {
-            String content = Files.readString(path);
-            return content.contains(LIBRARY_MARKER);
-        } catch (IOException ex) {
-            LOGGER.warn("Could not read file to check for library marker: {}", path, ex);
-            return false;
-        }
-    }
-
-    /**
-     * Loads and executes a single Groovy library file, making its functions and
-     * variables available in the binding.
-     *
-     * <p>This method evaluates the library script, which makes any top-level
-     * method definitions available to subsequent scripts that share the same binding.</p>
-     *
-     * @param shell the Groovy shell to use for execution
-     * @param libraryFile the library file to load
-     * @throws IOException if the file cannot be read
-     */
-    private void loadLibraryFile(GroovyShell shell, Path libraryFile) throws IOException {
-        LOGGER.debug("Loading Groovy library: {}", libraryFile);
-
-        String scriptContent = Files.readString(libraryFile);
-
-        // Parse and evaluate the script - this makes the methods available in subsequent evaluations
-        // using the same GroovyShell/Binding
-        Script script = shell.parse(scriptContent, libraryFile.getFileName().toString());
-        script.run();
-
-        // Copy script methods to the binding so they're available for subsequent evaluations
-        copyScriptMethodsToBinding(script, shell.getContext());
-
-        // Extract metadata from the script class
-        extractMetadataFromScript(script.getClass(), libraryFile.getFileName().toString());
-
-        LOGGER.debug("Successfully loaded Groovy library: {}", libraryFile);
+    private static void loadLibraryFileStatic(GroovyShell shell, String name, String content) {
+        LOGGER.debug("Loading Groovy library: {}", name);
+        shell.evaluate(content, name);
+        LOGGER.debug("Successfully loaded Groovy library: {}", name);
     }
 
     /**
