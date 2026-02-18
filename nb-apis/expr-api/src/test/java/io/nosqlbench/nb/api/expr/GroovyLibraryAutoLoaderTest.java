@@ -17,6 +17,7 @@
 
 package io.nosqlbench.nb.api.expr;
 
+import groovy.lang.GroovyShell;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.Tag;
@@ -28,8 +29,20 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import java.io.FileOutputStream;
 
 /**
  * Tests for the Groovy library auto-loading functionality.
@@ -38,6 +51,75 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @Tag("unit")
 class GroovyLibraryAutoLoaderTest {
+
+    @Test
+    void shouldLoadLibraryFromJar(@TempDir Path tempDir) throws Exception {
+        // Create a JAR file with a library script
+        Path jarPath = tempDir.resolve("test-lib.jar");
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(jarPath.toFile()))) {
+            ZipEntry dirEntry = new ZipEntry("jar_lib/groovy/");
+            zos.putNextEntry(dirEntry);
+            zos.closeEntry();
+            
+            ZipEntry entry = new ZipEntry("jar_lib/groovy/jar_library.groovy");
+            zos.putNextEntry(entry);
+            zos.write("""
+                /* @Library */
+                def jarGreet(name) { return "Hello from JAR, ${name}!" }
+                """.getBytes());
+            zos.closeEntry();
+            zos.finish();
+        }
+
+        // Create a classloader that includes the JAR
+        URL baseJarUrl = jarPath.toUri().toURL();
+
+        try (URLClassLoader cl = new URLClassLoader(new URL[]{baseJarUrl}, null)) {
+            GroovyLibraryAutoLoader loader = new GroovyLibraryAutoLoader();
+            GroovyShell shell = new GroovyShell();
+
+            // Manually trigger the classpath loading logic with a simulated resource URL
+            java.lang.reflect.Method method = GroovyLibraryAutoLoader.class.getDeclaredMethod(
+                "loadLibrariesFromResource", GroovyShell.class, URL.class, String.class);
+            method.setAccessible(true);
+
+            URL resourceUrl = cl.getResource("jar_lib/groovy");
+            assertNotNull(resourceUrl, "Resource should be found in JAR");
+            assertTrue(resourceUrl.getProtocol().equals("jar"), "Resource URL should have jar protocol");
+            
+            method.invoke(loader, shell, resourceUrl, "jar_lib/groovy");
+
+            // Verify function is loaded
+            Object result = shell.evaluate("jarGreet('User')");
+            assertEquals("Hello from JAR, User!", result.toString());
+
+            // Test concurrent access to the same JAR resource
+            int threads = 10;
+            ExecutorService executor = Executors.newFixedThreadPool(threads);
+            CyclicBarrier barrier = new CyclicBarrier(threads);
+            AtomicInteger successCount = new AtomicInteger(0);
+
+            for (int i = 0; i < threads; i++) {
+                executor.submit(() -> {
+                    try {
+                        barrier.await();
+                        GroovyShell threadShell = new GroovyShell();
+                        method.invoke(loader, threadShell, resourceUrl, "jar_lib/groovy");
+                        Object res = threadShell.evaluate("jarGreet('Concurrent')");
+                        if ("Hello from JAR, Concurrent!".equals(res.toString())) {
+                            successCount.incrementAndGet();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS));
+            assertEquals(threads, successCount.get(), "All threads should successfully load and use the library from JAR");
+        }
+    }
 
     @Test
     void shouldLoadLibraryFunctionsFromDirectory(@TempDir Path tempDir) throws IOException {
