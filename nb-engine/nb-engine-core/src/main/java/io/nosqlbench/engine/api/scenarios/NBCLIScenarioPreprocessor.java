@@ -17,14 +17,14 @@
 package io.nosqlbench.engine.api.scenarios;
 
 import io.nosqlbench.adapters.api.activityconfig.OpsLoader;
+import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDoc;
+import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawOpsLoader;
+import io.nosqlbench.adapters.api.activityconfig.rawyaml.RawScenarios;
 import io.nosqlbench.adapters.api.activityconfig.yaml.OpsDocList;
 import io.nosqlbench.adapters.api.activityconfig.yaml.Scenarios;
 import io.nosqlbench.nb.api.expr.ExprPreprocessor;
-import io.nosqlbench.nb.api.expr.ProcessingResult;
-import io.nosqlbench.nb.api.expr.TemplateContext;
 import io.nosqlbench.nb.api.expr.TemplateRewriter;
-import io.nosqlbench.engine.cmdstream.Cmd;
 import io.nosqlbench.engine.cmdstream.CmdType;
 import io.nosqlbench.nb.api.nbio.Content;
 import io.nosqlbench.nb.api.nbio.NBIO;
@@ -33,9 +33,7 @@ import io.nosqlbench.nb.api.errors.BasicError;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -320,11 +318,27 @@ public class NBCLIScenarioPreprocessor {
         return parsedStep;
     }
 
+    /// Regex pattern for extracting TEMPLATE variable names and defaults from raw YAML text.
+    /// Handles nested parentheses in default values like `TEMPLATE(key,Uniform(0,1000))`.
+    private static final Pattern TEMPLATE_EXTRACT_PATTERN =
+        Pattern.compile("TEMPLATE\\(([^,)]+)(?:,([^)]*(?:\\([^)]*\\)[^)]*)*))\\)");
+
+    /// Filters workload candidates to those containing named scenarios, extracting
+    /// scenario names, descriptions, and TEMPLATE variable metadata.
+    ///
+    /// This method uses raw YAML parsing (no Groovy expression evaluation) to avoid
+    /// errors from VirtData binding functions that are not valid Groovy expressions.
+    /// TEMPLATE variables are extracted via regex on the raw text rather than through
+    /// the expression evaluation pipeline.
+    ///
+    /// @param candidates the list of workload content candidates to filter
+    /// @return a sorted list of workload descriptions for candidates that have scenarios
     public static List<WorkloadDesc> filterForScenarios(List<Content<?>> candidates) {
 
         List<Path> yamlPathList = candidates.stream().map(Content::asPath).toList();
 
         List<WorkloadDesc> workloadDescriptions = new ArrayList<>();
+        RawOpsLoader rawLoader = new RawOpsLoader();
 
         for (Path yamlPath : yamlPathList) {
 
@@ -345,10 +359,12 @@ public class NBCLIScenarioPreprocessor {
                     .pathname(referenced).extensionSet(RawOpsLoader.YAML_EXTENSIONS)
                     .one();
 
-                OpsDocList stmts = null;
+                // Parse raw YAML without template/expression evaluation to avoid
+                // Groovy errors from VirtData functions like Uniform(0,1000000000)
+                RawOpsDocList rawDocs;
                 try {
-                    stmts = OpsLoader.loadContent(content, new LinkedHashMap<>());
-                    if (stmts.getStmtDocs().isEmpty()) {
+                    rawDocs = rawLoader.loadString(content.get().toString());
+                    if (rawDocs.getOpsDocs().isEmpty()) {
                         logger.warn("Encountered yaml with no docs in '" + referenced + "'");
                         continue;
                     }
@@ -357,36 +373,37 @@ public class NBCLIScenarioPreprocessor {
                     continue;
                 }
 
+                // Extract scenario names and description from the raw parsed YAML
+                RawOpsDoc firstDoc = rawDocs.getOpsDocs().get(0);
+                RawScenarios rawScenarios = firstDoc.getRawScenarios();
+                List<String> scenarioNames = rawScenarios.getScenarioNames();
+
+                if (scenarioNames == null || scenarioNames.isEmpty()) {
+                    continue;
+                }
+
+                // Extract TEMPLATE variables and defaults via regex on raw text
+                // No Groovy evaluation needed — just pattern matching
+                String rawYamlText = content.get().toString();
                 Map<String, String> templates = new LinkedHashMap<>();
-                ExprPreprocessor templatePreprocessor = new ExprPreprocessor();
-                try (TemplateContext ctx = TemplateContext.enter()) {
-                    String yamlContent = Files.readString(yamlPath);
-                    // Rewrite TEMPLATE syntax first
-                    String rewritten = TemplateRewriter.rewrite(yamlContent);
-                    // Process with context to track template variable accesses
-                    ProcessingResult result = templatePreprocessor.processWithContext(rewritten, yamlPath.toUri(), Map.of());
-                    // Get tracked template variable accesses
-                    templates = ctx.getAccesses();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                Matcher templateMatcher = TEMPLATE_EXTRACT_PATTERN.matcher(rawYamlText);
+                while (templateMatcher.find()) {
+                    String varName = templateMatcher.group(1).trim();
+                    String defaultValue = templateMatcher.group(2) != null
+                        ? templateMatcher.group(2).trim() : "";
+                    // Only store the first default seen for each variable
+                    templates.putIfAbsent(varName, defaultValue);
                 }
-                Scenarios scenarios = stmts.getDocScenarios();
 
-                List<String> scenarioNames = scenarios.getScenarioNames();
-
-                if (scenarioNames != null && !scenarioNames.isEmpty()) {
-//                String path = yamlPath.toString();
-//                path = path.startsWith(FileSystems.getDefault().getSeparator()) ? path.substring(1) : path;
-                    LinkedHashMap<String, String> sortedTemplates = new LinkedHashMap<>();
-                    ArrayList<String> keyNames = new ArrayList<>(templates.keySet());
-                    Collections.sort(keyNames);
-                    for (String keyName : keyNames) {
-                        sortedTemplates.put(keyName, templates.get(keyName));
-                    }
-
-                    String description = stmts.getDescription();
-                    workloadDescriptions.add(new WorkloadDesc(referenced, scenarioNames, sortedTemplates, description, ""));
+                LinkedHashMap<String, String> sortedTemplates = new LinkedHashMap<>();
+                ArrayList<String> keyNames = new ArrayList<>(templates.keySet());
+                Collections.sort(keyNames);
+                for (String keyName : keyNames) {
+                    sortedTemplates.put(keyName, templates.get(keyName));
                 }
+
+                String description = firstDoc.getDesc();
+                workloadDescriptions.add(new WorkloadDesc(referenced, scenarioNames, sortedTemplates, description, ""));
             } catch (Exception e) {
                 throw new RuntimeException("Error while scanning path '" + yamlPath.toString() + "':" + e.getMessage(), e);
             }

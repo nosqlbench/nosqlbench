@@ -78,7 +78,9 @@ class TemplateRewriterTest {
         String input = "bind: TEMPLATE(keydist,Uniform(0,1000000000))";
         String output = TemplateRewriter.rewrite(input);
 
-        assertEquals("bind: {{= paramOr('keydist', Uniform(0,1000000000)) }}", output);
+        // VirtData functions like Uniform() should be quoted as string literals,
+        // not left unquoted (which would cause Groovy to try evaluating them)
+        assertEquals("bind: {{= paramOr('keydist', 'Uniform(0,1000000000)') }}", output);
     }
 
     @Test
@@ -86,7 +88,8 @@ class TemplateRewriterTest {
         String input = "rw_key: TEMPLATE(keydist,Uniform(0,1000000000)); ToString()";
         String output = TemplateRewriter.rewrite(input);
 
-        assertEquals("rw_key: {{= paramOr('keydist', Uniform(0,1000000000)) }}; ToString()", output);
+        // VirtData functions should be quoted as string literals
+        assertEquals("rw_key: {{= paramOr('keydist', 'Uniform(0,1000000000)') }}; ToString()", output);
     }
 
     @Test
@@ -110,7 +113,8 @@ class TemplateRewriterTest {
         String input = "seq_key: TEMPLATE(keyCount,Mod(1000000); ToString())";
         String output = TemplateRewriter.rewrite(input);
 
-        assertEquals("seq_key: {{= paramOr('keyCount', Mod(1000000); ToString()) }}", output);
+        // VirtData functions should be quoted as string literals
+        assertEquals("seq_key: {{= paramOr('keyCount', 'Mod(1000000); ToString()') }}", output);
     }
 
     @Test
@@ -280,6 +284,43 @@ class TemplateRewriterTest {
         String output = TemplateRewriter.rewrite(input);
 
         assertEquals("result: {{= paramOr('result', a * b) }}", output);
+    }
+
+    // ==================== VirtData with Nested Expressions Tests ====================
+
+    @Test
+    void testVirtDataWithNestedTemplate() {
+        // TEMPLATE(keydist,Uniform(0,TEMPLATE(keycount,1000000000)))
+        // Inner TEMPLATE rewrites first to: Uniform(0,{{= paramOr('keycount', 1000000000) }})
+        // This contains VirtData text AND {{...}}, so quoteValue produces a concatenation expr
+        String input = "bind: TEMPLATE(keydist,Uniform(0,TEMPLATE(keycount,1000000000)))";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals(
+            "bind: {{= paramOr('keydist', 'Uniform(0,' + paramOr('keycount', 1000000000) + ')') }}",
+            output
+        );
+    }
+
+    @Test
+    void testVirtDataArrowWithNestedTemplate() {
+        // VirtData chain with -> AND nested TEMPLATE produces a concatenation expr
+        String input = "bind: TEMPLATE(keydist,Uniform(0,TEMPLATE(keycount,10000000))->int)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals(
+            "bind: {{= paramOr('keydist', 'Uniform(0,' + paramOr('keycount', 10000000) + ')->int') }}",
+            output
+        );
+    }
+
+    @Test
+    void testPlainArrowQuotedAsString() {
+        // Plain VirtData chain with -> but no expressions should be quoted as string
+        String input = "bind: TEMPLATE(dist,Uniform(0,1000)->int)";
+        String output = TemplateRewriter.rewrite(input);
+
+        assertEquals("bind: {{= paramOr('dist', 'Uniform(0,1000)->int') }}", output);
     }
 
     // ==================== Nested Template Tests ====================

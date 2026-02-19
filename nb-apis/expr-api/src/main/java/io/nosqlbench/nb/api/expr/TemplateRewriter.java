@@ -285,12 +285,18 @@ public final class TemplateRewriter {
      *
      * <p>This method intelligently handles different value types:</p>
      * <ul>
+     *   <li>Values that are entirely a single {@code {{= expr }}} expression are unwrapped
+     *       and returned unquoted (the expression came from rewriting, e.g. nested TEMPLATE)</li>
+     *   <li>Values containing {@code {{...}}} mixed with other text are converted to Groovy
+     *       GString interpolation, allowing the expr parts to evaluate while surrounding
+     *       text (like VirtData functions) is treated as a literal string</li>
+     *   <li>VirtData binding chains containing {@code ->} with embedded {@code {{...}}} are
+     *       converted to GString</li>
+     *   <li>VirtData binding chains containing {@code ->} without expressions are quoted as strings</li>
      *   <li>Numeric literals (integers, floats) are returned unquoted</li>
      *   <li>Boolean literals are returned unquoted</li>
-     *   <li>Expr function calls (containing parentheses) are returned unquoted</li>
-     *   <li>Expr references (already using {{}} syntax) are unwrapped to avoid nesting</li>
-     *   <li>VirtData binding chains (containing ->) are quoted as strings</li>
-     *   <li>All other strings are single-quoted with proper escaping</li>
+     *   <li>All other strings (including VirtData function calls like {@code Uniform(0,1000)})
+     *       are single-quoted as string literals</li>
      * </ul>
      *
      * @param value the value to quote
@@ -301,55 +307,137 @@ public final class TemplateRewriter {
             return "''";
         }
 
-        // Check if it contains VirtData binding chain syntax (->)
-        // This should be treated as a string, not an expression
-        if (value.contains("->")) {
+        boolean hasExprRef = value.contains("{{") && value.contains("}}");
+        boolean hasArrow = value.contains("->");
+
+        // Case: contains -> AND embedded {{...}} expressions — use GString interpolation
+        // so Groovy evaluates the expr parts while treating VirtData text as literal string
+        if (hasArrow && hasExprRef) {
+            return toGString(value);
+        }
+
+        // Case: contains -> but NO expressions — plain VirtData chain, quote as string
+        if (hasArrow) {
             return "'" + value.replace("'", "\\'") + "'";
         }
 
-        // Check if it contains expr references - unwrap to avoid nested delimiters
-        // Transform {{=expression}} to just expression
-        boolean hadExprReference = value.contains("{{") && value.contains("}}");
-        if (hadExprReference) {
-            value = unwrapExprReference(value);
-            // Continue with other checks to see if unwrapped value needs quoting
+        // Case: contains expr references
+        if (hasExprRef) {
+            String unwrapped = unwrapExprReference(value);
+
+            // If the ENTIRE value was a single {{= expr }}, the unwrapped result is
+            // a pure expression (e.g. paramOr(...)) — return unquoted
+            if (isEntireSingleExpr(value)) {
+                return unwrapped;
+            }
+
+            // Mixed text + expressions — check if unwrapping produced something evaluable
+            // After unwrapping, if it contains function calls it came from expr rewriting
+            if (unwrapped.contains("(") && unwrapped.contains(")")) {
+                // Check if the original had non-expr text around the {{...}} blocks
+                // If so, use GString to preserve the literal parts
+                String textOnly = value.replaceAll("\\{\\{\\s*=?\\s*.+?\\s*\\}\\}", "").trim();
+                if (!textOnly.isEmpty()) {
+                    return toGString(value);
+                }
+                return unwrapped;
+            }
+
+            // Simple identifier or expression with operators — return unquoted
+            if (unwrapped.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
+                return unwrapped;
+            }
+            if (unwrapped.matches(".*[+\\-*/|&<>=!].*")) {
+                return unwrapped;
+            }
+
+            // Otherwise quote the unwrapped text
+            return "'" + unwrapped.replace("'", "\\'") + "'";
         }
 
-        // Check if it's a numeric literal (integer or float)
+        // No expr references from here on — plain values
+
+        // Numeric literal (integer or float)
         if (value.matches("^-?\\d+(\\.\\d+)?$")) {
             return value;
         }
 
-        // Check if it's a boolean literal
+        // Boolean literal
         if (value.equals("true") || value.equals("false")) {
             return value;
         }
 
-        // Check if it contains function call syntax (likely an expr function)
-        if (value.contains("(") && value.contains(")")) {
-            return value;
-        }
-
-        // If we unwrapped an expr reference, check if the result needs quoting
-        if (hadExprReference) {
-            // Check if it looks like a simple identifier (variable name)
-            // Simple identifiers: letters, numbers, underscores - no spaces or special chars
-            if (value.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
-                return value;
-            }
-
-            // Check if it looks like an expression with operators
-            // If it contains expr operators, treat it as an expression (don't quote)
-            if (value.matches(".*[+\\-*/|&<>=!].*")) {
-                return value;
-            }
-
-            // Otherwise (mixed text like "prefix name suffix"), quote it
-            return "'" + value.replace("'", "\\'") + "'";
-        }
-
-        // For values that didn't have expr references, quote them as strings
+        // Everything else is a string literal (including VirtData functions like Uniform(0,1000))
         return "'" + value.replace("'", "\\'") + "'";
+    }
+
+    /**
+     * Check whether the value is entirely a single {@code {{= expr }}} expression
+     * with no surrounding text.
+     *
+     * @param value the value to check
+     * @return true if the value is a single complete expr reference
+     */
+    private static boolean isEntireSingleExpr(String value) {
+        return value.matches("^\\{\\{\\s*=?\\s*.+?\\s*\\}\\}$");
+    }
+
+    /**
+     * Convert a value containing embedded {@code {{= expr }}} references into a Groovy
+     * string concatenation expression.
+     *
+     * <p>This allows Groovy to evaluate the inner expr function calls (like {@code paramOr()})
+     * while treating the surrounding text (like VirtData function names) as literal string content.
+     * Uses string concatenation ({@code +}) rather than GString interpolation ({@code ${...}})
+     * to avoid conflicts with the shell-variable rewriter which also matches {@code ${...}}.</p>
+     *
+     * <p>Example transformations:</p>
+     * <pre>
+     * Input:  Uniform(0,{{= paramOr('keycount', 1000000000) }})
+     * Output: 'Uniform(0,' + paramOr('keycount', 1000000000) + ')'
+     *
+     * Input:  Uniform(0,{{= paramOr('k', 1000) }})->int
+     * Output: 'Uniform(0,' + paramOr('k', 1000) + ')->int'
+     * </pre>
+     *
+     * @param value the value containing embedded expr references
+     * @return a Groovy string concatenation expression
+     */
+    private static String toGString(String value) {
+        Pattern exprPattern = Pattern.compile("\\{\\{\\s*=?\\s*(.+?)\\s*\\}\\}", Pattern.DOTALL);
+        Matcher matcher = exprPattern.matcher(value);
+
+        // Split the value into literal segments and expression segments,
+        // then build: 'literal1' + expr1 + 'literal2' + expr2 + 'literal3'
+        StringBuilder result = new StringBuilder();
+        int lastEnd = 0;
+        boolean first = true;
+
+        while (matcher.find()) {
+            String literal = value.substring(lastEnd, matcher.start());
+            String expression = matcher.group(1).trim();
+
+            if (!literal.isEmpty()) {
+                if (!first) result.append(" + ");
+                result.append("'").append(literal.replace("'", "\\'")).append("'");
+                first = false;
+            }
+
+            if (!first) result.append(" + ");
+            result.append(expression);
+            first = false;
+
+            lastEnd = matcher.end();
+        }
+
+        // Append any trailing literal text
+        String trailing = value.substring(lastEnd);
+        if (!trailing.isEmpty()) {
+            if (!first) result.append(" + ");
+            result.append("'").append(trailing.replace("'", "\\'")).append("'");
+        }
+
+        return result.toString();
     }
 
     /**
