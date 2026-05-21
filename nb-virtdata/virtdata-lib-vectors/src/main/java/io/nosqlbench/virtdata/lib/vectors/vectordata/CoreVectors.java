@@ -21,7 +21,7 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
 import io.nosqlbench.nbdatatools.api.concurrent.ProgressIndicatingFuture;
 import io.nosqlbench.vectordata.VectorTestData;
 import io.nosqlbench.vectordata.discovery.ProfileSelector;
-import io.nosqlbench.vectordata.discovery.TestDataView;
+import io.nosqlbench.vectordata.discovery.vector.TestDataView;
 import io.nosqlbench.vectordata.downloader.Catalog;
 import io.nosqlbench.vectordata.downloader.DatasetEntry;
 import io.nosqlbench.vectordata.spec.datasets.types.DatasetView;

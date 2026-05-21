@@ -23,7 +23,7 @@ import io.nosqlbench.nb.api.expr.ExprFunctionProvider;
 import io.nosqlbench.nb.api.expr.annotations.ExprExample;
 import io.nosqlbench.nb.api.expr.annotations.ExprFunctionSpec;
 import io.nosqlbench.vectordata.VectorTestData;
-import io.nosqlbench.vectordata.discovery.TestDataView;
+import io.nosqlbench.vectordata.discovery.vector.TestDataView;
 import io.nosqlbench.vectordata.spec.datasets.types.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
