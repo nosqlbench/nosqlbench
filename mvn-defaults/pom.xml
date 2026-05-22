@@ -25,7 +25,6 @@
     <packaging>pom</packaging>
 
     <properties>
-
         <revision>5.25.8-SNAPSHOT</revision>
         <!-- Set this level to override the logging level for tests during build -->
         <project.testlevel>INFO</project.testlevel>

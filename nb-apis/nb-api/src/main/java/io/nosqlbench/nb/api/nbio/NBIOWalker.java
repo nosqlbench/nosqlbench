@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
@@ -85,6 +86,9 @@ public class NBIOWalker {
         } catch (AccessDeniedException ade) {
             logger.debug("Access denied while walking '{}', skipping.", p);
             return;
+        } catch (NoSuchFileException nsfe) {
+            logger.debug("Directory '{}' disappeared during walk, skipping.", p);
+            return;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -106,6 +110,8 @@ public class NBIOWalker {
                 }
             } catch (AccessDeniedException ade) {
                 logger.debug("Access denied while reading attributes for '{}', skipping.", path);
+            } catch (NoSuchFileException nsfe) {
+                logger.debug("Skipping dangling or vanished entry '{}'.", path);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
