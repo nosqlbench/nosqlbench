@@ -18,6 +18,7 @@ on:
 jobs:
   release-build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     outputs:
       release_version: ${{ steps.versions.outputs.RELEASE_VERSION }}
       release_version_numeric: ${{ steps.versions.outputs.RELEASE_VERSION_NUMERIC }}

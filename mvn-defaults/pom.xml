@@ -562,6 +562,7 @@
                 <configuration>
                     <!--   <argLine>-ea @{argLine}</argLine> -->
 <!--                    <argLine>&#45;&#45;enable-preview @{argLine}</argLine>-->
+                    <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
                     <systemPropertyVariables>
                         <Log4jContextSelector>
                             org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
