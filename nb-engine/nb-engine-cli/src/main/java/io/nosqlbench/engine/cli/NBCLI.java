@@ -92,6 +92,12 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
     private String sessionName;
     private String sessionCode;
     private long sessionTime;
+    /**
+     * User-configured base labels (jobname/instance/node plus any --add-labels).
+     * These seed the root NBBaseComponent for the session — they are NOT child labels.
+     * Do not re-pass these as `extraLabels` to any component constructed under the session;
+     * doing so causes a parent/child label overlap. See MapLabels#and.
+     */
     private NBLabels labels;
 
 
@@ -512,7 +518,7 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
             options.wantsReportCsvTo().ifPresent(cfg -> {
                 MetricInstanceFilter filter = new MetricInstanceFilter();
                 filter.addPattern(cfg.pattern);
-                new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter, getLabels());
+                new CsvReporter(session, Path.of(cfg.file), cfg.millis, filter);
             });
 
             options.wantsReportSqliteTo().ifPresent(cfg -> {
@@ -573,6 +579,19 @@ public class NBCLI implements Function<String[], Integer>, NBLabeledElement {
         return basicHelp;
     }
 
+    /**
+     * Returns the user-configured base labels (jobname/instance/node plus any --add-labels)
+     * that will seed the root NBBaseComponent for the session.
+     *
+     * Provided so that pre-session activities — e.g. session-layer annotations recorded before
+     * the component tree is constructed — can be tagged with the same identifying labels that
+     * will subsequently appear on the session root.
+     *
+     * These labels are *foundational*: they are owned by the root component once the session
+     * is instanced. They MUST NOT be re-passed as `extraLabels` to any component constructed
+     * under the session, since that would violate the parent/child non-overlap invariant
+     * enforced by MapLabels#and.
+     */
     @Override
     public NBLabels getLabels() {
         return labels;

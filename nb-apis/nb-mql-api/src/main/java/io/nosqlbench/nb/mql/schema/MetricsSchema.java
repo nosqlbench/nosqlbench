@@ -63,6 +63,7 @@ public class MetricsSchema {
     public static final String TABLE_SAMPLE_QUANTILE = "sample_quantile";
     public static final String TABLE_SAMPLE_RATE = "sample_rate";
     public static final String TABLE_SAMPLE_HISTOGRAM = "sample_histogram";
+    public static final String TABLE_SAMPLE_STATISTICS = "sample_statistics";
     public static final String TABLE_LABEL_KEY = "label_key";
     public static final String TABLE_LABEL_VALUE = "label_value";
     public static final String TABLE_LABEL_SET = "label_set";
@@ -109,6 +110,13 @@ public class MetricsSchema {
     public static final String COL_SH_INTERVAL_SECONDS = "interval_seconds";
     public static final String COL_SH_MAX_VALUE = "max_value";
     public static final String COL_SH_HISTOGRAM_BASE64 = "histogram_base64";
+
+    // sample_statistics columns (min/max/mean/stddev for each summary/timer sample)
+    public static final String COL_SS_SAMPLE_VALUE_ID = "sample_value_id";
+    public static final String COL_SS_MIN_VALUE = "min_value";
+    public static final String COL_SS_MAX_VALUE = "max_value";
+    public static final String COL_SS_MEAN_VALUE = "mean_value";
+    public static final String COL_SS_STDDEV_VALUE = "stddev_value";
 
     // label_key columns
     public static final String COL_LK_ID = "id";

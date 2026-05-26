@@ -718,6 +718,17 @@
                         <exclude>**/generated/**</exclude>
                         <exclude>**/jmh_generated/**</exclude>
                         <exclude>**/generated-sources/**</exclude>
+                        <!--
+                          Repo-root staging dirs that may symlink to or contain external sources.
+                          NOTE: in apache-rat-plugin 0.15 these excludes are report-level filters,
+                          not directory-tree prunes — the walk still descends and can take minutes
+                          when `links/` symlinks at an external repo. The root pom carries
+                          `<skip>true</skip>` to actually stop the walk at the aggregator level;
+                          these entries are belt-and-braces in case a module accumulates content
+                          under these names directly.
+                        -->
+                        <exclude>links/**</exclude>
+                        <exclude>local/**</exclude>
                     </excludes>
                     <addLicenseHeaders>true</addLicenseHeaders>
                     <copyrightMessage>Copyright (c) nosqlbench</copyrightMessage>

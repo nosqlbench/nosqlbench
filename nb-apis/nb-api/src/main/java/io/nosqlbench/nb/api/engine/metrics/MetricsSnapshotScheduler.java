@@ -278,6 +278,40 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         processSnapshot(view);
     }
 
+    /// Synchronously capture and dispatch a snapshot to all registered consumers — same
+    /// semantics as a periodic tick, but on the calling thread. Used at activity-completion
+    /// time so the final state of an activity's metrics is delivered to consumers (e.g. the
+    /// session SQLite reporter) **before** the activity detaches from the component tree.
+    /// Without this, short runs (where no periodic tick fires before completion) leave
+    /// activity-level metrics out of the SQLite database entirely.
+    ///
+    /// Unlike a periodic tick, this **bypasses the per-consumer interval bucketing** and
+    /// emits the captured view directly to every registered consumer. Otherwise a single
+    /// trigger would only contribute the base-interval amount toward each consumer's
+    /// accumulated time and consumers with longer intervals (e.g. SQLite at 30s vs CSV at
+    /// 5s) would still wait for their normal bucket boundary — defeating the point of the
+    /// final flush.
+    public void triggerSnapshot() {
+        if (consumerIntervals.isEmpty()) {
+            return;
+        }
+        List<NBMetric> metrics = new ArrayList<>(getParent().find().metrics());
+        if (metrics.isEmpty()) {
+            return;
+        }
+        boolean includeHdrPayload = consumerIntervals.keySet().stream()
+            .anyMatch(MetricsSnapshotConsumer::requiresHdrPayload);
+        MetricsView snapshot = MetricsView.capture(metrics, baseIntervalMillis, includeHdrPayload);
+        for (MetricsSnapshotConsumer consumer : consumerIntervals.keySet()) {
+            try {
+                consumer.onMetricsSnapshot(snapshot);
+            } catch (Exception e) {
+                logger.warn("Final-snapshot consumer {} threw exception",
+                    consumer.getClass().getSimpleName(), e);
+            }
+        }
+    }
+
     private void processSnapshot(MetricsView view) {
         if (view == null) {
             return;

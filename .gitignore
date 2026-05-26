@@ -25,3 +25,4 @@ bin/**
 **/.flattened-pom.xml
 **/stargate-token.txt
 /deptree.txt
+/links

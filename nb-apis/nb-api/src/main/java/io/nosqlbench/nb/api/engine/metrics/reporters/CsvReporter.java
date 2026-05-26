@@ -54,6 +54,7 @@ public class CsvReporter extends MetricsSnapshotReporterBase {
     private final long durationFactor;
     private final long rateFactor;
     private Map<Path, PrintWriter> outstreams = new HashMap<>();
+    private CsvMetricsFilesManifest manifest;
 
     public CsvReporter(NBComponent node, Path reportTo, long intervalMs, MetricInstanceFilter filter,
                        NBLabels extraLabels) {
@@ -80,7 +81,7 @@ public class CsvReporter extends MetricsSnapshotReporterBase {
                 throw new RuntimeException(e);
             }
         }
-
+        this.manifest = new CsvMetricsFilesManifest(reportTo);
     }
 
     public CsvReporter(NBComponent node, Path reportTo, long intervalMs, MetricInstanceFilter filter) {
@@ -93,6 +94,7 @@ public class CsvReporter extends MetricsSnapshotReporterBase {
         NBLabels commonLabels = computeCommonLabels(view);
         logger.info("Factoring out common labels for CSV metrics logging: " + commonLabels.linearizeAsMetrics());
 
+        long timestampMs = view.capturedAtEpochMillis();
         for (MetricFamily family : view.families()) {
             for (Sample sample : family.samples()) {
                 NBLabels diff = sample.labels().difference(commonLabels);
@@ -101,18 +103,28 @@ public class CsvReporter extends MetricsSnapshotReporterBase {
                 if (!filter.matches(handle, sample.labels())) {
                     continue;
                 }
+                String sampleType;
                 switch (sample) {
-                    case PointSample pointSample -> reportGauge(timestampSeconds, name, pointSample);
-                    case MeterSample meterSample -> reportMeter(timestampSeconds, name, meterSample);
+                    case PointSample pointSample -> {
+                        reportGauge(timestampSeconds, name, pointSample);
+                        sampleType = "gauge";
+                    }
+                    case MeterSample meterSample -> {
+                        reportMeter(timestampSeconds, name, meterSample);
+                        sampleType = "meter";
+                    }
                     case SummarySample summarySample -> {
                         if (summarySample.rates() != null) {
                             reportTimer(timestampSeconds, name, summarySample);
+                            sampleType = "timer";
                         } else {
                             reportHistogram(timestampSeconds, name, summarySample);
+                            sampleType = "histogram";
                         }
                     }
                     default -> throw new RuntimeException("Unrecognized metric sample type to report '" + sample.getClass().getSimpleName() + "'");
                 }
+                manifest.recordIfChanged(sample.labels(), name + ".csv", sampleType, timestampMs);
             }
         }
     }

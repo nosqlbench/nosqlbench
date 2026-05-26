@@ -17,6 +17,7 @@ package io.nosqlbench.engine.core.lifecycle.activity;
 
 import com.codahale.metrics.Gauge;
 import io.nosqlbench.engine.core.lifecycle.IndexedThreadFactory;
+import io.nosqlbench.nb.api.engine.metrics.MetricsSnapshotScheduler;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricGauge;
 import io.nosqlbench.nb.api.labels.NBLabeledElement;
@@ -443,7 +444,23 @@ public class ActivityExecutor implements NBLabeledElement, ParameterMap.Listener
                 this.exception = e;
             } finally {
                 stoppedAt = System.currentTimeMillis();
-                // TODO: close out metrics outputs on component tree if needed
+                // Capture a final snapshot of this activity's metrics — including per-op
+                // dispenser-level instrumentation — *before* any close/shutdown machinery
+                // begins to dismantle the tree. `closeAutoCloseables` and `close` both
+                // detach op dispensers and other children whose metrics we want to record
+                // one last time. Without this, short runs (finishing before the snapshot
+                // scheduler's periodic tick) leave activity-level metrics out of the
+                // session SQLite database — the session's teardown-time flush would only
+                // see what's still attached, which by then is just system gauges.
+                MetricsSnapshotScheduler scheduler = MetricsSnapshotScheduler.lookup(activity);
+                if (scheduler != null) {
+                    try {
+                        scheduler.triggerSnapshot();
+                    } catch (Exception flushErr) {
+                        logger.warn(() -> "Failed to capture final activity snapshot for '"
+                            + activity.getAlias() + "': " + flushErr);
+                    }
+                }
                 activity.shutdownActivity();
                 activity.closeAutoCloseables();
                 activity.close();

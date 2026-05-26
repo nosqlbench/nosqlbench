@@ -72,6 +72,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
     private final PreparedStatement insertSample;
     private final PreparedStatement insertSampleQuantile;
     private final PreparedStatement insertSampleRate;
+    private final PreparedStatement insertSampleStatistics;
     private final PreparedStatement insertSampleHistogram;
     private final PreparedStatement insertLabel;
     private final PreparedStatement insertLabelValue;
@@ -138,6 +139,11 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
             this.insertSampleRate = connection.prepareStatement("""
                 INSERT INTO sample_rate(sample_value_id, rate_type, rate_value)
                 VALUES (?, ?, ?)
+            """);
+            this.insertSampleStatistics = connection.prepareStatement("""
+                INSERT OR REPLACE INTO sample_statistics(
+                    sample_value_id, min_value, max_value, mean_value, stddev_value
+                ) VALUES (?, ?, ?, ?, ?)
             """);
             this.insertSampleHistogram = includeHistograms
                 ? connection.prepareStatement("""
@@ -322,6 +328,16 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
                 )
             """);
             stmt.execute("""
+                CREATE TABLE IF NOT EXISTS sample_statistics (
+                    sample_value_id INTEGER PRIMARY KEY,
+                    min_value REAL,
+                    max_value REAL,
+                    mean_value REAL,
+                    stddev_value REAL,
+                    FOREIGN KEY(sample_value_id) REFERENCES sample_value(id)
+                )
+            """);
+            stmt.execute("""
                 CREATE TABLE IF NOT EXISTS sample_histogram (
                     sample_value_id INTEGER PRIMARY KEY,
                     start_seconds REAL NOT NULL,
@@ -356,6 +372,17 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
 
     @Override
     public void onMetricsSnapshot(MetricsView view) {
+        // The snapshot scheduler can fire one more tick after the reporter has been closed by
+        // session teardown — there's a small window between connection.close() and the
+        // scheduler's unregister call. Detect that and return silently rather than emitting
+        // a noisy "database connection closed" stack trace.
+        try {
+            if (connection.isClosed()) {
+                return;
+            }
+        } catch (SQLException ignored) {
+            return;
+        }
         long epochMillis = view.capturedAtEpochMillis();
         try {
             for (MetricFamily family : view.families()) {
@@ -379,7 +406,9 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
             connection.commit();
         } catch (SQLException e) {
             try {
-                connection.rollback();
+                if (!connection.isClosed()) {
+                    connection.rollback();
+                }
             } catch (SQLException rollback) {
                 logger.error("Failed to rollback after error.", rollback);
             }
@@ -639,6 +668,7 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
 
     private void writeSummaryDetails(long sampleId, SummarySample sample)	throws SQLException {
         writeHistogramEncoding(sampleId, sample);
+        writeStatistics(sampleId, sample);
         for (Map.Entry<Double, Double> entry : sample.quantiles().entrySet()) {
             insertSampleQuantile.setLong(1, sampleId);
             insertSampleQuantile.setDouble(2, entry.getKey());
@@ -667,6 +697,19 @@ public class SqliteSnapshotReporter extends MetricsSnapshotReporterBase {
             insertSampleRate.setDouble(3, rates.fifteenMinute());
             insertSampleRate.executeUpdate();
         }
+    }
+
+    /// Persist the per-sample summary statistics (min/max/mean/stddev) alongside the existing
+    /// per-sample quantiles. Without this, downstream consumers had no way to recover c-stress-
+    /// equivalent `mean` and `max` latencies without re-enabling full HDR histogram storage.
+    private void writeStatistics(long sampleId, SummarySample sample) throws SQLException {
+        var stats = sample.statistics();
+        insertSampleStatistics.setLong(1, sampleId);
+        insertSampleStatistics.setDouble(2, stats.min());
+        insertSampleStatistics.setDouble(3, stats.max());
+        insertSampleStatistics.setDouble(4, stats.mean());
+        insertSampleStatistics.setDouble(5, stats.stddev());
+        insertSampleStatistics.executeUpdate();
     }
 
     private void writeHistogramEncoding(long sampleId, SummarySample sample) throws SQLException {

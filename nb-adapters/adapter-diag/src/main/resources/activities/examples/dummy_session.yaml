@@ -1,0 +1,69 @@
+min_version: "5.25.0"
+
+description: |
+  Synthetic dummy session generator — emits realistic per-op latency, count, and error
+  metrics without requiring any target system. Useful for experimenting with the metrics
+  pipeline, MQL queries against the SQLite snapshot DB, and the stress-report bundled app.
+
+  Each op runs only diag tasks: a `cycledelay` for per-cycle synthetic latency (giving each
+  op its own latency distribution via the binding recipe) and an `errormodulo` for a steady
+  error sprinkle (so `errors_total` and `error_rate_*` metrics move). Op-level ratios drive
+  the per-op share of cycles, so per-op label dimensions show realistic relative counts.
+
+  Scenarios:
+
+    free_rate    No rate limiter. Only cycles_servicetime histograms have data; stress-report
+                 will auto-select service-time as the latency source.
+
+    rate_limited Cycle-rate limited at 2000 ops/s. cycles_responsetime is populated and
+                 will be coordinated-omission corrected; stress-report will auto-select
+                 response-time and flag it in the latency-source callout.
+
+  Example usage:
+
+    # produce a free-rate session, then view a c-stress-style summary
+    nb5 dummy_session free_rate threads=8 cycles=80000 \
+        --report-csv-to logs --logs-dir logs
+    nb5 stress-report --logs-dir logs
+
+    # produce a rate-limited session and verify A/B equivalence between the two reporters
+    nb5 dummy_session rate_limited threads=8 cycles=80000 rate=2000 \
+        --report-csv-to logs --logs-dir logs
+    nb5 stress-report --ab --sqlite logs/metrics.db --csv logs
+
+scenarios:
+  # errors=count lets the synthetic errormodulo failures be counted toward
+  # `result` / `errors_total` / `error_rate_*` instead of stopping the run.
+  default:      run driver=diag tags=block:main threads=8 cycles=40000 errors=count
+  free_rate:    run driver=diag tags=block:main threads=8 cycles=40000 errors=count
+  rate_limited: run driver=diag tags=block:main threads=8 cycles=40000 errors=count rate=2000
+
+blocks:
+  main:
+    tags:
+      block: main
+    params:
+      # Creates per-op `successfor_<opname>` and `errorsfor_<opname>` timer families
+      # with `op=<opname>` labels, which is what the stress-report bundled app reads
+      # to produce its per-op breakdown.
+      instrument: true
+    ops:
+
+      # Fastest op — ~300–1200 us per cycle. Highest ratio (8/13 of cycles).
+      read:
+        delayer: type=cycledelay delay='HashRange(300L,1200L)' unit=us
+        errors:  type=errormodulo modulo=500
+        ratio: 8
+
+      # Middle-cost op — ~800–3000 us per cycle. Higher per-op error rate.
+      write:
+        delayer: type=cycledelay delay='HashRange(800L,3000L)' unit=us
+        errors:  type=errormodulo modulo=200
+        ratio: 4
+
+      # Slowest op — ~2000–8000 us per cycle. Low ratio, low error rate; this op should
+      # dominate the p99/p999 latency tail when present.
+      slow:
+        delayer: type=cycledelay delay='HashRange(2000L,8000L)' unit=us
+        errors:  type=errormodulo modulo=1000
+        ratio: 1

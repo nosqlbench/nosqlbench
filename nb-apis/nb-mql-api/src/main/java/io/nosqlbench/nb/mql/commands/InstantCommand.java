@@ -137,9 +137,15 @@ public class InstantCommand implements MetricsQueryCommand {
     private String buildQuery(Map<String, String> labelFilters) {
         StringBuilder sql = new StringBuilder();
 
-        sql.append("WITH latest_snapshot AS (\n");
-        sql.append("  SELECT MAX(").append(MetricsSchema.COL_SV_TIMESTAMP_MS).append(") AS max_ts\n");
+        // Per-metric-instance latest timestamp. We can't use a single global MAX(timestamp)
+        // because different metrics may be captured at different snapshot times — e.g. an
+        // activity-close trigger writes the full activity-level view at T1, while a later
+        // session-teardown flush writes only system gauges at T2. A global MAX would point
+        // at T2 and miss every metric not also written then.
+        sql.append("WITH latest_per_instance AS (\n");
+        sql.append("  SELECT metric_instance_id, MAX(").append(MetricsSchema.COL_SV_TIMESTAMP_MS).append(") AS max_ts\n");
         sql.append("  FROM ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append("\n");
+        sql.append("  GROUP BY metric_instance_id\n");
         sql.append("),\n");
 
         sql.append("labeled_samples AS (\n");
@@ -150,9 +156,9 @@ public class InstantCommand implements MetricsQueryCommand {
         sql.append("    mi.").append(MetricsSchema.COL_MI_LABEL_SET_ID).append("\n");
         sql.append("  FROM ").append(MetricsSchema.TABLE_SAMPLE_VALUE).append(" sv\n");
         sql.append("  ").append(MetricsSchema.joinAllLabelsWithSampleName()).append("\n");
-        sql.append("  CROSS JOIN latest_snapshot\n");
+        sql.append("  JOIN latest_per_instance lpi ON lpi.metric_instance_id = sv.metric_instance_id\n");
+        sql.append("                              AND lpi.max_ts = sv.").append(MetricsSchema.COL_SV_TIMESTAMP_MS).append("\n");
         sql.append("  WHERE sn.").append(MetricsSchema.COL_SN_SAMPLE).append(" = ?\n");
-        sql.append("    AND sv.").append(MetricsSchema.COL_SV_TIMESTAMP_MS).append(" = latest_snapshot.max_ts\n");
 
         // Add label filters
         for (String labelKey : labelFilters.keySet()) {

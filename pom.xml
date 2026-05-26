@@ -66,6 +66,27 @@
 
     </modules>
 
+    <build>
+        <plugins>
+            <!--
+              Skip the apache-rat license check at the aggregator level. The root has no
+              .java sources of its own (only an empty src/main/java tree), so there is
+              nothing to license-check here. More importantly, RAT 0.15's <excludes> filter
+              reports but doesn't prune the directory walk — so without this skip, RAT
+              follows any symlinks under links/ (e.g. links/cassandra → external Cassandra
+              checkout) and grinds through tens of thousands of unrelated Java files. The
+              per-module RAT executions inherited from mvn-defaults still run normally.
+            -->
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <profiles>
         <profile>
             <id>converge-project</id>
