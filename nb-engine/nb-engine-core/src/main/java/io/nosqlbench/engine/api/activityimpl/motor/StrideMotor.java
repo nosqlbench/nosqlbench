@@ -40,6 +40,29 @@ public class StrideMotor<D> implements Motor<D>, ActivityDefObserver {
 
     private static final Logger logger = LogManager.getLogger(StrideMotor.class);
 
+    /// Diagnostic timing knob — see {@link #requestStop()}. Read once at class load; the env
+    /// var is normally unset and the field is 0 (no-op). When set to a positive integer, an
+    /// uncoordinated sleep is injected inside `requestStop()` between the state read and the
+    /// state transition. This artificially widens the TOCTOU race window so the
+    /// `Running → Stopping` attempt is virtually guaranteed to collide with the motor's own
+    /// `Running → Finished` transition when stopping a short / zero-cycle activity. Only
+    /// affects timing — no fork/join or blocking-state changes.
+    private static final long REQUEST_STOP_RACE_DELAY_MS = parseLongEnv(
+        "NB_DEBUG_STRIDEMOTOR_STOP_DELAY_MS", 0L);
+
+    private static long parseLongEnv(String name, long defaultValue) {
+        String raw = System.getenv(name);
+        if (raw == null || raw.isBlank()) return defaultValue;
+        try {
+            long parsed = Long.parseLong(raw.trim());
+            logger.warn("StrideMotor.requestStop race-window delay enabled via {} = {} ms — diagnostic only", name, parsed);
+            return parsed;
+        } catch (NumberFormatException nfe) {
+            logger.warn("Ignoring non-numeric value for {}: '{}'", name, raw);
+            return defaultValue;
+        }
+    }
+
     private final Activity activity;
     private final long slotId;
     private Input input;
@@ -204,7 +227,34 @@ public class StrideMotor<D> implements Motor<D>, ActivityDefObserver {
         RunState currentState = motorState.get();
         if (Objects.requireNonNull(currentState) == RunState.Running) {
             Stoppable.stop(input, action);
-            motorState.enterState(RunState.Stopping);
+            // Diagnostic-only: when NB_DEBUG_STRIDEMOTOR_STOP_DELAY_MS is set, widen the
+            // check-then-act window between the state read above and the transition below.
+            // This makes the TOCTOU race deterministically reproducible for tests that stop
+            // a zero-cycle / instantly-finished activity: the motor's own run loop
+            // transitions Running→Finished during our sleep. The catch below handles the
+            // collision; without it, the test fails with "Invalid transition from Finished
+            // to Stopping" (the same shape as the CI failure we're investigating).
+            if (REQUEST_STOP_RACE_DELAY_MS > 0) {
+                try {
+                    Thread.sleep(REQUEST_STOP_RACE_DELAY_MS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            try {
+                motorState.enterState(RunState.Stopping);
+            } catch (RuntimeException raceErr) {
+                // Race: the motor transitioned to a terminal state (Finished/Errored/Stopped)
+                // between our read above and the enterState call here. The stop request is
+                // effectively already satisfied — log and move on rather than propagating an
+                // exception out of a control-path method.
+                RunState now = motorState.get();
+                if (now != RunState.Finished && now != RunState.Errored && now != RunState.Stopped) {
+                    throw raceErr;
+                }
+                logger.debug(() -> "motor " + this.getSlotId()
+                    + " reached terminal state " + now + " concurrently with stop request");
+            }
         } else {
             logger.warn(() -> "attempted to stop motor " + this.getSlotId() + ": from non Running state:" + currentState);
         }
