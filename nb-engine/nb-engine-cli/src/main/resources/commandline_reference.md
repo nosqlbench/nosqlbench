@@ -57,6 +57,7 @@ parsing.
 | `forceStop <alias>` | Force-stop an activity immediately. |
 | `waitmillis <ms>` | Insert a pause between scripted commands. |
 | `fragment '<javascript>'` | Inject an ECMAScript fragment into the scenario. |
+| `runapp appname=<selector> [name=value]...` | Invoke a bundled app (e.g. `stress-report`) from within the command stream. See [`runapp.md`](runapp.md). |
 
 Named parameters (e.g., `driver=cql`, `threads=4`, `cycles=1M`) follow each
 command and are applied in-place.
@@ -191,6 +192,8 @@ ${PROG} \
   used options.
 - [`cli-scripting.md`](cli-scripting.md) – in-depth guide to command-line
   scripting patterns.
+- [`runapp.md`](runapp.md) – calling bundled apps (e.g. `stress-report`) from the
+  command stream and from named-scenario steps.
 - `${PROG} help <topic>` – contextual help within the CLI itself.
 
 If you encounter an option that is not documented here, please open an issue or
