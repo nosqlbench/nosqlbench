@@ -74,6 +74,10 @@
             <artifactId>swagger-core</artifactId>
             <version>2.2.24</version>
         </dependency>
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

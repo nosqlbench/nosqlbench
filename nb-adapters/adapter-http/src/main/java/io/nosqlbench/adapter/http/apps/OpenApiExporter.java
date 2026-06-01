@@ -27,6 +27,9 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
@@ -58,6 +61,44 @@ public class OpenApiExporter implements BundledApp {
     ) {}
 
     private Argv argv;
+
+    @Command(name = "openapi-exporter",
+        description = "Generate a NoSQLBench http workload yaml from an OpenAPI v3 spec.")
+    static class Options {
+        @Option(names = {"-I", "--input"}, paramLabel = "<file>",
+            description = "input OpenAPI spec file")
+        String infile = "specify-me.yaml";
+
+        @Option(names = {"-O", "--output"}, paramLabel = "<file>",
+            description = "output workload yaml file (default: stdout)")
+        String outfile;
+
+        @Option(names = {"-b", "--baseurl"}, paramLabel = "<url>",
+            description = "base url used with every request (default: ${DEFAULT-VALUE})")
+        String baseurl = "{baseurl}";
+
+        @Option(names = {"-l", "--limit"}, paramLabel = "<n>",
+            description = "limit generated op templates to n (0 = no limit)")
+        int limit = 0;
+
+        @Option(names = {"-m", "--methods"}, paramLabel = "<method>", split = ",",
+            description = "HTTP methods to include; repeatable or comma-separated (default: all)")
+        List<String> methods = new ArrayList<>();
+
+        @Option(names = {"-h", "--header"}, paramLabel = "<name: value>",
+            description = "header to add to each request, in 'Name: Value' form; repeatable")
+        List<String> headers = new ArrayList<>();
+
+        @Option(names = {"--help", "-?"}, usageHelp = true, description = "display help")
+        boolean helpRequested;
+    }
+
+    /// Exposes the picocli model so the `runapp` command-stream verb can adapt
+    /// `name=value` parameters into this app's argv (e.g. `input=spec.yaml` -> `--input=spec.yaml`).
+    @Override
+    public Optional<CommandLine> getCommandModel() {
+        return Optional.of(new CommandLine(new Options()));
+    }
 
     @Override
     public int applyAsInt(String[] args) {
@@ -184,67 +225,34 @@ public class OpenApiExporter implements BundledApp {
     }
 
     private Argv parseArgs(String[] args) {
-        LinkedList<String> argv = new LinkedList<>(Arrays.asList(args));
-        Set<String> enabledMethods = new HashSet<>();
-        Map<String,String> headers = new LinkedHashMap<>();
-        ListIterator<String> iter = argv.listIterator();
-        String baseurl = "{baseurl}";
-        String infile = "specify-me.yaml";
-        int limit = 0;
-        String outfile = null;
-        while (iter.hasNext()) {
-            String word = iter.next();
-            if (word.equals("-h")) {
-                String header = iter.next();
-                String[] parts = header.split(":", 2);
-                if (parts.length==1) {
-                    throw new RuntimeException("You MUST provide aux headers in the name: value form. This one was not in that form: '" + header + "'");
-                }
-                headers.put(parts[0],parts[1].trim());
-            } else if (word.equals("-m")) {
-                String enable=iter.next();
-                io.swagger.models.Method enabledMethod = io.swagger.models.Method.forValue(enable);
-                enabledMethods.add(enabledMethod.name().toLowerCase());
-            } else if (word.equals("-l")) {
-                limit = Integer.parseInt(iter.next());
-            } else if (word.equals("-b")) {
-                baseurl = iter.next();
-            } else if (word.equals("-I")) {
-                infile = iter.next();
-            } else if (word.equals("-O")) {
-                outfile = iter.next();
-            } else {
-                System.out.println("""
-                    EXAMPLE:           nb5 openapi-exporter -I myspec.yaml -O myworkload.yaml -b "TEMPLATE(baseurl)"
-
-                    -I <inputfile>     Set the input file for the OpenAPI spec, as in:
-                                       -I myspec.yaml
-
-                    [-O <outputfile>]  Set the output file for the workload, as in:
-                                       -O myworkload.yaml
-                                       If unspecified, the result is printed to stdout.
-
-                    [-m [method]]      Include methods in generated workload. This argument can be specified multiple times, as in:
-                                       -m get -m post
-                                       If unspecified, then all methods are included by default.
-
-                    [-h "<header>"]    Add a header to each request. This can be specified multiple times, as in:
-                                       -h "Authorization: Bearer sometoken" -h "X-Special-Header: I love spicy chicken wings."
-                                       If unspecified, then no additional headers are added beyond those in the spec.
-
-                    [-l <limit> ]      Limit the generated op templates to some number, usually used to test a small scale
-                                       version of the rendered workload before doing the full scale test, as in:
-                                       -l 10
-                                       If unspecified, all operations included in the spec are rendered as op templates.
-
-                    [-b <baseurl> ]    Set the base url which will be used with every request. This is often set to
-                                       a template var form and the specified when the workload is run, as in:
-                                       -b "TEMPLATE(baseurl)" ...
-                                       If unspecified "{baseurl}" is used, which will require a binding to be set for it.
-                    """);
-            }
+        Options opts = new Options();
+        CommandLine cmd = new CommandLine(opts);
+        try {
+            cmd.parseArgs(args);
+        } catch (CommandLine.ParameterException pe) {
+            cmd.usage(System.out);
+            throw new RuntimeException(pe.getMessage(), pe);
         }
-        return new Argv(infile, outfile, baseurl, headers,enabledMethods, limit);
+        if (opts.helpRequested) {
+            cmd.usage(System.out);
+        }
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        for (String header : opts.headers) {
+            String[] parts = header.split(":", 2);
+            if (parts.length == 1) {
+                throw new RuntimeException("You MUST provide aux headers in the name: value form. This one was not in that form: '" + header + "'");
+            }
+            headers.put(parts[0], parts[1].trim());
+        }
+
+        Set<String> enabledMethods = new HashSet<>();
+        for (String method : opts.methods) {
+            io.swagger.models.Method enabledMethod = io.swagger.models.Method.forValue(method);
+            enabledMethods.add(enabledMethod.name().toLowerCase());
+        }
+
+        return new Argv(opts.infile, opts.outfile, opts.baseurl, headers, enabledMethods, opts.limit);
     }
 
 //    private Map<String,Object> buildOpBodyTemplate(OpenAPI model, String path, PathItem pathitem, PathItem.HttpMethod method, Operation op) {

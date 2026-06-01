@@ -92,6 +92,34 @@ public class NBCLIScenarioPreprocessorTest {
     }
 
     @Test
+    public void runappStepDoesNotInheritActivityParams() {
+        NBCLIOptions opts = new NBCLIOptions(new String[]{"example_scenarios", "withapp"}, NBCLIOptions.Mode.ParseAllOptions);
+        List<Cmd> cmds = opts.getCommands();
+
+        Cmd runapp = cmds.stream()
+            .filter(c -> "runapp".equals(c.getArgValueOrNull("_impl")))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("no runapp command was expanded from the scenario"));
+
+        // the bundled-app selector and the app's own parameter survive scenario expansion
+        assertThat(runapp.getArgValueOrNull("appname")).isEqualTo("stress-report");
+        assertThat(runapp.getArgValueOrNull("logs-dir")).isEqualTo("logs");
+
+        // activity-only params must NOT be injected into a runapp step, or they would leak into
+        // the bundled app's argv as unknown options
+        assertThat(runapp.getArgValueOrNull("workload")).isNull();
+        assertThat(runapp.getArgValueOrNull("alias")).isNull();
+        assertThat(runapp.getArgValueOrNull("labels")).isNull();
+
+        // a normal activity step in the same scenario still gets its workload injected
+        Cmd bench = cmds.stream()
+            .filter(c -> "run".equals(c.getArgValueOrNull("_impl")))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("no run command was expanded from the scenario"));
+        assertThat(bench.getArgValueOrNull("workload")).isNotNull();
+    }
+
+    @Test
     public void testThatTemplatesAreExpandedDefault() {
         NBCLIOptions opts = new NBCLIOptions(new String[]{"scenario_test", "template_test"}, NBCLIOptions.Mode.ParseAllOptions);
         List<Cmd> cmds = opts.getCommands();

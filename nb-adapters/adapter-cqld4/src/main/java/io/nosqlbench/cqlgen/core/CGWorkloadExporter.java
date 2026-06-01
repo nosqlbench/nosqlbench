@@ -31,6 +31,10 @@ import io.nosqlbench.cqlgen.transformers.CGModelTransformers;
 import io.nosqlbench.nb.annotations.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
@@ -54,10 +58,28 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://cassandra.apache.org/doc/trunk/cassandra/cql/index.html">Apache Cassandra CQL Docs</a>
  */
+@Command(name = "cqlgen",
+    description = "Generate a NoSQLBench workload yaml from a CQL schema (.cql) file.")
 @Service(value = BundledApp.class, selector = "cqlgen")
 public class CGWorkloadExporter implements BundledApp {
     public static final String APPNAME = "cqlgen";
     private final static Logger logger = LogManager.getLogger(APPNAME);
+
+    @Option(names = {"--input", "-i"}, paramLabel = "<file.cql>",
+        description = "source CQL schema file (alternative to the first positional argument)")
+    private Path inputOpt;
+
+    @Option(names = {"--output", "-o"}, paramLabel = "<file.yaml>",
+        description = "output workload yaml (alternative to the second positional argument; default: derived from input)")
+    private Path outputOpt;
+
+    @Parameters(index = "0", arity = "0..1", paramLabel = "<file.cql>",
+        description = "source CQL schema file")
+    private Path inputArg;
+
+    @Parameters(index = "1", arity = "0..1", paramLabel = "<file.yaml>",
+        description = "output workload yaml (default: derived from input)")
+    private Path outputArg;
 
     private CGColumnRebinder binder;
     private NamingFolio namer;
@@ -90,15 +112,28 @@ public class CGWorkloadExporter implements BundledApp {
         new CGWorkloadExporter().applyAsInt(args);
     }
 
+    /// Exposes the picocli model so the `runapp` command-stream verb can adapt
+    /// `name=value` parameters into this app's argv (e.g. `input=schema.cql` -> `--input=schema.cql`).
+    @Override
+    public Optional<CommandLine> getCommandModel() {
+        return Optional.of(new CommandLine(this));
+    }
+
     @Override
     public int applyAsInt(String[] args) {
 
         logger.info(() -> "running CQL workload exporter with args:" + Arrays.toString(args));
 
-        if (args.length == 0) {
+        try {
+            new CommandLine(this).parseArgs(args);
+        } catch (CommandLine.ParameterException pe) {
+            throw new RuntimeException("Usage example: PROG filepath.cql filepath.yaml ; " + pe.getMessage(), pe);
+        }
+
+        Path srcpath = (inputOpt != null) ? inputOpt : inputArg;
+        if (srcpath == null) {
             throw new RuntimeException("Usage example: PROG filepath.cql filepath.yaml");
         }
-        Path srcpath = Path.of(args[0]);
         if (!srcpath.toString().endsWith(".cql")) {
             throw new RuntimeException("File '" + srcpath + "' must end in .cql");
         }
@@ -106,9 +141,8 @@ public class CGWorkloadExporter implements BundledApp {
             throw new RuntimeException("File '" + srcpath + "' does not exist.");
         }
 
-        Path target = null;
-        if (args.length >= 2) {
-            target = Path.of(args[1]);
+        Path target = (outputOpt != null) ? outputOpt : outputArg;
+        if (target != null) {
             logger.info("using output path as '" + target + "'");
         } else {
             target = Path.of(srcpath.toString().replace(".cql", ".yaml"));

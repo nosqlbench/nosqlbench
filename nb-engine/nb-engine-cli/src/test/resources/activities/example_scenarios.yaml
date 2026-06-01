@@ -6,6 +6,9 @@ scenarios:
   namedsteps:
     one: run cycles=3 alias=A driver=stdout testparam1=testvalue1
     two: run cycles=5 alias=B driver=stdout
+  withapp:
+    bench: run cycles=3 alias=A driver=stdout
+    report: runapp appname=stress-report logs-dir=logs
 
 bindings:
   cycle: Identity()

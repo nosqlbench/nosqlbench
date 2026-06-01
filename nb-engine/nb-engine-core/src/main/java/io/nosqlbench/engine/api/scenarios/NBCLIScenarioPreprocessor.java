@@ -189,6 +189,11 @@ public class NBCLIScenarioPreprocessor {
                 cmd = TemplateRewriter.rewrite(cmd);
                 cmd = exprPreprocessor.process(cmd, null, userProvidedParams);
                 LinkedHashMap<String, SCNamedParam> parsedStep = parseStep(cmd, stepName, scenarioName);
+                // A 'runapp' step invokes a bundled app whose arguments are its own; the
+                // activity-only parameters injected below (workload/alias/labels) would otherwise
+                // leak into the app's argv, so they are skipped for these steps.
+                boolean isAppStep = !parsedStep.isEmpty()
+                    && "runapp".equalsIgnoreCase(parsedStep.keySet().iterator().next());
                 LinkedHashMap<String, String> usersCopy = new LinkedHashMap<>(userProvidedParams);
                 LinkedHashMap<String, String> buildingCmd = new LinkedHashMap<>();
 
@@ -214,11 +219,11 @@ public class NBCLIScenarioPreprocessor {
                     .toList();
                 undefKeys.forEach(buildingCmd::remove);
 
-                if (!buildingCmd.containsKey("workload")) {
+                if (!isAppStep && !buildingCmd.containsKey("workload")) {
                     buildingCmd.put("workload", "workload=" + workloadName);
                 }
 
-                if (!buildingCmd.containsKey("alias")) {
+                if (!isAppStep && !buildingCmd.containsKey("alias")) {
                     buildingCmd.put("alias", "alias=" + WORKLOAD_SCENARIO_STEP);
                 }
 
@@ -229,16 +234,18 @@ public class NBCLIScenarioPreprocessor {
                     buildingCmd.put("step","step="+stepName);
                 }
 
-                // TODO: simplify this
-                String alias = buildingCmd.get("alias");
-                String workloadToken = workloadContent.asPath().getFileName().toString();
+                if (!isAppStep) {
+                    // TODO: simplify this
+                    String alias = buildingCmd.get("alias");
+                    String workloadToken = workloadContent.asPath().getFileName().toString();
 
-                alias = alias.replaceAll("WORKLOAD", sanitize(workloadToken));
-                alias = alias.replaceAll("SCENARIO", sanitize(scenarioName));
-                alias = alias.replaceAll("STEP", sanitize(stepName));
-                alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
-                buildingCmd.put("alias", alias);
-                buildingCmd.put("labels","labels=workload:"+sanitize(workloadToken)+",scenario:"+scenarioName);
+                    alias = alias.replaceAll("WORKLOAD", sanitize(workloadToken));
+                    alias = alias.replaceAll("SCENARIO", sanitize(scenarioName));
+                    alias = alias.replaceAll("STEP", sanitize(stepName));
+                    alias = (alias.startsWith("alias=") ? alias : "alias=" + alias);
+                    buildingCmd.put("alias", alias);
+                    buildingCmd.put("labels","labels=workload:"+sanitize(workloadToken)+",scenario:"+scenarioName);
+                }
 
                 logger.debug(() -> "rebuilt command: " + String.join(" ", buildingCmd.values()));
                 buildCmdBuffer.addAll(buildingCmd.values());

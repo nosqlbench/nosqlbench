@@ -18,10 +18,14 @@ package io.nosqlbench.engine.cli.stressreport;
 
 import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.apps.BundledApp;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Optional;
 
 /// Bundled app that emits a cassandra-stress-style summary from the metrics persisted at the
 /// end of a NoSQLBench session.
@@ -41,6 +45,8 @@ import java.util.Locale;
 /// - `--logs-dir <dir>` — discover `<dir>/metrics.db` (the symlink the session keeps current)
 /// - `--ab` — A/B mode; requires both `--sqlite` and `--csv`
 /// - (default) — discover `./logs/metrics.db`
+@Command(name = "stress-report",
+    description = "Emit a cassandra-stress-style summary from NoSQLBench session metrics.")
 @Service(value = BundledApp.class, selector = "stress-report")
 public class StressReportApp implements BundledApp {
 
@@ -48,6 +54,25 @@ public class StressReportApp implements BundledApp {
     static final int EXIT_USAGE = 64;
     static final int EXIT_MISMATCH = 1;
     static final int EXIT_ERROR = 2;
+
+    @Option(names = "--sqlite", paramLabel = "<db>",
+        description = "Read from session SQLite database")
+    private Path sqlitePath;
+
+    @Option(names = "--csv", paramLabel = "<dir>",
+        description = "Read from CSV reporter directory")
+    private Path csvDir;
+
+    @Option(names = "--logs-dir", paramLabel = "<dir>",
+        description = "Discover <dir>/metrics.db (default: ./logs/metrics.db)")
+    private Path logsDir;
+
+    @Option(names = "--ab",
+        description = "Read from BOTH sources and verify equivalence (requires --sqlite and --csv)")
+    private boolean ab;
+
+    @Option(names = {"--help", "-h"}, usageHelp = true, description = "Display help")
+    private boolean helpRequested;
 
     private final PrintStream out;
     private final PrintStream err;
@@ -62,29 +87,25 @@ public class StressReportApp implements BundledApp {
         this.err = err;
     }
 
+    /// Exposes the picocli model of this app so the `runapp` command-stream verb can adapt
+    /// `name=value` parameters into the correct argv (e.g. `sqlite=x` -> `--sqlite=x`).
+    @Override
+    public Optional<CommandLine> getCommandModel() {
+        return Optional.of(new CommandLine(this));
+    }
+
     @Override
     public int applyAsInt(String[] args) {
-        Path sqlitePath = null;
-        Path csvDir = null;
-        Path logsDir = null;
-        boolean ab = false;
-        for (int i = 0; i < args.length; i++) {
-            String a = args[i];
-            switch (a) {
-                case "--sqlite" -> sqlitePath = nextArgPath(args, ++i, "--sqlite");
-                case "--csv" -> csvDir = nextArgPath(args, ++i, "--csv");
-                case "--logs-dir" -> logsDir = nextArgPath(args, ++i, "--logs-dir");
-                case "--ab" -> ab = true;
-                case "--help", "-h" -> {
-                    printUsage(out);
-                    return EXIT_OK;
-                }
-                default -> {
-                    err.println("Unknown argument: " + a);
-                    printUsage(err);
-                    return EXIT_USAGE;
-                }
-            }
+        try {
+            new CommandLine(this).parseArgs(args);
+        } catch (CommandLine.ParameterException pe) {
+            err.println(pe.getMessage());
+            printUsage(err);
+            return EXIT_USAGE;
+        }
+        if (helpRequested) {
+            printUsage(out);
+            return EXIT_OK;
         }
 
         if (ab) {
@@ -144,14 +165,6 @@ public class StressReportApp implements BundledApp {
         StressReportComparator.ComparisonResult result = comparator.compare(sa, sb);
         out.print(comparator.renderResult(result, a.sourceDescription(), b.sourceDescription()));
         return result.isMatch() ? EXIT_OK : EXIT_MISMATCH;
-    }
-
-    private Path nextArgPath(String[] args, int i, String flag) {
-        if (i >= args.length) {
-            err.println(flag + " requires a path argument");
-            return null;
-        }
-        return Path.of(args[i]);
     }
 
     private static void printUsage(PrintStream ps) {

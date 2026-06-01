@@ -21,6 +21,7 @@ import io.nosqlbench.nb.api.nbio.NBIO;
 import io.nosqlbench.nb.api.docsapi.Docs;
 import io.nosqlbench.nb.api.docsapi.DocsBinder;
 import io.nosqlbench.nb.annotations.Service;
+import picocli.CommandLine;
 
 import java.util.Optional;
 import java.util.function.ToIntFunction;
@@ -31,6 +32,27 @@ public interface BundledApp extends ToIntFunction<String[]> {
 
     default String getBundledAppName() {
         return this.getClass().getAnnotation(Service.class).selector();
+    }
+
+    /// Exposes this app's picocli command model so that callers in the command stream (the
+    /// `runapp` verb) can adapt NoSQLBench `name=value` parameters into a correct argv for
+    /// this specific app.
+    ///
+    /// The returned [CommandLine] is read for metadata only — its option names, types, and
+    /// subcommands — and is never executed here; the app's own [#applyAsInt(String[])] remains
+    /// the single execution entry point. Apps that parse their arguments with picocli should
+    /// override this to return their model, typically `Optional.of(new CommandLine(this))`
+    /// when the app itself is the `@Command`-annotated object, or
+    /// `Optional.of(new CommandLine(new SomeCli()))` when parsing is delegated.
+    ///
+    /// Apps that delegate to an external CLI with no picocli model leave this empty. In that
+    /// case the caller falls back to a literal `--name=value` mapping, which cannot express
+    /// positionals or subcommands; such apps remain fully usable via the top-level
+    /// `nb5 <app> ...` invocation with their native argv.
+    ///
+    /// @return this app's picocli command model, or empty if it has none
+    default Optional<CommandLine> getCommandModel() {
+        return Optional.empty();
     }
 
     default DocsBinder getBundledDocs() {
