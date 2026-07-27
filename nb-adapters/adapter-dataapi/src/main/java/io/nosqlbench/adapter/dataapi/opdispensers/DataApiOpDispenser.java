@@ -46,19 +46,37 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         this.spaceFunction = adapter.getSpaceFunc(op);
     }
 
-    protected Sort getSortFromOp(ParsedOp op, long l) {
-        Sort sort = null;
+    protected Sort[] getSortFromOp(ParsedOp op, long l) {
+        Sort fieldSort = null;
         Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
         if (sortFunction.isPresent()) {
             Map<String,Object> sortFields = sortFunction.get().apply(l);
             String sortOrder = sortFields.get("type").toString();
             String sortField = sortFields.get("field").toString();
             switch(sortOrder) {
-                case "asc" -> sort = Sort.ascending(sortField);
-                case "desc" -> sort = Sort.descending(sortField);
+                case "asc" -> fieldSort = Sort.ascending(sortField);
+                case "desc" -> fieldSort = Sort.descending(sortField);
             }
         }
-        return sort;
+
+        Sort vectorSort = null;
+        if (op.isDefined("vector")) {
+            float[] vector = getVectorValues(op, l);
+            if (vector != null) {
+                vectorSort = Sort.vector(vector);
+            }
+        }
+
+        if (fieldSort != null && vectorSort != null) {
+            return new Sort[]{vectorSort, fieldSort};
+        }
+        if (vectorSort != null) {
+            return new Sort[]{vectorSort};
+        }
+        if (fieldSort != null) {
+            return new Sort[]{fieldSort};
+        }
+        return new Sort[0];
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
@@ -174,6 +192,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             }
         } else if (rawVectorValues instanceof List) {
             return getVectorValuesList(rawVectorValues);
+        } else if (rawVectorValues == null) {
+            throw new RuntimeException("Invalid specification for values (null)");
         } else {
             throw new RuntimeException("Invalid type specified for values (type: " + rawVectorValues.getClass().getSimpleName() + "), values: " + rawVectorValues.toString());
         }

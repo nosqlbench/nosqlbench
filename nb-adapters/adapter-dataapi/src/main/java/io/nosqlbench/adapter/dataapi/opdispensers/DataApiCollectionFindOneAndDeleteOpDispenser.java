@@ -56,9 +56,9 @@ public class DataApiCollectionFindOneAndDeleteOpDispenser extends DataApiOpDispe
 
     private CollectionFindOneAndDeleteOptions getCollectionFindOneAndDeleteOptions(ParsedOp op, long l) {
         CollectionFindOneAndDeleteOptions options = new CollectionFindOneAndDeleteOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (sort != null) {
-            options = options.sort(sort);
+        Sort[] sorts = getSortFromOp(op, l);
+        if (sorts.length > 0) {
+            options = options.sort(sorts);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
