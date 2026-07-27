@@ -100,17 +100,17 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 filtersList.add(Filters.exists(fieldName));
             }
             case "gt" ->
-                filtersList.add(Filters.gt(fieldName, (long) fieldValue));
+                filtersList.add(Filters.gt(fieldName, ((Number) fieldValue).longValue()));
             case "gte" ->
-                filtersList.add(Filters.gte(fieldName, (long) fieldValue));
+                filtersList.add(Filters.gte(fieldName, ((Number) fieldValue).longValue()));
             case "hasSize" ->
-                filtersList.add(Filters.hasSize(fieldName, (int) fieldValue));
+                filtersList.add(Filters.hasSize(fieldName, ((Number) fieldValue).intValue()));
             case "in" ->
                 filtersList.add(Filters.in(fieldName, fieldValue));
             case "lt" ->
-                filtersList.add(Filters.lt(fieldName, (long) fieldValue));
+                filtersList.add(Filters.lt(fieldName, ((Number) fieldValue).longValue()));
             case "lte" ->
-                filtersList.add(Filters.lte(fieldName, (long) fieldValue));
+                filtersList.add(Filters.lte(fieldName, ((Number) fieldValue).longValue()));
             case "ne" ->
                 filtersList.add(Filters.ne(fieldName, fieldValue));
             case "nin" ->
