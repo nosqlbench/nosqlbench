@@ -20,6 +20,9 @@ import com.datastax.astra.client.DataAPIClient;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
 import com.datastax.astra.client.admin.DatabaseAdmin;
+// TODO: remove this - it's to log Data API requests and responses
+import com.datastax.astra.client.core.options.DataAPIClientOptions;
+
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;
@@ -75,7 +78,11 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     private void createClient() {
-        this.dataAPIClient = new DataAPIClient(astraToken);
+        // TODO: remove this - it's to log Data API requests and responses
+        DataAPIClientOptions options = new DataAPIClientOptions()
+            .logRequests();
+
+        this.dataAPIClient = new DataAPIClient(astraToken, /* S */ options);
         if (namespace != null) {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint, namespace);
         } else {
