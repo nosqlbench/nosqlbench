@@ -26,6 +26,7 @@ import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
@@ -78,6 +79,12 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                         addOperatorFilter(orFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
                     default -> logger.error(() -> "Conjunction " + filterFields.get("conjunction") + " not supported");
                 }
+            }
+            if (!andFilterList.isEmpty() && !orFilterList.isEmpty()) {
+                throw new OpConfigError(
+                    "filters list mixes 'and' and 'or' conjunctions, which is not supported; " +
+                    "use only one conjunction type per filters list"
+                );
             }
             if (!andFilterList.isEmpty())
                 filter = Filters.and(andFilterList.toArray(new Filter[0]));
