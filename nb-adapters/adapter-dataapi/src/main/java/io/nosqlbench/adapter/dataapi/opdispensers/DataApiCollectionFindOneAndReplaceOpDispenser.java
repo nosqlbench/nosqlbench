@@ -63,9 +63,9 @@ public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDisp
 
     private CollectionFindOneAndReplaceOptions getCollectionFindOneAndReplaceOptions(ParsedOp op, long l) {
         CollectionFindOneAndReplaceOptions options = new CollectionFindOneAndReplaceOptions();
-        Sort[] sorts = getSortFromOp(op, l);
-        if (sorts.length > 0) {
-            options = options.sort(sorts);
+        Sort sort = getSortFromOp(op, l);
+        if (sort != null) {
+            options = options.sort(sort);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {

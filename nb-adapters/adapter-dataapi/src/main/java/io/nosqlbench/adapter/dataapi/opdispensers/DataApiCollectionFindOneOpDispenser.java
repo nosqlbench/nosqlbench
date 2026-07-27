@@ -54,9 +54,9 @@ public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
 
     private CollectionFindOneOptions getCollectionFindOneOptions(ParsedOp op, long l) {
         CollectionFindOneOptions options = new CollectionFindOneOptions();
-        Sort[] sorts = getSortFromOp(op, l);
-        if (sorts.length > 0) {
-            options = options.sort(sorts);
+        Sort sort = getSortFromOp(op, l);
+        if (sort != null) {
+            options = options.sort(sort);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {

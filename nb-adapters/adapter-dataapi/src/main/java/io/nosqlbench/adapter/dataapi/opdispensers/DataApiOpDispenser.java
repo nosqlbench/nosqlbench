@@ -46,7 +46,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         this.spaceFunction = adapter.getSpaceFunc(op);
     }
 
-    protected Sort[] getSortFromOp(ParsedOp op, long l) {
+    protected Sort getSortFromOp(ParsedOp op, long l) {
         Sort fieldSort = null;
         Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
         if (sortFunction.isPresent()) {
@@ -68,15 +68,17 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         }
 
         if (fieldSort != null && vectorSort != null) {
-            return new Sort[]{vectorSort, fieldSort};
+            throw new OpConfigError(
+                "cannot sort by vector and regular asc/desc criteria at the same time."
+            );
         }
         if (vectorSort != null) {
-            return new Sort[]{vectorSort};
+            return vectorSort;
         }
         if (fieldSort != null) {
-            return new Sort[]{fieldSort};
+            return fieldSort;
         }
-        return new Sort[0];
+        return null;
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
