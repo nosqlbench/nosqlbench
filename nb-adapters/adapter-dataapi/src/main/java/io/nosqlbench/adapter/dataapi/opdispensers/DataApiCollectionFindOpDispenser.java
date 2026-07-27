@@ -55,14 +55,9 @@ public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
 
     private CollectionFindOptions getCollectionFindOptions(ParsedOp op, long l) {
         CollectionFindOptions options = new CollectionFindOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (op.isDefined("vector")) {
-            float[] vector = getVectorValues(op, l);
-            if (sort != null) {
-                options = vector != null ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
-            } else if (vector != null) {
-                options = options.sort(Sort.vector(vector));
-            }
+        Sort[] sorts = getSortFromOp(op, l);
+        if (sorts.length > 0) {
+            options = options.sort(sorts);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {

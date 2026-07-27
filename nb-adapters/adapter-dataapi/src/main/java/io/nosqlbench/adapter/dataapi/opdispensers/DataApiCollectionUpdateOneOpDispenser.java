@@ -60,21 +60,16 @@ public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
 
     private CollectionUpdateOneOptions getCollectionUpdateOneOptions(ParsedOp op, long l) {
         CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
-        Sort sort = getSortFromOp(op, l);
-        float[] vector = getVectorFromOp(op, l);
+        Sort[] sorts = getSortFromOp(op, l);
 
         Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
         if (upsertFunction.isPresent()) {
             options = options.upsert(upsertFunction.get().apply(l));
         }
-        if (sort != null) {
-            options = (vector != null) ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
+        if (sorts.length > 0) {
+            options = options.sort(sorts);
         }
         return options;
-    }
-
-    private float[] getVectorFromOp(ParsedOp op, long l) {
-        return getVectorValues(op.get("vector", l));
     }
 
     @Override
