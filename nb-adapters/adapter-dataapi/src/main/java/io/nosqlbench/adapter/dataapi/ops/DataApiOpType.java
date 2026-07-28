@@ -17,7 +17,22 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 public enum DataApiOpType {
+    // admin ops:
+    create_database,
+    list_databases,
+    drop_database,
+    get_database_info,
+    // db-admin ops:
+    create_namespace,
+    list_namespaces,
+    drop_namespace,
+    // in-database ops:
     create_collection,
+    delete_collection,
+    list_collections,
+    list_collection_names,
+    create_collection_with_class,
+    // in-collection ops:
     insert_many,
     insert_one,
     insert_one_vector,
@@ -31,9 +46,6 @@ public enum DataApiOpType {
     update_many,
     delete_one,
     delete_many,
-    delete_collection,
-    list_collections,
-    list_collection_names,
     estimated_document_count,
     find_by_id,
     find_distinct,
@@ -41,12 +53,4 @@ public enum DataApiOpType {
     replace_one,
     find_one_and_replace,
     delete_all,
-    create_collection_with_class,
-    create_database,
-    list_databases,
-    drop_database,
-    get_database_info,
-    create_namespace,
-    list_namespaces,
-    drop_namespace,
 }
