@@ -158,12 +158,12 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                         case "set" ->
                             update = Updates.set(updateFields.get("field").toString(), updateFields.get("value"));
                         case "inc" ->
-                            update = Updates.inc(updateFields.get("field").toString(), (double) updateFields.get("value"));
+                            update = Updates.inc(updateFields.get("field").toString(), ((Number) updateFields.get("value")).doubleValue());
                         case "unset" -> update = Updates.unset(updateFields.get("field").toString());
                         case "addToSet" ->
                             update = Updates.addToSet(updateFields.get("field").toString(), updateFields.get("value"));
                         case "min" ->
-                            update = Updates.min(updateFields.get("field").toString(), (double) updateFields.get("value"));
+                            update = Updates.min(updateFields.get("field").toString(), ((Number) updateFields.get("value")).doubleValue());
                         case "rename" ->
                             update = Updates.rename(updateFields.get("field").toString(), updateFields.get("value").toString());
                         default -> logger.error(() -> "Operation " + updateFields.get("operation") + " not supported");
