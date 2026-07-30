@@ -40,7 +40,7 @@ public class DataApiCollectionFindOneAndUpdateOpDispenser extends DataApiOpDispe
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            Update update = getUpdates(op, l);
+            Update update = getUpdateFromOp(op, l);
 
             return new DataApiCollectionFindOneAndUpdateOp(
                 db,
