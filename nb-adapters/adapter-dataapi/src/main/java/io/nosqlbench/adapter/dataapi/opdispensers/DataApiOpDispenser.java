@@ -257,6 +257,15 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return projection;
     }
 
+    protected Boolean getUpsertFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            LongFunction<Boolean> uf = upsertFunction.get();
+            return uf.apply(l);
+        }
+        return null;
+    }
+
     protected CollectionDefinition getCollectionDefinitionFromOp(ParsedOp op, long l) {
         CollectionDefinition optionsBldr = new CollectionDefinition();
         Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);

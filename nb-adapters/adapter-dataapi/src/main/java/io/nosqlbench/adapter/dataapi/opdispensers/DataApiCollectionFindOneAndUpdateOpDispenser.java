@@ -18,7 +18,11 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.options.CollectionDeleteOneOptions;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndUpdateOptions;
+
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindOneAndUpdateOp;
@@ -41,14 +45,29 @@ public class DataApiCollectionFindOneAndUpdateOpDispenser extends DataApiOpDispe
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             Update update = getUpdateFromOp(op, l);
+            CollectionFindOneAndUpdateOptions options = getCollectionFindOneAndUpdateOptions(op, l);
 
             return new DataApiCollectionFindOneAndUpdateOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                update
+                update,
+                options
             );
         };
+    }
+
+    private CollectionFindOneAndUpdateOptions getCollectionFindOneAndUpdateOptions(ParsedOp op, long l) {
+        CollectionFindOneAndUpdateOptions options = new CollectionFindOneAndUpdateOptions();
+        Sort sort = getSortFromOp(op, l);
+        Boolean upsert = getUpsertFromOp(op, l);
+        if (sort != null) {
+            options = options.sort(sort);
+        }
+        if ( upsert != null ){
+            options = options.upsert(upsert);
+        }
+        return options;
     }
 
     @Override
