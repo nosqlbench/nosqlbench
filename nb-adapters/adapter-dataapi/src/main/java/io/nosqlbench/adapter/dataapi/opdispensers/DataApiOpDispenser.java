@@ -21,6 +21,7 @@ import com.datastax.astra.client.core.query.Filters;
 import com.datastax.astra.client.collections.definition.CollectionDefinition;
 import com.datastax.astra.client.collections.definition.CollectionDefaultIdTypes;
 import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.Updates;
 import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
@@ -37,7 +38,6 @@ import java.util.function.LongFunction;
 public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, DataApiSpace> {
     protected final LongFunction<String> targetFunction;
     protected final LongFunction<DataApiSpace> spaceFunction;
-    private volatile boolean warnedDeprecatedUpdates = false;
 
     protected DataApiOpDispenser(DriverAdapter<? extends DataApiBaseOp, DataApiSpace> adapter, ParsedOp op,
                                  LongFunction<String> targetFunction) {
@@ -146,41 +146,18 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected Update getUpdateFromOp(ParsedOp op, long l) {
         Update update = Update.create();
-        Object rawUpdates = op.getAsOptionalFunction("updates", Object.class)
-            .map(f -> f.apply(l))
-            .orElse(null);
-        if (rawUpdates instanceof List<?> rawList) {
-            // New form: updates is a list of {operation, field, value} entries
-            List<Map<String, Object>> updatesList = (List<Map<String, Object>>) rawList;
-            for (Map<String, Object> entry : updatesList) {
-                String operation = entry.get("operation").toString();
-                String field = entry.get("field").toString();
-                Object value = entry.get("value");
-                applyUpdateOperation(update, operation, field, value);
-            }
-        } else if (rawUpdates instanceof Map<?,?> rawMap) {
-            /* Backward-compatibility with the previous single-update form:
-                updates:
-                  update:
-                    operation: inc
-                    field: myfield
-                    value: 21474
-            */
-            if (!warnedDeprecatedUpdates) {
-                warnedDeprecatedUpdates = true;
-                logger.warn(() -> "DEPRECATED: 'updates' as a map with a nested 'update' key is deprecated. " +
-                    "Use a list of operation entries instead (see op template documentation).");
-            }
-            Map<String, Object> updateFields = (Map<String, Object>) ((Map<?,?>) rawMap).get("update");
-            if (updateFields != null) {
-                applyUpdateOperation(update,
-                    updateFields.get("operation").toString(),
-                    updateFields.get("field").toString(),
-                    updateFields.get("value"));
-            }
+        Optional<LongFunction<List>> updatesFunction = op.getAsOptionalFunction("updates", List.class);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> updatesList = updatesFunction
+            .map(f -> (List<Map<String, Object>>) f.apply(l))
+            .orElse(List.of());
+        for (Map<String, Object> entry : updatesList) {
+            String operation = entry.get("operation").toString();
+            String field = entry.get("field").toString();
+            Object value = entry.get("value");
+            applyUpdateOperation(update, operation, field, value);
         }
         return update;
     }
@@ -266,7 +243,46 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return null;
     }
 
-    protected CollectionDefinition getCollectionDefinitionFromOp(ParsedOp op, long l) {
+     /* LEGACY OP DISPENSER UTILS START HERE */
+
+    /*
+    updates:
+        update:
+            operation: inc
+            field: "incd field"
+            value: 500
+     */
+    protected Update getLegacyUpdateFromOp(ParsedOp op, long l) {
+        Update update = new Update();
+        Optional<LongFunction<Map>> updatesFunction = op.getAsOptionalFunction("updates", Map.class);
+        if (updatesFunction.isPresent()) {
+            Map<String, Object> updates = updatesFunction.get().apply(l);
+            for (Map.Entry<String, Object> entry : updates.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase("update")) {
+                    Map<String, Object> updateFields = (Map<String, Object>) entry.getValue();
+                    switch (updateFields.get("operation").toString()) {
+                        case "set" ->
+                            update = Updates.set(updateFields.get("field").toString(), updateFields.get("value"));
+                        case "inc" ->
+                            update = Updates.inc(updateFields.get("field").toString(), ((Number) updateFields.get("value")).doubleValue());
+                        case "unset" -> update = Updates.unset(updateFields.get("field").toString());
+                        case "addToSet" ->
+                            update = Updates.addToSet(updateFields.get("field").toString(), updateFields.get("value"));
+                        case "min" ->
+                            update = Updates.min(updateFields.get("field").toString(), ((Number) updateFields.get("value")).doubleValue());
+                        case "rename" ->
+                            update = Updates.rename(updateFields.get("field").toString(), updateFields.get("value").toString());
+                        default -> logger.error(() -> "Operation " + updateFields.get("operation") + " not supported");
+                    }
+                } else {
+                    logger.error(() -> "Unsupported entry under 'updates': '" + entry.getKey() + "'");
+                }
+            }
+        }
+        return update;
+    }
+
+    protected CollectionDefinition getLegacyCollectionDefinitionFromOp(ParsedOp op, long l) {
         CollectionDefinition optionsBldr = new CollectionDefinition();
         Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
         if (dimFunc.isPresent()) {
