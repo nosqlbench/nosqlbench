@@ -26,10 +26,22 @@ import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.LongFunction;
 
 public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
     private static final Logger logger = LogManager.getLogger(DataApiOpMapper.class);
+
+    // Maps a deprecated op type to its replacement, or null if there is no replacement.
+    private static final Map<DataApiOpType, DataApiOpType> DEPRECATED_OP_TYPES;
+    static {
+        DEPRECATED_OP_TYPES = new HashMap<>();
+        DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection_with_class, null);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_distinct,               null);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_update,         DataApiOpType.collection_find_one_and_update);
+    }
+
     private final DataApiDriverAdapter adapter;
 
     public DataApiOpMapper(DataApiDriverAdapter dataApiDriverAdapter) {
@@ -47,6 +59,16 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             "collection"
         );
         logger.debug(() -> "Using '" + typeAndTarget.enumId + "' op type for op template '" + op.getName() + "'");
+        if (DEPRECATED_OP_TYPES.containsKey(typeAndTarget.enumId)) {
+            DataApiOpType replacement = DEPRECATED_OP_TYPES.get(typeAndTarget.enumId);
+            if (replacement != null) {
+                logger.warn(() -> "Op type '" + typeAndTarget.enumId + "' is deprecated; please switch to '" +
+                    replacement + "'. Op template: '" + op.getName() + "'");
+            } else {
+                logger.warn(() -> "Op type '" + typeAndTarget.enumId + "' is discontinued and will be removed" +
+                    " in a future release. Op template: '" + op.getName() + "'");
+            }
+        }
         return switch (typeAndTarget.enumId) {
             // LEGACY OPS
             // admin ops:
