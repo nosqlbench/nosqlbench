@@ -50,6 +50,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Sort fieldSort = null;
         Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
         if (sortFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
             Map<String,Object> sortFields = sortFunction.get().apply(l);
             String sortOrder = sortFields.get("type").toString();
             String sortField = sortFields.get("field").toString();
@@ -82,12 +83,19 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
-        // TODO: Clarify 'filter' vs 'filters' or whether to support both uniformly
+        Map<String, Object> filterMap = getFreeFormFromOp(op, l, "filter", false);
+        if (filterMap != null) {
+            return new Filter(filterMap);
+        }
+        return null;
+        /*
+        // TODO choose whether to switch to the free-form route (performant? viable re: bindings?)
         Filter filter = null;
         Optional<LongFunction<List>> filterFunction = op.getAsOptionalFunction("filters", List.class)
             .or(() -> op.getAsOptionalFunction("filter",List.class));
 
         if (filterFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
             List<Map<String,Object>> filters = filterFunction.get().apply(l);
             List<Filter> andFilterList = new ArrayList<>();
             List<Filter> orFilterList = new ArrayList<>();
@@ -112,6 +120,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 filter = Filters.or(orFilterList.toArray(new Filter[0]));
         }
         return filter;
+        */
     }
 
     protected void addOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
@@ -147,6 +156,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     protected Update getUpdateFromOp(ParsedOp op, long l) {
+        Map<String, Object> updateMap = getFreeFormFromOp(op, l, "update", true);
+        return new Update(updateMap);
+        /* TODO choose whether to switch to freeform for update
         Update update = Update.create();
         Optional<LongFunction<List>> updatesFunction = op.getAsOptionalFunction("updates", List.class);
         @SuppressWarnings("unchecked")
@@ -160,6 +172,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             applyUpdateOperation(update, operation, field, value);
         }
         return update;
+        */
     }
 
     private void applyUpdateOperation(Update update, String operation, String field, Object value) {
@@ -202,6 +215,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
 
     protected float[] getVectorValuesList(Object rawVectorValues) {
         float[] vectorValues = null;
+        @SuppressWarnings("unchecked")
         List<Object> vectorValuesList = (List<Object>) rawVectorValues;
         vectorValues = new float[vectorValuesList.size()];
         for (int i = 0; i < vectorValuesList.size(); i++) {
@@ -214,6 +228,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Projection[] projection = null;
         Optional<LongFunction<Map>> projectionFunction = op.getAsOptionalFunction("projection", Map.class);
         if (projectionFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
             Map<String,List<String>> projectionFields = projectionFunction.get().apply(l);
             for (Map.Entry<String,List<String>> field : projectionFields.entrySet()) {
                 List<String> includeFields = field.getValue();
@@ -243,6 +258,21 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return null;
     }
 
+    // EXPERIMENTAL: generic free-form
+    @SuppressWarnings("unchecked")
+    protected Map<String, Object> getFreeFormFromOp(ParsedOp op, long l, String fieldName, Boolean required) {
+        Optional<LongFunction<Map>> ffMapFunc = op.getAsOptionalFunction(fieldName, Map.class);
+        if (ffMapFunc.isPresent()) {
+            LongFunction<Map> dmf = ffMapFunc.get();
+            return dmf.apply(l);
+        } else {
+            if (required) {
+                logger.error("Required field '" + fieldName + "' not supplied.");
+            }
+            return null;
+        }
+    }
+
      /* LEGACY OP DISPENSER UTILS START HERE */
 
     /*
@@ -256,9 +286,11 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Update update = new Update();
         Optional<LongFunction<Map>> updatesFunction = op.getAsOptionalFunction("updates", Map.class);
         if (updatesFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
             Map<String, Object> updates = updatesFunction.get().apply(l);
             for (Map.Entry<String, Object> entry : updates.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase("update")) {
+                    @SuppressWarnings("unchecked")
                     Map<String, Object> updateFields = (Map<String, Object>) entry.getValue();
                     switch (updateFields.get("operation").toString()) {
                         case "set" ->
@@ -282,6 +314,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return update;
     }
 
+    @SuppressWarnings("unchecked")
     protected CollectionDefinition getLegacyCollectionDefinitionFromOp(ParsedOp op, long l) {
         CollectionDefinition optionsBldr = new CollectionDefinition();
         Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
