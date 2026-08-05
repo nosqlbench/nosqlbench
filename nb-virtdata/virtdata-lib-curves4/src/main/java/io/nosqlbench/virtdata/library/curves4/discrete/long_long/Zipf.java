@@ -19,12 +19,12 @@ package io.nosqlbench.virtdata.library.curves4.discrete.long_long;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import org.apache.commons.statistics.distribution.ZipfDistribution;
+import io.nosqlbench.virtdata.library.curves4.discrete.common.GrayZipfSampler;
 
 @ThreadSafeMapper
 @Categories({Category.distributions})
 public class Zipf extends LongToLongDiscreteCurve {
     public Zipf(int numberOfElements, double exponent, String... modslist) {
-        super(ZipfDistribution.of(numberOfElements, exponent), modslist);
+        super(new GrayZipfSampler(numberOfElements, exponent), modslist);
     }
 }

@@ -238,11 +238,10 @@ Allows for easy branching over multiple functions with specific weights.
 
 ## Zipf
 
-@see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law) @see [Commons JavaDoc: ZipfDistribution](https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/ZipfDistribution.html)
+@see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law) @see [Jim Gray et al.: Quickly Generating Billion-Record Synthetic Databases](https://doi.org/10.1145/191843.191886)
 
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> int
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> long
 - long -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> int
 - long -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> long
-
 

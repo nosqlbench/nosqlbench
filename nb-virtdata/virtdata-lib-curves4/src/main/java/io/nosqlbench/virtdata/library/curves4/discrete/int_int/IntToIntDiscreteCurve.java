@@ -69,7 +69,6 @@ import java.util.function.IntUnaryOperator;
  */
 public class IntToIntDiscreteCurve implements IntUnaryOperator {
 
-    private final DiscreteDistribution distribution;
     private final IntUnaryOperator function;
 
     public final static String COMPUTE="compute";
@@ -85,10 +84,11 @@ public class IntToIntDiscreteCurve implements IntUnaryOperator {
 
 
     public IntToIntDiscreteCurve(DiscreteDistribution distribution, String... modslist) {
-        this.distribution = distribution;
-        HashSet<String> mods = new HashSet<>(Arrays.asList(modslist));
+        this(new IntegerDistributionICDSource(distribution), modslist);
+    }
 
-        DoubleToIntFunction icdSource = new IntegerDistributionICDSource(distribution);
+    protected IntToIntDiscreteCurve(DoubleToIntFunction icdSource, String... modslist) {
+        HashSet<String> mods = new HashSet<>(Arrays.asList(modslist));
 
         if (mods.contains(HASH) && mods.contains(MAP)) {
             throw new RuntimeException("mods must not contain both "+HASH+" and "+MAP+".");

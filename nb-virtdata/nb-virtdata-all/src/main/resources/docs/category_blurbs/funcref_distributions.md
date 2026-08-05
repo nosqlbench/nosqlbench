@@ -46,18 +46,13 @@ category.
 When sampling from mathematical models of probability densities,
 performance between different densities can vary drastically. This means
 that you may end up perturbing the results of your test in an unexpected
-way simply by changing parameters of your testing distributions. Even
-worse, some densities have painful corner cases in performance, like
-'Zipf', which can make tests unbearably slow and flawed as they chew up
-CPU resources.
+way simply by changing parameters of your testing distributions.
 
 **NOTE:**
-Functions like 'Zipf' can still take a long time to initialize for certain
-parameters. If you are seeing a workload that seems to hang while
-initializing, it might be computing complex integrals for large parameters
-of Zipf. We hope to pre-compute and cache these at a future time to avoid
-this type of impact. For now, just be aware that some parameters on some
-density curves can be expensive to compute _even during initialization_.
+Zipf uses the constant-time pseudo-sampling approximation from Jim Gray et al.,
+with exact weights for its first two ranks. Its normalization constant still
+requires one pass over the configured elements during initialization, while
+each sample thereafter takes constant time.
 
 ### Interpolated Samples
 
@@ -103,5 +98,4 @@ is used in mathematics and statistics, but more tailored to modern system capabi
 interval, we simply use the interval of all positive longs. This provides more compatibility with other functions in
 VirtData, including hashing functions. Internally, this value is automatically converted to a unit interval variate as
 needed to work well with the distributions from Apache Math.
-
 
