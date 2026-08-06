@@ -36,16 +36,16 @@ public class IntegratedCurvesTest {
 
     @Test
     public void testZipf() {
-        DataMapper<Long> mapper = VirtData.getMapper("Zipf(1000,2) -> long", long.class);
+        DataMapper<Long> mapper = VirtData.getMapper("Zipf(1000,0.99) -> long", long.class);
         RunData runData = iterateMapperLong(mapper, 10000);
         logger.debug(runData);
 
         assertThat(runData.getStats().getPercentile(0.1d)).isCloseTo(1.0, Offset.offset(0.01d));
         assertThat(runData.getStats().getPercentile(1.0d)).isCloseTo(1.0, Offset.offset(0.01d));
         assertThat(runData.getStats().getPercentile(10.0d)).isCloseTo(1.0, Offset.offset(0.01d));
-        assertThat(runData.getStats().getPercentile(90.0d)).isCloseTo(6.0, Offset.offset(0.01d));
-        assertThat(runData.getStats().getPercentile(99.0d)).isCloseTo(55.989, Offset.offset(0.01d));
-        assertThat(runData.getStats().getPercentile(99.9d)).isCloseTo(202.999, Offset.offset(0.01d));
+        assertThat(runData.getStats().getPercentile(90.0d)).isBetween(400.0d, 700.0d);
+        assertThat(runData.getStats().getPercentile(99.0d)).isBetween(800.0d, 1000.0d);
+        assertThat(runData.getStats().getPercentile(99.9d)).isBetween(900.0d, 1000.0d);
 
     }
 

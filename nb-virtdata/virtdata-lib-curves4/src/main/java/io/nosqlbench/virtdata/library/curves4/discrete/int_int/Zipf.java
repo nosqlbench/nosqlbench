@@ -19,18 +19,22 @@ package io.nosqlbench.virtdata.library.curves4.discrete.int_int;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import io.nosqlbench.virtdata.library.curves4.discrete.common.GrayZipfSampler;
+import io.nosqlbench.virtdata.library.curves4.discrete.common.FastZipfSampler;
 
 /**
+ * Jim Gray's constant-time approximate Zipf sampler.
+ *
+ * <p>{@code numberOfElements} must be at least one and {@code exponent}, Gray's theta
+ * parameter, must be in {@code [0.0, 1.0)}. Initialization is O(numberOfElements) and
+ * each computed sample is O(1).</p>
+ *
  * @see <a href="https://en.wikipedia.org/wiki/Zipf's_law">Wikipedia: Zipf's Law</a>
- *
  * @see <a href="https://doi.org/10.1145/191843.191886">Jim Gray et al.: Quickly Generating Billion-Record Synthetic Databases</a>
- *
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})
 public class Zipf extends IntToIntDiscreteCurve {
     public Zipf(int numberOfElements, double exponent, String... modslist) {
-        super(new GrayZipfSampler(numberOfElements, exponent), modslist);
+        super(new FastZipfSampler(numberOfElements, exponent), modslist);
     }
 }

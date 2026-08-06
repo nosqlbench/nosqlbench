@@ -69,12 +69,12 @@ public class IntegratedTemporalExamplesTest {
     @Test
     public void timeuuidSkewExample() {
         DataMapper<UUID> uuidgen = VirtData.getMapper(
-                "Zipf(10,2); ToEpochTimeUUID('2017-01-01 23:59:59') -> java.util.UUID;",
+                "Zipf(10,0.99); ToEpochTimeUUID('2017-01-01 23:59:59') -> java.util.UUID;",
                 UUID.class
         );
         UUID uuid1 = uuidgen.get(1L);
         System.out.println(uuid1);
-        assertThat(uuid1).isEqualTo(UUID.fromString("7a4637a0-ee50-1398-8000-000000000000"));
+        assertThat(uuid1).isEqualTo(UUID.fromString("7a4685c0-ee50-1398-8000-000000000000"));
     }
 
     /**
@@ -159,12 +159,12 @@ public class IntegratedTemporalExamplesTest {
     @Test
     public void manualOffsetAndSkewedDateTimeExample() {
         DataMapper<DateTime> dateTimeMapper = VirtData.getMapper(
-                "Zipf(10,2); StartingEpochMillis('2015-01-01'); ToDateTime()-> org.joda.time.DateTime;",
+                "Zipf(10,0.99); StartingEpochMillis('2015-01-01'); ToDateTime()-> org.joda.time.DateTime;",
                 DateTime.class
         );
         DateTime dt = dateTimeMapper.get(6L);
         assertThat(dt).isEqualTo(
-                new DateTime(2015, 1, 1, 0, 0, 0, 2,
+                new DateTime(2015, 1, 1, 0, 0, 0, 4,
                         DateTimeZone.UTC)
         );
 

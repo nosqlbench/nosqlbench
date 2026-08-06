@@ -22,7 +22,6 @@ import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
@@ -38,33 +37,32 @@ public class IntegerDistributionsValuesTest {
     private final static Logger logger = LogManager.getLogger(IntegerDistributionsValuesTest.class);
 
 
-    @Disabled
     @Test
     public void testComputedZipf() {
-        RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
+        RunData runData = iterateMapperLong(new Zipf(10000, 0.99, "compute"), 10000);
         logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
-                .isCloseTo(1.0D, Offset.offset(0.0001D));
+                .isBetween(150.0D, 260.0D);
         assertThat(runData.getFractionalPercentile(0.7D))
-                .isCloseTo(2.0D, Offset.offset(0.0001D));
+                .isBetween(430.0D, 660.0D);
         assertThat(runData.getFractionalPercentile(0.8D))
-                .isCloseTo(3.0D, Offset.offset(0.0001D));
+                .isBetween(1150.0D, 1750.0D);
         assertThat(runData.getFractionalPercentile(0.9D))
-                .isCloseTo(5.0D, Offset.offset(0.0001D));
+                .isBetween(3000.0D, 4600.0D);
     }
 
     @Test
     public void testInterpolatedZipf() {
-        RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
+        RunData runData = iterateMapperLong(new Zipf(10000, 0.99), 10000);
         logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
-                .isCloseTo(1.0D, Offset.offset(0.0001D));
+                .isBetween(150.0D, 260.0D);
         assertThat(runData.getFractionalPercentile(0.7D))
-                .isCloseTo(2.0D, Offset.offset(0.0001D));
+                .isBetween(430.0D, 660.0D);
         assertThat(runData.getFractionalPercentile(0.8D))
-                .isCloseTo(3.0D, Offset.offset(0.0001D));
+                .isBetween(1150.0D, 1750.0D);
         assertThat(runData.getFractionalPercentile(0.9D))
-                .isCloseTo(5.0D, Offset.offset(0.0001D));
+                .isBetween(3000.0D, 4600.0D);
     }
 
     @Test

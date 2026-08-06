@@ -240,8 +240,12 @@ Allows for easy branching over multiple functions with specific weights.
 
 @see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law) @see [Jim Gray et al.: Quickly Generating Billion-Record Synthetic Databases](https://doi.org/10.1145/191843.191886)
 
+Uses Jim Gray's constant-time pseudo-sampling approximation after O(numberOfElements)
+initialization. `numberOfElements` must be at least one, and `exponent` (Gray's theta
+parameter) must be in `[0.0, 1.0)`. The sampler's internal uniform input is in
+`[0.0, 1.0)`; an input of exactly `1.0` is converted with `Math.nextDown(1.0)`.
+
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> int
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> long
 - long -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> int
 - long -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> long
-

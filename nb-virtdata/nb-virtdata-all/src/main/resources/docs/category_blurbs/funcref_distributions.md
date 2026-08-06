@@ -52,7 +52,10 @@ way simply by changing parameters of your testing distributions.
 Zipf uses the constant-time pseudo-sampling approximation from Jim Gray et al.,
 with exact weights for its first two ranks. Its normalization constant still
 requires one pass over the configured elements during initialization, while
-each sample thereafter takes constant time.
+each sample thereafter takes constant time. `numberOfElements` must be at least
+one, and `exponent` (Gray's theta parameter) must be in the range `[0.0, 1.0)`.
+The sampler accepts uniform input in `[0.0, 1.0]` and converts the exact upper
+endpoint to `Math.nextDown(1.0)` before evaluating Gray's formula over `[0.0, 1.0)`.
 
 ### Interpolated Samples
 
@@ -98,4 +101,3 @@ is used in mathematics and statistics, but more tailored to modern system capabi
 interval, we simply use the interval of all positive longs. This provides more compatibility with other functions in
 VirtData, including hashing functions. Internally, this value is automatically converted to a unit interval variate as
 needed to work well with the distributions from Apache Math.
-

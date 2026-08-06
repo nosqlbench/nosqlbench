@@ -81,7 +81,7 @@ bindings:
   poisson: Poisson(5.0)
   # https://en.wikipedia.org/wiki/Zipf%27s_law
   # (int elements, double exponent)
-  zipf: Zipf(10,5.0)
+  zipf: Zipf(10,0.99)
   # https://en.wikipedia.org/wiki/Binomial_distribution
   # (int trials, double probability)
   binomial: Binomial(8,0.5)
