@@ -27,10 +27,10 @@ public class ZipfTest {
     @Disabled
     public void testZipfMatrix() {
 
-        for (int i = 1; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             for (int j = 0; j < 10; j++) {
                 int elements = (int) Math.pow(10,j);
-                double exponent = i / 10.0d;
+                double exponent = (double) i+1;
                 System.out.println("i:" + i + " j:" + j + " elements:" + elements + " exp:" + exponent);
                 long startAt = System.nanoTime();
                 Zipf z = new Zipf(elements, exponent, "compute", "map");
