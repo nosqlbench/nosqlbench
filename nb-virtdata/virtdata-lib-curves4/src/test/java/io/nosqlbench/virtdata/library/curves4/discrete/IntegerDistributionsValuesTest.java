@@ -48,7 +48,7 @@ public class IntegerDistributionsValuesTest {
         assertThat(runData.getFractionalPercentile(0.8D))
                 .isCloseTo(3.0D, Offset.offset(0.0001D));
         assertThat(runData.getFractionalPercentile(0.9D))
-                .isCloseTo(5.0D, Offset.offset(0.0001D));
+                .isCloseTo(6.0D, Offset.offset(0.0001D));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class IntegerDistributionsValuesTest {
         assertThat(runData.getFractionalPercentile(0.8D))
                 .isCloseTo(3.0D, Offset.offset(0.0001D));
         assertThat(runData.getFractionalPercentile(0.9D))
-                .isCloseTo(5.0D, Offset.offset(0.0001D));
+                .isCloseTo(6.0D, Offset.offset(0.0001D));
     }
 
     @Test

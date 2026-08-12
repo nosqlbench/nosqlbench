@@ -241,7 +241,7 @@ Allows for easy branching over multiple functions with specific weights.
 @see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law)
 
 Uses a constant-time approximate inverse sampler after O(numberOfElements)
-initialization. The first two ranks use exact cumulative weights and the remaining ranks
+initialization. The first eight ranks use exact cumulative weights and the remaining ranks
 use a continuous power-law approximation. `numberOfElements` must be at least one and
 `exponent` must be finite and non-negative. The sampler accepts internal uniform input in
 `[0.0, 1.0]`; an input of exactly `1.0` is converted with `Math.nextDown(1.0)`.

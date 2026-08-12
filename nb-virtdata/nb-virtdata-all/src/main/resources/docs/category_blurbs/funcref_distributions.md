@@ -50,7 +50,7 @@ way simply by changing parameters of your testing distributions.
 
 **NOTE:**
 Zipf uses a constant-time approximate inverse sampler, with exact cumulative
-weights for its first two ranks and a continuous power-law approximation for
+weights for its first eight ranks and a continuous power-law approximation for
 the remaining ranks. Its normalization constant requires one pass over the
 configured elements during initialization, while each sample thereafter takes
 constant time. `numberOfElements` must be at least one, and `exponent` must be

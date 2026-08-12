@@ -21,7 +21,7 @@ import java.util.function.DoubleToIntFunction;
 /**
  * A constant-time approximate inverse Zipf sampler for a finite domain.
  *
- * <p>The first two ranks use their exact cumulative weights. The remaining ranks use a
+ * <p>The first eight ranks use their exact cumulative weights. The remaining ranks use a
  * continuous power-law approximation conditioned on the remaining probability mass.
  * Parameter calculation takes one pass over the ranks ({@code O(numberOfElements)}),
  * except for the uniform case; each subsequent sample takes constant time
@@ -34,7 +34,7 @@ import java.util.function.DoubleToIntFunction;
  */
 public final class FastZipfSampler implements DoubleToIntFunction {
 
-    private static final int CDF_TABLE_SIZE = 2;
+    private static final int CDF_TABLE_SIZE = 8;
 
     private final int numberOfElements;
     private final double alpha;
