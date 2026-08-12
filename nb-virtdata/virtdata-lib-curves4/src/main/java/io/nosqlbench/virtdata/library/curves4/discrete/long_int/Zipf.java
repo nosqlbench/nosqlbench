@@ -22,13 +22,13 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.library.curves4.discrete.common.FastZipfSampler;
 
 /**
- * Jim Gray's constant-time approximate Zipf sampler.
+ * A constant-time approximate Zipf sampler.
  *
- * <p>{@code numberOfElements} must be at least one and {@code exponent}, Gray's theta
- * parameter, must be in {@code [0.0, 1.0)}. Initialization is O(numberOfElements) and
- * each computed sample is O(1).</p>
+ * <p>{@code numberOfElements} must be at least one and {@code exponent} must be finite
+ * and non-negative. Initialization is O(numberOfElements) and each computed sample is
+ * O(1).</p>
  *
- * @see <a href="https://doi.org/10.1145/191843.191886">Jim Gray et al.: Quickly Generating Billion-Record Synthetic Databases</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Zipf's_law">Wikipedia: Zipf's Law</a>
  */
 @ThreadSafeMapper
 @Categories({Category.distributions})

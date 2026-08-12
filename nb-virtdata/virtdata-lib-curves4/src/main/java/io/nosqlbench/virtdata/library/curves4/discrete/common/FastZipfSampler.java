@@ -19,43 +19,43 @@ package io.nosqlbench.virtdata.library.curves4.discrete.common;
 import java.util.function.DoubleToIntFunction;
 
 /**
- * The constant-time approximate inverse Zipf sampler described by Jim Gray et al. in
- * <a href="https://doi.org/10.1145/191843.191886">Quickly Generating Billion-Record
- * Synthetic Databases</a>.
+ * A constant-time approximate inverse Zipf sampler for a finite domain.
  *
- * <p>The first two ranks use their exact cumulative weights. The remaining ranks use
- * the paper's corrected continuous approximation. Parameter calculation takes one pass
- * over the ranks ({@code O(numberOfElements)}); each subsequent sample takes constant
- * time ({@code O(1)}).</p>
+ * <p>The first two ranks use their exact cumulative weights. The remaining ranks use a
+ * continuous power-law approximation conditioned on the remaining probability mass.
+ * Parameter calculation takes one pass over the ranks ({@code O(numberOfElements)}),
+ * except for the uniform case; each subsequent sample takes constant time
+ * ({@code O(1)}).</p>
  *
- * <p>This implementation uses the parameter range defined by Gray's algorithm:
- * {@code numberOfElements >= 1} and {@code 0.0 <= exponent < 1.0}. The sampler accepts
- * a uniform variate in {@code [0.0, 1.0]}; the upper endpoint is converted to
- * {@code Math.nextDown(1.0)} before evaluating Gray's formula over {@code [0.0, 1.0)}.</p>
+ * <p>{@code numberOfElements} must be at least one and {@code exponent} must be finite
+ * and non-negative. The sampler accepts a uniform variate in {@code [0.0, 1.0]}; the
+ * upper endpoint is converted to {@code Math.nextDown(1.0)} before sampling over
+ * {@code [0.0, 1.0)}.</p>
  */
 public final class FastZipfSampler implements DoubleToIntFunction {
+
+    private static final int CDF_TABLE_SIZE = 2;
 
     private final int numberOfElements;
     private final double alpha;
     private final double[] cdf;
-    private final double eta;
 
     /**
      * Creates a sampler for a finite Zipf domain.
      *
      * @param numberOfElements the number of ranks, starting at rank one
-     * @param exponent Gray's theta parameter
+     * @param exponent the Zipf exponent
      * @throws IllegalArgumentException if {@code numberOfElements < 1}, or if
-     *         {@code exponent} is not in {@code [0.0, 1.0)}
+     *         {@code exponent} is negative or non-finite
      */
     public FastZipfSampler(int numberOfElements, double exponent) {
         if (numberOfElements <= 0) {
             throw new IllegalArgumentException(
                     "numberOfElements must be greater than zero: " + numberOfElements);
         }
-        if (!Double.isFinite(exponent) || exponent < 0.0d || exponent >= 1.0d) {
+        if (!Double.isFinite(exponent) || exponent < 0.0d) {
             throw new IllegalArgumentException(
-                    "exponent must be in the range [0.0, 1.0): " + exponent);
+                    "exponent must be finite and non-negative: " + exponent);
         }
 
         this.numberOfElements = numberOfElements;
@@ -63,21 +63,18 @@ public final class FastZipfSampler implements DoubleToIntFunction {
         double zetan = exponent == 0.0d
                 ? numberOfElements
                 : generalizedHarmonic(numberOfElements, exponent);
-        double zeta2 = numberOfElements == 1
-                ? 1.0d
-                : 1.0d + Math.pow(0.5d, exponent);
 
-        this.cdf = new double[]{1.0d / zetan, zeta2 / zetan};
-        this.alpha = 1.0d / (1.0d - exponent);
-
-        if (numberOfElements <= 2) {
-            this.eta = 0.0d;
-        } else {
-            double oneMinusExponent = 1.0d - exponent;
-            double numerator = -Math.expm1(
-                    oneMinusExponent * Math.log(2.0d / numberOfElements));
-            this.eta = numerator / (1.0d - cdf[1]);
+        this.cdf = new double[CDF_TABLE_SIZE];
+        double cumulative = 0.0d;
+        int exactRanks = Math.min(numberOfElements, cdf.length);
+        for (int i = 0; i < exactRanks; i++) {
+            cumulative += exponent == 0.0d
+                    ? 1.0d
+                    : Math.pow((double) i + 1.0d, -exponent);
+            cdf[i] = cumulative / zetan;
         }
+
+        this.alpha = 1.0d - exponent;
     }
 
     /**
@@ -104,11 +101,18 @@ public final class FastZipfSampler implements DoubleToIntFunction {
             }
         }
 
-        double rank = (double) numberOfElements * Math.exp(
-                alpha * Math.log1p(eta * (uniform - 1.0d)));
-        long sample = 1L + (long) rank;
+        double tailCdf = cdf[cdf.length - 1];
+        double tailUniform = (uniform - tailCdf) / (1.0d - tailCdf);
+        double lowerRank = cdf.length;
+        double upperRank = Math.nextDown((double) numberOfElements);
+        double logRange = Math.log(upperRank / lowerRank);
 
-        return (int) Math.max(3L, Math.min(numberOfElements, sample));
+        double scale = alpha == 0.0d
+                ? tailUniform * logRange
+                : Math.log1p(tailUniform * Math.expm1(alpha * logRange)) / alpha;
+        long zeroBasedRank = (long) (lowerRank * Math.exp(scale));
+
+        return (int) (Math.min(zeroBasedRank, (long) numberOfElements - 1L) + 1L);
     }
 
     private static double generalizedHarmonic(int numberOfElements, double exponent) {

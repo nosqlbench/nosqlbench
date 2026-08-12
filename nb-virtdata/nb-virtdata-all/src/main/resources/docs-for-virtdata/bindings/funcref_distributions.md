@@ -238,12 +238,13 @@ Allows for easy branching over multiple functions with specific weights.
 
 ## Zipf
 
-@see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law) @see [Jim Gray et al.: Quickly Generating Billion-Record Synthetic Databases](https://doi.org/10.1145/191843.191886)
+@see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law)
 
-Uses Jim Gray's constant-time pseudo-sampling approximation after O(numberOfElements)
-initialization. `numberOfElements` must be at least one, and `exponent` (Gray's theta
-parameter) must be in `[0.0, 1.0)`. The sampler's internal uniform input is in
-`[0.0, 1.0)`; an input of exactly `1.0` is converted with `Math.nextDown(1.0)`.
+Uses a constant-time approximate inverse sampler after O(numberOfElements)
+initialization. The first two ranks use exact cumulative weights and the remaining ranks
+use a continuous power-law approximation. `numberOfElements` must be at least one and
+`exponent` must be finite and non-negative. The sampler accepts internal uniform input in
+`[0.0, 1.0]`; an input of exactly `1.0` is converted with `Math.nextDown(1.0)`.
 
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> int
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> long

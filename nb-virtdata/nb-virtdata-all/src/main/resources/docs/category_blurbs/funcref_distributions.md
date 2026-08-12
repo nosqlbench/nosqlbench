@@ -49,13 +49,13 @@ that you may end up perturbing the results of your test in an unexpected
 way simply by changing parameters of your testing distributions.
 
 **NOTE:**
-Zipf uses the constant-time pseudo-sampling approximation from Jim Gray et al.,
-with exact weights for its first two ranks. Its normalization constant still
-requires one pass over the configured elements during initialization, while
-each sample thereafter takes constant time. `numberOfElements` must be at least
-one, and `exponent` (Gray's theta parameter) must be in the range `[0.0, 1.0)`.
-The sampler accepts uniform input in `[0.0, 1.0]` and converts the exact upper
-endpoint to `Math.nextDown(1.0)` before evaluating Gray's formula over `[0.0, 1.0)`.
+Zipf uses a constant-time approximate inverse sampler, with exact cumulative
+weights for its first two ranks and a continuous power-law approximation for
+the remaining ranks. Its normalization constant requires one pass over the
+configured elements during initialization, while each sample thereafter takes
+constant time. `numberOfElements` must be at least one, and `exponent` must be
+finite and non-negative. The sampler accepts uniform input in `[0.0, 1.0]` and
+converts the exact upper endpoint to `Math.nextDown(1.0)` before sampling.
 
 ### Interpolated Samples
 
