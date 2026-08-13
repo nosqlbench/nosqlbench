@@ -184,6 +184,7 @@ For recognizing contributions, please follow [this documentation](https://allcon
     </tr>
     <tr>
       <td align="center" valign="top" width="16.66%"><a href="https://github.com/stheodosius-sky"><img src="https://avatars.githubusercontent.com/u/110117464?v=4?s=50" width="50px;" alt="Simon Theodosius"/><br /><sub><b>Simon Theodosius</b></sub></a><br /><a href="#design-stheodosius-sky" title="Design">🎨</a> <a href="#example-stheodosius-sky" title="Examples">💡</a> <a href="#ideas-stheodosius-sky" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="16.66%"><a href="http://sira.dev"><img src="https://avatars.githubusercontent.com/u/1114146?v=4?s=50" width="50px;" alt="Youki Shiraishi"/><br /><sub><b>Youki Shiraishi</b></sub></a><br /><a href="#design-stonewhitener" title="Design">🎨</a> <a href="https://github.com/nosqlbench/nosqlbench/commits?author=stonewhitener" title="Tests">⚠️</a> <a href="#ideas-stonewhitener" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
 </table>
