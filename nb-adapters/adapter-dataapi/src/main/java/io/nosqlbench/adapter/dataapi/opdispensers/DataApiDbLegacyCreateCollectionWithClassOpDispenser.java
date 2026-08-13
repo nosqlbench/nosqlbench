@@ -18,27 +18,27 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCreateCollectionWithClassOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDbLegacyCreateCollectionWithClassOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiCreateCollectionWithClassOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCreateCollectionWithClassOpDispenser.class);
-    private final LongFunction<DataApiCreateCollectionWithClassOp> opFunction;
+public class DataApiDbLegacyCreateCollectionWithClassOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDbLegacyCreateCollectionWithClassOpDispenser.class);
+    private final LongFunction<DataApiDbLegacyCreateCollectionWithClassOp> opFunction;
 
-    public DataApiCreateCollectionWithClassOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiDbLegacyCreateCollectionWithClassOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCreateCollectionWithClassOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiCreateCollectionWithClassOp(
+    private LongFunction<DataApiDbLegacyCreateCollectionWithClassOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiDbLegacyCreateCollectionWithClassOp(
             spaceFunction.apply(l).getDatabase(),
             targetFunction.apply(l),
-            this.getCollectionDefinitionFromOp(op, l),
+            this.getLegacyCollectionDefinitionFromOp(op, l),
             getCreateClass(op, l)
         );
     }
