@@ -19,12 +19,21 @@ package io.nosqlbench.virtdata.library.curves4.discrete.long_int;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
-import org.apache.commons.statistics.distribution.ZipfDistribution;
+import io.nosqlbench.virtdata.library.curves4.discrete.common.FastZipfSampler;
 
+/**
+ * A constant-time approximate Zipf sampler.
+ *
+ * <p>{@code numberOfElements} must be at least one and {@code exponent} must be finite
+ * and non-negative. Initialization is O(numberOfElements) and each computed sample is
+ * O(1).</p>
+ *
+ * @see <a href="https://en.wikipedia.org/wiki/Zipf's_law">Wikipedia: Zipf's Law</a>
+ */
 @ThreadSafeMapper
 @Categories({Category.distributions})
 public class Zipf extends LongToIntDiscreteCurve {
     public Zipf(int numberOfElements, double exponent, String... modslist) {
-        super(ZipfDistribution.of(numberOfElements, exponent), modslist);
+        super(new FastZipfSampler(numberOfElements, exponent), modslist);
     }
 }

@@ -261,6 +261,12 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
 
     @Override
     protected void task() {
+        synchronized (scheduleLock) {
+            captureSnapshotLocked();
+        }
+    }
+
+    private void captureSnapshotLocked() {
         if (consumerIntervals.isEmpty()) {
             return;
         }
@@ -271,7 +277,10 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         boolean includeHdrPayload = consumerIntervals.keySet().stream()
             .anyMatch(MetricsSnapshotConsumer::requiresHdrPayload);
         MetricsView snapshot = MetricsView.capture(metrics, baseIntervalMillis, includeHdrPayload);
-        processSnapshot(snapshot);
+        ScheduleNode base = scheduleNodes.get(baseIntervalMillis);
+        if (base != null) {
+            base.ingest(snapshot);
+        }
     }
 
     public void injectSnapshotForTesting(MetricsView view) {
@@ -285,29 +294,19 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
     /// Without this, short runs (where no periodic tick fires before completion) leave
     /// activity-level metrics out of the SQLite database entirely.
     ///
-    /// Unlike a periodic tick, this **bypasses the per-consumer interval bucketing** and
-    /// emits the captured view directly to every registered consumer. Otherwise a single
-    /// trigger would only contribute the base-interval amount toward each consumer's
-    /// accumulated time and consumers with longer intervals (e.g. SQLite at 30s vs CSV at
-    /// 5s) would still wait for their normal bucket boundary — defeating the point of the
-    /// final flush.
+    /// The final view is ingested through the normal cadence hierarchy, then every partial
+    /// bucket is flushed recursively. This preserves snapshots which were already pending
+    /// for slower consumers (e.g. SQLite at 30s vs CSV at 5s), while ensuring that the newly
+    /// captured delta is delivered exactly once.
     public void triggerSnapshot() {
-        if (consumerIntervals.isEmpty()) {
-            return;
-        }
-        List<NBMetric> metrics = new ArrayList<>(getParent().find().metrics());
-        if (metrics.isEmpty()) {
-            return;
-        }
-        boolean includeHdrPayload = consumerIntervals.keySet().stream()
-            .anyMatch(MetricsSnapshotConsumer::requiresHdrPayload);
-        MetricsView snapshot = MetricsView.capture(metrics, baseIntervalMillis, includeHdrPayload);
-        for (MetricsSnapshotConsumer consumer : consumerIntervals.keySet()) {
+        synchronized (scheduleLock) {
             try {
-                consumer.onMetricsSnapshot(snapshot);
-            } catch (Exception e) {
-                logger.warn("Final-snapshot consumer {} threw exception",
-                    consumer.getClass().getSimpleName(), e);
+                captureSnapshotLocked();
+            } finally {
+                ScheduleNode base = scheduleNodes.get(baseIntervalMillis);
+                if (base != null) {
+                    base.flushPending();
+                }
             }
         }
     }
@@ -379,6 +378,21 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
                     child.ingest(ready);
                 }
                 return;
+            }
+        }
+
+        private void flushPending() {
+            if (pending != null) {
+                MetricsView ready = pending;
+                pending = null;
+                accumulatedMillis = 0L;
+                emit(ready);
+                for (ScheduleNode child : children) {
+                    child.ingest(ready);
+                }
+            }
+            for (ScheduleNode child : children) {
+                child.flushPending();
             }
         }
 

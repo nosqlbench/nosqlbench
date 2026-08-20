@@ -587,6 +587,17 @@
         "example",
         "ideas"
       ]
+    },
+    {
+      "login": "stonewhitener",
+      "name": "Youki Shiraishi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1114146?v=4",
+      "profile": "http://sira.dev",
+      "contributions": [
+        "design",
+        "test",
+        "ideas"
+      ]
     }
   ],
   "commitType": "docs"

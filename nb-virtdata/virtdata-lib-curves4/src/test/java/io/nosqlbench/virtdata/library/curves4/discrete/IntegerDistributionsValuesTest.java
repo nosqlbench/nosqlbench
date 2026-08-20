@@ -22,7 +22,6 @@ import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
@@ -38,10 +37,9 @@ public class IntegerDistributionsValuesTest {
     private final static Logger logger = LogManager.getLogger(IntegerDistributionsValuesTest.class);
 
 
-    @Disabled
     @Test
     public void testComputedZipf() {
-        RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
+        RunData runData = iterateMapperLong(new Zipf(10000, 2.0, "compute"), 10000);
         logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
                 .isCloseTo(1.0D, Offset.offset(0.0001D));
@@ -55,7 +53,7 @@ public class IntegerDistributionsValuesTest {
 
     @Test
     public void testInterpolatedZipf() {
-        RunData runData = iterateMapperLong(new Zipf(10000,2.0), 10000);
+        RunData runData = iterateMapperLong(new Zipf(10000, 2.0), 10000);
         logger.debug(runData);
         assertThat(runData.getFractionalPercentile(0.6D))
                 .isCloseTo(1.0D, Offset.offset(0.0001D));

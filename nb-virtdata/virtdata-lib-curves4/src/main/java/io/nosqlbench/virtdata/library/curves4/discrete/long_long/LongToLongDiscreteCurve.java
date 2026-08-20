@@ -69,7 +69,6 @@ import java.util.function.LongUnaryOperator;
  */
 public class LongToLongDiscreteCurve implements LongUnaryOperator {
 
-    private final DiscreteDistribution distribution;
     private final LongUnaryOperator function;
 
     public final static String COMPUTE="compute";
@@ -84,10 +83,11 @@ public class LongToLongDiscreteCurve implements LongUnaryOperator {
     }};
 
     public LongToLongDiscreteCurve(DiscreteDistribution distribution, String... modslist) {
-        this.distribution = distribution;
-        HashSet<String> mods = new HashSet<>(Arrays.asList(modslist));
+        this(new IntegerDistributionICDSource(distribution), modslist);
+    }
 
-        DoubleToIntFunction icdSource = new IntegerDistributionICDSource(distribution);
+    protected LongToLongDiscreteCurve(DoubleToIntFunction icdSource, String... modslist) {
+        HashSet<String> mods = new HashSet<>(Arrays.asList(modslist));
 
         if (mods.contains(HASH) && mods.contains(MAP)) {
             throw new RuntimeException("mods must not contain both "+HASH+" and "+MAP+".");
