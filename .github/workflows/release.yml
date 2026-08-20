@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: setup java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           distribution: 'oracle'
           java-version: '25'
@@ -139,7 +139,7 @@ jobs:
 
       #  https://github.com/softprops/action-gh-release
       - name: create github release
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           #          body: ${{ steps.prepare_summary.outputs.release_summary }}
