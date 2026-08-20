@@ -238,11 +238,15 @@ Allows for easy branching over multiple functions with specific weights.
 
 ## Zipf
 
-@see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law) @see [Commons JavaDoc: ZipfDistribution](https://commons.apache.org/proper/commons-statistics/commons-statistics-distribution/apidocs/org/apache/commons/statistics/distribution/ZipfDistribution.html)
+@see [Wikipedia: Zipf's Law](https://en.wikipedia.org/wiki/Zipf's_law)
+
+Uses a constant-time approximate inverse sampler after O(numberOfElements)
+initialization. The first eight ranks use exact cumulative weights and the remaining ranks
+use a continuous power-law approximation. `numberOfElements` must be at least one and
+`exponent` must be finite and non-negative. The sampler accepts internal uniform input in
+`[0.0, 1.0]`; an input of exactly `1.0` is converted with `Math.nextDown(1.0)`.
 
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> int
 - int -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> long
 - long -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> int
 - long -> Zipf(int: numberOfElements, double: exponent, java.lang.String[]...: modslist) -> long
-
-
