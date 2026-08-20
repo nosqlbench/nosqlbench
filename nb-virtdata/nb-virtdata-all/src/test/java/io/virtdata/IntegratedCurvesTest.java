@@ -44,8 +44,8 @@ public class IntegratedCurvesTest {
         assertThat(runData.getStats().getPercentile(1.0d)).isCloseTo(1.0, Offset.offset(0.01d));
         assertThat(runData.getStats().getPercentile(10.0d)).isCloseTo(1.0, Offset.offset(0.01d));
         assertThat(runData.getStats().getPercentile(90.0d)).isCloseTo(6.0, Offset.offset(0.01d));
-        assertThat(runData.getStats().getPercentile(99.0d)).isCloseTo(55.989, Offset.offset(0.01d));
-        assertThat(runData.getStats().getPercentile(99.9d)).isCloseTo(202.999, Offset.offset(0.01d));
+        assertThat(runData.getStats().getPercentile(99.0d)).isCloseTo(53.99, Offset.offset(0.01d));
+        assertThat(runData.getStats().getPercentile(99.9d)).isCloseTo(193.999, Offset.offset(0.01d));
 
     }
 

@@ -69,7 +69,6 @@ import java.util.function.LongToIntFunction;
  */
 public class LongToIntDiscreteCurve implements LongToIntFunction {
 
-    private final DiscreteDistribution distribution;
     private final LongToIntFunction function;
 
     public final static String COMPUTE="compute";
@@ -84,10 +83,11 @@ public class LongToIntDiscreteCurve implements LongToIntFunction {
     }};
 
     public LongToIntDiscreteCurve(DiscreteDistribution distribution, String... modslist) {
-        this.distribution = distribution;
-        HashSet<String> mods = new HashSet<>(Arrays.asList(modslist));
+        this(new IntegerDistributionICDSource(distribution), modslist);
+    }
 
-        DoubleToIntFunction icdSource = new IntegerDistributionICDSource(distribution);
+    protected LongToIntDiscreteCurve(DoubleToIntFunction icdSource, String... modslist) {
+        HashSet<String> mods = new HashSet<>(Arrays.asList(modslist));
 
         if (mods.contains(HASH) && mods.contains(MAP)) {
             throw new RuntimeException("mods must not contain both "+HASH+" and "+MAP+".");

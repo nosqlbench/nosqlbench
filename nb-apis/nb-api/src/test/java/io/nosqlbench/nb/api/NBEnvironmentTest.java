@@ -20,6 +20,9 @@ import io.nosqlbench.nb.api.system.NBEnvironment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,7 +45,10 @@ public class NBEnvironmentTest {
         NBEnvironment env = new NBEnvironment();
         long millis = 1633964892320L;
         String time1 = env.interpolateWithTimestamp("word WOO$WOO %td %% end", millis, Map.of("WOO","WOW")).orElse(null);
-        assertThat(time1).isEqualTo("word WOOWOW 11 % end");
+        String expectedDay = DateTimeFormatter.ofPattern("dd")
+                .withZone(ZoneId.systemDefault())
+                .format(Instant.ofEpochMilli(millis));
+        assertThat(time1).isEqualTo("word WOOWOW " + expectedDay + " % end");
     }
 
     @Test
