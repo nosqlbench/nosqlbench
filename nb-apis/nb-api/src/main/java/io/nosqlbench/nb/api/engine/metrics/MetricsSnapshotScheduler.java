@@ -120,10 +120,9 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
                     throw new IllegalArgumentException(
                         "Requested interval " + intervalMillis + " must divide existing base interval " + existing.baseIntervalMillis);
                 }
-                List<ScheduleRegistration> registrations = existing.snapshotSchedules();
-                existing.teardown();
+                existing.retireForRebase();
                 MetricsSnapshotScheduler replacement = new MetricsSnapshotScheduler(root, intervalMillis);
-                replacement.restoreSchedules(registrations);
+                existing.transferSchedulesTo(replacement);
                 created[0] = replacement;
                 return replacement;
             }
@@ -149,6 +148,8 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
     private final ConcurrentHashMap<MetricsSnapshotConsumer, Long> consumerIntervals = new ConcurrentHashMap<>();
     private final Object scheduleLock = new Object();
     private final long baseIntervalMillis;
+    // Guarded by scheduleLock so registration transfer and unregister delegation are atomic.
+    private MetricsSnapshotScheduler successor;
 
     private MetricsSnapshotScheduler(NBComponent root, long intervalMillis) {
         super(root,
@@ -170,15 +171,22 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         return schedulers.get(root);
     }
 
-    private List<ScheduleRegistration> snapshotSchedules() {
+    private List<ScheduleRegistration> snapshotSchedulesLocked() {
         List<ScheduleRegistration> registrations = new ArrayList<>();
-        synchronized (scheduleLock) {
-            for (Map.Entry<MetricsSnapshotConsumer, Long> entry : consumerIntervals.entrySet()) {
-                registrations.add(new ScheduleRegistration(entry.getValue(), entry.getKey()));
-            }
+        for (Map.Entry<MetricsSnapshotConsumer, Long> entry : consumerIntervals.entrySet()) {
+            registrations.add(new ScheduleRegistration(entry.getValue(), entry.getKey()));
         }
         registrations.sort((a, b) -> Long.compare(a.intervalMillis(), b.intervalMillis()));
         return registrations;
+    }
+
+    private void transferSchedulesTo(MetricsSnapshotScheduler replacement) {
+        synchronized (scheduleLock) {
+            replacement.restoreSchedules(snapshotSchedulesLocked());
+            successor = replacement;
+            consumerIntervals.clear();
+            scheduleNodes.clear();
+        }
     }
 
     private void restoreSchedules(List<ScheduleRegistration> registrations) {
@@ -209,13 +217,20 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
     }
 
     public void unregisterConsumer(MetricsSnapshotConsumer consumer) {
+        MetricsSnapshotScheduler delegate;
         synchronized (scheduleLock) {
-            Long interval = consumerIntervals.remove(consumer);
-            if (interval == null) {
+            delegate = successor;
+            if (delegate == null) {
+                Long interval = consumerIntervals.remove(consumer);
+                if (interval == null) {
+                    return;
+                }
+                rebuildScheduleTreeLocked();
                 return;
             }
-            rebuildScheduleTreeLocked();
         }
+        // Delegate after releasing scheduleLock so a chain of rebases never nests scheduler locks.
+        delegate.unregisterConsumer(consumer);
     }
 
     private void rebuildScheduleTreeLocked() {
@@ -325,13 +340,29 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
 
     @Override
     public void teardown() {
+        NBComponent root = detachFromParent();
+        if (root != null) {
+            schedulers.remove(root, this);
+        }
+        shutdownScheduler();
+    }
+
+    private void retireForRebase() {
+        detachFromParent();
+        super.teardown();
+    }
+
+    private NBComponent detachFromParent() {
         NBComponent parent = getParent();
         if (parent != null) {
             parent.detachChild(this);
         }
-        schedulers.values().removeIf(scheduler -> scheduler == this);
-        consumerIntervals.clear();
+        return parent;
+    }
+
+    private void shutdownScheduler() {
         synchronized (scheduleLock) {
+            consumerIntervals.clear();
             scheduleNodes.clear();
         }
         super.teardown();
