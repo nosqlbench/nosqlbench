@@ -1,0 +1,4 @@
+datasets:
+  - name: rust-v1-demo
+    path: demo/dataset.yaml
+    dataset_type: dataset.yaml
