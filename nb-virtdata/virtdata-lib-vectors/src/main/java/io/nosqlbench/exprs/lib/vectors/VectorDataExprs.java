@@ -22,9 +22,10 @@ import io.nosqlbench.nb.annotations.Service;
 import io.nosqlbench.nb.api.expr.ExprFunctionProvider;
 import io.nosqlbench.nb.api.expr.annotations.ExprExample;
 import io.nosqlbench.nb.api.expr.annotations.ExprFunctionSpec;
-import io.nosqlbench.vectordata.VectorTestData;
-import io.nosqlbench.vectordata.discovery.vector.TestDataView;
-import io.nosqlbench.vectordata.spec.datasets.types.*;
+import io.nosqlbench.vectordata.Catalog;
+import io.nosqlbench.vectordata.CatalogSources;
+import io.nosqlbench.vectordata.TestDataView;
+import io.nosqlbench.vectordata.VectorReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +44,7 @@ public class VectorDataExprs implements ExprFunctionProvider {
         if (!datasetNameAndProfile.contains(":")) {
             logger.warn("datasetNameAndProfile missing profile:" + datasetNameAndProfile);
         }
-        return VectorTestData.catalogs().configure().catalog().profile(datasetNameAndProfile);
+        return Catalog.of(CatalogSources.defaults()).openProfile(datasetNameAndProfile);
     }
     @ExprExample(args = {"\"airports:demo\""}, expectNotNull = true)
     @ExprExample(args = {"\"airports:demo\""}, matches = ".+" )
@@ -52,9 +53,8 @@ public class VectorDataExprs implements ExprFunctionProvider {
         synopsis = "baseVectors(\"dataset:profile\")",
         description = "Return the BaseVectors associated with the dataset profile."
     )
-    public BaseVectors baseVectors(String datasetNameAndProfile) {
-        return dataset(datasetNameAndProfile).getBaseVectors().orElseThrow(() ->
-            new RuntimeException("Base vectors are not defined for dataset profile '" + datasetNameAndProfile + "'"));
+    public VectorReader<float[]> baseVectors(String datasetNameAndProfile) {
+        return dataset(datasetNameAndProfile).baseVectors();
     }
 
     @ExprExample(args = {"\"airports:demo\""}, expectNotNull = true)
@@ -64,9 +64,8 @@ public class VectorDataExprs implements ExprFunctionProvider {
         synopsis = "queryVectors(\"dataset:profile\")",
         description = "Return the QueryVectors associated with the dataset profile."
     )
-    public QueryVectors queryVectors(String datasetNameAndProfile) {
-        return dataset(datasetNameAndProfile).getQueryVectors().orElseThrow(() ->
-            new RuntimeException("Query vectors are not defined for dataset profile '" + datasetNameAndProfile + "'"));
+    public VectorReader<float[]> queryVectors(String datasetNameAndProfile) {
+        return dataset(datasetNameAndProfile).queryVectors();
     }
 
     @ExprExample(args = {"\"airports:demo\""}, expectNotNull = true)
@@ -76,9 +75,8 @@ public class VectorDataExprs implements ExprFunctionProvider {
         synopsis = "neighborDistances(\"dataset:profile\")",
         description = "Return the NeighborDistances associated with the dataset profile."
     )
-    public NeighborDistances neighborDistances(String datasetNameAndProfile) {
-        return dataset(datasetNameAndProfile).getNeighborDistances().orElseThrow(() ->
-            new RuntimeException("Neighbor distances are not defined for dataset profile '" + datasetNameAndProfile + "'"));
+    public VectorReader<float[]> neighborDistances(String datasetNameAndProfile) {
+        return dataset(datasetNameAndProfile).neighborDistances();
     }
 
     @ExprExample(args = {"\"airports:demo\""}, expectNotNull = true)
@@ -88,9 +86,8 @@ public class VectorDataExprs implements ExprFunctionProvider {
         synopsis = "neighborIndices(\"dataset:profile\")",
         description = "Return the NeighborIndices associated with the dataset profile."
     )
-    public NeighborIndices neighborIndices(String datasetNameAndProfile) {
-        return dataset(datasetNameAndProfile).getNeighborIndices().orElseThrow(() ->
-            new RuntimeException("Neighbor indices are not defined for dataset profile '" + datasetNameAndProfile + "'"));
+    public VectorReader<int[]> neighborIndices(String datasetNameAndProfile) {
+        return dataset(datasetNameAndProfile).neighborIndices();
     }
 
 }

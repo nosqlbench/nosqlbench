@@ -18,35 +18,28 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
  */
 
 
-import io.nosqlbench.nbdatatools.api.concurrent.ProgressIndicatingFuture;
-import io.nosqlbench.vectordata.VectorTestData;
-import io.nosqlbench.vectordata.discovery.ProfileSelector;
-import io.nosqlbench.vectordata.discovery.vector.TestDataView;
-import io.nosqlbench.vectordata.downloader.Catalog;
-import io.nosqlbench.vectordata.downloader.DatasetEntry;
-import io.nosqlbench.vectordata.spec.datasets.types.DatasetView;
-import java.util.concurrent.CompletableFuture;
+import io.nosqlbench.vectordata.Catalog;
+import io.nosqlbench.vectordata.CatalogSources;
+import io.nosqlbench.vectordata.TestDataView;
+import io.nosqlbench.vectordata.VectorReader;
 import java.util.function.LongFunction;
 
 public abstract class CoreVectors<T> implements LongFunction<T> {
 
     protected final TestDataView tdv;
-    protected final DatasetView<T> dataset;
+    protected final VectorReader<T> dataset;
 
     public CoreVectors(String datasetAndProfile, boolean prebuffer) {
-        Catalog catalog = VectorTestData.catalogs().configure().catalog();
-        tdv = catalog.profile(datasetAndProfile);
+        Catalog catalog = Catalog.of(CatalogSources.defaults());
+        tdv = catalog.openProfile(datasetAndProfile);
         dataset = getRandomAccessData();
 
         if (prebuffer) {
-            CompletableFuture<Void> pbfuture = dataset.prebuffer();
-            if (pbfuture instanceof ProgressIndicatingFuture<Void> indicator) {
-                    indicator.monitorProgress(1000);
-            }
+            dataset.prebuffer();
         }
     }
 
-    protected abstract DatasetView<T> getRandomAccessData();
+    protected abstract VectorReader<T> getRandomAccessData();
 
     @Override
     public T apply(long value) {
