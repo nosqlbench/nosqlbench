@@ -7,8 +7,6 @@ workload generators and legacy command-line tooling are not part of this
 module.
 
 The compatibility contract is [RUST_COMPATIBILITY.md](RUST_COMPATIBILITY.md).
-The implementation checkpoints and validation evidence are maintained in
-[PORTING_PLAN.md](PORTING_PLAN.md).
 
 ## Minimal use
 

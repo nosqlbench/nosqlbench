@@ -18,21 +18,17 @@ package io.nosqlbench.vectordata;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Proves Maven consumes the checked-in, Rust-produced binary format fixture. */
-class RustFixtureCompatibilityTest {
-    @Test void readsCheckedInRustFixtureThroughCatalogApi() throws Exception {
+/** Verifies the checked-in catalog and binary xvec format fixture through the public API. */
+class FormatCompatibilityTest {
+    @Test void readsCheckedInFormatFixtureThroughCatalogApi() throws Exception {
         URI catalogUri = getClass().getClassLoader().getResource("rust-v1/catalog.yaml").toURI();
         TestDataView view = Catalog.of(CatalogSources.of(catalogUri)).open("rust-v1-demo", "default");
         assertArrayEquals(new float[] {1f, 2f}, view.baseVectors().get(0));
         assertArrayEquals(new float[] {3f, 4f}, view.baseVectors().get(1));
         assertArrayEquals(new float[] {5f, 6f}, view.queryVectors().get(0));
         assertArrayEquals(new int[] {7, 8}, view.neighborIndices().get(0));
-        String manifest = java.nio.file.Files.readString(Path.of(getClass().getClassLoader().getResource("rust-v1/fixture-manifest.yaml").toURI()));
-        assertTrue(manifest.contains("source_commit: 1249310078785dbb59444f1c9bac14247767c286"));
     }
 }
