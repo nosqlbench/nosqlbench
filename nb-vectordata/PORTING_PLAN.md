@@ -4,9 +4,9 @@
 
 | Field | Value |
 |---|---|
-| Status | Core implementation in progress; release gates remain |
-| Overall implementation progress | 0 of 9 phase gates complete; baseline implementation is present |
-| Current phase | Phase 6 — deterministic interoperability hardening |
+| Status | Implemented access library and consumer migration; certification and release gates remain |
+| Overall implementation progress | Implementation is verified at module level; no formal release gate is claimed complete |
+| Current phase | Phase 8 — release readiness and remaining certification |
 | Last updated | 2026-08-24 |
 | Target module | `io.nosqlbench:nb-vectordata:${revision}` |
 | Target directory | `nb-vectordata/` |
@@ -21,6 +21,40 @@ Status values used throughout this document:
 - `[!]` Blocked; the blocker must be recorded in the progress log
 
 An item is not complete merely because code has been written. It is complete only when its stated verification evidence exists.
+
+### Current delivery status (authoritative)
+
+The detailed phase checklists below were written before implementation and are
+retained as the long-term certification roadmap. They were not maintained
+checkbox-by-checkbox during the port; an unchecked historical task must not be
+read as evidence that the corresponding implementation is absent. This summary
+and the dated progress log are the authoritative completion record.
+
+Delivered and verified at module level:
+
+- Root-level `nb-vectordata` Maven module with public catalog, dataset, typed
+  reader, cache, and configuration APIs.
+- Canonical and legacy catalog/manifest dispatch, local and HTTP sources,
+  profile inheritance, standard aliases, custom facets, and checked-in
+  compatibility fixtures.
+- Typed scalar, fixed-vector, and variable-vector readers; sparse HTTP range
+  caching with optional Merkle verification, retry, authentication, full-body
+  fallback, and same-JVM fetch deduplication.
+- Rust-compatible automatic cache resolution and isolated configuration-root
+  behavior, verified without modifying a developer's global configuration.
+- Migration of `virtdata-lib-vectors` from `datatools-vectordata` to
+  `nb-vectordata`, including deterministic mapper coverage.
+- `mvn -q -pl nb-vectordata clean verify -Dnb.junit.tags=` and the configured
+  live Rust-hosted canary passed on 2026-08-24.
+
+Remaining before publication/certification:
+
+- Produce and consume a fixture emitted by the pinned Rust crate itself, not
+  only the checked-in compatible Rust fixture generator.
+- Complete cross-process cache coordination, origin-collision, interruption,
+  corruption, capacity, and broad adversarial-format coverage.
+- Complete the window/profile prebuffer, performance, standalone-consumer,
+  full-reactor, and scheduled release-canary evidence required by C5/C6/C8.
 
 ## 1. Executive summary
 
@@ -633,11 +667,11 @@ The exact commands and results must be recorded in the checkpoint evidence.
 
 ## 8. Phased implementation plan and checkpoints
 
-### Progress overview
+### Certification overview
 
 | Phase | Weight | Status | Gate | Evidence location |
 |---|---:|---|---|---|
-| 0. Compatibility contract freeze | 10% | In progress | C0 | Progress log |
+| 0. Compatibility contract freeze | 10% | Partially documented; crate-emitted fixture provenance pending | C0 | Progress log |
 | 1. Module scaffold and public API | 10% | Implemented; review pending | C1 | Progress log |
 | 2. Catalog and dataset model | 15% | Implemented baseline; hardening pending | C2 | Progress log |
 | 3. Local typed readers | 15% | Implemented baseline; matrix pending | C3 | Progress log |
@@ -645,11 +679,13 @@ The exact commands and results must be recorded in the checkpoint evidence.
 | 5. View integration and prebuffer | 10% | Implemented baseline; strict-window work pending | C5 | Progress log |
 | 6. Rust interoperability and hardening | 10% | In progress | C6 | Progress log |
 | 7. NoSQLBench consumer migration | 5% | Implemented; mapper tests pending | C7 | Progress log |
-| 8. Release readiness | 5% | Not started | C8 | Progress log |
+| 8. Release readiness | 5% | In progress; publication evidence pending | C8 | Progress log |
 
-Percent complete is the sum of weights for gates that have passed. Partially completed phases may be described in the progress log but do not contribute to the gate-based percentage.
+No checkpoint is marked complete until all of its listed release evidence
+exists. The delivery summary above records implemented and verified behavior
+that precedes those formal checkpoint decisions.
 
-### Phase 0 — Compatibility contract freeze
+### Phase 0 — Compatibility contract freeze (historical checklist)
 
 Objective: turn the pinned Rust behavior into an explicit, testable Java-port contract before public implementation choices become expensive to change.
 
@@ -682,7 +718,7 @@ Evidence required:
 - Fixture manifest checksum.
 - Decision-log entries for all Section 3.2 topics.
 
-### Phase 1 — Module scaffold and public API
+### Phase 1 — Module scaffold and public API (historical checklist)
 
 Objective: establish an independently buildable Maven artifact and freeze the small public surface before internal implementation expands.
 
@@ -716,7 +752,7 @@ Evidence required:
 - Dependency tree summary.
 - Decision-log entry freezing API conventions.
 
-### Phase 2 — Catalog and dataset model
+### Phase 2 — Catalog and dataset model (historical checklist)
 
 Objective: parse and resolve every supported catalog and profile shape without opening facet data.
 
@@ -751,7 +787,7 @@ Evidence required:
 - Resolved-source snapshot for the Rust fixture.
 - List of supported manifest forms and aliases.
 
-### Phase 3 — Local typed readers
+### Phase 3 — Local typed readers (historical checklist)
 
 Objective: provide validated, thread-safe local access to scalar, uniform, and variable data for every supported element type.
 
@@ -784,7 +820,7 @@ Evidence required:
 - Rust fixture value comparison report.
 - Test command and result.
 
-### Phase 4 — Remote storage and cache
+### Phase 4 — Remote storage and cache (historical checklist)
 
 Objective: make the same shape readers work transparently over all required remote access modes.
 
@@ -827,7 +863,7 @@ Evidence required:
 - Concurrency/fault-test result summary.
 - Maven verification result.
 
-### Phase 5 — View integration and strict prebuffer
+### Phase 5 — View integration and strict prebuffer (historical checklist)
 
 Objective: complete the prescribed catalog-to-reader API and make profile-wide residency behavior observable and reliable.
 
@@ -861,7 +897,7 @@ Evidence required:
 - Progress callback trace for representative profiles.
 - Request-byte comparison for full versus windowed prebuffer.
 
-### Phase 6 — Rust interoperability and hardening
+### Phase 6 — Rust interoperability and hardening (historical checklist)
 
 Objective: prove the Java implementation against artifacts created by Rust and make future drift visible.
 
@@ -894,7 +930,7 @@ Evidence required:
 - Live canary URL redacted as appropriate, dataset/profile, timestamp, and result.
 - Benchmark summary and environment.
 
-### Phase 7 — NoSQLBench consumer migration
+### Phase 7 — NoSQLBench consumer migration (historical checklist)
 
 Objective: remove the external legacy artifact from current NoSQLBench vector access paths.
 
@@ -933,7 +969,7 @@ Evidence required:
 - Before/after dependency tree.
 - Migration notes for downstream callers.
 
-### Phase 8 — Release readiness
+### Phase 8 — Release readiness (historical checklist)
 
 Objective: make the module safe to publish and maintain as a standalone access implementation.
 
@@ -1037,8 +1073,8 @@ Add new entries at the top.
   deterministic 503 recovery coverage; configuration-gated integration canary
   for a Rust-hosted catalog; canary invocation documented in the README.
 - Verification: `mvn -q -pl nb-vectordata -Dnb.junit.tags= verify` passed.
-- External input still required: an approved Rust-hosted catalog URL, dataset,
-  and profile are needed to execute the live canary rather than skip it.
+- Superseded by the 2026-08-24 live-canary entry above, which records the
+  configured public catalog, dataset/profile, and passing result.
 
 #### 2026-08-20 — Numeric and authenticated transport matrix expanded
 
@@ -1046,8 +1082,9 @@ Add new entries at the top.
   projections; i32 and i64 vvec sidecar reads; and bearer-token propagation to
   remote `.mref`, HEAD, and range requests.
 - Verification: `mvn -q -pl nb-vectordata -Dnb.junit.tags= verify` passed.
-- Remaining: widening/narrowing policy tests for all integer combinations,
-  retries, cross-process cache coordination, and live Rust-hosted canary.
+- Remaining: widening/narrowing policy tests for all integer combinations and
+  cross-process cache coordination. Retry and live-canary coverage are
+  recorded in later entries.
 
 #### 2026-08-20 — Checked-in Rust fixture established
 
@@ -1075,8 +1112,7 @@ Add new entries at the top.
   for existing system-interface tests.
 - Remaining: the repository still needs a checked-in fixture emitted by the
   pinned `vectordata-rs` crate, not merely format-compatible generated test
-  data; live-canary configuration and the remaining stress/fault matrix are
-  also outstanding.
+  data, plus the remaining stress/fault matrix.
 
 #### 2026-08-20 — Baseline implementation and consumer migration
 
@@ -1090,9 +1126,8 @@ Add new entries at the top.
   including four unit tests and one loopback HTTP/Merkle integration test.
   `mvn -q -pl nb-virtdata/virtdata-lib-vectors -am -DskipTests compile` passed.
 - Remaining: checked-in Rust-generated fixture matrix and regeneration,
-  adversarial/retry/concurrency/cache-collision tests, strict window-byte
-  prebuffering, live Rust-hosted canary, mapper fixture tests, and full-reactor
-  release verification.
+  adversarial/concurrency/cache-collision tests, strict window-byte
+  prebuffering, mapper fixture tests, and full-reactor release verification.
 - Next checkpoint: C0/C6 fixture provenance and complete interoperability matrix.
 
 #### 2026-08-20 — Plan established
