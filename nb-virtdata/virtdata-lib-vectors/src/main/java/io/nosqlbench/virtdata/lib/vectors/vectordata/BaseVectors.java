@@ -18,7 +18,8 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
  */
 
 
-import io.nosqlbench.vectordata.spec.datasets.types.FloatVectors;
+import io.nosqlbench.vectordata.VectorReader;
+import io.nosqlbench.vectordata.VectorDataSettings;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
@@ -42,9 +43,14 @@ public class BaseVectors extends CoreVectors<float[]> {
         super (datasetAndProfile, prebuffer);
     }
 
+    /** Construct with explicit vectordata settings, including an isolated cache location. */
+    public BaseVectors(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
+        super(datasetAndProfile, prebuffer, settings);
+    }
+
     @Override
-    protected FloatVectors getRandomAccessData() {
-        return super.tdv.getBaseVectors().orElseThrow(()->new RuntimeException("Cannot get base vectors from data view " + super.tdv.getName()));
+    protected VectorReader<float[]> getRandomAccessData() {
+        return super.tdv.baseVectors();
     }
 
     @Override

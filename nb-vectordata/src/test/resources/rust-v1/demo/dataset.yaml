@@ -1,0 +1,6 @@
+name: rust-v1-demo
+profiles:
+  default:
+    base: base.fvec
+    query: query.fvec
+    neighbor_indices: neighbors.ivecs

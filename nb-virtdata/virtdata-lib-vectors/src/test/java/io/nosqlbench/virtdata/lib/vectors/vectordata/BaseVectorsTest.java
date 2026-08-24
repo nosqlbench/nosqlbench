@@ -18,22 +18,49 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
  */
 
 
-import org.junit.jupiter.api.Disabled;
+import io.nosqlbench.vectordata.VectorDataSettings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.util.Arrays;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("unit")
 public class BaseVectorsTest {
 
+    @TempDir Path temporary;
+
     @Test
-    @Disabled
-    public void testExampleDataset() {
-        BaseVectors bv1 = new BaseVectors("example1");
-        float[] v23 = bv1.apply(23L);
-        System.out.println("v23:" + Arrays.toString(v23));
+    public void testFixtureDataset() throws Exception {
+        Path dataset = Files.createDirectories(temporary.resolve("example"));
+        ByteBuffer values = ByteBuffer.allocate(24).order(ByteOrder.LITTLE_ENDIAN);
+        values.putInt(2).putFloat(1f).putFloat(2f).putInt(2).putFloat(3f).putFloat(4f);
+        Files.write(dataset.resolve("base.fvec"), values.array());
+        Files.writeString(dataset.resolve("dataset.yaml"), """
+            name: example
+            profiles:
+              demo:
+                base: base.fvec
+            """);
+        Path catalog = temporary.resolve("catalog.yaml");
+        Files.writeString(catalog, """
+            datasets:
+              - name: example
+                path: example/dataset.yaml
+            """);
+        String prior = System.getProperty("vectordata.catalog");
+        System.setProperty("vectordata.catalog", catalog.toString());
+        try {
+            BaseVectors vectors = new BaseVectors("example:demo", true,
+                VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build());
+            assertArrayEquals(new float[] {3f, 4f}, vectors.apply(1));
+        } finally {
+            if (prior == null) System.clearProperty("vectordata.catalog"); else System.setProperty("vectordata.catalog", prior);
+        }
     }
 }

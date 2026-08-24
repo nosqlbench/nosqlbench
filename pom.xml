@@ -59,6 +59,7 @@
         <module>nb-adapters</module>
 
         <!-- VIRTDATA MODULES -->
+        <module>nb-vectordata</module>
         <module>nb-virtdata</module>
 
         <!-- Documentation -->

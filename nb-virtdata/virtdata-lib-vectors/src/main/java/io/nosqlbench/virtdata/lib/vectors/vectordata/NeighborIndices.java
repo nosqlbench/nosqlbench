@@ -18,8 +18,8 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
  */
 
 
-import io.nosqlbench.vectordata.spec.datasets.types.FloatVectors;
-import io.nosqlbench.vectordata.spec.datasets.types.IntVectors;
+import io.nosqlbench.vectordata.VectorDataSettings;
+import io.nosqlbench.vectordata.VectorReader;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
 import io.nosqlbench.virtdata.api.annotations.Example;
@@ -40,9 +40,14 @@ public class NeighborIndices extends CoreVectors<int[]> {
         super (datasetAndProfile, prebuffer);
     }
 
+    /** Construct with explicit vectordata settings, including an isolated cache location. */
+    public NeighborIndices(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
+        super(datasetAndProfile, prebuffer, settings);
+    }
+
     @Override
-    protected IntVectors getRandomAccessData() {
-        return super.tdv.getNeighborIndices().orElseThrow(()->new RuntimeException("Cannot get neighbor indices from data view " + super.tdv.getName()));
+    protected VectorReader<int[]> getRandomAccessData() {
+        return super.tdv.neighborIndices();
     }
 
     @Override
