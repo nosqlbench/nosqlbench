@@ -2,13 +2,13 @@ package io.nosqlbench.nb.api.engine.metrics;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -152,6 +152,7 @@ public class MetricsSnapshotSchedulerTest {
         scheduler = MetricsSnapshotScheduler.register(root, 100L, baseSnapshots::add);
 
         assertThat(scheduler.getIntervalMillis()).isEqualTo(100L);
+        assertThat(MetricsSnapshotScheduler.lookup(root)).isSameAs(scheduler);
 
         scheduler.injectSnapshotForTesting(counterView(1, 100L));
         scheduler.injectSnapshotForTesting(counterView(2, 100L));
@@ -162,6 +163,20 @@ public class MetricsSnapshotSchedulerTest {
         MetricsView.PointSample sample = (MetricsView.PointSample) coarse.families().getFirst().samples().getFirst();
         assertThat(sample.value()).isEqualTo(3.0d);
         assertThat(coarse.intervalMillis()).isEqualTo(200L);
+    }
+
+    @Test
+    public void testUnregistersThroughRetiredScheduler() {
+        MetricsSnapshotScheduler.MetricsSnapshotConsumer coarseConsumer = coarseSnapshots::add;
+        MetricsSnapshotScheduler original = MetricsSnapshotScheduler.register(root, 200L, coarseConsumer);
+        scheduler = MetricsSnapshotScheduler.register(root, 100L, baseSnapshots::add);
+
+        original.unregisterConsumer(coarseConsumer);
+        scheduler.injectSnapshotForTesting(counterView(1, 100L));
+        scheduler.injectSnapshotForTesting(counterView(2, 100L));
+
+        assertThat(baseSnapshots).hasSize(2);
+        assertThat(coarseSnapshots).isEmpty();
     }
 
     @Test
