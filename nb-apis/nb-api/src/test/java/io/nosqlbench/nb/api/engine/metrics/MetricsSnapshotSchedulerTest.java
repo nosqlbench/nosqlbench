@@ -2,13 +2,13 @@ package io.nosqlbench.nb.api.engine.metrics;
 
 /*
  * Copyright (c) nosqlbench
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package io.nosqlbench.nb.api.engine.metrics;
 import io.nosqlbench.nb.api.components.core.NBBaseComponent;
 import io.nosqlbench.nb.api.components.core.NBComponent;
 import io.nosqlbench.nb.api.engine.metrics.instruments.MetricCategory;
+import io.nosqlbench.nb.api.engine.metrics.instruments.NBFunctionGauge;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricCounter;
 import io.nosqlbench.nb.api.engine.metrics.instruments.NBMetricHistogram;
 import io.nosqlbench.nb.api.engine.metrics.view.MetricsView;
@@ -151,6 +152,7 @@ public class MetricsSnapshotSchedulerTest {
         scheduler = MetricsSnapshotScheduler.register(root, 100L, baseSnapshots::add);
 
         assertThat(scheduler.getIntervalMillis()).isEqualTo(100L);
+        assertThat(MetricsSnapshotScheduler.lookup(root)).isSameAs(scheduler);
 
         scheduler.injectSnapshotForTesting(counterView(1, 100L));
         scheduler.injectSnapshotForTesting(counterView(2, 100L));
@@ -161,6 +163,20 @@ public class MetricsSnapshotSchedulerTest {
         MetricsView.PointSample sample = (MetricsView.PointSample) coarse.families().getFirst().samples().getFirst();
         assertThat(sample.value()).isEqualTo(3.0d);
         assertThat(coarse.intervalMillis()).isEqualTo(200L);
+    }
+
+    @Test
+    public void testUnregistersThroughRetiredScheduler() {
+        MetricsSnapshotScheduler.MetricsSnapshotConsumer coarseConsumer = coarseSnapshots::add;
+        MetricsSnapshotScheduler original = MetricsSnapshotScheduler.register(root, 200L, coarseConsumer);
+        scheduler = MetricsSnapshotScheduler.register(root, 100L, baseSnapshots::add);
+
+        original.unregisterConsumer(coarseConsumer);
+        scheduler.injectSnapshotForTesting(counterView(1, 100L));
+        scheduler.injectSnapshotForTesting(counterView(2, 100L));
+
+        assertThat(baseSnapshots).hasSize(2);
+        assertThat(coarseSnapshots).isEmpty();
     }
 
     @Test
@@ -221,6 +237,112 @@ public class MetricsSnapshotSchedulerTest {
             .families().getFirst().samples().getFirst();
         EncodableHistogram payload = sample.snapshot().asEncodableHistogram().orElseThrow();
         assertThat(payload).isInstanceOf(Histogram.class);
+    }
+
+    @Test
+    public void testTriggerSnapshotFlushesPendingHierarchicalSnapshots() {
+        long baseInterval = 100_000L;
+        RecordingHdrConsumer baseConsumer = new RecordingHdrConsumer();
+        RecordingHdrConsumer mediumConsumer = new RecordingHdrConsumer();
+        RecordingHdrConsumer coarseConsumer = new RecordingHdrConsumer();
+
+        NBLabels labels = NBLabels.forKV("name", "hist_metric", "scenario", "scenario", "activity", "activity");
+        DeltaHdrHistogramReservoir reservoir = new DeltaHdrHistogramReservoir(labels, 3);
+        NBMetricHistogram liveHistogram = new NBMetricHistogram(
+            labels,
+            reservoir,
+            "hist",
+            "nanoseconds",
+            MetricCategory.Core
+        );
+        root.addComponentMetric(liveHistogram, MetricCategory.Core, "hist");
+
+        MetricsSnapshotScheduler.register(root, baseInterval, baseConsumer);
+        MetricsSnapshotScheduler.register(root, baseInterval * 2L, mediumConsumer);
+        MetricsSnapshotScheduler.register(root, baseInterval * 4L, coarseConsumer);
+        scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        scheduler.injectSnapshotForTesting(histogramView(baseInterval, 10L, 20L));
+        scheduler.injectSnapshotForTesting(histogramView(baseInterval, 30L));
+        liveHistogram.update(40L);
+        liveHistogram.update(50L);
+
+        scheduler.triggerSnapshot();
+
+        assertThat(baseConsumer.snapshots).hasSize(3);
+        assertThat(histogramCount(baseConsumer.snapshots.get(0))).isEqualTo(2L);
+        assertThat(histogramCount(baseConsumer.snapshots.get(1))).isEqualTo(1L);
+        assertThat(histogramCount(baseConsumer.snapshots.get(2))).isEqualTo(2L);
+
+        assertThat(mediumConsumer.snapshots).hasSize(2);
+        assertThat(histogramCount(mediumConsumer.snapshots.get(0))).isEqualTo(3L);
+        assertThat(mediumConsumer.snapshots.get(0).intervalMillis()).isEqualTo(baseInterval * 2L);
+        assertThat(histogramCount(mediumConsumer.snapshots.get(1))).isEqualTo(2L);
+        assertThat(mediumConsumer.snapshots.get(1).intervalMillis()).isEqualTo(baseInterval);
+
+        assertThat(coarseConsumer.snapshots).hasSize(1);
+        assertThat(histogramCount(coarseConsumer.snapshots.getFirst())).isEqualTo(5L);
+        assertThat(coarseConsumer.snapshots.getFirst().intervalMillis()).isEqualTo(baseInterval * 3L);
+    }
+
+    @Test
+    public void testTriggerSnapshotFlushesPendingSnapshotsWhenCaptureFails() {
+        long baseInterval = 100_000L;
+        RecordingHdrConsumer baseConsumer = new RecordingHdrConsumer();
+        RecordingHdrConsumer coarseConsumer = new RecordingHdrConsumer();
+
+        MetricsSnapshotScheduler.register(root, baseInterval, baseConsumer);
+        MetricsSnapshotScheduler.register(root, baseInterval * 2L, coarseConsumer);
+        scheduler = MetricsSnapshotScheduler.lookup(root);
+
+        scheduler.injectSnapshotForTesting(histogramView(baseInterval, 10L));
+        NBFunctionGauge failingGauge = new NBFunctionGauge(
+            root,
+            () -> {
+                throw new IllegalStateException("capture failed");
+            },
+            "failing_gauge",
+            "failing gauge",
+            "",
+            MetricCategory.Core
+        );
+        root.addComponentMetric(failingGauge, MetricCategory.Core, "failing gauge");
+
+        assertThatThrownBy(scheduler::triggerSnapshot)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("capture failed");
+
+        assertThat(baseConsumer.snapshots).hasSize(1);
+        assertThat(coarseConsumer.snapshots).hasSize(1);
+        assertThat(histogramCount(coarseConsumer.snapshots.getFirst())).isEqualTo(1L);
+        assertThat(coarseConsumer.snapshots.getFirst().intervalMillis()).isEqualTo(baseInterval);
+    }
+
+    private MetricsView histogramView(long interval, long... values) {
+        NBLabels labels = NBLabels.forKV("name", "hist_metric", "scenario", "scenario", "activity", "activity");
+        DeltaHdrHistogramReservoir reservoir = new DeltaHdrHistogramReservoir(labels, 3);
+        NBMetricHistogram histogram = new NBMetricHistogram(
+            labels,
+            reservoir,
+            "hist",
+            "nanoseconds",
+            MetricCategory.Core
+        );
+        for (long value : values) {
+            histogram.update(value);
+        }
+        return MetricsView.capture(List.of(histogram), interval, true);
+    }
+
+    private long histogramCount(MetricsView view) {
+        return view.families().stream()
+            .filter(family -> family.familyName().equals("hist_metric"))
+            .flatMap(family -> family.samples().stream())
+            .filter(MetricsView.SummarySample.class::isInstance)
+            .map(MetricsView.SummarySample.class::cast)
+            .mapToLong(sample -> sample.statistics().count())
+            .findFirst()
+            .orElseThrow();
     }
 
     private static final class RecordingReporter extends MetricsSnapshotReporterBase {

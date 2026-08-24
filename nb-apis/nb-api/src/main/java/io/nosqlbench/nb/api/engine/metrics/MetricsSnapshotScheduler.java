@@ -120,10 +120,9 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
                     throw new IllegalArgumentException(
                         "Requested interval " + intervalMillis + " must divide existing base interval " + existing.baseIntervalMillis);
                 }
-                List<ScheduleRegistration> registrations = existing.snapshotSchedules();
-                existing.teardown();
+                existing.retireForRebase();
                 MetricsSnapshotScheduler replacement = new MetricsSnapshotScheduler(root, intervalMillis);
-                replacement.restoreSchedules(registrations);
+                existing.transferSchedulesTo(replacement);
                 created[0] = replacement;
                 return replacement;
             }
@@ -149,6 +148,8 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
     private final ConcurrentHashMap<MetricsSnapshotConsumer, Long> consumerIntervals = new ConcurrentHashMap<>();
     private final Object scheduleLock = new Object();
     private final long baseIntervalMillis;
+    // Guarded by scheduleLock so registration transfer and unregister delegation are atomic.
+    private MetricsSnapshotScheduler successor;
 
     private MetricsSnapshotScheduler(NBComponent root, long intervalMillis) {
         super(root,
@@ -170,15 +171,22 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         return schedulers.get(root);
     }
 
-    private List<ScheduleRegistration> snapshotSchedules() {
+    private List<ScheduleRegistration> snapshotSchedulesLocked() {
         List<ScheduleRegistration> registrations = new ArrayList<>();
-        synchronized (scheduleLock) {
-            for (Map.Entry<MetricsSnapshotConsumer, Long> entry : consumerIntervals.entrySet()) {
-                registrations.add(new ScheduleRegistration(entry.getValue(), entry.getKey()));
-            }
+        for (Map.Entry<MetricsSnapshotConsumer, Long> entry : consumerIntervals.entrySet()) {
+            registrations.add(new ScheduleRegistration(entry.getValue(), entry.getKey()));
         }
         registrations.sort((a, b) -> Long.compare(a.intervalMillis(), b.intervalMillis()));
         return registrations;
+    }
+
+    private void transferSchedulesTo(MetricsSnapshotScheduler replacement) {
+        synchronized (scheduleLock) {
+            replacement.restoreSchedules(snapshotSchedulesLocked());
+            successor = replacement;
+            consumerIntervals.clear();
+            scheduleNodes.clear();
+        }
     }
 
     private void restoreSchedules(List<ScheduleRegistration> registrations) {
@@ -209,13 +217,20 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
     }
 
     public void unregisterConsumer(MetricsSnapshotConsumer consumer) {
+        MetricsSnapshotScheduler delegate;
         synchronized (scheduleLock) {
-            Long interval = consumerIntervals.remove(consumer);
-            if (interval == null) {
+            delegate = successor;
+            if (delegate == null) {
+                Long interval = consumerIntervals.remove(consumer);
+                if (interval == null) {
+                    return;
+                }
+                rebuildScheduleTreeLocked();
                 return;
             }
-            rebuildScheduleTreeLocked();
         }
+        // Delegate after releasing scheduleLock so a chain of rebases never nests scheduler locks.
+        delegate.unregisterConsumer(consumer);
     }
 
     private void rebuildScheduleTreeLocked() {
@@ -261,6 +276,12 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
 
     @Override
     protected void task() {
+        synchronized (scheduleLock) {
+            captureSnapshotLocked();
+        }
+    }
+
+    private void captureSnapshotLocked() {
         if (consumerIntervals.isEmpty()) {
             return;
         }
@@ -271,7 +292,10 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
         boolean includeHdrPayload = consumerIntervals.keySet().stream()
             .anyMatch(MetricsSnapshotConsumer::requiresHdrPayload);
         MetricsView snapshot = MetricsView.capture(metrics, baseIntervalMillis, includeHdrPayload);
-        processSnapshot(snapshot);
+        ScheduleNode base = scheduleNodes.get(baseIntervalMillis);
+        if (base != null) {
+            base.ingest(snapshot);
+        }
     }
 
     public void injectSnapshotForTesting(MetricsView view) {
@@ -285,29 +309,19 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
     /// Without this, short runs (where no periodic tick fires before completion) leave
     /// activity-level metrics out of the SQLite database entirely.
     ///
-    /// Unlike a periodic tick, this **bypasses the per-consumer interval bucketing** and
-    /// emits the captured view directly to every registered consumer. Otherwise a single
-    /// trigger would only contribute the base-interval amount toward each consumer's
-    /// accumulated time and consumers with longer intervals (e.g. SQLite at 30s vs CSV at
-    /// 5s) would still wait for their normal bucket boundary — defeating the point of the
-    /// final flush.
+    /// The final view is ingested through the normal cadence hierarchy, then every partial
+    /// bucket is flushed recursively. This preserves snapshots which were already pending
+    /// for slower consumers (e.g. SQLite at 30s vs CSV at 5s), while ensuring that the newly
+    /// captured delta is delivered exactly once.
     public void triggerSnapshot() {
-        if (consumerIntervals.isEmpty()) {
-            return;
-        }
-        List<NBMetric> metrics = new ArrayList<>(getParent().find().metrics());
-        if (metrics.isEmpty()) {
-            return;
-        }
-        boolean includeHdrPayload = consumerIntervals.keySet().stream()
-            .anyMatch(MetricsSnapshotConsumer::requiresHdrPayload);
-        MetricsView snapshot = MetricsView.capture(metrics, baseIntervalMillis, includeHdrPayload);
-        for (MetricsSnapshotConsumer consumer : consumerIntervals.keySet()) {
+        synchronized (scheduleLock) {
             try {
-                consumer.onMetricsSnapshot(snapshot);
-            } catch (Exception e) {
-                logger.warn("Final-snapshot consumer {} threw exception",
-                    consumer.getClass().getSimpleName(), e);
+                captureSnapshotLocked();
+            } finally {
+                ScheduleNode base = scheduleNodes.get(baseIntervalMillis);
+                if (base != null) {
+                    base.flushPending();
+                }
             }
         }
     }
@@ -326,13 +340,29 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
 
     @Override
     public void teardown() {
+        NBComponent root = detachFromParent();
+        if (root != null) {
+            schedulers.remove(root, this);
+        }
+        shutdownScheduler();
+    }
+
+    private void retireForRebase() {
+        detachFromParent();
+        super.teardown();
+    }
+
+    private NBComponent detachFromParent() {
         NBComponent parent = getParent();
         if (parent != null) {
             parent.detachChild(this);
         }
-        schedulers.values().removeIf(scheduler -> scheduler == this);
-        consumerIntervals.clear();
+        return parent;
+    }
+
+    private void shutdownScheduler() {
         synchronized (scheduleLock) {
+            consumerIntervals.clear();
             scheduleNodes.clear();
         }
         super.teardown();
@@ -379,6 +409,21 @@ public final class MetricsSnapshotScheduler extends UnstartedPeriodicTaskCompone
                     child.ingest(ready);
                 }
                 return;
+            }
+        }
+
+        private void flushPending() {
+            if (pending != null) {
+                MetricsView ready = pending;
+                pending = null;
+                accumulatedMillis = 0L;
+                emit(ready);
+                for (ScheduleNode child : children) {
+                    child.ingest(ready);
+                }
+            }
+            for (ScheduleNode child : children) {
+                child.flushPending();
             }
         }
 
