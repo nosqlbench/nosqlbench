@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
  */
 
 
+import io.nosqlbench.vectordata.VectorDataSettings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.io.TempDir;
@@ -55,7 +56,8 @@ public class BaseVectorsTest {
         String prior = System.getProperty("vectordata.catalog");
         System.setProperty("vectordata.catalog", catalog.toString());
         try {
-            BaseVectors vectors = new BaseVectors("example:demo", true);
+            BaseVectors vectors = new BaseVectors("example:demo", true,
+                VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build());
             assertArrayEquals(new float[] {3f, 4f}, vectors.apply(1));
         } finally {
             if (prior == null) System.clearProperty("vectordata.catalog"); else System.setProperty("vectordata.catalog", prior);

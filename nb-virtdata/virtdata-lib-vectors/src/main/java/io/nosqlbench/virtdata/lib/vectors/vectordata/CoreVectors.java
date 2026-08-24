@@ -21,6 +21,7 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
 import io.nosqlbench.vectordata.Catalog;
 import io.nosqlbench.vectordata.CatalogSources;
 import io.nosqlbench.vectordata.TestDataView;
+import io.nosqlbench.vectordata.VectorDataSettings;
 import io.nosqlbench.vectordata.VectorReader;
 import java.util.function.LongFunction;
 
@@ -30,7 +31,11 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
     protected final VectorReader<T> dataset;
 
     public CoreVectors(String datasetAndProfile, boolean prebuffer) {
-        Catalog catalog = Catalog.of(CatalogSources.defaults());
+        this(datasetAndProfile, prebuffer, VectorDataSettings.defaults());
+    }
+
+    protected CoreVectors(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
+        Catalog catalog = Catalog.of(CatalogSources.defaults(), settings);
         tdv = catalog.openProfile(datasetAndProfile);
         dataset = getRandomAccessData();
 

@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
  */
 
 
+import io.nosqlbench.vectordata.VectorDataSettings;
 import io.nosqlbench.vectordata.VectorReader;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
@@ -37,6 +38,11 @@ public class QueryVectors extends CoreVectors<float[]> {
         "Find and download vectordata for query vectors, with demand-paged access"})
     public QueryVectors(String datasetAndProfile, boolean prebuffer) {
         super (datasetAndProfile, prebuffer);
+    }
+
+    /** Construct with explicit vectordata settings, including an isolated cache location. */
+    public QueryVectors(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
+        super(datasetAndProfile, prebuffer, settings);
     }
 
 

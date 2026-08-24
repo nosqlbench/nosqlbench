@@ -18,6 +18,7 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
  */
 
 
+import io.nosqlbench.vectordata.VectorDataSettings;
 import io.nosqlbench.vectordata.VectorReader;
 import io.nosqlbench.virtdata.api.annotations.Categories;
 import io.nosqlbench.virtdata.api.annotations.Category;
@@ -37,6 +38,11 @@ public class NeighborIndices extends CoreVectors<int[]> {
         "Find and download vectordata for neighbor indices, with demand-paged access"})
     public NeighborIndices(String datasetAndProfile, boolean prebuffer) {
         super (datasetAndProfile, prebuffer);
+    }
+
+    /** Construct with explicit vectordata settings, including an isolated cache location. */
+    public NeighborIndices(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
+        super(datasetAndProfile, prebuffer, settings);
     }
 
     @Override
