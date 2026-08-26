@@ -27,6 +27,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("unit")
 class CatalogManifestTest {
     @TempDir Path temporary;
+
+    private VectorDataSettings settings() {
+        return VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
+    }
     @Test void resolvesCatalogProfilesInheritanceAliasesAndCustomFacets() throws Exception {
         Path dataset = Files.createDirectories(temporary.resolve("sample"));
         FixtureSupport.fvec(dataset, "base.fvec", new float[][] {{1f, 2f}});
@@ -51,7 +55,7 @@ class CatalogManifestTest {
                 path: sample/dataset.yaml
                 dataset_type: dataset.yaml
             """);
-        Catalog catalog = Catalog.of(CatalogSources.of(temporary.resolve("catalog.yaml").toUri()));
+        Catalog catalog = Catalog.of(CatalogSources.of(temporary.resolve("catalog.yaml").toUri()), settings());
         TestDataView view = catalog.open("sample", "demo");
         assertArrayEquals(new float[] {1f, 2f}, view.baseVectors().get(0));
         assertArrayEquals(new float[] {3f, 4f}, view.queryVectors().get(0));
@@ -76,7 +80,7 @@ class CatalogManifestTest {
                 base_vectors: base.fvec
                 query_vectors: query.fvec
             """);
-        TestDataView view = TestDataGroup.load(dataset.toUri(), VectorDataSettings.defaults()).profile("100k");
+        TestDataView view = TestDataGroup.load(dataset.toUri(), settings()).profile("100k");
         assertArrayEquals(new float[] {1f, 2f}, view.baseVectors().get(0));
         assertArrayEquals(new float[] {3f, 4f}, view.queryVectors().get(0));
         assertTrue(view.facets().containsKey("base_vectors"), "the facet map is keyed canonically");
@@ -94,7 +98,7 @@ class CatalogManifestTest {
               query: query.fvec
               gt: gt.ivecs
             """);
-        TestDataView view = Catalog.of(CatalogSources.of(catalogFile.toUri())).open("legacy", "demo");
+        TestDataView view = Catalog.of(CatalogSources.of(catalogFile.toUri()), settings()).open("legacy", "demo");
         assertArrayEquals(new float[] {1f, 2f}, view.baseVectors().get(0));
         assertArrayEquals(new float[] {3f, 4f}, view.queryVectors().get(0));
         assertArrayEquals(new int[] {7, 8}, view.neighborIndices().get(0));
@@ -103,24 +107,24 @@ class CatalogManifestTest {
         FixtureSupport.fvec(temporary, "base.fvec", new float[][] {{1f, 2f}});
         Path file = temporary.resolve("entries.yaml");
         Files.writeString(file, "\"shape:default\":\n  base: base.fvec\n");
-        assertArrayEquals(new float[] {1f, 2f}, TestDataGroup.load(file.toUri(), VectorDataSettings.defaults()).profile("default").baseVectors().get(0));
+        assertArrayEquals(new float[] {1f, 2f}, TestDataGroup.load(file.toUri(), settings()).profile("default").baseVectors().get(0));
     }
     @Test void directoryPrefersDatasetYamlThenFallsBackToKnnEntries() throws Exception {
         Path preferred = Files.createDirectories(temporary.resolve("preferred"));
         FixtureSupport.fvec(preferred, "base.fvec", new float[][] {{1f, 2f}});
         Files.writeString(preferred.resolve("dataset.yaml"), "profiles:\n  default:\n    base: base.fvec\n");
         Files.writeString(preferred.resolve("knn_entries.yaml"), "\"ignored:default\":\n  base: missing.fvec\n");
-        assertArrayEquals(new float[] {1f, 2f}, TestDataGroup.load(preferred.toUri(), VectorDataSettings.defaults()).profile("default").baseVectors().get(0));
+        assertArrayEquals(new float[] {1f, 2f}, TestDataGroup.load(preferred.toUri(), settings()).profile("default").baseVectors().get(0));
         Path legacy = Files.createDirectories(temporary.resolve("legacy"));
         FixtureSupport.fvec(legacy, "base.fvec", new float[][] {{3f, 4f}});
         Files.writeString(legacy.resolve("knn_entries.yaml"), "\"legacy:default\":\n  base: base.fvec\n");
-        assertArrayEquals(new float[] {3f, 4f}, TestDataGroup.load(legacy.toUri(), VectorDataSettings.defaults()).profile("default").baseVectors().get(0));
+        assertArrayEquals(new float[] {3f, 4f}, TestDataGroup.load(legacy.toUri(), settings()).profile("default").baseVectors().get(0));
     }
     @Test void catalogDirectoryPrefersJsonOverYaml() throws Exception {
         Path dataset = Files.createDirectories(temporary.resolve("json-dataset"));
         FixtureSupport.fvec(dataset, "base.fvec", new float[][] {{1f, 2f}}); Files.writeString(dataset.resolve("dataset.yaml"), "profiles:\n  default:\n    base: base.fvec\n");
         Files.writeString(temporary.resolve("catalog.json"), "[{\"name\":\"json\",\"path\":\"json-dataset/dataset.yaml\",\"dataset_type\":\"dataset.yaml\"}]");
         Files.writeString(temporary.resolve("catalog.yaml"), "- name: yaml\n  path: absent.yaml\n");
-        assertArrayEquals(new float[] {1f, 2f}, Catalog.of(CatalogSources.of(temporary.toUri())).open("json", "default").baseVectors().get(0));
+        assertArrayEquals(new float[] {1f, 2f}, Catalog.of(CatalogSources.of(temporary.toUri()), settings()).open("json", "default").baseVectors().get(0));
     }
 }

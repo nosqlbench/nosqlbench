@@ -37,6 +37,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class PrefetchWindowsTest {
     @TempDir Path temporary;
 
+    private VectorDataSettings settings() {
+        return VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
+    }
+
     /// A 100-record, dim-4 fvec: bytes per record = 4 + 4*4 = 20.
     private static final long BPR = 20;
 
@@ -55,7 +59,7 @@ class PrefetchWindowsTest {
               windowed:
                 base_vectors: base_vectors.fvec[10..20)
             """);
-        return TestDataGroup.load(dataset.toString()).profile(profile);
+        return TestDataGroup.load(dataset.toUri(), settings()).profile(profile);
     }
 
     @Test void anArbitraryWindowResolvesWithoutAProfileDeclaringIt() throws Exception {
@@ -137,7 +141,7 @@ class PrefetchWindowsTest {
                 base_vectors: base_vectors.fvec
                 metadata_content: meta.ivecs
             """);
-        return new VvecFixture(TestDataGroup.load(dataset.toString()).profile("default"), offsets, Files.size(data));
+        return new VvecFixture(TestDataGroup.load(dataset.toUri(), settings()).profile("default"), offsets, Files.size(data));
     }
 
     @Test void aVvecWindowResolvesThroughItsOffsetIndex() throws Exception {
@@ -183,7 +187,7 @@ class PrefetchWindowsTest {
                 base_vectors: base_vectors.fvec
                 metadata_content: ragged.ivecs
             """);
-        TestDataView view = TestDataGroup.load(dataset.toString()).profile("default");
+        TestDataView view = TestDataGroup.load(dataset.toUri(), settings()).profile("default");
         PrefetchPlan plan = view.prefetchPlan("metadata_content", DSWindow.parse("1..4"));
         assertFalse(plan.degradesToFullDownload());
         assertEquals(List.of(new ByteRange(offsets[1], offsets[4])), plan.byteRanges());
@@ -193,7 +197,7 @@ class PrefetchWindowsTest {
         Path persisted = dataset.resolve("IDXFOR__ragged.ivecs.i32");
         assertTrue(Files.isRegularFile(persisted), "the rebuilt index is persisted beside the data");
         assertEquals(dims.length * 4L, Files.size(persisted), "record starts only, no sentinel");
-        PrefetchPlan again = TestDataGroup.load(dataset.toString()).profile("default")
+        PrefetchPlan again = TestDataGroup.load(dataset.toUri(), settings()).profile("default")
             .prefetchPlan("metadata_content", DSWindow.parse("1..4"));
         assertEquals(plan.byteRanges(), again.byteRanges(), "a later view reads the persisted index");
     }
@@ -211,7 +215,7 @@ class PrefetchWindowsTest {
             yaml.append("    facet_").append(scalar[0]).append(": values.").append(scalar[0]).append("\n");
         }
         Files.writeString(dataset.resolve("dataset.yaml"), yaml.toString());
-        TestDataView view = TestDataGroup.load(dataset.toString()).profile("default");
+        TestDataView view = TestDataGroup.load(dataset.toUri(), settings()).profile("default");
         for (String[] scalar : scalars) {
             int width = Integer.parseInt(scalar[1]);
             PrefetchPlan plan = view.prefetchPlan("facet_" + scalar[0], DSWindow.parse("2..5"));
@@ -237,7 +241,7 @@ class PrefetchWindowsTest {
                 base_vectors: base_vectors.fvec
                 metadata_results: labels.i32
             """);
-        TestDataView view = TestDataGroup.load(dataset.toString()).profile("default");
+        TestDataView view = TestDataGroup.load(dataset.toUri(), settings()).profile("default");
         PrefetchPlan plan = view.prefetchPlan("metadata_results", DSWindow.parse("2..5"));
         assertFalse(plan.degradesToFullDownload());
         assertEquals(List.of(new ByteRange(2 * 4, 5 * 4)), plan.byteRanges(), "scalars map at ordinal times width, no header");
@@ -254,7 +258,7 @@ class PrefetchWindowsTest {
                 base_vectors: base_vectors.fvec
                 metadata_content: m.parquet
             """);
-        return TestDataGroup.load(dataset.toString()).profile("default");
+        return TestDataGroup.load(dataset.toUri(), settings()).profile("default");
     }
 
     @Test void anUnmappableFormatReportsThatItDegrades() throws Exception {
@@ -350,7 +354,7 @@ class PrefetchWindowsTest {
                 base_vectors: base_vectors.fvec[0,1000)
             """);
         VectorDataException malformed = assertThrows(VectorDataException.class,
-            () -> TestDataGroup.load(dataset.toString()).profile("default"));
+            () -> TestDataGroup.load(dataset.toUri(), settings()).profile("default"));
         assertTrue(malformed.getMessage().contains("malformed window"), malformed.getMessage());
     }
 }
