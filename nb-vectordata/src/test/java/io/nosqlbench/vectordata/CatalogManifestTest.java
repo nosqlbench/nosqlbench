@@ -60,6 +60,29 @@ class CatalogManifestTest {
         assertTrue(view.facet("custom_scores").isPresent());
         assertEquals(1, view.queryVectors().count());
     }
+    @Test void canonicalFacetKeysResolveThroughStandardAccessors() throws Exception {
+        // Rust-published dataset.yaml files declare the canonical keys
+        // (base_vectors, query_vectors, ...); the alias forms (base,
+        // query, gt, ...) are shorthand. Both must reach the standard
+        // accessors — a released dataset failed here when baseVectors()
+        // looked up only the "base" alias.
+        Path dataset = Files.createDirectories(temporary.resolve("canonical"));
+        FixtureSupport.fvec(dataset, "base.fvec", new float[][] {{1f, 2f}});
+        FixtureSupport.fvec(dataset, "query.fvec", new float[][] {{3f, 4f}});
+        Files.writeString(dataset.resolve("dataset.yaml"), """
+            name: canonical
+            profiles:
+              "100k":
+                base_vectors: base.fvec
+                query_vectors: query.fvec
+            """);
+        TestDataView view = TestDataGroup.load(dataset.toUri(), VectorDataSettings.defaults()).profile("100k");
+        assertArrayEquals(new float[] {1f, 2f}, view.baseVectors().get(0));
+        assertArrayEquals(new float[] {3f, 4f}, view.queryVectors().get(0));
+        assertTrue(view.facets().containsKey("base_vectors"), "the facet map is keyed canonically");
+        assertTrue(view.facet("base").isPresent(), "shorthand aliases resolve on lookup");
+        assertTrue(view.facet("train").isPresent(), "every Rust alias resolves");
+    }
     @Test void opensLegacyKnnEntriesProfilesWithoutDatasetManifest() throws Exception {
         FixtureSupport.fvec(temporary, "base.fvec", new float[][] {{1f, 2f}});
         FixtureSupport.fvec(temporary, "query.fvec", new float[][] {{3f, 4f}});

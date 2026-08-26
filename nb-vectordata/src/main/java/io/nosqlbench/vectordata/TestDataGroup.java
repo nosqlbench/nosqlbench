@@ -41,8 +41,7 @@ public final class TestDataGroup {
         for (Map.Entry<String, Map<String, Object>> entry : entries.entrySet()) {
             Map<String, Object> profile = new LinkedHashMap<>();
             for (Map.Entry<String, Object> facet : entry.getValue().entrySet()) {
-                String key = switch (facet.getKey()) { case "base" -> "base"; case "query" -> "query"; case "gt" -> "neighbor_indices"; default -> facet.getKey(); };
-                profile.put(key, facet.getValue() instanceof Map<?, ?> ? facet.getValue() : Map.of("source", facet.getValue()));
+                profile.put(canonical(facet.getKey()), facet.getValue() instanceof Map<?, ?> ? facet.getValue() : Map.of("source", facet.getValue()));
             }
             profiles.put(entry.getKey(), profile);
         }
@@ -77,7 +76,13 @@ public final class TestDataGroup {
             if (item.getKey().startsWith("_")) continue;
             int colon = item.getKey().indexOf(':'); String dataset = colon < 0 ? item.getKey() : item.getKey().substring(0, colon); String profile = colon < 0 ? "default" : item.getKey().substring(colon + 1);
             Map<String, Object> values = YamlData.map(item.getValue(), "legacy entry " + item.getKey()); Map<String, Object> resolved = new LinkedHashMap<>();
-            for (Map.Entry<String, Object> facet : values.entrySet()) resolved.put(facet.getKey(), facet.getValue() instanceof String path ? base.resolve(path).toString() : facet.getValue());
+            for (Map.Entry<String, Object> facet : values.entrySet()) {
+                if (facet.getValue() instanceof String path) {
+                    String[] split = splitWindowSuffix(path);
+                    resolved.put(facet.getKey(), split[1] == null ? base.resolve(split[0]).toString()
+                        : Map.of("source", base.resolve(split[0]).toString(), "window", split[1]));
+                } else resolved.put(facet.getKey(), facet.getValue());
+            }
             grouped.computeIfAbsent(dataset, ignored -> new LinkedHashMap<>()).put(profile, resolved);
         }
         if (grouped.isEmpty()) throw new VectorDataException("Legacy entries document has no datasets: " + manifest);
@@ -106,9 +111,33 @@ public final class TestDataGroup {
             if (source == null) source = YamlData.optionalString(values.get("path"));
             if (source == null) continue;
             String window = YamlData.optionalString(values.get("window"));
-            inherited.put(facetName, new FacetDescriptor(facetName, manifest.resolve(source), window, Map.copyOf(values)));
+            String[] split = splitWindowSuffix(source);
+            if (split[1] != null) window = split[1];
+            inherited.put(facetName, new FacetDescriptor(facetName, manifest.resolve(split[0]), window, Map.copyOf(values)));
         }
         return inherited;
+    }
+    /// Splits the documented window-suffix sugar off a facet source
+    /// string — `base.fvec[0..1M)` names the file plus a record window,
+    /// with either bracket kind on either side. The outer delimiters
+    /// are structural: they separate the path from the window and do
+    /// not affect interval bound semantics. Returns
+    /// `{path, windowOrNull}`. A source string only fails when it
+    /// *looks* like it carries a window suffix and that suffix is
+    /// malformed — a plain path always passes through — so an error
+    /// here names the broken window rather than turning it into "no
+    /// such file".
+    private static String[] splitWindowSuffix(String source) {
+        if (!source.endsWith("]") && !source.endsWith(")")) return new String[] {source, null};
+        int bracket = source.indexOf('['); int paren = source.indexOf('(');
+        int open = bracket < 0 ? paren : paren < 0 ? bracket : Math.min(bracket, paren);
+        if (open <= 0) return new String[] {source, null};
+        String inner = source.substring(open + 1, source.length() - 1);
+        try { DSWindow.parse(inner); }
+        catch (VectorDataException malformed) {
+            throw new VectorDataException("source '" + source + "' has a malformed window: " + malformed.getMessage());
+        }
+        return new String[] {source.substring(0, open), inner};
     }
     private static boolean isYaml(URI source) { String path = source.getPath() == null ? "" : source.getPath().toLowerCase(); return path.endsWith(".yaml") || path.endsWith(".yml"); }
     private static URI child(URI source, String name) { String text = source.toString(); return URI.create(text.endsWith("/") ? text + name : text + "/" + name); }
@@ -121,5 +150,5 @@ public final class TestDataGroup {
         } catch (IOException e) { throw new VectorDataException("Cannot read manifest " + source, e); }
     }
     private static String basename(URI uri) { String path = uri.getPath(); String parent = path.substring(0, path.lastIndexOf('/')); return parent.substring(parent.lastIndexOf('/') + 1); }
-    private static String canonical(String value) { return switch (value) { case "metadata_indices", "predicate_results" -> "metadata_results"; case "filtered" -> "prefiltered"; default -> value; }; }
+    private static String canonical(String value) { return FacetNames.canonical(value); }
 }
