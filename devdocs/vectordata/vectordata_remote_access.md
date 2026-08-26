@@ -7,29 +7,41 @@ and caller-named ordinal-range forms.
 
 ## Quick smoke test
 
-Point the environment at a hosted catalog and read a few records; fill
-in your catalog URL and a `dataset:profile` it serves:
+[`remote_smoke_test.sh`](remote_smoke_test.sh) checks the base, query,
+and neighbor-index facets of one profile by eagerly warming exactly the
+records each check reads — the same chunks demand paging would fetch,
+cheap even against a billion-record facet, with the plan announced and
+download progress emitted on stderr while the bytes move — and aborts
+on the first failure:
 
 ```bash
-export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
-export VECTORDATA_HOME=/tmp/vdtest    # isolated config+cache boundary; delete when done
-
-# read through the profile (warms the profile's window by default)
-java -jar nb5.jar run driver=stdout cycles=3 threads=1 format=readout \
-  "op={{BaseVectors('mydataset:myprofile');Stringify()}}"
-
-# caller-named ordinal range, warmed in the background while cycles run
-java -jar nb5.jar run driver=stdout cycles=3 threads=1 format=readout \
-  "op={{BaseVectors('mydataset:myprofile','[0..1k)','background');Stringify()}}"
-
-# demand-paged (no warm-up), for comparing first-touch latency
-java -jar nb5.jar run driver=stdout cycles=3 threads=1 format=readout \
-  "op={{BaseVectors('mydataset:myprofile',false);Stringify()}}"
+VECTORDATA_CATALOG='https://your.host/path/catalog.yaml' \
+  DATASET=mydataset:myprofile bash remote_smoke_test.sh
 ```
 
-`VECTORDATA_CATALOG` outranks any `catalogs.yaml` in the config home;
-`VECTORDATA_HOME` keeps the cache and settings lookups isolated so the
-test never touches `~/.config/vectordata` or your real cache.
+`DATASET` is `<dataset>` or `<dataset>:<profile>` (the profile defaults
+to `default`); `NB` overrides how nosqlbench is invoked (default `nb5`,
+e.g. `NB='java -jar nb5.jar'`). `VECTORDATA_CATALOG` outranks any
+`catalogs.yaml` in the config home, and the script isolates
+`VECTORDATA_HOME` under `/tmp/vdtest` so it never touches
+`~/.config/vectordata` or your real cache.
+
+Beyond the script's checks:
+
+```bash
+# any other facet by name, standard or custom:
+nb5 run driver=stdout cycles=3 threads=1 format=readout \
+  "op={{Facet('mydataset:myprofile','metadata_results','','none');Stringify()}}"
+
+# caller-named ordinal range, warmed in the background while cycles run
+nb5 run driver=stdout cycles=3 threads=1 format=readout \
+  "op={{BaseVectors('mydataset:myprofile','[0..1k)','background');Stringify()}}"
+
+# whole-profile warm-up (the eager default) — fetches the profile's
+# full window before the first cycle, so size it deliberately
+nb5 run driver=stdout cycles=3 threads=1 format=readout \
+  "op={{BaseVectors('mydataset:myprofile');Stringify()}}"
+```
 
 ## Publishing a test dataset
 
