@@ -80,8 +80,17 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
         if (mode == Prefetch.NONE) return null;
         DSWindow effective = effectiveWindow(tdv, facetName, window);
         if (effective == null) return null;
-        if (mode == Prefetch.BACKGROUND) return tdv.prefetchInBackground(facetName, effective, WholeFacetFallback.REFUSE);
-        tdv.prefetch(facetName, effective, WholeFacetFallback.REFUSE);
+        // The plan is announced before any bytes move and progress is
+        // emitted during the download; the meter is silent when there
+        // is nothing to fetch.
+        PrefetchMeter meter = new PrefetchMeter(tdv.dataset() + ":" + facetName, tdv.prefetchPlan(facetName, effective));
+        if (mode == Prefetch.BACKGROUND) {
+            PrefetchHandle handle = tdv.prefetchInBackground(facetName, effective, WholeFacetFallback.REFUSE);
+            meter.watch(handle);
+            return handle;
+        }
+        tdv.prefetch(facetName, effective, WholeFacetFallback.REFUSE, meter);
+        meter.complete();
         return null;
     }
 

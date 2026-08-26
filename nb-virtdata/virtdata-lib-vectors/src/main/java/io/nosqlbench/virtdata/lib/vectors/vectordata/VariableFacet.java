@@ -76,15 +76,23 @@ public class VariableFacet implements LongFunction<Object> {
         this.facetName = FacetNames.canonical(facetName);
         reader = tdv.openVariableFacet(this.facetName);
         DSWindow parsed = DSWindow.parse(window == null ? "" : window);
-        backgroundPrefetch = switch (CoreVectors.Prefetch.parse(prefetchMode)) {
+        CoreVectors.Prefetch mode = CoreVectors.Prefetch.parse(prefetchMode);
+        PrefetchMeter meter = mode == CoreVectors.Prefetch.NONE ? null
+            : new PrefetchMeter(tdv.dataset() + ":" + this.facetName, tdv.prefetchPlan(this.facetName, parsed));
+        backgroundPrefetch = switch (mode) {
             case NONE -> null;
-            case BACKGROUND -> tdv.prefetchInBackground(this.facetName, parsed, WholeFacetFallback.REFUSE);
+            case BACKGROUND -> {
+                PrefetchHandle handle = tdv.prefetchInBackground(this.facetName, parsed, WholeFacetFallback.REFUSE);
+                meter.watch(handle);
+                yield handle;
+            }
             case EAGER -> {
                 // A windowless eager warm-up uses the reader's own
                 // prebuffer, which also drives the offset sidecar to
                 // resident; a windowed one resolves through the index.
-                if (parsed.isEmpty()) reader.prebuffer();
-                else tdv.prefetch(this.facetName, parsed, WholeFacetFallback.REFUSE);
+                if (parsed.isEmpty()) reader.prebuffer(meter);
+                else tdv.prefetch(this.facetName, parsed, WholeFacetFallback.REFUSE, meter);
+                meter.complete();
                 yield null;
             }
         };
