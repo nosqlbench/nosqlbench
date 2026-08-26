@@ -15,6 +15,7 @@
  */
 package io.nosqlbench.vectordata;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** Settings tests use explicit temporary roots and never inspect or write user configuration. */
+@Tag("unit")
 class VectorDataSettingsTest {
     @TempDir Path temporary;
 

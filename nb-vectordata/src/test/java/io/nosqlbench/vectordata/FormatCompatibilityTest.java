@@ -15,6 +15,7 @@
  */
 package io.nosqlbench.vectordata;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -22,6 +23,7 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 /** Verifies the checked-in catalog and binary xvec format fixture through the public API. */
+@Tag("unit")
 class FormatCompatibilityTest {
     @Test void readsCheckedInFormatFixtureThroughCatalogApi() throws Exception {
         URI catalogUri = getClass().getClassLoader().getResource("rust-v1/catalog.yaml").toURI();
