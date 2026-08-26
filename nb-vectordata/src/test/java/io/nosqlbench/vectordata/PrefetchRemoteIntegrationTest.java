@@ -26,6 +26,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -89,11 +90,11 @@ class PrefetchRemoteIntegrationTest {
         Files.write(published.resolve("base.fvec"), fvec);
         int[][] ragged = new int[400][];
         for (int record = 0; record < 400; record++) { ragged[record] = new int[1 + record % 17]; }
-        FixtureSupport.vvec(published, "meta.ivecs", ragged);
+        FixtureSupport.vvec(published, "meta.ivvec", ragged);
         byte[] blob = new byte[40_000]; Arrays.fill(blob, (byte) 7);
         Files.write(published.resolve("blob.parquet"), blob);
         if (publishMref) {
-            for (String file : new String[] {"base.fvec", "meta.ivecs", "blob.parquet"}) {
+            for (String file : new String[] {"base.fvec", "meta.ivvec", "blob.parquet"}) {
                 byte[] payload = Files.readAllBytes(published.resolve(file));
                 Files.write(published.resolve(file + ".mref"), FixtureSupport.mref(payload, CHUNK));
             }
@@ -106,7 +107,7 @@ class PrefetchRemoteIntegrationTest {
             profiles:
               default:
                 base_vectors: %sbase.fvec
-                metadata_content: %smeta.ivecs
+                metadata_content: %smeta.ivvec
                 metadata_predicates: %sblob.parquet
             """.formatted(name, base, base, base));
         VectorDataSettings settings = VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
@@ -227,17 +228,17 @@ class PrefetchRemoteIntegrationTest {
         Path published = Files.createDirectories(temporary.resolve("pub"));
         int[][] ragged = new int[40][];
         for (int record = 0; record < 40; record++) ragged[record] = new int[1 + record % 7];
-        FixtureSupport.vvec(published, "meta.ivecs", ragged);
-        Files.delete(published.resolve("IDXFOR__meta.ivecs.i32"));
-        byte[] payload = Files.readAllBytes(published.resolve("meta.ivecs"));
-        Files.write(published.resolve("meta.ivecs.mref"), FixtureSupport.mref(payload, CHUNK));
+        FixtureSupport.vvec(published, "meta.ivvec", ragged);
+        Files.delete(published.resolve("IDXFOR__meta.ivvec.i32"));
+        byte[] payload = Files.readAllBytes(published.resolve("meta.ivvec"));
+        Files.write(published.resolve("meta.ivvec.mref"), FixtureSupport.mref(payload, CHUNK));
         var server = serveDirectory(published, rangeRequests, true);
         Path dataset = Files.createDirectories(temporary.resolve("no-sidecar"));
         Files.writeString(dataset.resolve("dataset.yaml"), """
             name: no-sidecar
             profiles:
               default:
-                metadata_content: http://127.0.0.1:%d/meta.ivecs
+                metadata_content: http://127.0.0.1:%d/meta.ivvec
             """.formatted(server.getAddress().getPort()));
         VectorDataSettings isolated = VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
         TestDataView view = TestDataGroup.load(dataset.resolve("dataset.yaml").toUri(), isolated).profile("default");
@@ -252,6 +253,37 @@ class PrefetchRemoteIntegrationTest {
         view.prefetch("metadata_content", DSWindow.parse("10..20"), WholeFacetFallback.ALLOW);
         assertTrue(view.prefetchPlan("metadata_content", DSWindow.ALL).isResident(),
             "consenting to the degrade fetches the whole facet");
+    }
+
+    /// In this format, `ivec` records are length-qualified but fixed
+    /// throughout — ground-truth neighbor files — so a window maps at
+    /// the uniform header stride with no offset index involved. Only
+    /// the `*vvec` extensions carry variable-length records.
+    @Test void aRemoteIvecWindowMapsAtTheHeaderStride() throws Exception {
+        Path published = Files.createDirectories(temporary.resolve("pub"));
+        int dim = 100, records = 50, recordBytes = 4 + dim * 4;
+        ByteBuffer gt = ByteBuffer.allocate(records * recordBytes).order(ByteOrder.LITTLE_ENDIAN);
+        for (int record = 0; record < records; record++) { gt.putInt(dim); for (int at = 0; at < dim; at++) gt.putInt(record + at); }
+        Files.write(published.resolve("gt.ivecs"), gt.array());
+        Files.write(published.resolve("gt.ivecs.mref"), FixtureSupport.mref(gt.array(), CHUNK));
+        var server = serveDirectory(published, new AtomicInteger(), true);
+        Path dataset = Files.createDirectories(temporary.resolve("uniform-ivec"));
+        Files.writeString(dataset.resolve("dataset.yaml"), """
+            name: uniform-ivec
+            profiles:
+              default:
+                neighbor_indices: http://127.0.0.1:%d/gt.ivecs
+            """.formatted(server.getAddress().getPort()));
+        VectorDataSettings isolated = VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
+        TestDataView view = TestDataGroup.load(dataset.resolve("dataset.yaml").toUri(), isolated).profile("default");
+
+        PrefetchPlan plan = view.prefetchPlan("neighbor_indices", DSWindow.parse("[0..3)"));
+        assertFalse(plan.degradesToFullDownload(), "a uniform ivec is windowable by its header stride");
+        assertEquals(List.of(new ByteRange(0, 3L * recordBytes)), plan.requestedRanges());
+
+        view.prefetch("neighbor_indices", DSWindow.parse("[0..3)"), WholeFacetFallback.REFUSE);
+        assertArrayEquals(new int[] {2, 3}, java.util.Arrays.copyOfRange((int[]) view.neighborIndices().get(2), 0, 2),
+            "the reader decodes the records the prefetch warmed");
     }
 
     @Test void allowingTheFallbackFetchesAWholeRemoteFacet() throws Exception {

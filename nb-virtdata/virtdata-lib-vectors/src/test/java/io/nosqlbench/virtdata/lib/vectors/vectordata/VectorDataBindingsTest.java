@@ -59,7 +59,7 @@ public class VectorDataBindingsTest {
         ivec(dataset.resolve("gt.ivecs"), new int[][] {{3, 4}});
         ivec(dataset.resolve("results.ivecs"), new int[][] {{1, 0}, {0, 1}});
         scalarI32(dataset.resolve("labels.i32"), 7, 1, 2, 3);
-        vvec(dataset, "meta.ivecs", new int[][] {{5}, {6, 7, 8}, {9, 10}, {11, 12, 13, 14}});
+        vvec(dataset, "meta.ivvec", new int[][] {{5}, {6, 7, 8}, {9, 10}, {11, 12, 13, 14}});
         Files.writeString(dataset.resolve("dataset.yaml"), """
             name: example
             profiles:
@@ -69,7 +69,7 @@ public class VectorDataBindingsTest {
                 gt: gt.ivecs
                 distances: dist.fvec
                 metadata_results: results.ivecs
-                metadata_content: meta.ivecs
+                metadata_content: meta.ivvec
                 labels: labels.i32
                 custom_floats: extra.fvec
               windowed:

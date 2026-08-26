@@ -49,17 +49,17 @@ public enum ElementType {
         if (dot < 0) throw new VectorDataException("Vector source has no extension: " + source);
         String extension = value.substring(dot + 1);
         return switch (extension) {
-            case "bvec", "bvecs", "u8", "u8vec", "u8vecs" -> U8;
-            case "i8", "i8vec", "i8vecs" -> I8;
-            case "u16", "u16vec", "u16vecs" -> U16;
-            case "i16", "i16vec", "i16vecs" -> I16;
-            case "u32", "u32vec", "u32vecs" -> U32;
-            case "ivec", "ivecs", "i32", "i32vec", "i32vecs" -> I32;
-            case "u64", "u64vec", "u64vecs" -> U64;
-            case "i64", "i64vec", "i64vecs" -> I64;
-            case "mvec", "mvecs", "f16", "f16vec", "f16vecs" -> F16;
-            case "fvec", "fvecs", "f32", "f32vec", "f32vecs" -> F32;
-            case "dvec", "dvecs", "f64", "f64vec", "f64vecs" -> F64;
+            case "bvec", "bvecs", "u8", "u8vec", "u8vecs", "bvvec", "bvvecs", "u8vvec", "u8vvecs" -> U8;
+            case "i8", "i8vec", "i8vecs", "i8vvec", "i8vvecs" -> I8;
+            case "u16", "u16vec", "u16vecs", "u16vvec", "u16vvecs" -> U16;
+            case "i16", "i16vec", "i16vecs", "svvec", "svvecs", "i16vvec", "i16vvecs" -> I16;
+            case "u32", "u32vec", "u32vecs", "u32vvec", "u32vvecs" -> U32;
+            case "ivec", "ivecs", "i32", "i32vec", "i32vecs", "ivvec", "ivvecs", "i32vvec", "i32vvecs" -> I32;
+            case "u64", "u64vec", "u64vecs", "u64vvec", "u64vvecs" -> U64;
+            case "i64", "i64vec", "i64vecs", "i64vvec", "i64vvecs" -> I64;
+            case "mvec", "mvecs", "f16", "f16vec", "f16vecs", "mvvec", "mvvecs", "f16vvec", "f16vvecs" -> F16;
+            case "fvec", "fvecs", "f32", "f32vec", "f32vecs", "fvvec", "fvvecs", "f32vvec", "f32vvecs" -> F32;
+            case "dvec", "dvecs", "f64", "f64vec", "f64vecs", "dvvec", "dvvecs", "f64vvec", "f64vvecs" -> F64;
             default -> throw new VectorDataException("Unsupported vector extension '." + extension + "' in " + source);
         };
     }

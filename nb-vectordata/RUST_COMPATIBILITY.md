@@ -90,6 +90,13 @@ source directly as of the baseline commit above.
 
 Remaining representation differences:
 
+- **`ivec`/`ivecs` facets are uniform-stride.** The format requires
+  length-qualified records that are fixed throughout — ground-truth
+  neighbor files — so windows map at the header stride, and only the
+  `*vvec` extensions carry variable-length records. (The Rust source's
+  `is_vvec_ext` still classifies `ivec` as variable; to be reconciled
+  upstream.)
+
 - **A non-range-capable remote facet degrades a window** rather than
   planning a partial fetch it cannot perform. Rust reaches the same end
   state by downloading such a facet whole at open; Java opens lazily, so

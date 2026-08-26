@@ -320,24 +320,34 @@ public final class Prefetcher {
         if (winEnd <= winStart) return null;
         String ext = extensionOf(handle.facet.source().toString());
         if (isVvecExt(ext)) return vvecRangeToBytes(handle, winStart, winEnd);
+        if (isScalarExt(ext)) {
+            int width;
+            try { width = ElementType.forExtension(handle.facet.source().toString()).width(); }
+            catch (VectorDataException unsupported) { return null; }
+            long total = handle.data().size();
+            long byteStart = Math.min(saturatedMultiply(winStart, width), total);
+            long byteEnd = Math.min(saturatedMultiply(winEnd, width), total);
+            return byteStart >= byteEnd ? null : new MappedRange(byteStart, byteEnd, 0);
+        }
+        return uniformRangeToBytes(handle, winStart, winEnd);
+    }
+
+    /// The uniform-stride mapping: `4 + dim × elemSize`, with `dim`
+    /// read from the header at byte 0 — the same first-chunk read any
+    /// reader does on first access, so nothing to report as a
+    /// prerequisite.
+    private static MappedRange uniformRangeToBytes(FacetHandle handle, long winStart, long winEnd) {
         int width;
         try { width = ElementType.forExtension(handle.facet.source().toString()).width(); }
         catch (VectorDataException unsupported) { return null; }
         ByteStorage storage = handle.data();
         long total = storage.size();
-        if (isScalarExt(ext)) {
-            long byteStart = Math.min(saturatedMultiply(winStart, width), total);
-            long byteEnd = Math.min(saturatedMultiply(winEnd, width), total);
-            return byteStart >= byteEnd ? null : new MappedRange(byteStart, byteEnd, 0);
-        }
         if (total < 4) return null;
         int dim = storage.read(0, 4).order(ByteOrder.LITTLE_ENDIAN).getInt();
         if (dim <= 0 || dim > 1_000_000) return null; // sanity vs corrupt header
         long bytesPerRecord = 4 + (long) dim * width;
         long byteStart = Math.min(saturatedMultiply(winStart, bytesPerRecord), total);
         long byteEnd = Math.min(saturatedMultiply(winEnd, bytesPerRecord), total);
-        // A uniform-stride mapping costs a 4-byte header read, which
-        // every reader pays on first access anyway — nothing to report.
         return byteStart >= byteEnd ? null : new MappedRange(byteStart, byteEnd, 0);
     }
 
@@ -372,7 +382,11 @@ public final class Prefetcher {
         return dot < 0 ? "" : value.substring(dot + 1);
     }
 
-    private static boolean isVvecExt(String ext) { return ext.contains("vvec") || ext.equals("ivec") || ext.equals("ivecs"); }
+    /// Only the `*vvec` extensions carry variable-length records. In
+    /// this catalog format, `ivec`/`ivecs` records are length-qualified
+    /// but fixed throughout — ground-truth neighbor files — and map at
+    /// the uniform header stride like every other xvec.
+    private static boolean isVvecExt(String ext) { return ext.contains("vvec"); }
 
     private static boolean isScalarExt(String ext) { return ext.matches("u8|i8|u16|i16|u32|i32|u64|i64"); }
 }

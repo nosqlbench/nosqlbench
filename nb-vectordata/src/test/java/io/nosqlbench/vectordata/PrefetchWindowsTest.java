@@ -133,13 +133,13 @@ class PrefetchWindowsTest {
             offsets[record] = at;
             at += 4 + dims[record] * 4L;
         }
-        Path data = FixtureSupport.vvec(dataset, "meta.ivecs", records);
+        Path data = FixtureSupport.vvec(dataset, "meta.ivvec", records);
         Files.writeString(dataset.resolve("dataset.yaml"), """
             name: prefetch-vvec
             profiles:
               default:
                 base_vectors: base_vectors.fvec
-                metadata_content: meta.ivecs
+                metadata_content: meta.ivvec
             """);
         return new VvecFixture(TestDataGroup.load(dataset.toUri(), settings()).profile("default"), offsets, Files.size(data));
     }
@@ -179,13 +179,13 @@ class PrefetchWindowsTest {
         for (int record = 0; record < dims.length; record++) { offsets[record] = size; size += 4 + dims[record] * 4; }
         ByteBuffer ragged = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
         for (int dim : dims) { ragged.putInt(dim); for (int element = 0; element < dim; element++) ragged.putInt(element); }
-        Files.write(dataset.resolve("ragged.ivecs"), ragged.array());
+        Files.write(dataset.resolve("ragged.ivvec"), ragged.array());
         Files.writeString(dataset.resolve("dataset.yaml"), """
             name: prefetch-walk
             profiles:
               default:
                 base_vectors: base_vectors.fvec
-                metadata_content: ragged.ivecs
+                metadata_content: ragged.ivvec
             """);
         TestDataView view = TestDataGroup.load(dataset.toUri(), settings()).profile("default");
         PrefetchPlan plan = view.prefetchPlan("metadata_content", DSWindow.parse("1..4"));
@@ -194,7 +194,7 @@ class PrefetchWindowsTest {
         // The walk persists its result beside the data — starts only,
         // in the width the payload size calls for — so it is paid once
         // rather than per view.
-        Path persisted = dataset.resolve("IDXFOR__ragged.ivecs.i32");
+        Path persisted = dataset.resolve("IDXFOR__ragged.ivvec.i32");
         assertTrue(Files.isRegularFile(persisted), "the rebuilt index is persisted beside the data");
         assertEquals(dims.length * 4L, Files.size(persisted), "record starts only, no sentinel");
         PrefetchPlan again = TestDataGroup.load(dataset.toUri(), settings()).profile("default")
