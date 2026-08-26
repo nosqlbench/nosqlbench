@@ -21,9 +21,16 @@ implementation's current behavior and its format tests are normative.
 - Windows: the full `DSWindow` grammar — `..` bounds, open ends, `(`/`]`
   bound adjustment, count/size suffixes (`K`/`M`/`G`/`T`, `KB`…`TiB`,
   compound `1g24m`), comma-separated intervals, and the structural
-  window-suffix sugar on source strings (`base.fvec[0..1M)`). Intervals
-  that select no records are rejected at parse. Readers apply the first
-  interval and clamp both bounds to the data.
+  window-suffix sugar on source strings (`base.fvec[0..1M)`). The
+  serialized structured form — a list of `{min_incl, max_excl}` maps —
+  and bare counts (`[0..N)`) are accepted on the `window:` key.
+  Intervals that select no records are rejected at parse. Readers apply
+  the first interval and clamp both bounds to the data.
+- Profiles: facets a profile does not declare resolve from `default`
+  implicitly, before any explicit `extends` — published sized profiles
+  (`100k`, `1m`, ...) carry a windowed base and their own neighbor
+  facets and inherit the rest, matching the expanded layout the
+  publishing toolchain emits.
 - Prefetch: caller-supplied record windows on any facet via
   `prefetchPlan`, `prefetch`, and `prefetchInBackground` on
   `TestDataView`, with `WholeFacetFallback` consent gating, chunk-level

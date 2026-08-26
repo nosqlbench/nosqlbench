@@ -87,6 +87,50 @@ class CatalogManifestTest {
         assertTrue(view.facet("base").isPresent(), "shorthand aliases resolve on lookup");
         assertTrue(view.facet("train").isPresent(), "every Rust alias resolves");
     }
+    @Test void sizedProfilesInheritMissingFacetsFromDefault() throws Exception {
+        // Published sized profiles name only what differs: a windowed
+        // base override and their own neighbor facets, with no
+        // `extends`. Everything else — query vectors included —
+        // resolves from `default`, matching the expanded layout the
+        // publishing toolchain emits. A released dataset failed here
+        // with "Profile 100k lacks facet query_vectors".
+        Path dataset = Files.createDirectories(temporary.resolve("sized"));
+        FixtureSupport.fvec(dataset, "base.fvec", new float[][] {{0f, 1f}, {1f, 2f}, {2f, 3f}, {3f, 4f}});
+        FixtureSupport.fvec(dataset, "query.fvec", new float[][] {{9f, 8f}});
+        FixtureSupport.ivec(dataset, "gt_default.ivecs", new int[][] {{1, 2}});
+        FixtureSupport.ivec(dataset, "gt_small.ivecs", new int[][] {{3, 4}});
+        Files.writeString(dataset.resolve("dataset.yaml"), """
+            name: sized
+            profiles:
+              default:
+                maxk: 100
+                base_vectors: base.fvec
+                query_vectors: query.fvec
+                neighbor_indices: gt_default.ivecs
+              small:
+                maxk: 100
+                base_count: 2
+                base_vectors:
+                  source: base.fvec
+                  window: "[0..2]"
+                neighbor_indices: gt_small.ivecs
+              structured:
+                base_vectors:
+                  source: base.fvec
+                  window:
+                  - min_incl: 1
+                    max_excl: 3
+            """);
+        TestDataView small = TestDataGroup.load(dataset.toUri(), settings()).profile("small");
+        assertArrayEquals(new float[] {9f, 8f}, small.queryVectors().get(0), "missing facets inherit from default");
+        assertEquals(2, small.baseVectors().count(), "the sized window clips the shared base");
+        assertArrayEquals(new int[] {3, 4}, small.neighborIndices().get(0), "declared facets override inherited ones");
+        // The serializer's structured window form clips identically to
+        // the string grammar.
+        TestDataView structured = TestDataGroup.load(dataset.toUri(), settings()).profile("structured");
+        assertEquals(2, structured.baseVectors().count());
+        assertArrayEquals(new float[] {1f, 2f}, structured.baseVectors().get(0));
+    }
     @Test void opensLegacyKnnEntriesProfilesWithoutDatasetManifest() throws Exception {
         FixtureSupport.fvec(temporary, "base.fvec", new float[][] {{1f, 2f}});
         FixtureSupport.fvec(temporary, "query.fvec", new float[][] {{3f, 4f}});

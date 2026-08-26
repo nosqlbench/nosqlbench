@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,6 +100,12 @@ public final class TestDataGroup {
     private Map<String, FacetDescriptor> facets(String profile, Map<String, FacetDescriptor> inherited) {
         Map<String, Object> definition = profiles.get(profile);
         if (definition == null) throw new VectorDataException("Dataset " + name + " has no profile " + profile);
+        // Profiles name only what differs: facets a profile does not
+        // declare resolve from `default`. A sized profile like `100k`
+        // carries a windowed base and its own neighbor facets and
+        // inherits the rest — query vectors included — without an
+        // explicit `extends`.
+        if (!"default".equals(profile) && profiles.containsKey("default")) inherited.putAll(facets("default", new LinkedHashMap<>()));
         String parent = YamlData.optionalString(definition.get("extends"));
         if (parent != null) {
             if (parent.equals(profile)) throw new VectorDataException("Profile cannot extend itself: " + profile);
@@ -110,12 +118,40 @@ public final class TestDataGroup {
             String source = YamlData.optionalString(values.get("source"));
             if (source == null) source = YamlData.optionalString(values.get("path"));
             if (source == null) continue;
-            String window = YamlData.optionalString(values.get("window"));
+            String window = windowText(values.get("window"));
             String[] split = splitWindowSuffix(source);
             if (split[1] != null) window = split[1];
             inherited.put(facetName, new FacetDescriptor(facetName, manifest.resolve(split[0]), window, Map.copyOf(values)));
         }
         return inherited;
+    }
+    /// Normalizes the `window:` key to the canonical interval text.
+    /// Manifests carry it as the string grammar, but the serializer
+    /// that publishes profiles emits the structured form — a list of
+    /// `{min_incl, max_excl}` maps — and a bare count means `[0..N)`.
+    /// Dropping an unrecognized form silently would read the whole
+    /// facet where a window was declared, so it fails instead.
+    private static String windowText(Object value) {
+        if (value == null) return null;
+        if (value instanceof String text) return text;
+        if (value instanceof Number count) return "0.." + count;
+        if (value instanceof List<?> list) {
+            List<String> parts = new ArrayList<>();
+            for (Object item : list) parts.add(intervalText(item));
+            return String.join(", ", parts);
+        }
+        if (value instanceof Map<?, ?>) return intervalText(value);
+        throw new VectorDataException("Unrecognized window form: " + value);
+    }
+    private static String intervalText(Object item) {
+        if (item instanceof String text) return text;
+        if (item instanceof Number count) return "0.." + count;
+        if (item instanceof Map<?, ?> raw) {
+            Map<String, Object> interval = YamlData.map(raw, "window interval");
+            Object min = interval.get("min_incl"); Object max = interval.get("max_excl");
+            if (min instanceof Number && max instanceof Number) return min + ".." + max;
+        }
+        throw new VectorDataException("Unrecognized window interval: " + item);
     }
     /// Splits the documented window-suffix sugar off a facet source
     /// string — `base.fvec[0..1M)` names the file plus a record window,
