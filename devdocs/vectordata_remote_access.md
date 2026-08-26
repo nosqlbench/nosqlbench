@@ -5,6 +5,32 @@ How to exercise remote dataset access end to end: the Java API in
 bindings on the CLI — including precache/prefetch in both profile-based
 and caller-named ordinal-range forms.
 
+## Quick smoke test
+
+Point the environment at a hosted catalog and read a few records; fill
+in your catalog URL and a `dataset:profile` it serves:
+
+```bash
+export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
+export VECTORDATA_HOME=/tmp/vdtest    # isolated config+cache boundary; delete when done
+
+# read through the profile (warms the profile's window by default)
+java -jar nb5.jar run driver=stdout cycles=3 threads=1 format=readout \
+  "op={{BaseVectors('mydataset:myprofile');Stringify()}}"
+
+# caller-named ordinal range, warmed in the background while cycles run
+java -jar nb5.jar run driver=stdout cycles=3 threads=1 format=readout \
+  "op={{BaseVectors('mydataset:myprofile','[0..1k)','background');Stringify()}}"
+
+# demand-paged (no warm-up), for comparing first-touch latency
+java -jar nb5.jar run driver=stdout cycles=3 threads=1 format=readout \
+  "op={{BaseVectors('mydataset:myprofile',false);Stringify()}}"
+```
+
+`VECTORDATA_CATALOG` outranks any `catalogs.yaml` in the config home;
+`VECTORDATA_HOME` keeps the cache and settings lookups isolated so the
+test never touches `~/.config/vectordata` or your real cache.
+
 ## Publishing a test dataset
 
 A dataset is a directory (or HTTP prefix) holding a `dataset.yaml` and
