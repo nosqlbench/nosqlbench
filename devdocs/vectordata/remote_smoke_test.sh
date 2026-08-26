@@ -37,4 +37,4 @@ check BaseVectors        # base_vectors, clipped to the profile window
 check QueryVectors       # query_vectors, inherited from default in sized profiles
 check NeighborIndices    # neighbor_indices for this profile
 
-echo "ok: ${DATASET}:${PROFILE} base, query, and neighbor indices read via ${VECTORDATA_CATALOG}"
+echo "ok: ${DATASET}:${PROFILE} base, query, and neighbor indices read"
