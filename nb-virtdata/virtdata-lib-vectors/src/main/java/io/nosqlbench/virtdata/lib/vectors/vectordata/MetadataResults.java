@@ -29,45 +29,45 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 * Random access to vector data from a hosted location. */
 @ThreadSafeMapper
 @Categories(Category.vectors)
-public class NeighborIndices extends CoreVectors<int[]> {
+public class MetadataResults extends CoreVectors<int[]> {
 
-    @Example({"NeighborIndices('exampledataset:exampleprofile')",
-        "Find and download vectordata for neighbor indices, prebuffering (by default) before resuming"})
-    public NeighborIndices(String datasetAndProfile) {
-        super(datasetAndProfile, "neighbor_indices", true, VectorDataSettings.defaults());
+    @Example({"MetadataResults('exampledataset:exampleprofile')",
+        "Find and download vectordata for metadata results, prebuffering (by default) before resuming"})
+    public MetadataResults(String datasetAndProfile) {
+        super(datasetAndProfile, "metadata_results", true, VectorDataSettings.defaults());
     }
 
-    @Example({"NeighborIndices('exampledataset:exampleprofile',false)",
-    "Find and download vectordata for neighbor indices, with demand-paged access"})
-    public NeighborIndices(String datasetAndProfile, boolean prebuffer) {
-        super(datasetAndProfile, "neighbor_indices", prebuffer, VectorDataSettings.defaults());
+    @Example({"MetadataResults('exampledataset:exampleprofile',false)",
+    "Find and download vectordata for metadata results, with demand-paged access"})
+    public MetadataResults(String datasetAndProfile, boolean prebuffer) {
+        super(datasetAndProfile, "metadata_results", prebuffer, VectorDataSettings.defaults());
     }
 
-    @Example({"NeighborIndices('exampledataset:exampleprofile','[0..100k)')",
+    @Example({"MetadataResults('exampledataset:exampleprofile','[0..100k)')",
         "Read only the first 100k records, warming exactly that window before resuming"})
-    public NeighborIndices(String datasetAndProfile, String window) {
-        super(datasetAndProfile, "neighbor_indices", window, "eager", VectorDataSettings.defaults());
+    public MetadataResults(String datasetAndProfile, String window) {
+        super(datasetAndProfile, "metadata_results", window, "eager", VectorDataSettings.defaults());
     }
 
-    @Example({"NeighborIndices('exampledataset:exampleprofile','[0..100k)','background')",
+    @Example({"MetadataResults('exampledataset:exampleprofile','[0..100k)','background')",
         "Read a window while it is warmed on another thread; 'eager', 'background', and 'none' select the prefetch mode"})
-    public NeighborIndices(String datasetAndProfile, String window, String prefetchMode) {
-        super(datasetAndProfile, "neighbor_indices", window, prefetchMode, VectorDataSettings.defaults());
+    public MetadataResults(String datasetAndProfile, String window, String prefetchMode) {
+        super(datasetAndProfile, "metadata_results", window, prefetchMode, VectorDataSettings.defaults());
     }
 
     /** Construct with explicit vectordata settings, including an isolated cache location. */
-    public NeighborIndices(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
-        super(datasetAndProfile, "neighbor_indices", prebuffer, settings);
+    public MetadataResults(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
+        super(datasetAndProfile, "metadata_results", prebuffer, settings);
     }
 
     /** Construct with a window, prefetch mode, and explicit vectordata settings. */
-    public NeighborIndices(String datasetAndProfile, String window, String prefetchMode, VectorDataSettings settings) {
-        super(datasetAndProfile, "neighbor_indices", window, prefetchMode, settings);
+    public MetadataResults(String datasetAndProfile, String window, String prefetchMode, VectorDataSettings settings) {
+        super(datasetAndProfile, "metadata_results", window, prefetchMode, settings);
     }
 
     @Override
     protected VectorReader<int[]> getRandomAccessData() {
-        return super.tdv.neighborIndices();
+        return super.tdv.metadataResults();
     }
 
     @Override

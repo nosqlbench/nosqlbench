@@ -20,31 +20,114 @@ package io.nosqlbench.virtdata.lib.vectors.vectordata;
 
 import io.nosqlbench.vectordata.Catalog;
 import io.nosqlbench.vectordata.CatalogSources;
+import io.nosqlbench.vectordata.DSWindow;
+import io.nosqlbench.vectordata.FacetDescriptor;
+import io.nosqlbench.vectordata.FacetNames;
+import io.nosqlbench.vectordata.PrefetchHandle;
 import io.nosqlbench.vectordata.TestDataView;
 import io.nosqlbench.vectordata.VectorDataSettings;
 import io.nosqlbench.vectordata.VectorReader;
+import io.nosqlbench.vectordata.WholeFacetFallback;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.function.LongFunction;
 
+/// Base plumbing for vectordata-backed binding functions: opens the
+/// named dataset profile from the default catalogs, clips the reader to
+/// an optional record window, and warms data according to a prefetch
+/// mode:
+///
+/// - `eager` (aliases `prebuffer`, `true`) — fetch the effective window,
+///   or the whole facet when no window applies, before returning;
+/// - `background` — start the same fetch on another thread and return
+///   immediately, letting reads overlap the download;
+/// - `none` (aliases `demand`, `false`) — demand-paged access only.
+///
+/// A binding window is expressed in the reader's own index coordinates,
+/// after any profile-declared window. For warming, it is translated to
+/// absolute record coordinates by shifting against the profile window,
+/// so the bytes fetched are exactly the bytes the clipped reader
+/// exposes.
 public abstract class CoreVectors<T> implements LongFunction<T> {
 
     protected final TestDataView tdv;
+    protected final String facetName;
     protected final VectorReader<T> dataset;
+    private final PrefetchHandle backgroundPrefetch;
 
-    public CoreVectors(String datasetAndProfile, boolean prebuffer) {
-        this(datasetAndProfile, prebuffer, VectorDataSettings.defaults());
+    protected CoreVectors(String datasetAndProfile, String facetName, boolean prebuffer, VectorDataSettings settings) {
+        this(datasetAndProfile, facetName, "", prebuffer ? "eager" : "none", settings);
     }
 
-    protected CoreVectors(String datasetAndProfile, boolean prebuffer, VectorDataSettings settings) {
+    protected CoreVectors(String datasetAndProfile, String facetName, String window, String prefetchMode,
+                          VectorDataSettings settings) {
         Catalog catalog = Catalog.of(CatalogSources.defaults(), settings);
         tdv = catalog.openProfile(datasetAndProfile);
-        dataset = getRandomAccessData();
-
-        if (prebuffer) {
-            dataset.prebuffer();
-        }
+        this.facetName = FacetNames.canonical(facetName);
+        dataset = WindowedReader.clip(getRandomAccessData(), window);
+        backgroundPrefetch = warm(window, Prefetch.parse(prefetchMode));
     }
 
     protected abstract VectorReader<T> getRandomAccessData();
+
+    /// The handle for a `background` prefetch, or `null` in the other
+    /// modes.
+    public PrefetchHandle backgroundPrefetch() { return backgroundPrefetch; }
+
+    private PrefetchHandle warm(String window, Prefetch mode) {
+        if (mode == Prefetch.NONE) return null;
+        DSWindow effective = effectiveWindow(tdv, facetName, window);
+        if (effective == null) return null;
+        if (mode == Prefetch.BACKGROUND) return tdv.prefetchInBackground(facetName, effective, WholeFacetFallback.REFUSE);
+        tdv.prefetch(facetName, effective, WholeFacetFallback.REFUSE);
+        return null;
+    }
+
+    /// Translates a reader-relative binding window to absolute record
+    /// coordinates: shifted by the profile window's start and clamped
+    /// to its end when the facet declares one. Returns the profile
+    /// window itself when no binding window is given, [DSWindow#ALL]
+    /// when neither applies, and `null` when the binding window falls
+    /// entirely outside the profile window — nothing to warm.
+    static DSWindow effectiveWindow(TestDataView tdv, String facetName, String window) {
+        DSWindow binding = DSWindow.parse(window == null ? "" : window);
+        DSWindow profile = tdv.facet(facetName)
+            .map(FacetDescriptor::window)
+            .filter(declared -> declared != null && !declared.isBlank())
+            .map(DSWindow::parse)
+            .orElse(DSWindow.ALL);
+        if (binding.isEmpty()) return profile;
+        if (profile.isEmpty()) return binding;
+        DSWindow.Interval base = profile.intervals().get(0);
+        List<DSWindow.Interval> shifted = new ArrayList<>();
+        for (DSWindow.Interval interval : binding.intervals()) {
+            long start = saturatedAdd(base.minIncl(), interval.minIncl());
+            long end = Math.min(saturatedAdd(base.minIncl(), interval.maxExcl()), base.maxExcl());
+            if (end > start) shifted.add(new DSWindow.Interval(start, end));
+        }
+        return shifted.isEmpty() ? null : new DSWindow(shifted);
+    }
+
+    private static long saturatedAdd(long a, long b) {
+        try { return Math.addExact(a, b); } catch (ArithmeticException overflow) { return Long.MAX_VALUE; }
+    }
+
+    /// How a binding warms its data before first read.
+    enum Prefetch {
+        EAGER, BACKGROUND, NONE;
+
+        static Prefetch parse(String mode) {
+            return switch (mode == null ? "" : mode.toLowerCase(Locale.ROOT)) {
+                case "eager", "prebuffer", "true" -> EAGER;
+                case "background" -> BACKGROUND;
+                case "none", "demand", "false" -> NONE;
+                default -> throw new RuntimeException(
+                    "Unknown prefetch mode '" + mode + "': expected eager, background, or none");
+            };
+        }
+    }
 
     @Override
     public T apply(long value) {
