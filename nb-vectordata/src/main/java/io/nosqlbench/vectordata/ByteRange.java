@@ -15,9 +15,9 @@
  */
 package io.nosqlbench.vectordata;
 
-/// Immutable observation of a reader's backing cache. `chunkSize` is
-/// the transfer-chunk size in bytes — `0` for local storage, which has
-/// no chunks — so consumers can map byte offsets to chunk ordinals
-/// (e.g. for chunk-aligned sampling or prefetch).
-public record CacheStats(AccessMode accessMode, long totalBytes, long cachedBytes, long chunkSize,
-                         long hits, long misses, boolean complete) { }
+/// A half-open byte range `[start, end)` within a facet's payload.
+public record ByteRange(long start, long end) {
+    /// Bytes spanned by this range.
+    public long length() { return Math.max(0, end - start); }
+    @Override public String toString() { return "[" + start + ".." + end + ")"; }
+}

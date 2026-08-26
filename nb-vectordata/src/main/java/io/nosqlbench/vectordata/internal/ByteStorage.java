@@ -17,6 +17,7 @@ package io.nosqlbench.vectordata.internal;
 
 import io.nosqlbench.vectordata.CacheStats;
 import io.nosqlbench.vectordata.PrebufferProgress;
+import io.nosqlbench.vectordata.RangeFill;
 
 import java.nio.ByteBuffer;
 
@@ -25,6 +26,20 @@ public interface ByteStorage extends AutoCloseable {
     long size();
     ByteBuffer read(long offset, int length);
     void prebuffer(PrebufferProgress progress);
+    /// Drives only the chunks covering `[byteStart, byteEnd)` to
+    /// resident state, reporting bytes resident within the covered
+    /// span against the span's total. Local storage reports the span
+    /// as immediately complete.
+    void prebufferRange(long byteStart, long byteEnd, PrebufferProgress progress);
+    /// Chunk-level residency for a byte range, or `null` when the
+    /// storage has no chunks — local storage is always fully resident
+    /// and a range question about it has no meaning beyond "yes".
+    /// Callers should treat `null` as "free".
+    RangeFill rangeFill(long byteStart, long byteEnd);
+    /// Whether a sub-range of this storage can be fetched without
+    /// fetching the rest. Local storage is trivially range-capable; a
+    /// remote source that cannot service byte ranges is not.
+    boolean rangeCapable();
     boolean isComplete();
     CacheStats stats();
     @Override default void close() { }

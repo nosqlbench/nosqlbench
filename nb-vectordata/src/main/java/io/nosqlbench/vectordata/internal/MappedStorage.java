@@ -18,6 +18,7 @@ package io.nosqlbench.vectordata.internal;
 import io.nosqlbench.vectordata.AccessMode;
 import io.nosqlbench.vectordata.CacheStats;
 import io.nosqlbench.vectordata.PrebufferProgress;
+import io.nosqlbench.vectordata.RangeFill;
 import io.nosqlbench.vectordata.VectorDataException;
 
 import java.io.IOException;
@@ -54,7 +55,13 @@ public final class MappedStorage implements ByteStorage {
             throw new VectorDataException("Byte range outside source: offset=" + offset + ", length=" + length + ", size=" + size);
     }
     @Override public void prebuffer(PrebufferProgress progress) { progress.onProgress(size, size); }
+    @Override public void prebufferRange(long byteStart, long byteEnd, PrebufferProgress progress) {
+        long length = Math.max(0, Math.min(byteEnd, size) - byteStart);
+        progress.onProgress(length, length);
+    }
+    @Override public RangeFill rangeFill(long byteStart, long byteEnd) { return null; }
+    @Override public boolean rangeCapable() { return true; }
     @Override public boolean isComplete() { return true; }
-    @Override public CacheStats stats() { return new CacheStats(AccessMode.LOCAL, size, size, 0, 0, true); }
+    @Override public CacheStats stats() { return new CacheStats(AccessMode.LOCAL, size, size, 0, 0, 0, true); }
     @Override public void close() { try { channel.close(); } catch (IOException ignored) { } }
 }

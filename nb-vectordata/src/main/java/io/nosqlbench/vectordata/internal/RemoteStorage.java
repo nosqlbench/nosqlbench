@@ -19,6 +19,7 @@ import io.nosqlbench.vectordata.AccessMode;
 import io.nosqlbench.vectordata.CacheStats;
 import io.nosqlbench.vectordata.IntegrityException;
 import io.nosqlbench.vectordata.PrebufferProgress;
+import io.nosqlbench.vectordata.RangeFill;
 import io.nosqlbench.vectordata.VectorDataException;
 import io.nosqlbench.vectordata.VectorDataSettings;
 
@@ -149,11 +150,40 @@ public final class RemoteStorage implements ByteStorage {
     @Override public void prebuffer(PrebufferProgress progress) {
         for (int i = 0; i < chunks(); i++) { ensure(i, i); progress.onProgress(Math.min(size, (long) present.cardinality() * chunkSize), size); }
     }
+    @Override public void prebufferRange(long byteStart, long byteEnd, PrebufferProgress progress) {
+        long end = Math.min(byteEnd, size);
+        if (byteStart < 0 || byteStart >= end) { progress.onProgress(0, 0); return; }
+        int first = Math.toIntExact(byteStart / chunkSize);
+        int last = Math.toIntExact((end - 1) / chunkSize);
+        long rangeBytes = Math.min(size, (last + 1L) * chunkSize) - (long) first * chunkSize;
+        synchronized (lock) {
+            long done = 0;
+            for (int chunk = first; chunk <= last; chunk++) {
+                if (present.get(chunk)) hits.incrementAndGet(); else fetch(chunk);
+                done += chunkLength(chunk);
+                progress.onProgress(done, rangeBytes);
+            }
+        }
+    }
+    @Override public RangeFill rangeFill(long byteStart, long byteEnd) {
+        if (size == 0 || byteEnd <= byteStart || byteStart < 0 || byteStart >= size) return null;
+        long end = Math.min(byteEnd, size);
+        int first = Math.toIntExact(byteStart / chunkSize);
+        int last = Math.toIntExact(Math.min((end - 1) / chunkSize, chunks() - 1L));
+        if (first > last) return null;
+        int resident = 0;
+        synchronized (lock) { for (int chunk = first; chunk <= last; chunk++) if (present.get(chunk)) resident++; }
+        long alignedStart = (long) first * chunkSize;
+        long alignedEnd = Math.min((last + 1L) * chunkSize, size);
+        return new RangeFill(first, last, chunkSize, last - first + 1, resident, alignedStart, alignedEnd);
+    }
+    @Override public boolean rangeCapable() { return ranges; }
+    private long chunkLength(int chunk) { return Math.min(chunkSize, size - (long) chunk * chunkSize); }
     @Override public boolean isComplete() { return complete; }
     @Override public CacheStats stats() {
         long cached = Math.min(size, (long) present.cardinality() * chunkSize);
         AccessMode mode = reference == null ? (ranges ? AccessMode.MERKLE_CHUNKED : AccessMode.FULL_TRANSFER) : AccessMode.MERKLE_HASHED;
-        return new CacheStats(mode, size, cached, hits.get(), misses.get(), complete);
+        return new CacheStats(mode, size, cached, chunkSize, hits.get(), misses.get(), complete);
     }
     private int chunks() { return size == 0 ? 0 : Math.toIntExact((size + chunkSize - 1) / chunkSize); }
     private void checkBounds(long offset, int length) {
