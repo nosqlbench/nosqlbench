@@ -39,11 +39,15 @@ public final class VectorReaders {
         ElementType type = ElementType.forExtension(text);
         if (!isVector(text)) throw new VectorDataException("vvec source must use a vector extension: " + source);
         ByteStorage data = new StorageFactory(settings).open(source, identity);
-        URI i32 = URI.create(source.toString().replaceAll("[^/]+$", "IDXFOR__" + filename(source) + ".i32"));
-        try { return new VariableVectorReader<>(data, new StorageFactory(settings).open(i32, identity), type, false); }
-        catch (VectorDataException missingI32) {
-            URI i64 = URI.create(source.toString().replaceAll("[^/]+$", "IDXFOR__" + filename(source) + ".i64"));
-            return new VariableVectorReader<>(data, new StorageFactory(settings).open(i64, identity), type, true);
+        // Probe the sidecar width the payload size calls for first —
+        // the rule the writers use — so the common case costs one
+        // request instead of a guaranteed miss.
+        boolean expect64 = data.size() > Integer.MAX_VALUE;
+        URI expected = URI.create(source.toString().replaceAll("[^/]+$", "IDXFOR__" + filename(source) + (expect64 ? ".i64" : ".i32")));
+        try { return new VariableVectorReader<>(data, new StorageFactory(settings).open(expected, identity), type, expect64); }
+        catch (VectorDataException missing) {
+            URI other = URI.create(source.toString().replaceAll("[^/]+$", "IDXFOR__" + filename(source) + (expect64 ? ".i32" : ".i64")));
+            return new VariableVectorReader<>(data, new StorageFactory(settings).open(other, identity), type, !expect64);
         }
     }
     @SuppressWarnings("unchecked") public static VectorReader<float[]> f32(URI source, VectorDataSettings settings, String identity) {

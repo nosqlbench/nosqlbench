@@ -16,21 +16,31 @@
 package io.nosqlbench.vectordata.internal;
 
 import io.nosqlbench.vectordata.CacheStats;
+import io.nosqlbench.vectordata.DSWindow;
 import io.nosqlbench.vectordata.ElementType;
 import io.nosqlbench.vectordata.PrebufferProgress;
-import io.nosqlbench.vectordata.VectorDataException;
 import io.nosqlbench.vectordata.VectorReader;
 
-/** Contiguous logical index window over a fixed vector reader. */
+/// Contiguous logical index window over a fixed vector reader.
+///
+/// The expression is the canonical [DSWindow] grammar. Only the first
+/// interval applies — the reader API handles a single contiguous range,
+/// so authors wanting a disjoint window split it into separate facet
+/// configs — and both bounds clamp to the underlying reader's count, so
+/// an open-ended `[10..]` window means "from 10 to wherever the data
+/// stops". Malformed windows and empty intervals fail at parse.
 public final class WindowedVectorReader<A> implements VectorReader<A> {
     private final VectorReader<A> delegate; private final long begin, count;
     public WindowedVectorReader(VectorReader<A> delegate, String expression) {
         this.delegate = delegate;
-        String[] parts = expression.trim().replace("[", "").replace("]", "").split("\\.\\.", -1);
-        if (parts.length != 2) throw new VectorDataException("Window must be a contiguous start..end range: " + expression);
-        try { begin = parts[0].isBlank() ? 0 : Long.parseLong(parts[0].trim()); long end = parts[1].isBlank() ? delegate.count() : Long.parseLong(parts[1].trim()); count = end - begin; }
-        catch (NumberFormatException e) { throw new VectorDataException("Invalid window " + expression, e); }
-        if (begin < 0 || count < 0 || begin > delegate.count() - count) throw new VectorDataException("Window lies outside source: " + expression);
+        DSWindow window = DSWindow.parse(expression);
+        long total = delegate.count();
+        if (window.isEmpty()) { begin = 0; count = total; }
+        else {
+            DSWindow.Interval first = window.intervals().get(0);
+            begin = Math.min(first.minIncl(), total);
+            count = Math.max(0, Math.min(first.maxExcl(), total) - begin);
+        }
     }
     @Override public long count() { return count; }
     @Override public int dimension() { return delegate.dimension(); }

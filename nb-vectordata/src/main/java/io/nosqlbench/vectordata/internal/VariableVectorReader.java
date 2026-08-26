@@ -24,14 +24,21 @@ import io.nosqlbench.vectordata.VvecReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-/** Reader for variable vectors, indexed by byte offsets in an IDXFOR sidecar. */
+/// Reader for variable vectors, indexed by byte offsets in an IDXFOR
+/// sidecar. Two published layouts are accepted: `N+1` entries whose
+/// final entry is an end-of-data sentinel equal to the payload size,
+/// and the `vectordata-rs` walk-built form of `N` record starts with no
+/// sentinel — the reader detects which by whether the last entry equals
+/// the payload size, which no record start can.
 public final class VariableVectorReader<A> implements VvecReader<A> {
-    private final ByteStorage data; private final ByteStorage index; private final ElementType type; private final int width; private final long count;
+    private final ByteStorage data; private final ByteStorage index; private final ElementType type; private final int width; private final long count; private final boolean sentinel;
     public VariableVectorReader(ByteStorage data, ByteStorage index, ElementType type, boolean index64) {
         this.data = data; this.index = index; this.type = type; this.width = index64 ? 8 : 4;
-        if (index.size() % width != 0 || index.size() < width * 2L) throw new VectorDataException("Invalid IDXFOR sidecar length");
-        count = index.size() / width - 1;
-        long end = offset(count); if (end != data.size()) throw new VectorDataException("IDXFOR final offset does not equal vvec data size");
+        if (index.size() % width != 0 || index.size() < width) throw new VectorDataException("Invalid IDXFOR sidecar length");
+        long entries = index.size() / width;
+        sentinel = rawOffset(entries - 1) == data.size();
+        count = sentinel ? entries - 1 : entries;
+        if (rawOffset(0) != (count == 0 ? data.size() : 0)) throw new VectorDataException("IDXFOR sidecar does not start at offset 0");
     }
     @Override public long count() { return count; }
     @Override public int dimensionAt(long value) { return record(value).order(ByteOrder.LITTLE_ENDIAN).getInt(); }
@@ -47,6 +54,10 @@ public final class VariableVectorReader<A> implements VvecReader<A> {
         return data.read(begin, Math.toIntExact(end - begin));
     }
     private long offset(long value) {
+        if (!sentinel && value == count) return data.size();
+        return rawOffset(value);
+    }
+    private long rawOffset(long value) {
         ByteBuffer bytes = index.read(value * width, width).order(ByteOrder.LITTLE_ENDIAN);
         return width == 4 ? Integer.toUnsignedLong(bytes.getInt()) : bytes.getLong();
     }

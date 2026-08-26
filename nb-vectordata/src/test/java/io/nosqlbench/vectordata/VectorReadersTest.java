@@ -46,6 +46,20 @@ class VectorReadersTest {
         @SuppressWarnings("unchecked") VvecReader<int[]> vectors64 = (VvecReader<int[]>) VectorReaders.openVvec(variable64.toUri(), VectorDataSettings.defaults(), "test");
         assertArrayEquals(new int[] {5, 6}, vectors64.get(1));
     }
+    @Test void readsRustWalkBuiltSidecarsWithoutASentinel() throws Exception {
+        // vectordata-rs walk-built sidecars carry one start per record
+        // and no end-of-data sentinel; both layouts must read
+        // identically, or a dataset Rust has opened locally becomes
+        // unreadable here.
+        Path data = FixtureSupport.vvec(temporary, "starts.ivecs", new int[][] {{1}, {2, 3}, {4, 5, 6}});
+        java.nio.ByteBuffer startsOnly = java.nio.ByteBuffer.allocate(3 * 4).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+        startsOnly.putInt(0).putInt(8).putInt(20);
+        java.nio.file.Files.write(temporary.resolve("IDXFOR__starts.ivecs.i32"), startsOnly.array());
+        @SuppressWarnings("unchecked") VvecReader<int[]> vectors = (VvecReader<int[]>) VectorReaders.openVvec(data.toUri(), VectorDataSettings.defaults(), "test");
+        assertEquals(3, vectors.count());
+        assertArrayEquals(new int[] {2, 3}, vectors.get(1));
+        assertArrayEquals(new int[] {4, 5, 6}, vectors.get(2));
+    }
     @Test void rejectsMalformedFixedRecord() throws Exception {
         Path source = FixtureSupport.fvec(temporary, "bad.fvec", new float[][] {{1f, 2f}});
         java.nio.file.Files.write(source, new byte[] {0}, java.nio.file.StandardOpenOption.APPEND);
