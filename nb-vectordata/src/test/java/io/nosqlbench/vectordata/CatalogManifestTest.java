@@ -101,6 +101,9 @@ class CatalogManifestTest {
         FixtureSupport.ivec(dataset, "gt_small.ivecs", new int[][] {{3, 4}});
         Files.writeString(dataset.resolve("dataset.yaml"), """
             name: sized
+            attributes:
+              distance_function: DOT_PRODUCT
+              is_zero_vector_free: true
             profiles:
               default:
                 maxk: 100
@@ -122,6 +125,8 @@ class CatalogManifestTest {
                     max_excl: 3
             """);
         TestDataView small = TestDataGroup.load(dataset.toUri(), settings()).profile("small");
+        assertEquals("DOT_PRODUCT", small.attributes().get("distance_function"),
+            "dataset attributes ride along on every profile view");
         assertArrayEquals(new float[] {9f, 8f}, small.queryVectors().get(0), "missing facets inherit from default");
         assertEquals(2, small.baseVectors().count(), "the sized window clips the shared base");
         assertArrayEquals(new int[] {3, 4}, small.neighborIndices().get(0), "declared facets override inherited ones");

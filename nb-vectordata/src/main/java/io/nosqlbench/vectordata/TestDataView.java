@@ -31,6 +31,12 @@ public interface TestDataView {
     VectorReader<int[]> metadataResults();
     VectorReader<?> openFacet(String name);
     VvecReader<?> openVariableFacet(String name);
+    /// Dataset-level attributes from the manifest's `attributes:`
+    /// block — `distance_function`, provenance fields, and whatever
+    /// else the publisher recorded. Empty when the manifest declares
+    /// none. This is how a workload derives configuration from the
+    /// dataset instead of restating it.
+    Map<String, Object> attributes();
     void prebuffer(PrebufferProgress progress);
 
     /// What prefetching `window` on `facet` would cost, without

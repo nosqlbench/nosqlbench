@@ -40,12 +40,18 @@ import java.util.concurrent.ConcurrentHashMap;
 /** Default TestDataView implementation backed by resolved manifest descriptors. */
 public final class ManifestView implements TestDataView {
     private final String dataset, profile; private final Map<String, FacetDescriptor> facets; private final VectorDataSettings settings;
+    private final Map<String, Object> attributes;
     /// One handle per facet, so a plan and the fetch that follows it —
     /// and every later ask through this view — share one loaded offset
     /// index rather than loading it repeatedly.
     private final Map<String, Prefetcher.FacetHandle> handles = new ConcurrentHashMap<>();
     public ManifestView(String dataset, String profile, Map<String, FacetDescriptor> facets, VectorDataSettings settings) {
+        this(dataset, profile, facets, settings, Map.of());
+    }
+    public ManifestView(String dataset, String profile, Map<String, FacetDescriptor> facets, VectorDataSettings settings,
+                        Map<String, Object> attributes) {
         this.dataset = dataset; this.profile = profile; this.facets = Map.copyOf(new LinkedHashMap<>(facets)); this.settings = settings;
+        this.attributes = Map.copyOf(attributes);
     }
     @Override public String dataset() { return dataset; }
     @Override public String profile() { return profile; }
@@ -58,6 +64,7 @@ public final class ManifestView implements TestDataView {
     @Override public VectorReader<int[]> metadataResults() { return fixed("metadata_results", VectorReaders::i32); }
     @Override public VectorReader<?> openFacet(String name) { FacetDescriptor facet = require(name); return window(VectorReaders.open(facet.source(), settings, dataset), facet); }
     @Override public VvecReader<?> openVariableFacet(String name) { FacetDescriptor facet = require(name); return VectorReaders.openVvec(facet.source(), settings, dataset); }
+    @Override public Map<String, Object> attributes() { return attributes; }
     @Override public void prebuffer(PrebufferProgress progress) { for (String name : facets.keySet()) openFacet(name).prebuffer(progress); }
     @Override public PrefetchPlan prefetchPlan(String facet, DSWindow window) { return Prefetcher.plan(handle(facet), window); }
     @Override public PrefetchReport prefetch(String facet, DSWindow window, WholeFacetFallback fallback, PrebufferProgress progress) {

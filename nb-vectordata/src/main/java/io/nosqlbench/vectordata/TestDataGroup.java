@@ -33,8 +33,10 @@ import java.util.Set;
 public final class TestDataGroup {
     private static final Set<String> NON_FACETS = Set.of("extends", "base_count", "query_count", "maxk", "partition", "name", "description", "tags");
     private final String name; private final URI manifest; private final Map<String, Map<String, Object>> profiles; private final VectorDataSettings settings;
-    private TestDataGroup(String name, URI manifest, Map<String, Map<String, Object>> profiles, VectorDataSettings settings) {
-        this.name = name; this.manifest = manifest; this.profiles = profiles; this.settings = settings;
+    private final Map<String, Object> attributes;
+    private TestDataGroup(String name, URI manifest, Map<String, Map<String, Object>> profiles, VectorDataSettings settings,
+                          Map<String, Object> attributes) {
+        this.name = name; this.manifest = manifest; this.profiles = profiles; this.settings = settings; this.attributes = attributes;
     }
     public static TestDataGroup load(String source) { return load(uri(source), VectorDataSettings.defaults()); }
     /** Builds a group from a legacy knn_entries layout whose sources are already resolved. */
@@ -48,7 +50,7 @@ public final class TestDataGroup {
             profiles.put(entry.getKey(), profile);
         }
         if (profiles.isEmpty()) throw new VectorDataException("Legacy catalog has no profiles for " + name);
-        return new TestDataGroup(name, origin, profiles, settings);
+        return new TestDataGroup(name, origin, profiles, settings, Map.of());
     }
     public static TestDataGroup load(URI source, VectorDataSettings settings) {
         if (!isYaml(source)) {
@@ -68,7 +70,9 @@ public final class TestDataGroup {
             Map<String, Object> fallback = new LinkedHashMap<>(root); fallback.remove("name"); fallback.remove("profiles"); profiles.put("default", fallback);
         }
         if (profiles.isEmpty()) throw new VectorDataException("Manifest contains no profiles: " + manifest);
-        return new TestDataGroup(name, manifest, profiles, settings);
+        Map<String, Object> attributes = root.get("attributes") instanceof Map<?, ?> declared
+            ? Map.copyOf(YamlData.map(declared, "attributes")) : Map.of();
+        return new TestDataGroup(name, manifest, profiles, settings, attributes);
     }
     private static TestDataGroup legacy(Map<String, Object> root, URI manifest, VectorDataSettings settings, String preferred) {
         String configuredBase = root.get("_defaults") instanceof Map<?, ?> map ? YamlData.optionalString(YamlData.map(map, "_defaults").get("base_url")) : null;
@@ -95,7 +99,7 @@ public final class TestDataGroup {
     public Map<String, Map<String, Object>> profiles() { return Map.copyOf(profiles); }
     public TestDataView profile(String profile) {
         String selected = profile == null || profile.isBlank() ? (profiles.containsKey("default") ? "default" : profiles.keySet().iterator().next()) : profile;
-        return new ManifestView(name, selected, facets(selected, new LinkedHashMap<>()), settings);
+        return new ManifestView(name, selected, facets(selected, new LinkedHashMap<>()), settings, attributes);
     }
     private Map<String, FacetDescriptor> facets(String profile, Map<String, FacetDescriptor> inherited) {
         Map<String, Object> definition = profiles.get(profile);
