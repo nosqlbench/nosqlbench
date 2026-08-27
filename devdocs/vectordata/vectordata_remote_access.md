@@ -163,6 +163,16 @@ passes through untouched. The vectordata expr functions:
 Diagnose expr processing with `dryrun=exprs` on the activity to dump the
 expression-processed workload and context.
 
+For a complete workload where every dataset-shaped parameter is derived
+this way, see
+`nb-adapters/adapter-cqld4/src/main/resources/activities/baselinesv2/cql_vector_dataset.yaml`:
+the only dataset input is `dataset='<dataset>:<profile>'`, and the
+schema's vector dimensions and similarity function, the rampup and
+search cycle counts, the ANN `LIMIT`, and the recall verifier's `k` all
+come from the dataset through expr assignments — with the bindings
+reading through the vectordata mappers, which warm the profile's base
+window eagerly before the first cycle.
+
 ## Inline op examples
 
 Binding recipes in op templates address the same surface. Smoke-test a

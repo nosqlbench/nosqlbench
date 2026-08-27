@@ -1,0 +1,111 @@
+min_version: "5.25"
+
+description: |
+  Live vector search with every dataset-shaped parameter derived from
+  the dataset itself through the expr system. The only required input
+  is the dataset spec, given as dataset='<dataset>:<profile>':
+    dataset: {{spec == paramOr('dataset', 'mydataset:myprofile')}}
+  Everything below is derived from that dataset at load time, so the
+  schema, cycle counts, and search shape follow the data instead of
+  restating it:
+    dimensions: {{dimensions == baseVectors(spec).dimension()}}
+    trainsize: {{trainsize == baseVectors(spec).count()}}
+    testsize: {{testsize == queryVectors(spec).count()}}
+    maxk: {{maxk == neighborIndices(spec).dimension()}}
+    similarity: {{similarity == dataset(spec).attributes().getOrDefault('distance_function','COSINE').toString().toLowerCase()}}
+    base bytes to warm (profile window): {{warmbytes == prefetchPlan(spec, 'base_vectors', dataset(spec).facet('base_vectors').get().window() ?: '').bytesToFetch()}}
+  The rampup bindings warm the profile's base window eagerly before the
+  first cycle (with download progress on stderr); pass a window and
+  prefetch mode on the binding functions to shape that differently.
+  Operational knobs stay conventional: keyspace, table, rf, and cl are
+  TEMPLATE parameters with the usual defaults.
+
+scenarios:
+  default:
+    drop: >-
+      run tags='block:drop' threads===1 cycles===UNDEF errors=count
+    schema_ks: >-
+      run tags='block:schema_ks' threads===1 cycles===UNDEF
+    schema: >-
+      run tags='block:schema' threads===1 cycles===UNDEF
+    rampup: >-
+      run tags='block:rampup' threads=TEMPLATE(rampup_threads,auto)
+      cycles==={{@trainsize}} errors=count,warn
+    search_and_verify: >-
+      run alias=search_and_verify tags='block:search_and_verify,optype=select'
+      threads=TEMPLATE(search_threads,auto) cycles==={{@testsize}}
+      errors=count,warn
+
+bindings:
+  id: ToString()
+  train_vec: BaseVectors('{{@spec}}'); ToCqlVector();
+  test_vec: QueryVectors('{{@spec}}'); ToCqlVector();
+  relevant_indices: NeighborIndices('{{@spec}}')
+
+blocks:
+  drop:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+      timeout: 600
+    ops:
+      drop_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)_value_idx;
+      drop_table: |
+        DROP TABLE IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors);
+
+  schema_ks:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+    ops:
+      create_keyspace: |
+        CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
+        AND durable_writes = true;
+
+  schema:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+    ops:
+      create_table: |
+        CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (
+          key TEXT,
+          value vector<float,{{@dimensions}}>,
+          PRIMARY KEY (key)
+        );
+      create_sai_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors) (value)
+        USING 'StorageAttachedIndex'
+        WITH OPTIONS = {'similarity_function' : '{{@similarity}}'};
+
+  rampup:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+      prepared: true
+    ops:
+      insert: |
+        INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+        (key, value) VALUES ({id},{train_vec});
+
+  search_and_verify:
+    ops:
+      select_ann:
+        prepared: |
+          SELECT * FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,vectors)
+          ORDER BY value ANN OF {test_vec} LIMIT {{@maxk}};
+        tags:
+          optype: select
+        verifier-init: |
+          k={{@maxk}}
+          relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+        verifier: |
+          actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
+          relevancy.accept({relevant_indices},actual_indices);
+          return true;
