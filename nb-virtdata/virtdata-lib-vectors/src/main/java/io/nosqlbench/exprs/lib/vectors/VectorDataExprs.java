@@ -25,6 +25,7 @@ import io.nosqlbench.nb.api.expr.annotations.ExprFunctionSpec;
 import io.nosqlbench.vectordata.Catalog;
 import io.nosqlbench.vectordata.CatalogSources;
 import io.nosqlbench.vectordata.DSWindow;
+import io.nosqlbench.vectordata.FacetDescriptor;
 import io.nosqlbench.vectordata.PrefetchHandle;
 import io.nosqlbench.vectordata.PrefetchPlan;
 import io.nosqlbench.vectordata.PrefetchReport;
@@ -32,6 +33,7 @@ import io.nosqlbench.vectordata.TestDataView;
 import io.nosqlbench.vectordata.VectorReader;
 import io.nosqlbench.vectordata.VvecReader;
 import io.nosqlbench.vectordata.WholeFacetFallback;
+import io.nosqlbench.virtdata.lib.vectors.vectordata.PrefetchMeter;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.WindowedReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -160,7 +162,52 @@ public class VectorDataExprs implements ExprFunctionProvider {
         description = "Fetch a record window of a facet and return when it is resident. An empty window requests the whole facet; an unresolvable window is refused rather than fetching everything."
     )
     public PrefetchReport prefetch(String datasetNameAndProfile, String facetName, String window) {
-        return dataset(datasetNameAndProfile).prefetch(facetName, DSWindow.parse(window), WholeFacetFallback.REFUSE);
+        return warm(dataset(datasetNameAndProfile), datasetNameAndProfile, facetName, DSWindow.parse(window));
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"base_vectors\"", "0", "1000"}, expectNotNull = true)
+    @ExprExample(args = {"\"airports:demo\"", "\"query_vectors\"", "0", "10"}, expectNotNull = true)
+    @ExprFunctionSpec(
+        name = "prefetchCycles",
+        synopsis = "prefetchCycles(\"dataset:profile\", \"facet_name\", start, end)",
+        description = "Fetch the records a cycle range will read — the half-open ordinal interval [start,end) — and return when they are resident. The natural form when the range comes from an activity's cycles."
+    )
+    public PrefetchReport prefetchCycles(String datasetNameAndProfile, String facetName, Number start, Number end) {
+        DSWindow window = new DSWindow(java.util.List.of(new DSWindow.Interval(start.longValue(), end.longValue())));
+        return warm(dataset(datasetNameAndProfile), datasetNameAndProfile, facetName, window);
+    }
+
+    @ExprExample(args = {"\"airports:demo\""}, expectNotNull = true)
+    @ExprExample(args = {"\"airports:demo\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "prefetchProfile",
+        synopsis = "prefetchProfile(\"dataset:profile\")",
+        description = "Fetch every facet the profile declares, each to the window the profile declares for it (or whole when it declares none), and return a per-facet summary. The one-call warm-up for a workload."
+    )
+    public String prefetchProfile(String datasetNameAndProfile) {
+        TestDataView view = dataset(datasetNameAndProfile);
+        StringBuilder summary = new StringBuilder();
+        for (String facetName : view.facets().keySet()) {
+            String declared = view.facet(facetName).map(FacetDescriptor::window).orElse(null);
+            DSWindow window = DSWindow.parse(declared == null ? "" : declared);
+            PrefetchPlan plan = view.prefetchPlan(facetName, window);
+            warm(view, datasetNameAndProfile, facetName, window);
+            if (!summary.isEmpty()) summary.append("; ");
+            summary.append(facetName).append(' ').append(declared == null ? "ALL" : declared).append(' ')
+                .append(plan.isResident() ? "resident" : PrefetchMeter.bytes(plan.bytesToFetch()));
+        }
+        return summary.toString();
+    }
+
+    /// Plans, announces, fetches with progress, and confirms — the one
+    /// path every expr-driven warm-up takes, so a download started from
+    /// a workload reports itself the same way one started from a
+    /// binding does.
+    private static PrefetchReport warm(TestDataView view, String spec, String facetName, DSWindow window) {
+        PrefetchMeter meter = new PrefetchMeter(spec + ":" + facetName, view.prefetchPlan(facetName, window));
+        PrefetchReport report = view.prefetch(facetName, window, WholeFacetFallback.REFUSE, meter);
+        meter.complete();
+        return report;
     }
 
     @ExprExample(args = {"\"airports:demo\"", "\"base_vectors\"", "\"[0..100)\""}, expectNotNull = true)

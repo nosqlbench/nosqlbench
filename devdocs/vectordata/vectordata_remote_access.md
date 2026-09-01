@@ -142,10 +142,15 @@ expr forms (`{{= expr}}`, `{{name = expr}}`, `{{@name}}`); anything else
 passes through untouched. The vectordata expr functions:
 
 ```yaml
-# Precache the whole facet before the run (empty window = everything):
-# {{= prefetch("example:default", "base_vectors", "").rangesFetched()}}
+# One-call warm-up: every facet the profile declares, each to the
+# window the profile declares for it. This is the form to reach for —
+# it never fetches more than the profile describes.
+# {{= prefetchProfile("example:default")}}
 
-# Ordinal-range warm-up, priced first:
+# A cycle range, in the coordinates an activity already speaks:
+# {{= prefetchCycles("example:default", "base_vectors", 0, 100000).rangesFetched()}}
+
+# An explicit window, priced first:
 # {{= prefetchPlan("example:default", "base_vectors", "[0..100k)").bytesToFetch()}}
 # {{= prefetch("example:default", "base_vectors", "[0..100k)").rangesFetched()}}
 
@@ -162,6 +167,32 @@ passes through untouched. The vectordata expr functions:
 
 Diagnose expr processing with `dryrun=exprs` on the activity to dump the
 expression-processed workload and context.
+
+### Three things to know when prefetching from a workload
+
+**Expressions evaluate when the workload loads, not when a block runs.**
+The whole document is expression-processed before ops are parsed, so a
+prefetch written into an op body fires on every activity start —
+including `run tags='block:drop'` — no matter what tags that op carries.
+That is fine for an up-front warm-up, but it is not a way to tie
+fetching to a phase. To warm only when a phase actually uses the data,
+let the bindings do it: `BaseVectors('ds:profile','[0..1M)','eager')`
+warms when that binding resolves, which happens only for blocks that use
+it, and `'background'` lets the fetch overlap the run.
+
+**An empty window means the whole facet, not the profile's window.**
+`prefetch(spec,"base_vectors","")` on a sized profile fetches the entire
+shared base file — which may be terabytes — because an empty window is a
+request for everything rather than a fallback. Use `prefetchProfile`,
+which resolves each facet to its declared window, or pass the window
+explicitly.
+
+**An assignment sigil renders its value.** `{{p = "ds:" + profile}}`
+substitutes the assigned value into the document at that spot, so
+writing assignments in an op body leaves stray text in the op. Put them
+in `description:` (where they read as documentation) and reference them
+with `{{@p}}` where the value belongs — the workload example below does
+exactly this.
 
 For a complete workload where every dataset-shaped parameter is derived
 this way, see
