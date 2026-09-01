@@ -1,0 +1,55 @@
+min_version: "5.25"
+
+description: |
+  Runnable demo of remote vectordata access with a live download meter.
+  No database required — this uses the stdout driver, so the only thing
+  it exercises is dataset access itself.
+
+    nb5 run devdocs/vectordata/vectordata_demo.yaml dataset=<name>:<profile>
+
+  Everything below is read from the dataset when this file loads:
+
+    dataset:       {{spec == paramOr('dataset','UNSET — pass dataset=<name>:<profile>')}}
+    dimensions:    {{dimensions == baseVectors(spec).dimension()}}
+    base records:  {{basecount == baseVectors(spec).count()}}
+    query records: {{querycount == queryVectors(spec).count()}}
+    neighbors k:   {{maxk == neighborIndices(spec).dimension()}}
+    similarity:    {{similarity == dataset(spec).attributes().getOrDefault('distance_function','unspecified')}}
+
+  The demo works within the first `records` ordinals of the base facet,
+  and something has to fetch them. That fetch is announced, metered
+  while it runs, and confirmed — all on stderr, which is where the
+  progress you are looking for shows up:
+
+    records:       {{records == paramOr('records','20000') as Long}}
+    warmed at load:{{= paramOr('prefetch','true') == 'true' ? ' ' + prefetchCycles(spec,'base_vectors',0,records).rangesFetched() + ' range(s)' : ' skipped (prefetch=false)'}}
+
+  Two ways to watch it, both from the command line:
+
+    # 1. warm at load, then read — the meter runs before any cycles
+    nb5 run devdocs/vectordata/vectordata_demo.yaml dataset=<name>:<profile>
+
+    # 2. warm in the background while cycles run — turn off the
+    #    load-time fetch so the binding is the one doing the work
+    nb5 run devdocs/vectordata/vectordata_demo.yaml dataset=<name>:<profile> \
+      prefetch=false mode=background cycles=1000
+
+  Parameters: cycles (default 3), records (default 20000), prefetch
+  (true|false, default true), mode (none|eager|background, default
+  none). The meter only speaks when there are bytes to move, so a
+  second run against a warm cache is silent by design — point
+  VECTORDATA_HOME at an empty directory to watch it fetch again.
+
+scenarios:
+  default: >-
+    run driver=stdout format=readout cycles=TEMPLATE(cycles,3) threads=1
+
+bindings:
+  cycle: Identity()
+  # The window keeps reads inside the demo's record range, and mode
+  # selects who warms it: 'none' leaves that to the load-time prefetch
+  # above, 'eager' blocks on it here, 'background' overlaps it with the
+  # run.
+  base_vector: BaseVectors('{{@spec}}','[0..{{@records}})','TEMPLATE(mode,none)'); Stringify()
+  query_vector: QueryVectors('{{@spec}}',false); Stringify()
+  neighbor_indices: NeighborIndices('{{@spec}}',false); Stringify()

@@ -26,6 +26,41 @@ e.g. `NB='java -jar nb5.jar'`). `VECTORDATA_CATALOG` outranks any
 `VECTORDATA_HOME` under `/tmp/vdtest` so it never touches
 `~/.config/vectordata` or your real cache.
 
+## Watch a download happen
+
+[`vectordata_demo.yaml`](vectordata_demo.yaml) is a runnable workload
+that needs no database — it uses the stdout driver, so the only thing it
+exercises is dataset access. It prints what it derived from the dataset,
+fetches a record range with a live meter, and reads records back:
+
+```bash
+export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
+export VECTORDATA_HOME=/tmp/vdtest     # empty dir ⇒ nothing is cached yet
+nb5 run devdocs/vectordata/vectordata_demo.yaml dataset=mydataset:myprofile
+```
+
+The meter goes to stderr while the bytes move:
+
+```
+[vectordata] mydataset:myprofile:base_vectors: fetching 29.0 MiB in 1 range(s)
+[vectordata] mydataset:myprofile:base_vectors: 12.0 MiB / 30.0 MiB
+[vectordata] mydataset:myprofile:base_vectors: fetch complete (29.0 MiB)
+```
+
+To watch the fetch overlap the run instead of preceding it, turn off the
+load-time prefetch and let the binding warm in the background:
+
+```bash
+nb5 run devdocs/vectordata/vectordata_demo.yaml dataset=mydataset:myprofile \
+  prefetch=false mode=background cycles=1000
+```
+
+Parameters: `cycles`, `records` (how many ordinals the demo spans),
+`prefetch` (`true|false`), and `mode` (`none|eager|background`). The
+meter is silent when there is nothing to fetch, so a second run against
+a warm cache prints nothing — point `VECTORDATA_HOME` at an empty
+directory to see it fetch again.
+
 Beyond the script's checks:
 
 ```bash

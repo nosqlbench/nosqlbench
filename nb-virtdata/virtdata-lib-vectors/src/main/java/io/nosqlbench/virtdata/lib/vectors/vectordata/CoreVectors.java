@@ -83,7 +83,7 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
         // The plan is announced before any bytes move and progress is
         // emitted during the download; the meter is silent when there
         // is nothing to fetch.
-        PrefetchMeter meter = new PrefetchMeter(tdv.dataset() + ":" + facetName, tdv.prefetchPlan(facetName, effective));
+        PrefetchMeter meter = new PrefetchMeter(tdv.dataset() + ":" + tdv.profile() + ":" + facetName, tdv.prefetchPlan(facetName, effective));
         if (mode == Prefetch.BACKGROUND) {
             PrefetchHandle handle = tdv.prefetchInBackground(facetName, effective, WholeFacetFallback.REFUSE);
             meter.watch(handle);
