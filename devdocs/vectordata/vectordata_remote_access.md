@@ -28,16 +28,19 @@ e.g. `NB='java -jar nb5.jar'`). `VECTORDATA_CATALOG` outranks any
 
 ## Watch a download happen
 
-[`vectordata_demo.yaml`](vectordata_demo.yaml) is a runnable workload
-that needs no database — it uses the stdout driver, so the only thing it
-exercises is dataset access. It prints what it derived from the dataset,
-fetches a record range with a live meter, and reads records back:
+`vectordata_demo` is a workload bundled in nb5 — no checkout, no
+database. It uses the stdout driver, so the only thing it exercises is
+dataset access: it prints what it derived from the dataset, fetches a
+record range with a live meter, and reads records back.
 
 ```bash
 export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
 export VECTORDATA_HOME=/tmp/vdtest     # empty dir ⇒ nothing is cached yet
-nb5 run devdocs/vectordata/vectordata_demo.yaml dataset=mydataset:myprofile
+nb5 run vectordata_demo dataset=mydataset:myprofile
 ```
+
+`nb5 --cat vectordata_demo` prints it and `nb5 --copy vectordata_demo`
+drops an editable copy in the working directory.
 
 The meter goes to stderr while the bytes move:
 
@@ -51,7 +54,7 @@ To watch the fetch overlap the run instead of preceding it, turn off the
 load-time prefetch and let the binding warm in the background:
 
 ```bash
-nb5 run devdocs/vectordata/vectordata_demo.yaml dataset=mydataset:myprofile \
+nb5 run vectordata_demo dataset=mydataset:myprofile \
   prefetch=false mode=background cycles=1000
 ```
 

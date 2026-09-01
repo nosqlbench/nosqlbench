@@ -1,0 +1,64 @@
+min_version: "5.25"
+
+description: |
+  Remote vector dataset access with a live download meter. No database
+  required — this uses the stdout driver, so the only thing exercised is
+  dataset access itself.
+
+    nb5 run vectordata_demo dataset=<name>:<profile>
+
+  Point it at a catalog first, either of these:
+
+    export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
+    nb5 run vectordata_demo dataset=<name>:<profile> -Dvectordata.catalog=<url>
+
+  Everything the workload needs is read from the dataset itself when the
+  file loads — dimensions, record counts, k, and the similarity function
+  come from the data rather than from parameters you have to restate.
+
+    dataset:       {{spec == paramOr('dataset','MISSING-dataset-parameter')}}
+    records:       {{records == paramOr('records','20000') as Long}}
+  {{= spec == 'MISSING-dataset-parameter' ? '  (pass dataset=<name>:<profile> to derive the rest from a dataset)' :
+      '  dimensions:    ' + baseVectors(spec).dimension() + '\n' +
+      '    base records:  ' + baseVectors(spec).count() + '\n' +
+      '    query records: ' + queryVectors(spec).count() + '\n' +
+      '    neighbors k:   ' + neighborIndices(spec).dimension() + '\n' +
+      '    similarity:    ' + dataset(spec).attributes().getOrDefault('distance_function','unspecified')}}
+
+  The demo works within the first `records` ordinals of the base facet,
+  and something has to fetch them. That fetch is announced, metered
+  while it runs, and confirmed — all on stderr, which is where the
+  progress shows up:
+
+  {{= spec == 'MISSING-dataset-parameter' || paramOr('prefetch','true') != 'true' ? '  warm at load: skipped' :
+      '  warm at load: ' + prefetchCycles(spec,'base_vectors',0,records).rangesFetched() + ' range(s) fetched'}}
+
+  Two ways to watch it:
+
+    # 1. warm at load, then read — the meter runs before any cycles
+    nb5 run vectordata_demo dataset=<name>:<profile>
+
+    # 2. warm in the background while cycles run — turn off the
+    #    load-time fetch so the binding does the work instead
+    nb5 run vectordata_demo dataset=<name>:<profile> \
+      prefetch=false mode=background cycles=1000
+
+  Parameters: dataset (required), cycles (default 3), records (default
+  20000), prefetch (true|false, default true), mode (none|eager|
+  background, default none). The meter only speaks when there are bytes
+  to move, so a second run against a warm cache is silent by design —
+  point VECTORDATA_HOME at an empty directory to watch it fetch again.
+
+scenarios:
+  default: >-
+    run driver=stdout format=readout cycles=TEMPLATE(cycles,3) threads=1
+
+bindings:
+  cycle: Identity()
+  # The window keeps reads inside the demo's record range, and mode
+  # selects who warms it: 'none' leaves that to the load-time prefetch
+  # above, 'eager' blocks on it here, 'background' overlaps it with the
+  # run.
+  base_vector: BaseVectors('{{@spec}}','[0..{{@records}})','TEMPLATE(mode,none)'); Stringify()
+  query_vector: QueryVectors('{{@spec}}',false); Stringify()
+  neighbor_indices: NeighborIndices('{{@spec}}',false); Stringify()
