@@ -36,7 +36,15 @@ record range with a live meter, and reads records back.
 ```bash
 export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
 export VECTORDATA_HOME=/tmp/vdtest     # empty dir ⇒ nothing is cached yet
-nb5 run vectordata_demo dataset=mydataset:myprofile
+nb5 vectordata_demo dataset=mydataset:myprofile
+```
+
+That is the scenario form — the workload name stands alone, with no
+`run` in front of it (`run` is itself a command, so `nb5 run
+vectordata_demo` fails). The equivalent long form names the full path:
+
+```bash
+nb5 run workload=activities/examples/vectordata_demo.yaml dataset=mydataset:myprofile
 ```
 
 `nb5 --cat vectordata_demo` prints it and `nb5 --copy vectordata_demo`
@@ -54,7 +62,7 @@ To watch the fetch overlap the run instead of preceding it, turn off the
 load-time prefetch and let the binding warm in the background:
 
 ```bash
-nb5 run vectordata_demo dataset=mydataset:myprofile \
+nb5 vectordata_demo dataset=mydataset:myprofile \
   prefetch=false mode=background cycles=1000
 ```
 

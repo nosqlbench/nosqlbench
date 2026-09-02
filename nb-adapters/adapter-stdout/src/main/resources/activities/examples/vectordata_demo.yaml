@@ -5,12 +5,17 @@ description: |
   required — this uses the stdout driver, so the only thing exercised is
   dataset access itself.
 
-    nb5 run vectordata_demo dataset=<name>:<profile>
+    nb5 vectordata_demo dataset=<name>:<profile>
+
+  That is the scenario form — the workload name stands alone, without a
+  `run` in front of it. The equivalent long form names the full path:
+
+    nb5 run workload=activities/examples/vectordata_demo.yaml dataset=<name>:<profile>
 
   Point it at a catalog first, either of these:
 
     export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
-    nb5 run vectordata_demo dataset=<name>:<profile> -Dvectordata.catalog=<url>
+    nb5 vectordata_demo dataset=<name>:<profile> -Dvectordata.catalog=<url>
 
   Everything the workload needs is read from the dataset itself when the
   file loads — dimensions, record counts, k, and the similarity function
@@ -36,11 +41,11 @@ description: |
   Two ways to watch it:
 
     # 1. warm at load, then read — the meter runs before any cycles
-    nb5 run vectordata_demo dataset=<name>:<profile>
+    nb5 vectordata_demo dataset=<name>:<profile>
 
     # 2. warm in the background while cycles run — turn off the
     #    load-time fetch so the binding does the work instead
-    nb5 run vectordata_demo dataset=<name>:<profile> \
+    nb5 vectordata_demo dataset=<name>:<profile> \
       prefetch=false mode=background cycles=1000
 
   Parameters: dataset (required), cycles (default 3), records (default
