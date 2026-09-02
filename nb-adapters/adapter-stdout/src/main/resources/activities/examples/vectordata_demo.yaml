@@ -7,11 +7,6 @@ description: |
 
     nb5 vectordata_demo dataset=<name>:<profile>
 
-  That is the scenario form — the workload name stands alone, without a
-  `run` in front of it. The equivalent long form names the full path:
-
-    nb5 run workload=activities/examples/vectordata_demo.yaml dataset=<name>:<profile>
-
   Point it at a catalog first, either of these:
 
     export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
@@ -23,6 +18,7 @@ description: |
 
     dataset:       {{spec == paramOr('dataset','MISSING-dataset-parameter')}}
     records:       {{records == paramOr('records','20000') as Long}}
+    prefetch:      {{prefetchMode == paramOr('prefetch','load')}}
   {{= spec == 'MISSING-dataset-parameter' ? '  (pass dataset=<name>:<profile> to derive the rest from a dataset)' :
       '  dimensions:    ' + baseVectors(spec).dimension() + '\n' +
       '    base records:  ' + baseVectors(spec).count() + '\n' +
@@ -30,29 +26,42 @@ description: |
       '    neighbors k:   ' + neighborIndices(spec).dimension() + '\n' +
       '    similarity:    ' + dataset(spec).attributes().getOrDefault('distance_function','unspecified')}}
 
-  The demo works within the first `records` ordinals of the base facet,
-  and something has to fetch them. That fetch is announced, metered
-  while it runs, and confirmed — all on stderr, which is where the
-  progress shows up:
+  The demo reads the first `records` ordinals of the base facet, and
+  `prefetch` chooses which prefetch call fetches them. Both fetching
+  forms report the same way — the plan is announced, progress is metered
+  while the bytes move, and completion is confirmed, all on stderr:
 
-  {{= spec == 'MISSING-dataset-parameter' || paramOr('prefetch','true') != 'true' ? '  warm at load: skipped' :
-      '  warm at load: ' + prefetchCycles(spec,'base_vectors',0,records).rangesFetched() + ' range(s) fetched'}}
+    prefetch=load        prefetchCycles(...) — fetches before the run
+                         starts, so cycle 0 reads warm data. Blocks
+                         until resident. This is the default.
+    prefetch=background  prefetchCyclesBackground(...) — returns a
+                         handle immediately and fetches while the cycles
+                         run, so reads and the download overlap.
+                         Progress is polled from the handle. Give it
+                         enough cycles to outlast the download, or the
+                         run ends first and the fetch stops partway.
+    prefetch=none        no warm-up; reads demand-page whatever they
+                         touch. Nothing to meter, so it stays quiet.
+
+  {{= spec == 'MISSING-dataset-parameter' ? '  warm-up: skipped (no dataset given)' :
+      prefetchMode == 'load' ? '  warm-up: fetched ' + prefetchCycles(spec,'base_vectors',0,records).rangesFetched() + ' range(s) before the run' :
+      prefetchMode == 'background' ? '  warm-up: started in the background, ' + prefetchCyclesBackground(spec,'base_vectors',0,records).plan().requests() + ' range(s) planned' :
+      '  warm-up: none, reads demand-page'}}
 
   Two ways to watch it:
 
-    # 1. warm at load, then read — the meter runs before any cycles
+    # fetch up front, then read — the meter runs before any cycles
     nb5 vectordata_demo dataset=<name>:<profile>
 
-    # 2. warm in the background while cycles run — turn off the
-    #    load-time fetch so the binding does the work instead
+    # fetch during the run — a large range and enough cycles to see it
     nb5 vectordata_demo dataset=<name>:<profile> \
-      prefetch=false mode=background cycles=1000
+      prefetch=background records=100000 cycles=200
 
   Parameters: dataset (required), cycles (default 3), records (default
-  20000), prefetch (true|false, default true), mode (none|eager|
-  background, default none). The meter only speaks when there are bytes
-  to move, so a second run against a warm cache is silent by design —
-  point VECTORDATA_HOME at an empty directory to watch it fetch again.
+  20000), prefetch (load|background|none, default load). The meter only
+  speaks when there are bytes to move, so a second run against a warm
+  cache is silent by design — point VECTORDATA_HOME at an empty
+  directory to watch it fetch again.
 
 scenarios:
   default: >-
@@ -60,10 +69,9 @@ scenarios:
 
 bindings:
   cycle: Identity()
-  # The window keeps reads inside the demo's record range, and mode
-  # selects who warms it: 'none' leaves that to the load-time prefetch
-  # above, 'eager' blocks on it here, 'background' overlaps it with the
-  # run.
-  base_vector: BaseVectors('{{@spec}}','[0..{{@records}})','TEMPLATE(mode,none)'); Stringify()
+  # Reads are demand-paged here on purpose: the prefetch above is what
+  # warms the data, so the meter has one owner and this window only
+  # clips what the bindings expose.
+  base_vector: BaseVectors('{{@spec}}','[0..{{@records}})','none'); Stringify()
   query_vector: QueryVectors('{{@spec}}',false); Stringify()
   neighbor_indices: NeighborIndices('{{@spec}}',false); Stringify()

@@ -218,7 +218,28 @@ public class VectorDataExprs implements ExprFunctionProvider {
         description = "Start fetching a record window of a facet on another thread and return the handle; join() waits, cancel() stops between ranges."
     )
     public PrefetchHandle prefetchBackground(String datasetNameAndProfile, String facetName, String window) {
-        return dataset(datasetNameAndProfile).prefetchInBackground(facetName, DSWindow.parse(window), WholeFacetFallback.REFUSE);
+        TestDataView view = dataset(datasetNameAndProfile);
+        DSWindow parsed = DSWindow.parse(window);
+        // Metered like every other prefetch form: the plan is announced
+        // before the handle is returned, and a watcher reports the
+        // handle's byte counter while the fetch runs alongside whatever
+        // the caller does next.
+        PrefetchMeter meter = new PrefetchMeter(datasetNameAndProfile + ":" + facetName, view.prefetchPlan(facetName, parsed));
+        PrefetchHandle handle = view.prefetchInBackground(facetName, parsed, WholeFacetFallback.REFUSE);
+        meter.watch(handle);
+        return handle;
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"base_vectors\"", "0", "1000"}, expectNotNull = true)
+    @ExprExample(args = {"\"airports:demo\"", "\"query_vectors\"", "0", "10"}, expectNotNull = true)
+    @ExprFunctionSpec(
+        name = "prefetchCyclesBackground",
+        synopsis = "prefetchCyclesBackground(\"dataset:profile\", \"facet_name\", start, end)",
+        description = "Start fetching the records a cycle range will read, on another thread, and return the handle. The background counterpart of prefetchCycles, metered the same way."
+    )
+    public PrefetchHandle prefetchCyclesBackground(String datasetNameAndProfile, String facetName, Number start, Number end) {
+        return prefetchBackground(datasetNameAndProfile, facetName,
+            "[" + start.longValue() + ".." + end.longValue() + ")");
     }
 
 }

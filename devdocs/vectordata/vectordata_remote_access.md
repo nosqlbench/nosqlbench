@@ -58,19 +58,23 @@ The meter goes to stderr while the bytes move:
 [vectordata] mydataset:myprofile:base_vectors: fetch complete (29.0 MiB)
 ```
 
-To watch the fetch overlap the run instead of preceding it, turn off the
-load-time prefetch and let the binding warm in the background:
+To watch the fetch overlap the run instead of preceding it, ask for the
+background form — give it a range big enough and enough cycles to
+outlast the download:
 
 ```bash
 nb5 vectordata_demo dataset=mydataset:myprofile \
-  prefetch=false mode=background cycles=1000
+  prefetch=background records=100000 cycles=200
 ```
 
-Parameters: `cycles`, `records` (how many ordinals the demo spans),
-`prefetch` (`true|false`), and `mode` (`none|eager|background`). The
-meter is silent when there is nothing to fetch, so a second run against
-a warm cache prints nothing — point `VECTORDATA_HOME` at an empty
-directory to see it fetch again.
+`prefetch` selects which prefetch call does the work: `load` (the
+default) blocks on `prefetchCycles` before cycle 0, `background` hands
+back a handle from `prefetchCyclesBackground` and meters it while the
+run proceeds, and `none` leaves reads to demand-page. `records` sets how
+many ordinals the demo spans, `cycles` how long it runs. The meter is
+silent when there is nothing to fetch, so a second run against a warm
+cache prints nothing — point `VECTORDATA_HOME` at an empty directory to
+see it fetch again.
 
 Beyond the script's checks:
 
@@ -200,7 +204,10 @@ passes through untouched. The vectordata expr functions:
 # {{= prefetchPlan("example:default", "base_vectors", "[0..100k)").bytesToFetch()}}
 # {{= prefetch("example:default", "base_vectors", "[0..100k)").rangesFetched()}}
 
-# Background warm-up captured in an expr variable, joined later:
+# The same, in the background: the handle comes back immediately and
+# the fetch overlaps whatever runs next. Both background forms meter
+# from the handle, so the download reports itself either way.
+# {{= prefetchCyclesBackground("example:default", "base_vectors", 0, 1000000).plan().requests()}}
 # {{warmup = prefetchBackground("example:default", "base_vectors", "[0..1M)")}}
 # {{= warmup.join().rangesFetched()}}
 
