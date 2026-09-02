@@ -296,10 +296,17 @@ java -jar nb5.jar run driver=stdout cycles=10 \
 ```
 
 Prefetch modes on every mapper: `eager` (default; aliases `prebuffer`,
-`true`), `background`, `none` (aliases `demand`, `false`). A binding
-window is in the reader's own coordinates — after any profile window —
-and is shifted to absolute records for the fetch, so the warmed bytes
-are exactly the bytes the clipped reader exposes.
+`true`), `background`, `none` (aliases `demand`, `false`).
+
+A binding window says **which records to warm**, and nothing else —
+indices stay absolute record ordinals.
+`BaseVectors('ds:profile','[50000..100000)')` warms records 50000
+through 99999, and a run of `cycles=50000..100000` addresses exactly
+those records. Reading outside the window is not an error; it just
+demand-pages, as it would with no window. Ordinals mean the same thing
+here, in `VariableFacet`, and in `prefetchCycles`. The window is
+translated into dataset coordinates for the fetch, so the warmed bytes
+are the bytes the reader will expose.
 
 ## Verifying that warming happened
 

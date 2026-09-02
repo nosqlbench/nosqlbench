@@ -126,7 +126,7 @@ public class VectorDataExprs implements ExprFunctionProvider {
     @ExprFunctionSpec(
         name = "windowedFacet",
         synopsis = "windowedFacet(\"dataset:profile\", \"facet_name\", \"window\")",
-        description = "Return a reader for a named facet, clipped to a record window in the reader's own coordinates."
+        description = "Return a reader for a named facet, restricted to a record window. Indices stay absolute — a window of [50000..100000) accepts 50000..99999 — so cycle values address the records they name."
     )
     public VectorReader<?> windowedFacet(String datasetNameAndProfile, String facetName, String window) {
         return WindowedReader.clip(dataset(datasetNameAndProfile).openFacet(facetName), window);

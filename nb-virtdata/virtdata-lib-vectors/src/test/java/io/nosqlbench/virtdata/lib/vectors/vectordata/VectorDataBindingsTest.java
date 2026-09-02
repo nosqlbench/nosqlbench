@@ -108,10 +108,31 @@ public class VectorDataBindingsTest {
     }
 
     @Test
-    void aWindowArgumentClipsTheReaderAndWarmsIt() {
-        BaseVectors clipped = new BaseVectors("example:demo", "1..3", "eager", settings);
-        assertArrayEquals(new float[] {1f, 2f}, clipped.apply(0), "windowed record 0 is underlying record 1");
-        assertThrows(IndexOutOfBoundsException.class, () -> clipped.apply(2), "the window is two records long");
+    void aWindowWarmsWithoutRenumbering() {
+        // The window says which records to warm; it does not re-base
+        // them. Index 1 is record 1, as it would be with no window.
+        BaseVectors warmed = new BaseVectors("example:demo", "1..3", "eager", settings);
+        assertArrayEquals(new float[] {1f, 2f}, warmed.apply(1), "index 1 is record 1, not the window's first record");
+        assertArrayEquals(new float[] {2f, 3f}, warmed.apply(2));
+    }
+
+    @Test
+    void aWindowFarFromZeroReadsTheRecordsItsCyclesName() {
+        // The field failure: a window starting well above zero used to
+        // re-base to 0, so a run over those same cycles indexed past the
+        // end and threw.
+        BaseVectors slice = new BaseVectors("example:demo", "[7..10)", "none", settings);
+        assertArrayEquals(new float[] {7f, 8f}, slice.apply(7));
+        assertArrayEquals(new float[] {9f, 10f}, slice.apply(9));
+    }
+
+    @Test
+    void readingOutsideTheWindowStillWorks() {
+        // Not an error, and load-bearing: VirtData probes a resolved
+        // function with a small sample index before any cycle runs, so a
+        // window starting above zero would otherwise fail to resolve.
+        BaseVectors slice = new BaseVectors("example:demo", "[7..10)", "none", settings);
+        assertArrayEquals(new float[] {1f, 2f}, slice.apply(1), "outside the warmed window, but readable");
     }
 
     @Test
@@ -119,16 +140,16 @@ public class VectorDataBindingsTest {
         BaseVectors vectors = new BaseVectors("example:demo", "1..3", "background", settings);
         assertNotNull(vectors.backgroundPrefetch(), "background mode hands back the running prefetch");
         vectors.backgroundPrefetch().join();
-        assertArrayEquals(new float[] {2f, 3f}, vectors.apply(1));
+        assertArrayEquals(new float[] {1f, 2f}, vectors.apply(1));
     }
 
     @Test
     void aBindingWindowComposesWithAProfileWindow() {
-        // The profile clips to records [2..8); the binding window is in
-        // the clipped reader's coordinates, so 1..3 reads records 3..5.
+        // The profile clips to records [2..8), which re-bases the reader
+        // it hands back; the binding window then restricts that reader's
+        // indices 1..2, and warming shifts them to dataset records 3..5.
         BaseVectors vectors = new BaseVectors("example:windowed", "1..3", "eager", settings);
-        assertArrayEquals(new float[] {3f, 4f}, vectors.apply(0));
-        assertThrows(IndexOutOfBoundsException.class, () -> vectors.apply(2));
+        assertArrayEquals(new float[] {3f, 4f}, vectors.apply(1));
         // And warming shifts the same window to absolute records 3..5.
         DSWindow effective = CoreVectors.effectiveWindow(vectors.tdv, "base_vectors", "1..3");
         assertEquals(new DSWindow.Interval(3, 5), effective.intervals().get(0));
