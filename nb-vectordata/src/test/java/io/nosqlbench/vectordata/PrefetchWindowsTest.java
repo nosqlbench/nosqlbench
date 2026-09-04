@@ -65,12 +65,12 @@ class PrefetchWindowsTest {
     @Test void anArbitraryWindowResolvesWithoutAProfileDeclaringIt() throws Exception {
         PrefetchPlan plan = view().prefetchPlan("base_vectors", DSWindow.parse("10..20"));
         assertFalse(plan.degradesToFullDownload(), "a uniform-stride facet must be windowable on demand");
-        assertEquals(List.of(new ByteRange(10 * BPR, 20 * BPR)), plan.byteRanges(), "records map to bytes at 4 + dim*elem_size");
+        assertEquals(List.of(ShardRange.whole(10 * BPR, 20 * BPR)), plan.byteRanges(), "records map to bytes at 4 + dim*elem_size");
     }
 
     @Test void aMultiIntervalWindowResolvesEveryInterval() throws Exception {
         PrefetchPlan plan = view().prefetchPlan("base_vectors", DSWindow.parse("[0..10, 50..60]"));
-        assertEquals(List.of(new ByteRange(0, 10 * BPR), new ByteRange(50 * BPR, 60 * BPR)), plan.byteRanges(),
+        assertEquals(List.of(ShardRange.whole(0, 10 * BPR), ShardRange.whole(50 * BPR, 60 * BPR)), plan.byteRanges(),
             "both intervals must survive; the reader's single-window limit is a reader limit, not a fetch limit");
     }
 
@@ -78,11 +78,11 @@ class PrefetchWindowsTest {
         TestDataView view = view();
         PrefetchPlan touching = view.prefetchPlan("base_vectors", DSWindow.parse("[0..10, 10..20]"));
         assertEquals(2, touching.requestedRanges().size(), "two intervals were asked for");
-        assertEquals(List.of(new ByteRange(0, 20 * BPR)), touching.byteRanges(), "and they merge into one request");
+        assertEquals(List.of(ShardRange.whole(0, 20 * BPR)), touching.byteRanges(), "and they merge into one request");
         assertEquals(1, touching.requests());
         PrefetchPlan apart = view.prefetchPlan("base_vectors", DSWindow.parse("[0..10, 80..90]"));
         assertEquals(2, apart.requestedRanges().size());
-        assertEquals(List.of(new ByteRange(0, 10 * BPR), new ByteRange(80 * BPR, 90 * BPR)), apart.byteRanges(),
+        assertEquals(List.of(ShardRange.whole(0, 10 * BPR), ShardRange.whole(80 * BPR, 90 * BPR)), apart.byteRanges(),
             "nothing bridges a gap this size on chunkless local storage");
         assertEquals(2, apart.requests());
     }
@@ -90,12 +90,12 @@ class PrefetchWindowsTest {
     @Test void overlappingIntervalsBecomeOneRequest() throws Exception {
         PrefetchPlan plan = view().prefetchPlan("base_vectors", DSWindow.parse("[0..30, 20..40]"));
         assertEquals(1, plan.requests());
-        assertEquals(List.of(new ByteRange(0, 40 * BPR)), plan.byteRanges());
+        assertEquals(List.of(ShardRange.whole(0, 40 * BPR)), plan.byteRanges());
     }
 
     @Test void anEmptyWindowCoversTheWholeFacet() throws Exception {
         PrefetchPlan plan = view().prefetchPlan("base_vectors", DSWindow.ALL);
-        assertEquals(List.of(new ByteRange(0, 100 * BPR)), plan.byteRanges());
+        assertEquals(List.of(ShardRange.whole(0, 100 * BPR)), plan.byteRanges());
         assertFalse(plan.degradesToFullDownload(), "asking for everything is a request, not a fallback");
     }
 
@@ -112,7 +112,7 @@ class PrefetchWindowsTest {
 
     @Test void aWindowPastTheEndClampsToTheFacet() throws Exception {
         PrefetchPlan plan = view().prefetchPlan("base_vectors", DSWindow.parse("90..500"));
-        assertEquals(List.of(new ByteRange(90 * BPR, 100 * BPR)), plan.byteRanges());
+        assertEquals(List.of(ShardRange.whole(90 * BPR, 100 * BPR)), plan.byteRanges());
     }
 
     /// Ragged variable-length records with a published sentinel-form
@@ -148,7 +148,7 @@ class PrefetchWindowsTest {
         VvecFixture fixture = vvecView(new int[] {1, 7, 3, 9, 2, 5, 4, 8});
         PrefetchPlan plan = fixture.view().prefetchPlan("metadata_content", DSWindow.parse("2..5"));
         assertFalse(plan.degradesToFullDownload(), "an indexed vvec facet is windowable");
-        assertEquals(List.of(new ByteRange(fixture.offsets()[2], fixture.offsets()[5])), plan.byteRanges(),
+        assertEquals(List.of(ShardRange.whole(fixture.offsets()[2], fixture.offsets()[5])), plan.byteRanges(),
             "records 2..5 are exactly offsets[2]..offsets[5]");
     }
 
@@ -165,7 +165,7 @@ class PrefetchWindowsTest {
     @Test void aVvecWindowPastTheEndEndsAtTheFile() throws Exception {
         VvecFixture fixture = vvecView(new int[] {1, 7, 3, 9});
         PrefetchPlan plan = fixture.view().prefetchPlan("metadata_content", DSWindow.parse("2..99"));
-        assertEquals(List.of(new ByteRange(fixture.offsets()[2], fixture.fileLength())), plan.byteRanges());
+        assertEquals(List.of(ShardRange.whole(fixture.offsets()[2], fixture.fileLength())), plan.byteRanges());
     }
 
     /// A local vvec facet that published no sidecar is walked in place,
@@ -190,7 +190,7 @@ class PrefetchWindowsTest {
         TestDataView view = TestDataGroup.load(dataset.toUri(), settings()).profile("default");
         PrefetchPlan plan = view.prefetchPlan("metadata_content", DSWindow.parse("1..4"));
         assertFalse(plan.degradesToFullDownload());
-        assertEquals(List.of(new ByteRange(offsets[1], offsets[4])), plan.byteRanges());
+        assertEquals(List.of(ShardRange.whole(offsets[1], offsets[4])), plan.byteRanges());
         // The walk persists its result beside the data — starts only,
         // in the width the payload size calls for — so it is paid once
         // rather than per view.
@@ -220,7 +220,7 @@ class PrefetchWindowsTest {
             int width = Integer.parseInt(scalar[1]);
             PrefetchPlan plan = view.prefetchPlan("facet_" + scalar[0], DSWindow.parse("2..5"));
             assertFalse(plan.degradesToFullDownload(), scalar[0] + " is trivially windowable");
-            assertEquals(List.of(new ByteRange(2L * width, 5L * width)), plan.byteRanges(), scalar[0]);
+            assertEquals(List.of(ShardRange.whole(2L * width, 5L * width)), plan.byteRanges(), scalar[0]);
             assertEquals(0, plan.prerequisiteBytes(), "a fixed stride costs nothing to know");
         }
     }
@@ -244,7 +244,7 @@ class PrefetchWindowsTest {
         TestDataView view = TestDataGroup.load(dataset.toUri(), settings()).profile("default");
         PrefetchPlan plan = view.prefetchPlan("metadata_results", DSWindow.parse("2..5"));
         assertFalse(plan.degradesToFullDownload());
-        assertEquals(List.of(new ByteRange(2 * 4, 5 * 4)), plan.byteRanges(), "scalars map at ordinal times width, no header");
+        assertEquals(List.of(ShardRange.whole(2 * 4, 5 * 4)), plan.byteRanges(), "scalars map at ordinal times width, no header");
     }
 
     private TestDataView parquetView() throws IOException {
@@ -287,7 +287,7 @@ class PrefetchWindowsTest {
         TestDataView view = parquetView();
         PrefetchPlan plan = view.prefetchPlan("metadata_content", DSWindow.ALL);
         assertFalse(plan.degradesToFullDownload(), "asking for everything and getting everything is not a degrade");
-        assertEquals(List.of(new ByteRange(0, 64)), plan.byteRanges());
+        assertEquals(List.of(ShardRange.whole(0, 64)), plan.byteRanges());
         view.prefetch("metadata_content", DSWindow.ALL, WholeFacetFallback.REFUSE);
     }
 
@@ -304,9 +304,9 @@ class PrefetchWindowsTest {
 
     @Test void aBackgroundPrefetchReportsItsPlanBeforeFinishing() throws Exception {
         PrefetchHandle handle = view().prefetchInBackground("base_vectors", DSWindow.parse("10..20"), WholeFacetFallback.REFUSE);
-        assertEquals(List.of(new ByteRange(10 * BPR, 20 * BPR)), handle.plan().byteRanges(), "the plan is known before the fetch is");
+        assertEquals(List.of(ShardRange.whole(10 * BPR, 20 * BPR)), handle.plan().byteRanges(), "the plan is known before the fetch is");
         PrefetchReport report = handle.join();
-        assertEquals(List.of(new ByteRange(10 * BPR, 20 * BPR)), report.planned().byteRanges());
+        assertEquals(List.of(ShardRange.whole(10 * BPR, 20 * BPR)), report.planned().byteRanges());
         assertTrue(handle.isDone());
     }
 

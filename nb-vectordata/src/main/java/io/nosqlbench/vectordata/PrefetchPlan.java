@@ -20,25 +20,30 @@ import java.util.List;
 /// What a prefetch would fetch, before any of it moves. Returned by
 /// [TestDataView#prefetchPlan].
 ///
-/// - `requestedRanges` — the byte ranges the window resolved to, one
-///   per interval, before merging: what the caller actually asked for.
+/// - `requestedRanges` — the byte ranges the window resolved to, before
+///   merging: what the caller actually asked for. Each is qualified by
+///   the shard it lies in, because across a series the same byte offset
+///   exists in every file; a single-file facet is shard `0`.
 /// - `byteRanges` — the ranges that will be issued, after merging those
-///   whose fetches would overlap: one request each.
+///   whose fetches would overlap: one request each. Ranges in different
+///   shards never merge — they are in different files.
 /// - `fills` — chunk-level cost of each issued range. Empty when the
 ///   facet has no chunks (local storage, which is free by definition).
 /// - `prerequisiteBytes` — bytes that had to be read before the window
 ///   could be resolved at all: the offset index, for variable-length
-///   formats; zero for uniform-stride formats. Reported whether or not
-///   it was paid this time — the index is cached on the view's facet
-///   handle, so a plan and the fetch that follows it load it once.
+///   formats; zero for uniform-stride formats. Across a series each
+///   touched file's index is a separate read, so they sum. Reported
+///   whether or not it was paid this time — the index is cached on the
+///   view's facet handle, so a plan and the fetch that follows it load
+///   it once.
 /// - `degradesToFullDownload` — set when a window was asked for and
 ///   could not be resolved for this format or storage, so honouring the
 ///   request means fetching the whole facet. A prefetch with *no*
 ///   window is a request for the whole facet, not a fallback, and never
 ///   sets this.
-/// - `facetBytes` — size of the facet, for reading the degrade case
-///   against.
-public record PrefetchPlan(List<ByteRange> requestedRanges, List<ByteRange> byteRanges, List<RangeFill> fills,
+/// - `facetBytes` — size of the facet, every shard included, for reading
+///   the degrade case against.
+public record PrefetchPlan(List<ShardRange> requestedRanges, List<ShardRange> byteRanges, List<RangeFill> fills,
                            long prerequisiteBytes, boolean degradesToFullDownload, long facetBytes) {
 
     public PrefetchPlan {
@@ -57,7 +62,7 @@ public record PrefetchPlan(List<ByteRange> requestedRanges, List<ByteRange> byte
     public int chunksToFetch() { return fills.stream().mapToInt(RangeFill::chunksToFetch).sum(); }
 
     /// Requests that will be issued. Lower than the interval count when
-    /// intervals were merged.
+    /// intervals were merged; higher when a window crossed a shard seam.
     public int requests() { return byteRanges.size(); }
 
     /// Bytes fetched beyond what was asked for. Two sources, counted
@@ -66,7 +71,7 @@ public record PrefetchPlan(List<ByteRange> requestedRanges, List<ByteRange> byte
     /// for.
     public long overfetchBytes() {
         long spanned = fills.stream().mapToLong(fill -> Math.max(0, fill.alignedEnd() - fill.alignedStart())).sum();
-        long asked = requestedRanges.stream().mapToLong(ByteRange::length).sum();
+        long asked = requestedRanges.stream().mapToLong(ShardRange::length).sum();
         return Math.max(0, spanned - asked);
     }
 

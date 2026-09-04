@@ -29,6 +29,10 @@ public interface TestDataView {
     VectorReader<int[]> neighborIndices();
     VectorReader<float[]> neighborDistances();
     VectorReader<int[]> metadataResults();
+    /// Opens a facet by name. A facet spanning several files presents
+    /// the same reader surface as a single-file one — `count()` is the
+    /// series total, `get(o)` resolves and reads from the owning shard —
+    /// and callers that never ask about layout never learn it exists.
     VectorReader<?> openFacet(String name);
     VvecReader<?> openVariableFacet(String name);
     /// Dataset-level attributes from the manifest's `attributes:`
@@ -52,7 +56,8 @@ public interface TestDataView {
     /// reporting per-range progress through `progress`. An empty window
     /// requests the whole facet. A window that cannot be resolved for
     /// the facet's format fails under [WholeFacetFallback#REFUSE]
-    /// rather than quietly fetching everything.
+    /// rather than quietly fetching everything. Across a series the
+    /// window costs the shards it spans, and only those.
     PrefetchReport prefetch(String facet, DSWindow window, WholeFacetFallback fallback, PrebufferProgress progress);
 
     /// Same as [#prefetch(String, DSWindow, WholeFacetFallback, PrebufferProgress)]

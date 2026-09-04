@@ -159,7 +159,7 @@ class PrefetchRemoteIntegrationTest {
         assertFalse(plan.degradesToFullDownload(), "a published index makes a remote vvec windowable");
         assertEquals(1, plan.requestedRanges().size());
         assertTrue(plan.prerequisiteBytes() > 0, "the index had to be read, and the plan says so");
-        ByteRange requested = plan.requestedRanges().get(0);
+        ShardRange requested = plan.requestedRanges().get(0);
         assertTrue(requested.end() > requested.start() && requested.end() <= plan.facetBytes());
         assertTrue(requested.length() < plan.facetBytes(), "50 of 400 ragged records must be a fraction of the facet");
 
@@ -279,7 +279,7 @@ class PrefetchRemoteIntegrationTest {
 
         PrefetchPlan plan = view.prefetchPlan("neighbor_indices", DSWindow.parse("[0..3)"));
         assertFalse(plan.degradesToFullDownload(), "a uniform ivec is windowable by its header stride");
-        assertEquals(List.of(new ByteRange(0, 3L * recordBytes)), plan.requestedRanges());
+        assertEquals(List.of(ShardRange.whole(0, 3L * recordBytes)), plan.requestedRanges());
 
         view.prefetch("neighbor_indices", DSWindow.parse("[0..3)"), WholeFacetFallback.REFUSE);
         assertArrayEquals(new int[] {2, 3}, java.util.Arrays.copyOfRange((int[]) view.neighborIndices().get(2), 0, 2),
@@ -301,5 +301,126 @@ class PrefetchRemoteIntegrationTest {
         view.prefetch("metadata_predicates", window, WholeFacetFallback.ALLOW);
         assertTrue(view.prefetchPlan("metadata_predicates", DSWindow.ALL).isResident(),
             "consenting to the whole facet fetches the whole facet");
+    }
+
+    // -- Facets spread across several remote files --
+
+    /// dim 8 → 36 bytes per record.
+    private static final int SERIES_BPR = 36;
+
+    private static byte[] seriesShard(int records, int first) {
+        ByteBuffer bytes = ByteBuffer.allocate(records * SERIES_BPR).order(ByteOrder.LITTLE_ENDIAN);
+        for (int r = 0; r < records; r++) { bytes.putInt(8); for (int d = 0; d < 8; d++) bytes.putFloat((first + r) * 100f + d); }
+        return bytes.array();
+    }
+
+    /// Publishes `big__0000..` shards of `records` each, `.mref`-published
+    /// so chunk residency is real, and returns the server's base URL.
+    private String publishSeries(int shards, int records, boolean mrefs) throws Exception {
+        Path published = Files.createDirectories(temporary.resolve("pub"));
+        for (int shard = 0; shard < shards; shard++) {
+            byte[] payload = seriesShard(records, shard * records);
+            Path file = published.resolve(String.format("big__%04d.fvec", shard));
+            Files.write(file, payload);
+            if (mrefs) Files.write(published.resolve(file.getFileName() + ".mref"), FixtureSupport.mref(payload, CHUNK));
+        }
+        HttpServer server = serveDirectory(published, new AtomicInteger(), true);
+        return "http://127.0.0.1:" + server.getAddress().getPort() + "/";
+    }
+
+    private TestDataView seriesView(String name, String yaml, String profile) throws Exception {
+        Path dataset = Files.createDirectories(temporary.resolve(name));
+        Files.writeString(dataset.resolve("dataset.yaml"), yaml);
+        VectorDataSettings settings = VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
+        return TestDataGroup.load(dataset.resolve("dataset.yaml").toUri(), settings).profile(profile);
+    }
+
+    private static String uniformYaml(String base, int shards, int records, String extra) {
+        return """
+            name: remote-series
+            profiles:
+              default:
+                base_vectors:
+                  source: %sbig__NNNN.fvec
+                  shard_stride: %d
+                  shard_count: %d
+                  record_count: %d
+            """.formatted(base, records, shards, shards * records) + extra;
+    }
+
+    @Test void aUniformSeriesReadsOverHttp() throws Exception {
+        String base = publishSeries(2, 25, false);
+        VectorReader<float[]> reader = seriesView("uniform-http", uniformYaml(base, 2, 25, ""), "default").baseVectors();
+        assertEquals(50, reader.count(), "the count spans the series");
+        assertEquals(8, reader.dimension());
+        for (int i = 0; i < 50; i++) { assertEquals(i * 100f, reader.get(i)[0], "record " + i + " over HTTP"); assertEquals(i * 100f + 7, reader.get(i)[7]); }
+        for (int i = 49; i >= 0; i--) assertEquals(i * 100f, reader.get(i)[0]);
+    }
+
+    @Test void anExplicitSeriesReadsOverHttp() throws Exception {
+        String base = publishSeries(2, 25, false);
+        VectorReader<float[]> reader = seriesView("explicit-http", """
+            name: explicit
+            profiles:
+              default:
+                base_vectors:
+                  source:
+                    - %sbig__0000.fvec=25
+                    - %sbig__0001.fvec=25
+                  record_count: 50
+            """.formatted(base, base), "default").baseVectors();
+        assertEquals(50, reader.count());
+        for (int i : new int[] {0, 24, 25, 49}) assertEquals(i * 100f, reader.get(i)[0], "record " + i);
+    }
+
+    @Test void aWindowInsideOneShardDoesNotDegradeToAFullDownload() throws Exception {
+        String base = publishSeries(2, 25, true);
+        TestDataView view = seriesView("one-shard", uniformYaml(base, 2, 25, ""), "default");
+        PrefetchPlan plan = view.prefetchPlan("base_vectors", DSWindow.parse("5..10"));
+        assertFalse(plan.degradesToFullDownload(), "a five-record window must not price as the whole facet");
+        assertEquals(1, plan.fills().size(), "a window inside shard 0 touches one shard");
+        assertEquals(0, plan.byteRanges().get(0).shard());
+    }
+
+    @Test void aWindowAcrossTheSeamPlansOneFillPerShard() throws Exception {
+        String base = publishSeries(2, 25, true);
+        TestDataView view = seriesView("seam", uniformYaml(base, 2, 25, ""), "default");
+        PrefetchPlan plan = view.prefetchPlan("base_vectors", DSWindow.parse("20..30"));
+        assertFalse(plan.degradesToFullDownload());
+        assertEquals(2, plan.fills().size(), "the window spans both shards");
+        assertEquals(2, plan.requests());
+        view.prefetch("base_vectors", DSWindow.parse("20..30"), WholeFacetFallback.REFUSE);
+        assertTrue(view.prefetchPlan("base_vectors", DSWindow.parse("20..30")).isResident());
+    }
+
+    @Test void aFacetByteRangePrebuffersTheShardItLivesIn() throws Exception {
+        String base = publishSeries(3, 400, true);
+        TestDataView view = seriesView("deep", uniformYaml(base, 3, 400, ""), "default");
+        VectorReader<float[]> reader = view.baseVectors();
+        long before = reader.cacheStats().cachedBytes();
+        view.prefetch("base_vectors", DSWindow.parse("1150..1160"), WholeFacetFallback.REFUSE);
+        CacheStats after = reader.cacheStats();
+        assertTrue(after.cachedBytes() > before, "a range in the last shard fetched nothing (" + before + " → " + after.cachedBytes() + ")");
+        assertFalse(reader.isComplete(), "only the range's chunks were fetched");
+        assertTrue(after.cachedBytes() - before < after.totalBytes() / 4,
+            "fetched " + (after.cachedBytes() - before) + " of " + after.totalBytes() + " bytes for ten records");
+        assertEquals(1155 * 100f, reader.get(1155)[0]);
+    }
+
+    @Test void cacheStatsForASeriesCoverEveryShard() throws Exception {
+        String base = publishSeries(3, 400, true);
+        TestDataView view = seriesView("stats", uniformYaml(base, 3, 400, ""), "default");
+        CacheStats stats = view.baseVectors().cacheStats();
+        assertEquals(3L * 400 * SERIES_BPR, stats.totalBytes(), "every shard's bytes");
+        assertEquals(CHUNK, stats.chunkSize());
+        assertEquals(AccessMode.MERKLE_HASHED, stats.accessMode());
+        assertFalse(stats.complete());
+    }
+
+    @Test void aMissingShardOverHttpIsNamed() throws Exception {
+        String base = publishSeries(2, 25, false);
+        TestDataView view = seriesView("missing", uniformYaml(base, 3, 25, ""), "default");
+        VectorDataException missing = assertThrows(VectorDataException.class, view::baseVectors);
+        assertTrue(missing.getMessage().contains("big__0002.fvec"), "the message must name the missing shard: " + missing.getMessage());
     }
 }

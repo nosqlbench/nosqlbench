@@ -17,6 +17,8 @@ package io.nosqlbench.vectordata;
 
 import io.nosqlbench.vectordata.internal.HttpTransport;
 import io.nosqlbench.vectordata.internal.ManifestView;
+import io.nosqlbench.vectordata.internal.Shards;
+import io.nosqlbench.vectordata.internal.SourceSpec;
 import io.nosqlbench.vectordata.internal.YamlData;
 
 import java.io.IOException;
@@ -54,13 +56,27 @@ public final class TestDataGroup {
     }
     public static TestDataGroup load(URI source, VectorDataSettings settings) {
         if (!isYaml(source)) {
+            // A directory resolves to its dataset.yaml, then to a legacy
+            // knn_entries.yaml — but only when the canonical manifest is
+            // absent. One that exists and is refused stays refused: a
+            // fallback that swallowed the refusal would report "no such
+            // file" for a dataset whose fault has a name.
             URI canonical = child(source, "dataset.yaml");
-            try { return load(canonical, settings); }
-            catch (VectorDataException ignored) { return load(child(source, "knn_entries.yaml"), settings); }
+            String text;
+            try { text = read(canonical, settings); }
+            catch (VectorDataException absent) { return load(child(source, "knn_entries.yaml"), settings); }
+            return parse(canonical, text, settings);
         }
-        URI manifest = source;
-        Map<String, Object> root = YamlData.parse(read(manifest, settings), manifest.toString());
+        return parse(source, read(source, settings), settings);
+    }
+    private static TestDataGroup parse(URI manifest, String text, VectorDataSettings settings) {
+        Map<String, Object> root = YamlData.parse(text, manifest.toString());
         if (!(root.get("profiles") instanceof Map<?, ?>)) return legacy(root, manifest, settings, directoryName(manifest));
+        // A dataset above this build's version is refused before
+        // anything else is read from it: the field exists to turn "no
+        // such file" into a diagnosis.
+        Integer stated = root.get("format_version") == null ? null : YamlData.integer(root.get("format_version"), "format_version");
+        FormatVersion.checkSupported(stated);
         String name = YamlData.optionalString(root.get("name")); if (name == null) name = basename(manifest);
         Object rawProfiles = root.get("profiles");
         Map<String, Map<String, Object>> profiles = new LinkedHashMap<>();
@@ -72,7 +88,12 @@ public final class TestDataGroup {
         if (profiles.isEmpty()) throw new VectorDataException("Manifest contains no profiles: " + manifest);
         Map<String, Object> attributes = root.get("attributes") instanceof Map<?, ?> declared
             ? Map.copyOf(YamlData.map(declared, "attributes")) : Map.of();
-        return new TestDataGroup(name, manifest, profiles, settings, attributes);
+        TestDataGroup group = new TestDataGroup(name, manifest, profiles, settings, attributes);
+        // The version the content requires is derived by folding every
+        // declaration, never asserted — and every declaration is
+        // checked for self-consistency here, before a facet opens.
+        FormatVersion.checkStatedAgainstContent(stated, group.requiredVersion());
+        return group;
     }
     private static TestDataGroup legacy(Map<String, Object> root, URI manifest, VectorDataSettings settings, String preferred) {
         String configuredBase = root.get("_defaults") instanceof Map<?, ?> map ? YamlData.optionalString(YamlData.map(map, "_defaults").get("base_url")) : null;
@@ -84,9 +105,9 @@ public final class TestDataGroup {
             Map<String, Object> values = YamlData.map(item.getValue(), "legacy entry " + item.getKey()); Map<String, Object> resolved = new LinkedHashMap<>();
             for (Map.Entry<String, Object> facet : values.entrySet()) {
                 if (facet.getValue() instanceof String path) {
-                    String[] split = splitWindowSuffix(path);
-                    resolved.put(facet.getKey(), split[1] == null ? base.resolve(split[0]).toString()
-                        : Map.of("source", base.resolve(split[0]).toString(), "window", split[1]));
+                    SourceSpec spec = SourceSpec.parse(path);
+                    resolved.put(facet.getKey(), spec.windowText() == null ? base.resolve(spec.path()).toString()
+                        : Map.of("source", base.resolve(spec.path()).toString(), "window", spec.windowText()));
                 } else resolved.put(facet.getKey(), facet.getValue());
             }
             grouped.computeIfAbsent(dataset, ignored -> new LinkedHashMap<>()).put(profile, resolved);
@@ -99,35 +120,93 @@ public final class TestDataGroup {
     public Map<String, Map<String, Object>> profiles() { return Map.copyOf(profiles); }
     public TestDataView profile(String profile) {
         String selected = profile == null || profile.isBlank() ? (profiles.containsKey("default") ? "default" : profiles.keySet().iterator().next()) : profile;
-        return new ManifestView(name, selected, facets(selected, new LinkedHashMap<>()), settings, attributes);
+        return new ManifestView(name, selected, facets(selected), settings, attributes);
     }
-    private Map<String, FacetDescriptor> facets(String profile, Map<String, FacetDescriptor> inherited) {
+    /// The format version this manifest's content requires: sharded if
+    /// any profile declares a multi-file facet, base otherwise.
+    private int requiredVersion() {
+        for (Map.Entry<String, Map<String, Object>> profile : profiles.entrySet())
+            for (FacetDescriptor facet : declared(profile.getKey(), profile.getValue()).values())
+                if (facet.isSeries()) return FormatVersion.SHARDED;
+        return FormatVersion.BASE;
+    }
+    private Map<String, FacetDescriptor> facets(String profile) {
         Map<String, Object> definition = profiles.get(profile);
         if (definition == null) throw new VectorDataException("Dataset " + name + " has no profile " + profile);
+        Map<String, FacetDescriptor> inherited = new LinkedHashMap<>();
         // Profiles name only what differs: facets a profile does not
         // declare resolve from `default`. A sized profile like `100k`
         // carries a windowed base and its own neighbor facets and
         // inherits the rest — query vectors included — without an
         // explicit `extends`.
-        if (!"default".equals(profile) && profiles.containsKey("default")) inherited.putAll(facets("default", new LinkedHashMap<>()));
+        if (!"default".equals(profile) && profiles.containsKey("default")) inherited.putAll(facets("default"));
         String parent = YamlData.optionalString(definition.get("extends"));
         if (parent != null) {
             if (parent.equals(profile)) throw new VectorDataException("Profile cannot extend itself: " + profile);
-            inherited.putAll(facets(parent, new LinkedHashMap<>()));
+            inherited.putAll(facets(parent));
         }
+        inherited.putAll(declared(profile, definition));
+        return inherited;
+    }
+    /// The facets a profile declares itself, resolved against the
+    /// manifest. Declaration shape is resolved here, once: a string
+    /// source is one file; a `NNNN` pattern with `shard_stride` and
+    /// `shard_count`, or an array of sources, is a series. Every series
+    /// declaration is checked for self-consistency at load, so a
+    /// dataset that disagrees with itself is refused before a facet
+    /// opens.
+    private Map<String, FacetDescriptor> declared(String profile, Map<String, Object> definition) {
+        Map<String, FacetDescriptor> result = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : definition.entrySet()) {
             if (NON_FACETS.contains(entry.getKey())) continue;
             String facetName = canonical(entry.getKey());
+            if (entry.getValue() instanceof List<?>)
+                throw new VectorDataException("facet '" + facetName + "' in profile " + profile + ": a list of sources belongs under 'source:'");
             Map<String, Object> values = entry.getValue() instanceof Map<?, ?> ? YamlData.map(entry.getValue(), "facet " + entry.getKey()) : Map.of("source", entry.getValue());
-            String source = YamlData.optionalString(values.get("source"));
-            if (source == null) source = YamlData.optionalString(values.get("path"));
-            if (source == null) continue;
+            Object rawSource = values.get("source");
+            if (rawSource == null) rawSource = values.get("path");
+            if (rawSource == null) continue;
             String window = windowText(values.get("window"));
-            String[] split = splitWindowSuffix(source);
-            if (split[1] != null) window = split[1];
-            inherited.put(facetName, new FacetDescriptor(facetName, manifest.resolve(split[0]), window, Map.copyOf(values)));
+            Long stride = longOrNull(values.get("shard_stride"), "shard_stride");
+            Integer count = values.get("shard_count") == null ? null : YamlData.integer(values.get("shard_count"), "shard_count");
+            Long recordCount = longOrNull(values.get("record_count"), "record_count");
+            boolean isArray = rawSource instanceof List<?>;
+            List<String> raw = new ArrayList<>();
+            if (isArray) for (Object item : (List<?>) rawSource) raw.add(YamlData.string(item, "facet " + facetName + " source entry"));
+            else raw.add(String.valueOf(rawSource));
+            boolean layout = stride != null || count != null;
+            if (!isArray && !layout && !Shards.hasShardField(raw.get(0))) {
+                SourceSpec spec = SourceSpec.parse(raw.get(0));
+                if (spec.windowText() != null) window = spec.windowText();
+                result.put(facetName, new FacetDescriptor(facetName, manifest.resolve(spec.path()), window, Map.copyOf(values)));
+                continue;
+            }
+            List<String> entries = new ArrayList<>();
+            for (String item : raw) {
+                SourceSpec spec = SourceSpec.parse(item);
+                // A window suffix on a uniform pattern is the facet
+                // window: a pattern names no file, so there is no entry
+                // for it to bound. Given both ways, it is refused rather
+                // than guessed at.
+                if (layout && spec.windowText() != null) {
+                    if (window != null)
+                        throw new VectorDataException("facet '" + facetName + "': the facet window is given twice: on the source pattern and as 'window'");
+                    window = spec.windowText();
+                    spec = new SourceSpec(spec.path(), DSWindow.ALL, null, spec.declaredCount());
+                }
+                entries.add(spec.withPath(manifest.resolve(spec.path()).toString()).render());
+            }
+            Shards.validate(facetName, new Shards.Declaration(raw, isArray, stride, count, recordCount));
+            result.put(facetName, new FacetDescriptor(facetName, null, window, Map.copyOf(values),
+                new FacetDescriptor.Series(entries, isArray, stride, count, recordCount)));
         }
-        return inherited;
+        return result;
+    }
+    private static Long longOrNull(Object value, String label) {
+        if (value == null) return null;
+        if (value instanceof Number number) return number.longValue();
+        try { return Long.parseLong(String.valueOf(value).trim()); }
+        catch (NumberFormatException e) { throw new VectorDataException("Invalid integer " + label + ": " + value, e); }
     }
     /// Normalizes the `window:` key to the canonical interval text.
     /// Manifests carry it as the string grammar, but the serializer
@@ -156,28 +235,6 @@ public final class TestDataGroup {
             if (min instanceof Number && max instanceof Number) return min + ".." + max;
         }
         throw new VectorDataException("Unrecognized window interval: " + item);
-    }
-    /// Splits the documented window-suffix sugar off a facet source
-    /// string — `base.fvec[0..1M)` names the file plus a record window,
-    /// with either bracket kind on either side. The outer delimiters
-    /// are structural: they separate the path from the window and do
-    /// not affect interval bound semantics. Returns
-    /// `{path, windowOrNull}`. A source string only fails when it
-    /// *looks* like it carries a window suffix and that suffix is
-    /// malformed — a plain path always passes through — so an error
-    /// here names the broken window rather than turning it into "no
-    /// such file".
-    private static String[] splitWindowSuffix(String source) {
-        if (!source.endsWith("]") && !source.endsWith(")")) return new String[] {source, null};
-        int bracket = source.indexOf('['); int paren = source.indexOf('(');
-        int open = bracket < 0 ? paren : paren < 0 ? bracket : Math.min(bracket, paren);
-        if (open <= 0) return new String[] {source, null};
-        String inner = source.substring(open + 1, source.length() - 1);
-        try { DSWindow.parse(inner); }
-        catch (VectorDataException malformed) {
-            throw new VectorDataException("source '" + source + "' has a malformed window: " + malformed.getMessage());
-        }
-        return new String[] {source.substring(0, open), inner};
     }
     private static boolean isYaml(URI source) { String path = source.getPath() == null ? "" : source.getPath().toLowerCase(); return path.endsWith(".yaml") || path.endsWith(".yml"); }
     private static URI child(URI source, String name) { String text = source.toString(); return URI.create(text.endsWith("/") ? text + name : text + "/" + name); }

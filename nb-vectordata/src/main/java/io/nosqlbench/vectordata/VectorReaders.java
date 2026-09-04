@@ -18,6 +18,7 @@ package io.nosqlbench.vectordata;
 import io.nosqlbench.vectordata.internal.ByteStorage;
 import io.nosqlbench.vectordata.internal.FixedVectorReader;
 import io.nosqlbench.vectordata.internal.ScalarReader;
+import io.nosqlbench.vectordata.internal.ShardedVectorReader;
 import io.nosqlbench.vectordata.internal.StorageFactory;
 import io.nosqlbench.vectordata.internal.VariableVectorReader;
 
@@ -30,9 +31,14 @@ public final class VectorReaders {
     private VectorReaders() { }
     public static VectorReader<?> open(String source) { return open(toUri(source), VectorDataSettings.defaults(), "direct"); }
     public static VectorReader<?> open(URI source, VectorDataSettings settings, String identity) {
-        ElementType type = ElementType.forExtension(source.toString());
-        ByteStorage storage = new StorageFactory(settings).open(source, identity);
-        return isScalar(source.toString()) ? new ScalarReader(storage, type) : new FixedVectorReader<>(storage, type);
+        return over(new StorageFactory(settings).open(source, identity), source.toString());
+    }
+    /// A reader over storage already open, chosen by the source's
+    /// extension — the per-file reader a facet spread across several
+    /// files composes.
+    public static VectorReader<?> over(ByteStorage storage, String source) {
+        ElementType type = ElementType.forExtension(source);
+        return isScalar(source) ? new ScalarReader(storage, type) : new FixedVectorReader<>(storage, type);
     }
     public static VvecReader<?> openVvec(URI source, VectorDataSettings settings, String identity) {
         String text = source.toString().toLowerCase(Locale.ROOT);
@@ -50,13 +56,23 @@ public final class VectorReaders {
             return new VariableVectorReader<>(data, new StorageFactory(settings).open(other, identity), type, !expect64);
         }
     }
-    @SuppressWarnings("unchecked") public static VectorReader<float[]> f32(URI source, VectorDataSettings settings, String identity) {
-        VectorReader<?> reader = open(source, settings, identity); if (reader.elementType() != ElementType.F32 || !(reader instanceof FixedVectorReader<?>)) throw new VectorDataException("Expected f32 fixed vectors: " + source); return (VectorReader<float[]>) reader;
+    public static VectorReader<float[]> f32(URI source, VectorDataSettings settings, String identity) {
+        return expectFixed(open(source, settings, identity), ElementType.F32, source);
     }
-    @SuppressWarnings("unchecked") public static VectorReader<int[]> i32(URI source, VectorDataSettings settings, String identity) {
-        VectorReader<?> reader = open(source, settings, identity); if (reader.elementType() != ElementType.I32 || !(reader instanceof FixedVectorReader<?>)) throw new VectorDataException("Expected i32 fixed vectors: " + source); return (VectorReader<int[]>) reader;
+    public static VectorReader<int[]> i32(URI source, VectorDataSettings settings, String identity) {
+        return expectFixed(open(source, settings, identity), ElementType.I32, source);
     }
-    static boolean isScalar(String source) { String ext = extension(source); return ext.matches("u8|i8|u16|i16|u32|i32|u64|i64"); }
+    /// Narrows a reader to a fixed-vector element type, single-file and
+    /// sharded alike; a packed scalar or another element type is refused
+    /// naming what was expected.
+    @SuppressWarnings("unchecked")
+    public static <T> VectorReader<T> expectFixed(VectorReader<?> reader, ElementType type, Object source) {
+        boolean fixed = reader instanceof FixedVectorReader<?> || (reader instanceof ShardedVectorReader<?> sharded && !sharded.isScalar());
+        if (reader.elementType() != type || !fixed)
+            throw new VectorDataException("Expected " + type.name().toLowerCase(Locale.ROOT) + " fixed vectors: " + source);
+        return (VectorReader<T>) reader;
+    }
+    public static boolean isScalar(String source) { String ext = extension(source); return ext.matches("u8|i8|u16|i16|u32|i32|u64|i64"); }
     static boolean isVector(String source) { return !isScalar(source); }
     private static String extension(String value) { int dot = value.lastIndexOf('.'); int end = value.indexOf('?', dot); return value.substring(dot + 1, end < 0 ? value.length() : end).toLowerCase(Locale.ROOT); }
     private static URI toUri(String source) { return source.contains("://") || source.startsWith("file:") ? URI.create(source) : Path.of(source).toAbsolutePath().toUri(); }

@@ -15,5 +15,25 @@
  */
 package io.nosqlbench.vectordata;
 
-/** Backing mode selected for a source. */
-public enum AccessMode { LOCAL, MERKLE_HASHED, MERKLE_CHUNKED, FULL_TRANSFER }
+/// Backing mode selected for a source. Ranked by what a caller must plan
+/// around — a full transfer constrains most, a local file least, and the
+/// two chunked modes differ in trust rather than access — so that a facet
+/// spanning several files can report the [#weakest] of them.
+public enum AccessMode {
+    LOCAL(3), MERKLE_HASHED(2), MERKLE_CHUNKED(1), FULL_TRANSFER(0);
+
+    private final int strength;
+    AccessMode(int strength) { this.strength = strength; }
+
+    /// The weakest of several modes — the one true of every file. A
+    /// facet's mode is a promise about every read it will serve, and a
+    /// caller that plans against "supports range" and then reaches a
+    /// file that does not has been misled by an average. Understating
+    /// the good files costs efficiency; overstating costs correctness.
+    /// `null` for no modes: making no promise is not promising little.
+    public static AccessMode weakest(Iterable<AccessMode> modes) {
+        AccessMode result = null;
+        for (AccessMode mode : modes) if (result == null || mode.strength < result.strength) result = mode;
+        return result;
+    }
+}
