@@ -27,6 +27,10 @@ implementation's current behavior and its format tests are normative.
   records with `IDXFOR__<file>.i32` or `.i64` index sidecars. Both sidecar
   layouts are accepted: `N+1` entries ending in an end-of-data sentinel,
   and the Rust walk-built form of `N` record starts with no sentinel.
+  Slab containers (`.slab`) — paged records indexed by ordinal through a
+  pages page in the file's tail, with optional named namespaces — are
+  planned, prefetched, and prebuffered by the pages a window spans; their
+  records are not decoded here (see below).
 - Multi-file facets: a facet may be a *series* of files forming one dense,
   gapless ordinal space, declared in either of the reference forms —
   uniform (`source: base__NNNN.fvec` with `shard_stride`, `shard_count`,
@@ -58,7 +62,11 @@ implementation's current behavior and its format tests are normative.
   count. The serialized structured form — a list of `{min_incl, max_excl}`
   maps — and bare counts (`[0..N)`) are accepted on the `window:` key.
   Intervals that select no records are rejected at parse. Readers apply
-  the first interval and clamp both bounds to the data.
+  the first interval and clamp both bounds to the data. A source may name
+  a slab namespace (`m.slab:content`, `m.slab:ns:[0..1K]`), or carry one
+  beside it under `namespace:`/`ns:`; the text after the last `:` is a
+  namespace only when the path before it has an extension and the text
+  after names no directory, so a URL scheme or a drive letter never is.
 - Profiles: a non-default profile inherits unstated facets from the profile
   it names with `inherits:`, else from `default`; an unknown or self parent
   falls back to `default`, and a cycle leaves its members with what they
@@ -81,7 +89,15 @@ implementation's current behavior and its format tests are normative.
   file. A window decomposes into one sub-window per shard it spans, each
   mapped by the format's rule against its own file; ranges in different
   shards never merge; prerequisite bytes sum over the files touched; a
-  whole-facet request names every shard.
+  whole-facet request names every shard. A slab window maps to the byte
+  extent of the pages holding it — one contiguous range, since pages lie
+  in ordinal order — through the index read from the slab's tail: the
+  16-byte footer, the terminal pages page or namespaces page, the named
+  namespace's pages page when indirected, and the last page's own record
+  count. That bounded read, never a walk of the file, is what the plan
+  reports as prerequisite bytes. A window starting past the end degrades
+  rather than fabricating a range; one running past the end stops at the
+  last page.
 - Whole-profile prebuffer: `prebuffer(WholeFacetFallback, PrebufferProgress)`
   plans every facet against the window it declares for itself, with the
   same shard-aware planner the selective prefetch uses, refusing a declared
@@ -157,6 +173,13 @@ Remaining representation differences:
   `*vvec` extensions carry variable-length records. (The Rust source's
   `is_vvec_ext` still classifies `ivec` as variable; to be reconciled
   upstream.)
+- **Slab records are not decoded.** The reference reads slab records
+  through its ANode codecs and binds them to operation parameters; this
+  module carries none of that, so `openFacet` on a slab facet fails with
+  an unsupported extension. Slab facets take part in everything that
+  does not depend on what a record *is* — windows, shards, residency,
+  planning, prefetch, and the whole-profile prebuffer — which is what a
+  sized profile over a slab-backed dataset needs.
 - **A windowed reader's `prebuffer` fetches its window.** The reference's
   windowed reader inherits a no-op `precache`; here the reader a view hands
   back for a windowed facet warms the same bytes the whole-profile prebuffer

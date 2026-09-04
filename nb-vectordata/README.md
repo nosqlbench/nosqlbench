@@ -53,7 +53,10 @@ view.prebuffer(WholeFacetFallback.REFUSE, (cached, total) -> meter.update(cached
 
 Every facet is planned before any is fetched. A declared window the format
 cannot map is refused under `REFUSE`, exactly as a requested window would be;
-`ALLOW` accepts the whole facet instead.
+`ALLOW` accepts the whole facet instead. Slab facets — paged metadata,
+addressable as `m.slab` or by namespace as `m.slab:content` — are planned
+and fetched by the pages a window spans, located through the index in the
+slab's tail; this module does not decode their records.
 
 ## Facets spread across several files
 
