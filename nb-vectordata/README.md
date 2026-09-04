@@ -2,9 +2,9 @@
 
 `nb-vectordata` is the standalone Java programmatic-access implementation of
 the vectordata dataset format. It is intentionally limited to catalog,
-manifest, vector-reader, transport, cache, and integrity-verification APIs;
-workload generators and legacy command-line tooling are not part of this
-module.
+manifest, vector-reader, record-codec, transport, cache, and
+integrity-verification APIs; workload generators and legacy command-line
+tooling are not part of this module.
 
 The compatibility contract is [RUST_COMPATIBILITY.md](RUST_COMPATIBILITY.md).
 
@@ -56,7 +56,39 @@ cannot map is refused under `REFUSE`, exactly as a requested window would be;
 `ALLOW` accepts the whole facet instead. Slab facets — paged metadata,
 addressable as `m.slab` or by namespace as `m.slab:content` — are planned
 and fetched by the pages a window spans, located through the index in the
-slab's tail; this module does not decode their records.
+slab's tail, and read by ordinal as records (below).
+
+## Reading a slab facet's records
+
+A facet holds either runs of a fixed-width element or opaque records of
+their own length. Ask which before choosing a reader; each refuses the
+other shape by naming the reader that opens it:
+
+```java
+if (view.facetShape("metadata_content") == FacetShape.RECORDS) {
+    RecordFacet facet = view.openFacetRecords("metadata_content");
+    Records<ANode> nodes = facet.decode(Codecs.ANODE);                 // stage 1: the record as it is
+    Records<String> json = facet.decode(Codecs.text(Vernacular.JSON)); // stage 2: rendered
+    Records<Object> trees = facet.decode(Codecs.TREE);                 // plain maps and lists
+    Records<String> byName = facet.decode(Codecs.byName("readout"));
+
+    ANode first = nodes.get(0);
+    if (first instanceof ANode.M m && view.facetShape("metadata_predicates") == FacetShape.RECORDS) {
+        ANode p = view.openFacetRecords("metadata_predicates").decode(Codecs.ANODE).get(0);
+        boolean hit = PredicateEvaluator.evaluate(((ANode.P) p).node(), m.node());
+    }
+    RecordFacet schema = facet.namespace("schema");                    // a sibling document, same files
+}
+```
+
+A record decodes by its own leader byte — `0x01` an `MNode`, `0x02` a
+`PNode` — so a facet holding both reads without the caller saying which.
+Rendering and parsing are available directly through `Vernaculars`,
+in every vernacular the reference names (`json`, `jsonl`, `yaml`, `sql`,
+`sqlite`, `cql`, `cddl`, `readout`, their `-schema` and `-value` forms,
+and `display`); a `PNode`'s display form reads back with `PNodeDisplay`.
+Reading one record from a remote facet fetches the page that holds it,
+not the file. A series of slabs is one facet of records in shard order.
 
 ## Facets spread across several files
 

@@ -29,8 +29,8 @@ implementation's current behavior and its format tests are normative.
   and the Rust walk-built form of `N` record starts with no sentinel.
   Slab containers (`.slab`) — paged records indexed by ordinal through a
   pages page in the file's tail, with optional named namespaces — are
-  planned, prefetched, and prebuffered by the pages a window spans; their
-  records are not decoded here (see below).
+  planned, prefetched, and prebuffered by the pages a window spans, and
+  read by ordinal as records (see *Records* below).
 - Multi-file facets: a facet may be a *series* of files forming one dense,
   gapless ordinal space, declared in either of the reference forms —
   uniform (`source: base__NNNN.fvec` with `shard_stride`, `shard_count`,
@@ -104,6 +104,57 @@ implementation's current behavior and its format tests are normative.
   window the format cannot map under `REFUSE` exactly as a requested one —
   so a sized profile over a large base fetches what it can address and
   nothing more. `prebuffer(PrebufferProgress)` is the `REFUSE` form.
+- Records: a slab facet opens through `openFacetRecords` as a
+  `RecordFacet` — ordinals and bytes, before a codec is chosen — and a
+  codec applied with `decode` yields a typed `Records` reader. The facet
+  holds one container per file, each shard of a series an ordinary slab
+  based at zero, so a facet ordinal is answered by the container that owns
+  it at its local ordinal; counts come from the containers, never from
+  the shard declaration. A namespace written into the declaration
+  (`m.slab:content`, `namespace:`) selects that document, one absent from
+  the container holds no records, and `namespace(name)` opens a sibling
+  document of the same containers. Reading one record from a remote
+  facet costs one page, not the file. The codecs compose the reference's
+  two stages: `Codecs.ANODE` stops after stage 1 — the record as the
+  `ANode` its leader byte says it is, `0x01` an `MNode` and `0x02` a
+  `PNode`, never inferred from the facet; `Codecs.text(vernacular)` adds
+  stage 2 and renders it; `Codecs.TREE` hands back plain Java values, the
+  role a serde target plays in the reference. `Codecs.byName` resolves a
+  vernacular name through the same table every other by-name surface
+  uses, so a codec chosen at runtime and one written in code decode
+  identically; `anode` names none, since it produces no text.
+- ANode wire formats: an `MNode` is `[0x01][u16 count]` of
+  `[u16 name][name][tag][value]` fields over the 29 `TypeTag`s (`text`
+  through `typed_map`, little-endian, `text_validated` read as text and
+  `decimal`/`varint` as bytes). A `PNode` is a pre-order tree of
+  `[conjugate type][…]` nodes in three sub-formats: indexed (`[0][field
+  index][op][i16 count][i64…]`), named legacy (a conjugate byte after
+  the leader, `i64` comparands), and named typed (`0xFF` after the
+  leader, comparands tagged `0` int, `1` float, `2` text, `3` bool, `4`
+  bytes, `5` null). Fingerprints replace every value with its type
+  default; congruence compares fingerprints. The `Display` grammar
+  (`age > 18`, `status IN (1, 2)`, `(a = 1 AND b < 2)`) round-trips
+  through `PNodeDisplay.parse`. `PredicateEvaluator` applies a tree to a
+  record with the reference's coercions — integer families against `Int`,
+  float families against `Float`, the two cross-compared numerically,
+  text families against `Text`, `MATCHES` as substring containment over
+  text or bytes, a missing field equal to `NULL` and nothing else.
+- Vernaculars: the reference's thirteen — `cddl`, `cddl-value`, `sql`,
+  `sql-schema`, `sqlite`, `sqlite-schema`, `cql`, `cql-schema`, `json`,
+  `jsonl`, `yaml`, `readout`, `display` — each rendering both node kinds
+  in its own syntax, with the sqlite pair spelled as the sql pair. JSON,
+  YAML, SQL, CQL, CDDL, and readout parse back with the reference's type
+  inference (quoted strings, bare integers, decimal-point floats,
+  `true`/`false`, each language's null); the schema, value, and display
+  renderings refuse to, naming themselves.
+- Facet shape: every extension the spec names belongs to a `FacetFormat`
+  with a `FacetShape` — element runs, or opaque records — and `facetShape`
+  answers it so a caller handling both branches on the fact rather than
+  on a failure. Each reader refuses the other shape at the door, naming
+  the reader that opens it (`WrongFacetShapeException` from the element
+  readers, `RecordException` of kind `WRONG_SHAPE` from the record path)
+  instead of failing on the symptom — a slab parsed as vectors, or an
+  xvec parsed for a footer.
 - Types: signed and unsigned 8/16/32/64-bit integers plus f16, f32, and f64.
 - Sources: local files, `file:` URIs, and HTTP(S) URLs.
 - Remote caching: sparse range caching, `.mref` SHA-256 Merkle verification,
@@ -173,13 +224,24 @@ Remaining representation differences:
   `*vvec` extensions carry variable-length records. (The Rust source's
   `is_vvec_ext` still classifies `ivec` as variable; to be reconciled
   upstream.)
-- **Slab records are not decoded.** The reference reads slab records
-  through its ANode codecs and binds them to operation parameters; this
-  module carries none of that, so `openFacet` on a slab facet fails with
-  an unsupported extension. Slab facets take part in everything that
-  does not depend on what a record *is* — windows, shards, residency,
-  planning, prefetch, and the whole-profile prebuffer — which is what a
-  sized profile over a slab-backed dataset needs.
+- **The serde codec is a tree codec.** The reference's third codec
+  deserializes into any serde target; Java has no serde, so `Codecs.TREE`
+  produces the one target that stands for all of them — an
+  insertion-ordered map of `String`, `Long`, `Double`, `Boolean`, `null`,
+  lists, and nested maps, typed exactly as the JSON vernacular types the
+  same record. A caller wanting a class binds it from that map.
+- **JSON parses in document order.** The JSON vernacular reads back with
+  a minimal strict parser that keeps object keys in the order written, so
+  a record round-tripped through JSON keeps its field order; the reference
+  relies on its JSON library's map, whose order is that library's choice.
+  Numbers follow the reference's inference: no point or exponent and fits
+  a long is an integer, anything else numeric is a float.
+- **Record binding forms are not ported.** The reference binds decoded
+  records to operation parameters and walks MNode fields without
+  allocating; both belong to workload generation, not to the access API,
+  and are out of this module's scope. Slab facets take part in everything
+  else — windows, shards, residency, planning, prefetch, the
+  whole-profile prebuffer, and now records by ordinal.
 - **A windowed reader's `prebuffer` fetches its window.** The reference's
   windowed reader inherits a no-op `precache`; here the reader a view hands
   back for a windowed facet warms the same bytes the whole-profile prebuffer
