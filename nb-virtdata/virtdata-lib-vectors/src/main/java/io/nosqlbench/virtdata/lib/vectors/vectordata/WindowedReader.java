@@ -24,41 +24,55 @@ import io.nosqlbench.vectordata.ElementType;
 import io.nosqlbench.vectordata.PrebufferProgress;
 import io.nosqlbench.vectordata.VectorReader;
 
-/// Binding-layer clip of a [VectorReader] to a record window, with the
-/// same semantics a profile-declared window gives a reader in
-/// nb-vectordata (and in `vectordata-rs`): only the first interval
-/// applies, and both bounds clamp to the underlying reader's count.
-/// This adapter lives here rather than in nb-vectordata because the
-/// vectordata crate exposes no caller-side reader windowing — windows
-/// there come from facet configuration — and the binding functions'
-/// window argument is a binding-layer convenience.
+/// Restricts a [VectorReader] to a record range **without renumbering
+/// it**: a window of `[50000..100000)` means indices 50000 through
+/// 99999 are readable and everything else is refused. Indices stay
+/// absolute, so the same ordinals mean the same records here as
+/// everywhere else in this package.
+///
+/// Used by the `windowedFacet` expression function, where a caller has
+/// explicitly asked for a restricted reader. The binding functions do
+/// **not** wrap their readers in this: a binding window only warms, and
+/// restricting it would break resolution, since VirtData probes a newly
+/// resolved function with a small sample index before any cycle runs.
+///
+/// Only the first interval of the window applies, and both bounds clamp
+/// to the underlying reader's count.
 public final class WindowedReader<A> implements VectorReader<A> {
 
     private final VectorReader<A> inner;
-    private final long begin, count;
+    private final long begin, end;
 
-    /// Clips `reader` to the first interval of `window`, in the
-    /// reader's own index coordinates. A blank window returns the
-    /// reader unchanged.
+    /// Restricts `reader` to the first interval of `window`, in the
+    /// reader's own — absolute — index coordinates. A blank window
+    /// returns the reader unchanged.
     public static <A> VectorReader<A> clip(VectorReader<A> reader, String window) {
         DSWindow parsed = DSWindow.parse(window == null ? "" : window);
         if (parsed.isEmpty()) return reader;
         DSWindow.Interval first = parsed.intervals().get(0);
         long total = reader.count();
-        long begin = Math.min(first.minIncl(), total);
-        long count = Math.max(0, Math.min(first.maxExcl(), total) - begin);
-        return new WindowedReader<>(reader, begin, count);
+        return new WindowedReader<>(reader, Math.min(first.minIncl(), total), Math.min(first.maxExcl(), total));
     }
 
-    private WindowedReader(VectorReader<A> inner, long begin, long count) {
-        this.inner = inner; this.begin = begin; this.count = count;
+    private WindowedReader(VectorReader<A> inner, long begin, long end) {
+        this.inner = inner; this.begin = begin; this.end = end;
     }
 
-    @Override public long count() { return count; }
+    /// The exclusive upper bound of the readable range — the highest
+    /// index this reader accepts, plus one. Indices below the window's
+    /// start are refused even though they are below this count, because
+    /// the window is a restriction rather than a re-basing.
+    @Override public long count() { return end; }
+    /// First index this reader accepts.
+    public long begin() { return begin; }
     @Override public int dimension() { return inner.dimension(); }
-    @Override public A get(long index) { check(index); return inner.get(begin + index); }
-    @Override public void get(long index, A target) { check(index); inner.get(begin + index, target); }
-    private void check(long index) { if (index < 0 || index >= count) throw new IndexOutOfBoundsException("windowed index " + index + " outside 0.." + (count - 1)); }
+    @Override public A get(long index) { check(index); return inner.get(index); }
+    @Override public void get(long index, A target) { check(index); inner.get(index, target); }
+    private void check(long index) {
+        if (index < begin || index >= end)
+            throw new IndexOutOfBoundsException("index " + index + " is outside the binding window ["
+                + begin + ".." + end + "); window indices are absolute record ordinals, so cycles must fall inside it");
+    }
     @Override public void prebuffer(PrebufferProgress progress) { inner.prebuffer(progress); }
     @Override public boolean isComplete() { return inner.isComplete(); }
     @Override public CacheStats cacheStats() { return inner.cacheStats(); }

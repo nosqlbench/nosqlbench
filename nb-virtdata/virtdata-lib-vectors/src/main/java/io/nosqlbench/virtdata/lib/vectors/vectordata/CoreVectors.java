@@ -35,9 +35,8 @@ import java.util.Locale;
 import java.util.function.LongFunction;
 
 /// Base plumbing for vectordata-backed binding functions: opens the
-/// named dataset profile from the default catalogs, clips the reader to
-/// an optional record window, and warms data according to a prefetch
-/// mode:
+/// named dataset profile from the default catalogs and warms an
+/// optional record window according to a prefetch mode:
 ///
 /// - `eager` (aliases `prebuffer`, `true`) — fetch the effective window,
 ///   or the whole facet when no window applies, before returning;
@@ -45,11 +44,18 @@ import java.util.function.LongFunction;
 ///   immediately, letting reads overlap the download;
 /// - `none` (aliases `demand`, `false`) — demand-paged access only.
 ///
-/// A binding window is expressed in the reader's own index coordinates,
-/// after any profile-declared window. For warming, it is translated to
-/// absolute record coordinates by shifting against the profile window,
-/// so the bytes fetched are exactly the bytes the clipped reader
-/// exposes.
+/// A binding window selects **which records to warm**, and nothing
+/// else: indices stay absolute record ordinals, so a workload running
+/// `cycles=50000..100000` with a window of `[50000..100000)` addresses
+/// the records those cycles name. Reads outside the window are not an
+/// error — they simply demand-page, the way they would with no window
+/// at all — which also keeps the binding resolvable, since VirtData
+/// probes a newly resolved function with a small sample index before
+/// any cycle runs. Ordinals mean the same thing here, in
+/// [VariableFacet], and in the `prefetchCycles` expression function.
+/// The window is translated into dataset coordinates against any
+/// profile-declared window, so the bytes fetched are the bytes the
+/// reader will expose.
 public abstract class CoreVectors<T> implements LongFunction<T> {
 
     protected final TestDataView tdv;
@@ -66,7 +72,8 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
         Catalog catalog = Catalog.of(CatalogSources.defaults(), settings);
         tdv = catalog.openProfile(datasetAndProfile);
         this.facetName = FacetNames.canonical(facetName);
-        dataset = WindowedReader.clip(getRandomAccessData(), window);
+        // Deliberately unwrapped: the window warms, it does not clip.
+        dataset = getRandomAccessData();
         backgroundPrefetch = warm(window, Prefetch.parse(prefetchMode));
     }
 
@@ -83,7 +90,7 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
         // The plan is announced before any bytes move and progress is
         // emitted during the download; the meter is silent when there
         // is nothing to fetch.
-        PrefetchMeter meter = new PrefetchMeter(tdv.dataset() + ":" + facetName, tdv.prefetchPlan(facetName, effective));
+        PrefetchMeter meter = new PrefetchMeter(tdv.dataset() + ":" + tdv.profile() + ":" + facetName, tdv.prefetchPlan(facetName, effective));
         if (mode == Prefetch.BACKGROUND) {
             PrefetchHandle handle = tdv.prefetchInBackground(facetName, effective, WholeFacetFallback.REFUSE);
             meter.watch(handle);
@@ -94,9 +101,11 @@ public abstract class CoreVectors<T> implements LongFunction<T> {
         return null;
     }
 
-    /// Translates a reader-relative binding window to absolute record
-    /// coordinates: shifted by the profile window's start and clamped
-    /// to its end when the facet declares one. Returns the profile
+    /// Translates a binding window into dataset record coordinates for
+    /// the fetch. A profile-declared window re-bases the reader it
+    /// hands back, so a binding index is offset by that window's start
+    /// and clamped to its end; profiles in practice declare windows
+    /// starting at 0, where this is the identity. Returns the profile
     /// window itself when no binding window is given, [DSWindow#ALL]
     /// when neither applies, and `null` when the binding window falls
     /// entirely outside the profile window — nothing to warm.

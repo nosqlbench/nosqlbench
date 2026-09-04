@@ -78,7 +78,7 @@ public class VariableFacet implements LongFunction<Object> {
         DSWindow parsed = DSWindow.parse(window == null ? "" : window);
         CoreVectors.Prefetch mode = CoreVectors.Prefetch.parse(prefetchMode);
         PrefetchMeter meter = mode == CoreVectors.Prefetch.NONE ? null
-            : new PrefetchMeter(tdv.dataset() + ":" + this.facetName, tdv.prefetchPlan(this.facetName, parsed));
+            : new PrefetchMeter(tdv.dataset() + ":" + tdv.profile() + ":" + this.facetName, tdv.prefetchPlan(this.facetName, parsed));
         backgroundPrefetch = switch (mode) {
             case NONE -> null;
             case BACKGROUND -> {

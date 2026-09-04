@@ -26,6 +26,56 @@ e.g. `NB='java -jar nb5.jar'`). `VECTORDATA_CATALOG` outranks any
 `VECTORDATA_HOME` under `/tmp/vdtest` so it never touches
 `~/.config/vectordata` or your real cache.
 
+## Watch a download happen
+
+`vectordata_demo` is a workload bundled in nb5 — no checkout, no
+database. It uses the stdout driver, so the only thing it exercises is
+dataset access: it prints what it derived from the dataset, fetches a
+record range with a live meter, and reads records back.
+
+```bash
+export VECTORDATA_CATALOG='https://your.host/path/catalog.yaml'
+export VECTORDATA_HOME=/tmp/vdtest     # empty dir ⇒ nothing is cached yet
+nb5 vectordata_demo dataset=mydataset:myprofile
+```
+
+That is the scenario form — the workload name stands alone, with no
+`run` in front of it (`run` is itself a command, so `nb5 run
+vectordata_demo` fails). The equivalent long form names the full path:
+
+```bash
+nb5 run workload=activities/examples/vectordata_demo.yaml dataset=mydataset:myprofile
+```
+
+`nb5 --cat vectordata_demo` prints it and `nb5 --copy vectordata_demo`
+drops an editable copy in the working directory.
+
+The meter goes to stderr while the bytes move:
+
+```
+[vectordata] mydataset:myprofile:base_vectors: fetching 29.0 MiB in 1 range(s)
+[vectordata] mydataset:myprofile:base_vectors: 12.0 MiB / 30.0 MiB
+[vectordata] mydataset:myprofile:base_vectors: fetch complete (29.0 MiB)
+```
+
+To watch the fetch overlap the run instead of preceding it, ask for the
+background form — give it a range big enough and enough cycles to
+outlast the download:
+
+```bash
+nb5 vectordata_demo dataset=mydataset:myprofile \
+  prefetch=background records=100000 cycles=200
+```
+
+`prefetch` selects which prefetch call does the work: `load` (the
+default) blocks on `prefetchCycles` before cycle 0, `background` hands
+back a handle from `prefetchCyclesBackground` and meters it while the
+run proceeds, and `none` leaves reads to demand-page. `records` sets how
+many ordinals the demo spans, `cycles` how long it runs. The meter is
+silent when there is nothing to fetch, so a second run against a warm
+cache prints nothing — point `VECTORDATA_HOME` at an empty directory to
+see it fetch again.
+
 Beyond the script's checks:
 
 ```bash
@@ -142,14 +192,22 @@ expr forms (`{{= expr}}`, `{{name = expr}}`, `{{@name}}`); anything else
 passes through untouched. The vectordata expr functions:
 
 ```yaml
-# Precache the whole facet before the run (empty window = everything):
-# {{= prefetch("example:default", "base_vectors", "").rangesFetched()}}
+# One-call warm-up: every facet the profile declares, each to the
+# window the profile declares for it. This is the form to reach for —
+# it never fetches more than the profile describes.
+# {{= prefetchProfile("example:default")}}
 
-# Ordinal-range warm-up, priced first:
+# A cycle range, in the coordinates an activity already speaks:
+# {{= prefetchCycles("example:default", "base_vectors", 0, 100000).rangesFetched()}}
+
+# An explicit window, priced first:
 # {{= prefetchPlan("example:default", "base_vectors", "[0..100k)").bytesToFetch()}}
 # {{= prefetch("example:default", "base_vectors", "[0..100k)").rangesFetched()}}
 
-# Background warm-up captured in an expr variable, joined later:
+# The same, in the background: the handle comes back immediately and
+# the fetch overlaps whatever runs next. Both background forms meter
+# from the handle, so the download reports itself either way.
+# {{= prefetchCyclesBackground("example:default", "base_vectors", 0, 1000000).plan().requests()}}
 # {{warmup = prefetchBackground("example:default", "base_vectors", "[0..1M)")}}
 # {{= warmup.join().rangesFetched()}}
 
@@ -162,6 +220,32 @@ passes through untouched. The vectordata expr functions:
 
 Diagnose expr processing with `dryrun=exprs` on the activity to dump the
 expression-processed workload and context.
+
+### Three things to know when prefetching from a workload
+
+**Expressions evaluate when the workload loads, not when a block runs.**
+The whole document is expression-processed before ops are parsed, so a
+prefetch written into an op body fires on every activity start —
+including `run tags='block:drop'` — no matter what tags that op carries.
+That is fine for an up-front warm-up, but it is not a way to tie
+fetching to a phase. To warm only when a phase actually uses the data,
+let the bindings do it: `BaseVectors('ds:profile','[0..1M)','eager')`
+warms when that binding resolves, which happens only for blocks that use
+it, and `'background'` lets the fetch overlap the run.
+
+**An empty window means the whole facet, not the profile's window.**
+`prefetch(spec,"base_vectors","")` on a sized profile fetches the entire
+shared base file — which may be terabytes — because an empty window is a
+request for everything rather than a fallback. Use `prefetchProfile`,
+which resolves each facet to its declared window, or pass the window
+explicitly.
+
+**An assignment sigil renders its value.** `{{p = "ds:" + profile}}`
+substitutes the assigned value into the document at that spot, so
+writing assignments in an op body leaves stray text in the op. Put them
+in `description:` (where they read as documentation) and reference them
+with `{{@p}}` where the value belongs — the workload example below does
+exactly this.
 
 For a complete workload where every dataset-shaped parameter is derived
 this way, see
@@ -212,10 +296,17 @@ java -jar nb5.jar run driver=stdout cycles=10 \
 ```
 
 Prefetch modes on every mapper: `eager` (default; aliases `prebuffer`,
-`true`), `background`, `none` (aliases `demand`, `false`). A binding
-window is in the reader's own coordinates — after any profile window —
-and is shifted to absolute records for the fetch, so the warmed bytes
-are exactly the bytes the clipped reader exposes.
+`true`), `background`, `none` (aliases `demand`, `false`).
+
+A binding window says **which records to warm**, and nothing else —
+indices stay absolute record ordinals.
+`BaseVectors('ds:profile','[50000..100000)')` warms records 50000
+through 99999, and a run of `cycles=50000..100000` addresses exactly
+those records. Reading outside the window is not an error; it just
+demand-pages, as it would with no window. Ordinals mean the same thing
+here, in `VariableFacet`, and in `prefetchCycles`. The window is
+translated into dataset coordinates for the fetch, so the warmed bytes
+are the bytes the reader will expose.
 
 ## Verifying that warming happened
 

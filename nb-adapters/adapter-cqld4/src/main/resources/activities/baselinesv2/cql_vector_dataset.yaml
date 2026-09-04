@@ -14,9 +14,14 @@ description: |
     maxk: {{maxk == neighborIndices(spec).dimension()}}
     similarity: {{similarity == dataset(spec).attributes().getOrDefault('distance_function','COSINE').toString().toLowerCase()}}
     base bytes to warm (profile window): {{warmbytes == prefetchPlan(spec, 'base_vectors', dataset(spec).facet('base_vectors').get().window() ?: '').bytesToFetch()}}
-  The rampup bindings warm the profile's base window eagerly before the
-  first cycle (with download progress on stderr); pass a window and
-  prefetch mode on the binding functions to shape that differently.
+  The bindings warm what they read, when they resolve — so a block that
+  does not use a facet never fetches it — with download progress on
+  stderr. Pass a window and prefetch mode to shape that:
+  BaseVectors('{{@spec}}','[0..1M)','background') warms a cycle range
+  while the run proceeds. To warm everything up front instead, run
+  prefetchProfile('{{@spec}}') from an expr, remembering that
+  expressions evaluate when the workload loads rather than when a block
+  runs.
   Operational knobs stay conventional: keyspace, table, rf, and cl are
   TEMPLATE parameters with the usual defaults.
 
