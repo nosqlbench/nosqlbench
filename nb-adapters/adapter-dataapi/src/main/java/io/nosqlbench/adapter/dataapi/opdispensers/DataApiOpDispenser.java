@@ -26,6 +26,7 @@ import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
+import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
@@ -46,27 +47,55 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     protected Sort getSortFromOp(ParsedOp op, long l) {
-        Sort sort = null;
+        Sort fieldSort = null;
         Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
         if (sortFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
             Map<String,Object> sortFields = sortFunction.get().apply(l);
             String sortOrder = sortFields.get("type").toString();
             String sortField = sortFields.get("field").toString();
             switch(sortOrder) {
-                case "asc" -> sort = Sort.ascending(sortField);
-                case "desc" -> sort = Sort.descending(sortField);
+                case "asc" -> fieldSort = Sort.ascending(sortField);
+                case "desc" -> fieldSort = Sort.descending(sortField);
             }
         }
-        return sort;
+
+        Sort vectorSort = null;
+        if (op.isDefined("vector")) {
+            float[] vector = getVectorValues(op, l);
+            if (vector != null) {
+                vectorSort = Sort.vector(vector);
+            }
+        }
+
+        if (fieldSort != null && vectorSort != null) {
+            throw new OpConfigError(
+                "cannot sort by vector and regular asc/desc criteria at the same time."
+            );
+        }
+        if (vectorSort != null) {
+            return vectorSort;
+        }
+        if (fieldSort != null) {
+            return fieldSort;
+        }
+        return null;
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
-        // TODO: Clarify 'filter' vs 'filters' or whether to support both uniformly
+        Map<String, Object> filterMap = getFreeFormFromOp(op, l, "filter", false);
+        if (filterMap != null) {
+            return new Filter(filterMap);
+        }
+        return null;
+        /*
+        // TODO choose whether to switch to the free-form route (performant? viable re: bindings?)
         Filter filter = null;
         Optional<LongFunction<List>> filterFunction = op.getAsOptionalFunction("filters", List.class)
             .or(() -> op.getAsOptionalFunction("filter",List.class));
 
         if (filterFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
             List<Map<String,Object>> filters = filterFunction.get().apply(l);
             List<Filter> andFilterList = new ArrayList<>();
             List<Filter> orFilterList = new ArrayList<>();
@@ -79,12 +108,19 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                     default -> logger.error(() -> "Conjunction " + filterFields.get("conjunction") + " not supported");
                 }
             }
+            if (!andFilterList.isEmpty() && !orFilterList.isEmpty()) {
+                throw new OpConfigError(
+                    "filters list mixes 'and' and 'or' conjunctions, which is not supported; " +
+                    "use only one conjunction type per filters list"
+                );
+            }
             if (!andFilterList.isEmpty())
                 filter = Filters.and(andFilterList.toArray(new Filter[0]));
             if (!orFilterList.isEmpty())
                 filter = Filters.or(orFilterList.toArray(new Filter[0]));
         }
         return filter;
+        */
     }
 
     protected void addOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
@@ -100,17 +136,17 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 filtersList.add(Filters.exists(fieldName));
             }
             case "gt" ->
-                filtersList.add(Filters.gt(fieldName, (long) fieldValue));
+                filtersList.add(Filters.gt(fieldName, ((Number) fieldValue).longValue()));
             case "gte" ->
-                filtersList.add(Filters.gte(fieldName, (long) fieldValue));
+                filtersList.add(Filters.gte(fieldName, ((Number) fieldValue).longValue()));
             case "hasSize" ->
-                filtersList.add(Filters.hasSize(fieldName, (int) fieldValue));
+                filtersList.add(Filters.hasSize(fieldName, ((Number) fieldValue).intValue()));
             case "in" ->
                 filtersList.add(Filters.in(fieldName, fieldValue));
             case "lt" ->
-                filtersList.add(Filters.lt(fieldName, (long) fieldValue));
+                filtersList.add(Filters.lt(fieldName, ((Number) fieldValue).longValue()));
             case "lte" ->
-                filtersList.add(Filters.lte(fieldName, (long) fieldValue));
+                filtersList.add(Filters.lte(fieldName, ((Number) fieldValue).longValue()));
             case "ne" ->
                 filtersList.add(Filters.ne(fieldName, fieldValue));
             case "nin" ->
@@ -119,34 +155,36 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         }
     }
 
-    protected Update getUpdates(ParsedOp op, long l) {
-        Update update = new Update();
-        Optional<LongFunction<Map>> updatesFunction = op.getAsOptionalFunction("updates", Map.class);
-        if (updatesFunction.isPresent()) {
-            Map<String, Object> updates = updatesFunction.get().apply(l);
-            for (Map.Entry<String, Object> entry : updates.entrySet()) {
-                if (entry.getKey().equalsIgnoreCase("update")) {
-                    Map<String, Object> updateFields = (Map<String, Object>) entry.getValue();
-                    switch (updateFields.get("operation").toString()) {
-                        case "set" ->
-                            update = Updates.set(updateFields.get("field").toString(), updateFields.get("value"));
-                        case "inc" ->
-                            update = Updates.inc(updateFields.get("field").toString(), (double) updateFields.get("value"));
-                        case "unset" -> update = Updates.unset(updateFields.get("field").toString());
-                        case "addToSet" ->
-                            update = Updates.addToSet(updateFields.get("field").toString(), updateFields.get("value"));
-                        case "min" ->
-                            update = Updates.min(updateFields.get("field").toString(), (double) updateFields.get("value"));
-                        case "rename" ->
-                            update = Updates.rename(updateFields.get("field").toString(), updateFields.get("value").toString());
-                        default -> logger.error(() -> "Operation " + updateFields.get("operation") + " not supported");
-                    }
-                } else {
-                    logger.error(() -> "Filter " + entry.getKey() + " not supported");
-                }
-            }
+    protected Update getUpdateFromOp(ParsedOp op, long l) {
+        Map<String, Object> updateMap = getFreeFormFromOp(op, l, "update", true);
+        return new Update(updateMap);
+        /* TODO choose whether to switch to freeform for update
+        Update update = Update.create();
+        Optional<LongFunction<List>> updatesFunction = op.getAsOptionalFunction("updates", List.class);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> updatesList = updatesFunction
+            .map(f -> (List<Map<String, Object>>) f.apply(l))
+            .orElse(List.of());
+        for (Map<String, Object> entry : updatesList) {
+            String operation = entry.get("operation").toString();
+            String field = entry.get("field").toString();
+            Object value = entry.get("value");
+            applyUpdateOperation(update, operation, field, value);
         }
         return update;
+        */
+    }
+
+    private void applyUpdateOperation(Update update, String operation, String field, Object value) {
+        switch (operation) {
+            case "set" -> update.set(field, value);
+            case "inc" -> update.inc(field, ((Number) value).doubleValue());
+            case "unset" -> update.unset(field);
+            case "addToSet" -> update.addToSet(field, value);
+            case "min" -> update.min(field, ((Number) value).doubleValue());
+            case "rename" -> update.rename(field, value.toString());
+            default -> logger.error(() -> "Operation '" + operation + "' not supported");
+        }
     }
 
     protected float[] getVectorValues(ParsedOp op, long l) {
@@ -167,6 +205,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             }
         } else if (rawVectorValues instanceof List) {
             return getVectorValuesList(rawVectorValues);
+        } else if (rawVectorValues == null) {
+            throw new RuntimeException("Invalid specification for values (null)");
         } else {
             throw new RuntimeException("Invalid type specified for values (type: " + rawVectorValues.getClass().getSimpleName() + "), values: " + rawVectorValues.toString());
         }
@@ -175,6 +215,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
 
     protected float[] getVectorValuesList(Object rawVectorValues) {
         float[] vectorValues = null;
+        @SuppressWarnings("unchecked")
         List<Object> vectorValuesList = (List<Object>) rawVectorValues;
         vectorValues = new float[vectorValuesList.size()];
         for (int i = 0; i < vectorValuesList.size(); i++) {
@@ -187,6 +228,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Projection[] projection = null;
         Optional<LongFunction<Map>> projectionFunction = op.getAsOptionalFunction("projection", Map.class);
         if (projectionFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
             Map<String,List<String>> projectionFields = projectionFunction.get().apply(l);
             for (Map.Entry<String,List<String>> field : projectionFields.entrySet()) {
                 List<String> includeFields = field.getValue();
@@ -207,7 +249,73 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return projection;
     }
 
-    protected CollectionDefinition getCollectionDefinitionFromOp(ParsedOp op, long l) {
+    protected Boolean getUpsertFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            LongFunction<Boolean> uf = upsertFunction.get();
+            return uf.apply(l);
+        }
+        return null;
+    }
+
+    // EXPERIMENTAL: generic free-form
+    @SuppressWarnings("unchecked")
+    protected Map<String, Object> getFreeFormFromOp(ParsedOp op, long l, String fieldName, Boolean required) {
+        Optional<LongFunction<Map>> ffMapFunc = op.getAsOptionalFunction(fieldName, Map.class);
+        if (ffMapFunc.isPresent()) {
+            LongFunction<Map> dmf = ffMapFunc.get();
+            return dmf.apply(l);
+        } else {
+            if (required) {
+                logger.error("Required field '" + fieldName + "' not supplied.");
+            }
+            return null;
+        }
+    }
+
+     /* LEGACY OP DISPENSER UTILS START HERE */
+
+    /*
+    updates:
+        update:
+            operation: inc
+            field: "incd field"
+            value: 500
+     */
+    protected Update getLegacyUpdateFromOp(ParsedOp op, long l) {
+        Update update = new Update();
+        Optional<LongFunction<Map>> updatesFunction = op.getAsOptionalFunction("updates", Map.class);
+        if (updatesFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> updates = updatesFunction.get().apply(l);
+            for (Map.Entry<String, Object> entry : updates.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase("update")) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> updateFields = (Map<String, Object>) entry.getValue();
+                    switch (updateFields.get("operation").toString()) {
+                        case "set" ->
+                            update = Updates.set(updateFields.get("field").toString(), updateFields.get("value"));
+                        case "inc" ->
+                            update = Updates.inc(updateFields.get("field").toString(), ((Number) updateFields.get("value")).doubleValue());
+                        case "unset" -> update = Updates.unset(updateFields.get("field").toString());
+                        case "addToSet" ->
+                            update = Updates.addToSet(updateFields.get("field").toString(), updateFields.get("value"));
+                        case "min" ->
+                            update = Updates.min(updateFields.get("field").toString(), ((Number) updateFields.get("value")).doubleValue());
+                        case "rename" ->
+                            update = Updates.rename(updateFields.get("field").toString(), updateFields.get("value").toString());
+                        default -> logger.error(() -> "Operation " + updateFields.get("operation") + " not supported");
+                    }
+                } else {
+                    logger.error(() -> "Unsupported entry under 'updates': '" + entry.getKey() + "'");
+                }
+            }
+        }
+        return update;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected CollectionDefinition getLegacyCollectionDefinitionFromOp(ParsedOp op, long l) {
         CollectionDefinition optionsBldr = new CollectionDefinition();
         Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
         if (dimFunc.isPresent()) {
