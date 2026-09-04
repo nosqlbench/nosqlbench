@@ -157,4 +157,63 @@ class SlabWindowsTest {
         assertEquals(0, plan.byteRanges().get(1).start(), "records 0..10 of the second shard are its first page");
     }
 
+    /// The whole-profile prebuffer visits slab facets like any other:
+    /// an unwindowed one is planned whole, a sharded one shard by shard.
+    @Test void prebufferingAProfileVisitsItsSlabFacetsWhole() throws Exception {
+        TestDataView view = view(pagedFacet("visit", 40, ""), "default");
+        assertDoesNotThrow(() -> view.prebuffer(WholeFacetFallback.REFUSE, PrebufferProgress.NONE));
+        PrefetchPlan whole = view.prefetchPlan("metadata_content", DSWindow.ALL);
+        assertEquals(1, whole.byteRanges().size());
+        assertEquals(whole.facetBytes(), bytes(whole), "no window, so the whole file");
+
+        Path dir = Files.createDirectories(temporary.resolve("visit-sharded"));
+        FixtureSupport.slab(dir, "m__0000.slab", 20, 10, 64);
+        FixtureSupport.slab(dir, "m__0001.slab", 20, 10, 64);
+        FixtureSupport.fvec(dir, "base.fvec", new float[][] {{0f, 1f, 2f, 3f}});
+        Files.writeString(dir.resolve("dataset.yaml"), """
+            name: visit-sharded
+            profiles:
+              default:
+                base_vectors: base.fvec
+                metadata_content:
+                  source: m__NNNN.slab
+                  shard_stride: 20
+                  shard_count: 2
+                  record_count: 40
+            """);
+        TestDataView sharded = view(dir, "default");
+        assertDoesNotThrow(() -> sharded.prebuffer(WholeFacetFallback.REFUSE, PrebufferProgress.NONE));
+        assertEquals(2, sharded.prefetchPlan("metadata_content", DSWindow.ALL).byteRanges().size(), "one range per shard");
+    }
+
+    /// An explicit entry that slices a slab carries its window in that
+    /// file's ordinals, so its shard's pages are found by file ordinal —
+    /// a plan over the sliced facet reaches into the middle of the file.
+    @Test void aSlicedSlabEntryPlansItsOwnPages() throws Exception {
+        Path dir = Files.createDirectories(temporary.resolve("sliced-slab"));
+        FixtureSupport.slab(dir, "m.slab", 200, 25, 64);
+        FixtureSupport.fvec(dir, "base.fvec", new float[][] {{0f, 1f, 2f, 3f}});
+        Files.writeString(dir.resolve("dataset.yaml"), """
+            name: sliced-slab
+            profiles:
+              default:
+                base_vectors: base.fvec
+                metadata_content:
+                  source:
+                    - m.slab[0..50]=50
+                    - m.slab[150..200]=50
+                  record_count: 100
+            """);
+        TestDataView view = view(dir, "default");
+        long fileBytes = Files.size(dir.resolve("m.slab"));
+        PrefetchPlan both = view.prefetchPlan("metadata_content", DSWindow.parse("0..100"));
+        assertEquals(2, both.byteRanges().size(), "the window spans both slices: " + both.byteRanges());
+        assertEquals(0, both.byteRanges().get(0).start(), "the first slice starts at the file's first page");
+        assertTrue(both.byteRanges().get(1).start() > both.byteRanges().get(0).end(), "the second slice's pages lie further into the file");
+        assertTrue(bytes(both) < fileBytes * 3 / 5 && bytes(both) > fileBytes * 2 / 5, "half the records cost about half the file: " + bytes(both) + " of " + fileBytes);
+        PrefetchPlan inner = view.prefetchPlan("metadata_content", DSWindow.parse("60..70"));
+        assertEquals(1, inner.byteRanges().size());
+        assertEquals(1, inner.byteRanges().get(0).shard(), "facet ordinals 60..70 are the second slice's 10..20");
+        assertEquals(both.byteRanges().get(1).start(), inner.byteRanges().get(0).start(), "which lives in that slice's first page");
+    }
 }

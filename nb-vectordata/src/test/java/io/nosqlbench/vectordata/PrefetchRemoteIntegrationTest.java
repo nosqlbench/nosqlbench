@@ -317,14 +317,20 @@ class PrefetchRemoteIntegrationTest {
     /// Publishes `big__0000..` shards of `records` each, `.mref`-published
     /// so chunk residency is real, and returns the server's base URL.
     private String publishSeries(int shards, int records, boolean mrefs) throws Exception {
+        return publishSeries(shards, records, mrefs ? shards : 0, true);
+    }
+
+    /// As above, with an `.mref` beside only the first `mrefShards`
+    /// shards, on a server that may refuse `Range`.
+    private String publishSeries(int shards, int records, int mrefShards, boolean acceptRanges) throws Exception {
         Path published = Files.createDirectories(temporary.resolve("pub"));
         for (int shard = 0; shard < shards; shard++) {
             byte[] payload = seriesShard(records, shard * records);
             Path file = published.resolve(String.format("big__%04d.fvec", shard));
             Files.write(file, payload);
-            if (mrefs) Files.write(published.resolve(file.getFileName() + ".mref"), FixtureSupport.mref(payload, CHUNK));
+            if (shard < mrefShards) Files.write(published.resolve(file.getFileName() + ".mref"), FixtureSupport.mref(payload, CHUNK));
         }
-        HttpServer server = serveDirectory(published, new AtomicInteger(), true);
+        HttpServer server = serveDirectory(published, new AtomicInteger(), acceptRanges);
         return "http://127.0.0.1:" + server.getAddress().getPort() + "/";
     }
 
@@ -506,5 +512,31 @@ class PrefetchRemoteIntegrationTest {
         small.prebuffer(WholeFacetFallback.REFUSE, PrebufferProgress.NONE);
         assertTrue(small.prefetchPlan("metadata_content", DSWindow.parse("0..100")).isResident(), "the window's pages are resident");
         assertFalse(small.prefetchPlan("metadata_content", DSWindow.ALL).isResident(), "the rest of the slab is not");
+    }
+
+    /// A server that ignores `Range` hands each shard over whole at its
+    /// first touch; the series still reads as one facet, and a window
+    /// still maps to fills, resident by then.
+    @Test void aSeriesReadsCorrectlyOnARangeLessServer() throws Exception {
+        String base = publishSeries(2, 25, 0, false);
+        TestDataView view = seriesView("rangeless", uniformYaml(base, 2, 25, ""), "default");
+        VectorReader<float[]> reader = view.baseVectors();
+        assertEquals(50, reader.count());
+        for (int i = 0; i < 50; i++) assertEquals(i * 100f, reader.get(i)[0], "record " + i);
+        PrefetchPlan plan = view.prefetchPlan("base_vectors", DSWindow.parse("20..30"));
+        assertFalse(plan.fills().isEmpty(), "the window maps to fills either way");
+        assertTrue(plan.isResident(), "and the files arrived whole at first touch");
+        assertEquals(AccessMode.FULL_TRANSFER, reader.cacheStats().accessMode());
+        assertEquals(2500f, reader.get(25)[0]);
+    }
+
+    /// A facet's access mode is a promise about every read it serves,
+    /// so a series with one unverified shard reports the weaker mode.
+    @Test void aSeriesReportsTheWeakestAccessModeOfItsShards() throws Exception {
+        String base = publishSeries(2, 25, 1, true);
+        VectorReader<float[]> reader = seriesView("weakest", uniformYaml(base, 2, 25, ""), "default").baseVectors();
+        assertEquals(AccessMode.MERKLE_CHUNKED, reader.cacheStats().accessMode(),
+            "one shard without an .mref makes the facet's promise chunked-but-unverified");
+        assertEquals(49 * 100f, reader.get(49)[0], "and both shards still read");
     }
 }

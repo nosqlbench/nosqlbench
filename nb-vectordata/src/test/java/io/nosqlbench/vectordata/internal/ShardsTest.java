@@ -145,6 +145,25 @@ class ShardsTest {
         assertTrue(short_.getMessage().contains("record_count"), "a total that leaves the last shard empty disagrees with itself: " + short_.getMessage());
     }
 
+    @Test void twoShardsOfOneFileShareOneStorage() throws Exception {
+        Path dir = Files.createDirectories(temporary.resolve("shared"));
+        ByteBuffer values = ByteBuffer.allocate(10_000 * 4).order(ByteOrder.LITTLE_ENDIAN);
+        for (int i = 0; i < 10_000; i++) values.putInt(i);
+        Files.write(dir.resolve("corpus.u32"), values.array());
+        String file = dir.resolve("corpus.u32").toUri().toString();
+        VectorDataSettings settings = VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
+        Shards shards = Shards.realize("layout",
+            new Shards.Declaration(List.of(file + "[0..10]=10", file + "[9990..10000]=10"), true, null, null, 20L), s -> 0);
+        FacetSeries series = new FacetSeries(shards, settings, "shared");
+        assertEquals(2, shards.shardCount(), "two shards");
+        assertEquals(1, series.fileCount(), "one file");
+        assertEquals(series.fileIndexOfShard(0), series.fileIndexOfShard(1));
+        assertSame(series.file(0), series.file(series.fileIndexOfShard(1)), "and one storage between them");
+        assertArrayEquals(new long[] {0, 40}, series.shardByteExtent(0), "each shard addresses its own window of the file");
+        assertArrayEquals(new long[] {9990 * 4, 10_000 * 4}, series.shardByteExtent(1));
+        assertEquals(10_000 * 4, series.tryTotalSize(), "the file is counted once");
+    }
+
     @Test void theOpenFileCapIsDerivedAndLeavesHeadroom() {
         assertEquals(256, FacetSeries.resolveOpenFileCap(null, 1024L), "a quarter of the soft limit");
         assertEquals(256, FacetSeries.resolveOpenFileCap(null, null), "1024 when the limit is unknown");

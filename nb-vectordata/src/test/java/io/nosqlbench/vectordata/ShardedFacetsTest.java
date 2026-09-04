@@ -428,4 +428,71 @@ class ShardedFacetsTest {
         Path plain = dataset("generous", "format_version: 2\nname: g\nprofiles:\n  default:\n    base_vectors: base.fvec\n");
         assertNotNull(TestDataGroup.load(plain.toUri(), settings()), "a version higher than the content requires is merely generous");
     }
+
+    // -- Files that are not one facet, and what a series promises --
+
+    @Test void aSeriesWithADisagreeingShardIsRefused() throws Exception {
+        Path dir = Files.createDirectories(temporary.resolve("disagree"));
+        fvec(dir, "base__0000.fvec", 10, 0);
+        FixtureSupport.fvec(dir, "base__0001.fvec", new float[10][8]);
+        Files.writeString(dir.resolve("dataset.yaml"), """
+            name: disagree
+            profiles:
+              default:
+                base_vectors:
+                  source: base__NNNN.fvec
+                  shard_stride: 10
+                  shard_count: 2
+                  record_count: 20
+            """);
+        VectorDataException refused = assertThrows(VectorDataException.class, () -> view(dir).baseVectors());
+        assertTrue(refused.getMessage().contains("share one shape"), "shards of different dimension are not one facet: " + refused.getMessage());
+        assertTrue(refused.getMessage().contains("base__0001.fvec"), "and the message names the odd one out: " + refused.getMessage());
+    }
+
+    @Test void aGapInTheMiddleOfASeriesIsReportedByName() throws Exception {
+        Path dir = Files.createDirectories(temporary.resolve("midgap"));
+        fvec(dir, "base__0000.fvec", 10, 0);
+        fvec(dir, "base__0001.fvec", 10, 10);
+        fvec(dir, "base__0003.fvec", 5, 30);
+        Files.writeString(dir.resolve("dataset.yaml"), """
+            name: midgap
+            profiles:
+              default:
+                base_vectors:
+                  source: base__NNNN.fvec
+                  shard_stride: 10
+                  shard_count: 4
+                  record_count: 35
+            """);
+        VectorDataException missing = assertThrows(VectorDataException.class, () -> view(dir).baseVectors());
+        assertTrue(missing.getMessage().contains("base__0002.fvec"), "a hole in the middle is named, never skipped: " + missing.getMessage());
+    }
+
+    @Test void aLocalSeriesReportsLocalThroughItsReader() throws Exception {
+        VectorReader<float[]> base = view(uniformSeries("")).baseVectors();
+        CacheStats stats = base.cacheStats();
+        assertEquals(AccessMode.LOCAL, stats.accessMode(), "every file is local, so the facet's promise is local");
+        assertEquals(240 * BPR, stats.totalBytes(), "bytes are summed over every shard");
+        assertTrue(stats.complete());
+        assertTrue(base.isComplete());
+    }
+
+    @Test void theWeakestAccessModeIsTheOneTrueOfEveryFile() {
+        assertEquals(AccessMode.MERKLE_HASHED, AccessMode.weakest(List.of(AccessMode.LOCAL, AccessMode.MERKLE_HASHED)));
+        assertEquals(AccessMode.MERKLE_CHUNKED, AccessMode.weakest(List.of(AccessMode.MERKLE_HASHED, AccessMode.MERKLE_CHUNKED)),
+            "a trusted-bytes shard is weaker than a verified one");
+        assertEquals(AccessMode.FULL_TRANSFER, AccessMode.weakest(List.of(AccessMode.LOCAL, AccessMode.MERKLE_HASHED, AccessMode.FULL_TRANSFER)),
+            "one shard that must download whole makes the facet's promise that");
+        assertEquals(AccessMode.LOCAL, AccessMode.weakest(List.of(AccessMode.LOCAL, AccessMode.LOCAL)));
+        assertNull(AccessMode.weakest(List.of()), "a facet with no files makes no promise, which is not the weakest promise");
+    }
+
+    @Test void prefetchingAMappedSeriesWindowNeedsNoConsent() throws Exception {
+        TestDataView view = view(uniformSeries(""));
+        PrefetchReport report = view.prefetch("base_vectors", DSWindow.parse("80..220"), WholeFacetFallback.REFUSE);
+        assertEquals(3, report.rangesFetched(), "one range per shard the window spans, fetched without a fallback in play");
+        assertFalse(report.planned().degradesToFullDownload());
+        view.prefetchInBackground("base_vectors", DSWindow.parse("0..240"), WholeFacetFallback.REFUSE).join();
+    }
 }
