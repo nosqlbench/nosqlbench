@@ -471,4 +471,40 @@ class PrefetchRemoteIntegrationTest {
         VectorDataException missing = assertThrows(VectorDataException.class, view::baseVectors);
         assertTrue(missing.getMessage().contains("big__0002.fvec"), "the message must name the missing shard: " + missing.getMessage());
     }
+
+    // -- Slab facets --
+
+    /// Publishes a 2000-record slab, fifty records to a page, `.mref`-published.
+    private String publishSlab() throws Exception {
+        Path published = Files.createDirectories(temporary.resolve("pub"));
+        Path slab = FixtureSupport.slab(published, "m.slab", 2000, 50, 100);
+        Files.write(published.resolve("m.slab.mref"), FixtureSupport.mref(Files.readAllBytes(slab), CHUNK));
+        HttpServer server = serveDirectory(published, new AtomicInteger(), true);
+        return "http://127.0.0.1:" + server.getAddress().getPort() + "/";
+    }
+
+    @Test void aRemoteSlabWindowFetchesOnlyItsPages() throws Exception {
+        String base = publishSlab();
+        TestDataView view = seriesView("slab-window", "name: slab\nprofiles:\n  default:\n    metadata_content: " + base + "m.slab\n", "default");
+        PrefetchPlan plan = view.prefetchPlan("metadata_content", DSWindow.parse("10..20"));
+        assertFalse(plan.degradesToFullDownload(), "the tail index makes a remote slab windowable");
+        assertEquals(1, plan.fills().size());
+        assertTrue(plan.bytesToFetch() > 0 && plan.bytesToFetch() < plan.facetBytes() / 4,
+            "ten records cost " + plan.bytesToFetch() + " of " + plan.facetBytes());
+        view.prefetch("metadata_content", DSWindow.parse("10..20"), WholeFacetFallback.REFUSE);
+        assertTrue(view.prefetchPlan("metadata_content", DSWindow.parse("10..20")).isResident());
+        assertFalse(view.prefetchPlan("metadata_content", DSWindow.ALL).isResident(), "and only those pages arrived");
+    }
+
+    /// The sized-profile case over a slab-backed dataset: the metadata
+    /// facet's inherited window is honoured by the whole-profile
+    /// prebuffer instead of refused.
+    @Test void prebufferingAProfileWithAWindowedSlabFetchesOnlyItsPages() throws Exception {
+        String base = publishSlab();
+        TestDataView small = seriesView("slab-sized", "name: slab\nprofiles:\n  default:\n    metadata_content: " + base
+            + "m.slab\n  small:\n    base_count: 100\n", "small");
+        small.prebuffer(WholeFacetFallback.REFUSE, PrebufferProgress.NONE);
+        assertTrue(small.prefetchPlan("metadata_content", DSWindow.parse("0..100")).isResident(), "the window's pages are resident");
+        assertFalse(small.prefetchPlan("metadata_content", DSWindow.ALL).isResident(), "the rest of the slab is not");
+    }
 }

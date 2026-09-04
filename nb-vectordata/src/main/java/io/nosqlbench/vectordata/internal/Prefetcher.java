@@ -55,6 +55,10 @@ import java.util.function.Supplier;
 ///   storage a file without a sidecar is walked once instead.
 /// - **scalar** (raw packed values): `ordinal × elemSize` exactly,
 ///   with no header.
+/// - **slab** (paged records): the pages the window spans, located
+///   through the index the slab carries in its tail — a bounded read of
+///   two short pages, never a walk of the file. A `:namespace` suffix on
+///   the locator selects that namespace's index.
 ///
 /// A window over a facet spread across several files decomposes into
 /// one sub-window per shard it touches, and each maps by the rule above
@@ -492,6 +496,13 @@ public final class Prefetcher {
     /// a shard.
     static MappedRange mapInFile(String path, long lo, long hi, ByteStorage storage, Supplier<long[]> offsets) {
         if (hi <= lo) return null;
+        // A slab carries its own ordinal index in its tail, so a window
+        // maps to the pages it spans. Without this branch the extension
+        // fails the element-width lookup below and every slab window
+        // degrades to a whole-facet fetch — leaving the planner claiming
+        // a cost the reader does not pay, since a record read costs its
+        // page.
+        if (isSlabExt(path)) return mapInSlab(path, lo, hi, storage);
         String ext = extensionOf(path);
         int width;
         try { width = ElementType.forExtension(SourceSpec.stripNamespace(path)).width(); }
@@ -524,9 +535,43 @@ public final class Prefetcher {
         return byteStart >= byteEnd ? null : new MappedRange(byteStart, byteEnd, 0);
     }
 
+    /// Maps an ordinal window in a slab to the byte range of the pages
+    /// that hold it. Pages are laid out in ordinal order, so a
+    /// contiguous window is a contiguous span of pages and therefore one
+    /// byte range — the same shape every other branch returns. The index
+    /// comes from the tail, a bounded read of two short pages rather
+    /// than a walk of the file, so planning stays cheap in the sense
+    /// that matters: it must not move the bytes it is deciding whether
+    /// to move. A slab whose tail does not parse, or that lacks the
+    /// namespace named, is unmappable rather than an error here — the
+    /// fallback policy decides what a caller does with that.
+    static MappedRange mapInSlab(String locator, long lo, long hi, ByteStorage storage) {
+        SlabIndex index;
+        try { index = SlabIndex.read(storage, SourceSpec.namespaceOf(locator), SourceSpec.stripNamespace(locator)); }
+        catch (VectorDataException unreadable) { return null; }
+        if (index == null || index.total() == 0) return null;
+        Integer first = index.pageOf(lo);
+        if (first == null) return null;
+        // A window running past the last record ends at the last page,
+        // not at one that does not exist.
+        Integer lastPage = index.pageOf(hi - 1);
+        int last = lastPage == null ? index.pageCount() - 1 : lastPage;
+        long byteStart = index.pageOffset(first);
+        long lastStart = index.pageOffset(last);
+        // The final page's extent comes from its own header, which is
+        // the only place its size is written.
+        Long size = SlabIndex.pageSizeAt(storage, lastStart);
+        if (size == null) return null;
+        long byteEnd = Math.min(lastStart + size, storage.size());
+        return byteStart < byteEnd ? new MappedRange(byteStart, byteEnd, index.prerequisiteBytes()) : null;
+    }
+
     private static long saturatedMultiply(long a, long b) {
         try { return Math.multiplyExact(a, b); } catch (ArithmeticException overflow) { return Long.MAX_VALUE; }
     }
+
+    /// Whether a locator names a slab, ignoring any `:namespace` suffix.
+    static boolean isSlabExt(String locator) { return "slab".equals(extensionOf(locator)); }
 
     static String extensionOf(String source) {
         String value = SourceSpec.stripNamespace(source).toLowerCase(Locale.ROOT);
