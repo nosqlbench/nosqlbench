@@ -75,10 +75,40 @@ public class VectorDataBindingsTest {
               windowed:
                 base_vectors: base.fvec[2..8)
             """);
+        // A base spread across two shard files, with a sized profile
+        // that inherits it under a base_count window.
+        Path sharded = Files.createDirectories(temporary.resolve("sharded"));
+        float[][] first = new float[5][2], second = new float[5][2];
+        for (int record = 0; record < 5; record++) {
+            first[record][0] = record; first[record][1] = record + 1;
+            second[record][0] = record + 5; second[record][1] = record + 6;
+        }
+        fvec(sharded.resolve("base__0000.fvec"), first);
+        fvec(sharded.resolve("base__0001.fvec"), second);
+        fvec(sharded.resolve("query.fvec"), new float[][] {{9f, 8f}});
+        ivec(sharded.resolve("gt.ivecs"), new int[][] {{3, 4}});
+        ivec(sharded.resolve("gt_half.ivecs"), new int[][] {{1, 2}});
+        Files.writeString(sharded.resolve("dataset.yaml"), """
+            name: sharded
+            profiles:
+              default:
+                base_vectors:
+                  source: base__NNNN.fvec
+                  shard_stride: 5
+                  shard_count: 2
+                  record_count: 10
+                query_vectors: query.fvec
+                neighbor_indices: gt.ivecs
+              half:
+                base_count: 6
+                neighbor_indices: gt_half.ivecs
+            """);
         Files.writeString(temporary.resolve("catalog.yaml"), """
             datasets:
               - name: example
                 path: example/dataset.yaml
+              - name: sharded
+                path: sharded/dataset.yaml
             """);
         settings = VectorDataSettings.builder().cacheDirectory(temporary.resolve("cache")).build();
         priorCatalog = System.getProperty("vectordata.catalog");
@@ -175,6 +205,35 @@ public class VectorDataBindingsTest {
         RuntimeException unknown = assertThrows(RuntimeException.class,
             () -> new BaseVectors("example:demo", "1..3", "sideways", settings));
         assertTrue(unknown.getMessage().contains("eager, background, or none"), unknown.getMessage());
+    }
+
+    @Test
+    void baseVectorsReadAcrossAShardSeam() {
+        // A binding window over a series warms the shards it spans and
+        // addresses records by the same absolute ordinals as one file.
+        BaseVectors vectors = new BaseVectors("sharded:default", "[3..8)", "eager", settings);
+        assertArrayEquals(new float[] {3f, 4f}, vectors.apply(3));
+        assertArrayEquals(new float[] {4f, 5f}, vectors.apply(4), "the last record of shard 0");
+        assertArrayEquals(new float[] {5f, 6f}, vectors.apply(5), "the first record of shard 1");
+        assertArrayEquals(new float[] {7f, 8f}, vectors.apply(7));
+        assertArrayEquals(new float[] {9f, 10f}, vectors.apply(9), "outside the warmed window, but readable");
+    }
+
+    @Test
+    void aBackgroundPrefetchOverASeriesPlansEveryShardItSpans() {
+        BaseVectors vectors = new BaseVectors("sharded:default", "[0..10)", "background", settings);
+        assertEquals(2, vectors.backgroundPrefetch().plan().requests(), "one request per shard the window spans");
+        vectors.backgroundPrefetch().join();
+        assertArrayEquals(new float[] {6f, 7f}, vectors.apply(6));
+    }
+
+    @Test
+    void aSizedProfileOverASeriesClipsAtItsBaseCount() {
+        BaseVectors vectors = new BaseVectors("sharded:half", false, settings);
+        assertArrayEquals(new float[] {5f, 6f}, vectors.apply(5), "record 5 is inside the six-record window, in shard 1");
+        assertThrows(IndexOutOfBoundsException.class, () -> vectors.apply(6), "the profile's base_count clips the series");
+        assertArrayEquals(new int[] {1, 2}, new NeighborIndices("sharded:half", false, settings).apply(0), "the sized profile's own ground truth");
+        assertArrayEquals(new float[] {9f, 8f}, new QueryVectors("sharded:half", false, settings).apply(0), "queries inherit from default");
     }
 
     private static void fvec(Path path, float[][] values) throws IOException {
