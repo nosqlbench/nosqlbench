@@ -293,10 +293,27 @@ java -jar nb5.jar run driver=stdout cycles=10 \
 # while indices stay absolute:
 java -jar nb5.jar run driver=stdout cycles=10 \
   "op={{VariableFacet('example:default','metadata_content','[0..10k)','background');Stringify()}}"
+
+# Opaque records — a slab of metadata — bound to parameters rather than
+# rendered: one field typed as the record types it, a map of named
+# fields in bind order, a form the facet declares, and a predicate's
+# comparands typed from the metadata fields they constrain. Each read
+# costs the page holding the record, never the file:
+java -jar nb5.jar run driver=stdout cycles=10 \
+  "op={{RecordField('example:default','metadata_content','id');Stringify()}}"
+java -jar nb5.jar run driver=stdout cycles=10 \
+  "op={{RecordFields('example:default','metadata_content','id,tag');Stringify()}}"
+java -jar nb5.jar run driver=stdout cycles=10 \
+  "op={{RecordForm('example:default','metadata_content','row');Stringify()}}"
+java -jar nb5.jar run driver=stdout cycles=10 \
+  "op={{PredicateParams('example:default','metadata_predicates','metadata_content');Stringify()}}"
 ```
 
-Prefetch modes on every mapper: `eager` (default; aliases `prebuffer`,
-`true`), `background`, `none` (aliases `demand`, `false`).
+Prefetch modes on every vector mapper: `eager` (default; aliases
+`prebuffer`, `true`), `background`, `none` (aliases `demand`, `false`).
+The record mappers take none: a slab is paged, and a record fetches the
+page it sits in, so they are demand-paged by construction. Warm a slab
+ahead of a run with `prefetch("ds:profile", "metadata_content", "[0..100k)")`.
 
 A binding window says **which records to warm**, and nothing else —
 indices stay absolute record ordinals.
