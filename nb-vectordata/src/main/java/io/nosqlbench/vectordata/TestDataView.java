@@ -35,6 +35,18 @@ public interface TestDataView {
     /// and callers that never ask about layout never learn it exists.
     VectorReader<?> openFacet(String name);
     VvecReader<?> openVariableFacet(String name);
+    /// How this facet's records are addressed, and therefore which
+    /// reader opens it. Ask this rather than trying a reader and
+    /// interpreting the failure: some facets hold element runs and some
+    /// hold opaque records, and a caller handling both branches on it.
+    /// A facet whose format the spec does not name fails.
+    FacetShape facetShape(String name);
+    /// Opens a facet of opaque records — a slab — by ordinal, before a
+    /// codec is chosen; see [io.nosqlbench.vectordata.records.Codecs]
+    /// for the codecs that type it. An element-shaped facet brought
+    /// here is refused naming the reader that opens it, as the element
+    /// readers refuse a record facet.
+    io.nosqlbench.vectordata.records.RecordFacet openFacetRecords(String name);
     /// Dataset-level attributes from the manifest's `attributes:`
     /// block — `distance_function`, provenance fields, and whatever
     /// else the publisher recorded. Empty when the manifest declares

@@ -76,6 +76,40 @@ final class FixtureSupport {
         out.write(slabPage(java.util.List.of(namespaceEntry(1, "", firstPages), namespaceEntry(2, name, secondPages)), 0, 3, 1));
         Path result = directory.resolve(filename); Files.write(result, out.toByteArray()); return result;
     }
+    /// A single-namespace slab of the given records, `perPage` to a page.
+    static Path slabOf(Path directory, String filename, java.util.List<byte[]> records, int perPage) throws IOException {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        java.util.List<byte[]> index = new java.util.ArrayList<>();
+        slabRecordPages(out, index, records, perPage, 1);
+        out.write(slabPage(index, 0, 1, 1));
+        Path result = directory.resolve(filename); Files.write(result, out.toByteArray()); return result;
+    }
+    /// A multi-namespace slab: the default namespace's records, then
+    /// each named namespace's in the order given, ending with the
+    /// namespaces page that locates each pages page.
+    static Path slabWithNamespaces(Path directory, String filename, java.util.List<byte[]> records, java.util.Map<String, java.util.List<byte[]>> namespaces, int perPage) throws IOException {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        java.util.List<byte[]> entries = new java.util.ArrayList<>();
+        java.util.List<byte[]> index = new java.util.ArrayList<>();
+        slabRecordPages(out, index, records, perPage, 1);
+        long at = out.size(); out.write(slabPage(index, 0, 1, 1)); entries.add(namespaceEntry(1, "", at));
+        int namespaceIndex = 2;
+        for (java.util.Map.Entry<String, java.util.List<byte[]>> namespace : namespaces.entrySet()) {
+            java.util.List<byte[]> pages = new java.util.ArrayList<>();
+            slabRecordPages(out, pages, namespace.getValue(), perPage, namespaceIndex);
+            long pagesAt = out.size(); out.write(slabPage(pages, 0, 1, namespaceIndex));
+            entries.add(namespaceEntry(namespaceIndex, namespace.getKey(), pagesAt));
+            namespaceIndex++;
+        }
+        out.write(slabPage(entries, 0, 3, 1));
+        Path result = directory.resolve(filename); Files.write(result, out.toByteArray()); return result;
+    }
+    private static void slabRecordPages(java.io.ByteArrayOutputStream out, java.util.List<byte[]> index, java.util.List<byte[]> records, int perPage, int namespaceIndex) throws IOException {
+        for (int start = 0; start < records.size(); start += perPage) {
+            ByteBuffer entry = ByteBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN); entry.putLong(start).putLong(out.size()); index.add(entry.array());
+            out.write(slabPage(records.subList(start, Math.min(records.size(), start + perPage)), start, 2, namespaceIndex));
+        }
+    }
     private static void slabDataPages(java.io.ByteArrayOutputStream out, java.util.List<byte[]> index, int records, int perPage, int recordBytes, int namespaceIndex) throws IOException {
         for (int start = 0; start < records; start += perPage) {
             int count = Math.min(perPage, records - start);

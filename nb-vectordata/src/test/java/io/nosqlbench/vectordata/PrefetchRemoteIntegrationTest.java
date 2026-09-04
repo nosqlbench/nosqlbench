@@ -539,4 +539,28 @@ class PrefetchRemoteIntegrationTest {
             "one shard without an .mref makes the facet's promise chunked-but-unverified");
         assertEquals(49 * 100f, reader.get(49)[0], "and both shards still read");
     }
+
+    /// A slab facet is read incrementally like every other format:
+    /// opening it costs its tail, and reading a record costs that
+    /// record's page — never the file.
+    @Test void aRemoteSlabRecordCostsItsPageNotTheFile() throws Exception {
+        Path published = Files.createDirectories(temporary.resolve("pub"));
+        List<byte[]> records = new java.util.ArrayList<>();
+        for (int i = 0; i < 2000; i++)
+            records.add(new io.nosqlbench.vectordata.anode.MNode().insert("id", new io.nosqlbench.vectordata.anode.MValue.Int32(i))
+                .insert("pad", new io.nosqlbench.vectordata.anode.MValue.Text("x".repeat(40))).toBytes());
+        Path slab = FixtureSupport.slabOf(published, "m.slab", records, 50);
+        Files.write(published.resolve("m.slab.mref"), FixtureSupport.mref(Files.readAllBytes(slab), CHUNK));
+        HttpServer server = serveDirectory(published, new AtomicInteger(), true);
+        String base = "http://127.0.0.1:" + server.getAddress().getPort() + "/";
+        TestDataView view = seriesView("slab-records", "name: slab\nprofiles:\n  default:\n    metadata_content: " + base + "m.slab\n", "default");
+        var rows = view.openFacetRecords("metadata_content").decode(io.nosqlbench.vectordata.records.Codecs.TREE);
+        assertEquals(2000, rows.count(), "the count comes from the tail index");
+        @SuppressWarnings("unchecked") var row = (java.util.Map<String, Object>) rows.get(1234);
+        assertEquals(1234L, row.get("id"));
+        PrefetchPlan whole = view.prefetchPlan("metadata_content", DSWindow.ALL);
+        long resident = whole.fills().stream().mapToLong(f -> (long) f.chunksResident() * f.chunkSize()).sum();
+        assertTrue(resident > 0 && resident < whole.facetBytes() / 4, "one record fetched " + resident + " of " + whole.facetBytes() + " bytes");
+        assertFalse(whole.isResident());
+    }
 }
