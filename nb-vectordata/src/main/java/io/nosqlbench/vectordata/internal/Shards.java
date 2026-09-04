@@ -115,11 +115,16 @@ public final class Shards {
     }
 
     /// One shard's binding to the file it is drawn from: the resolved
-    /// source path — the window has already been folded into `fileBase`
-    /// and `len` — the first **file** ordinal this shard reads (zero for
-    /// a whole-file shard, the entry window's lower bound for a sliced
-    /// one), and the ordinals it holds.
-    public record Entry(String source, long fileBase, long len) { }
+    /// source path and its slab namespace, if any — the window has
+    /// already been folded into `fileBase` and `len` — the first
+    /// **file** ordinal this shard reads (zero for a whole-file shard,
+    /// the entry window's lower bound for a sliced one), and the
+    /// ordinals it holds.
+    public record Entry(String source, String namespace, long fileBase, long len) {
+        public Entry(String source, long fileBase, long len) { this(source, null, fileBase, len); }
+        /// The path with its namespace, the form a slab is addressed by.
+        public String locator() { return namespace == null ? source : source + ":" + namespace; }
+    }
 
     /// Where a global ordinal lives: the shard, its offset within that
     /// shard, and its ordinal within the file the shard is drawn from.
@@ -284,7 +289,7 @@ public final class Shards {
             SourceSpec source;
             try { source = SourceSpec.parse(shardFilename(pattern, i)); }
             catch (VectorDataException malformed) { throw at(facet, i, malformed.getMessage()); }
-            entries.add(new Entry(source.path(), 0, i < count - 1 ? stride : total - full));
+            entries.add(new Entry(source.path(), source.namespace(), 0, i < count - 1 ? stride : total - full));
         }
         Shards shards = of(entries);
         if (shards == null) throw at(facet, 0, "resolves to zero records");
@@ -331,7 +336,7 @@ public final class Shards {
                 len = Math.max(0, records - fileBase);
             }
             if (len == 0) throw at(facet, i, "resolves to zero records");
-            entries.add(new Entry(parsed.path(), fileBase, len));
+            entries.add(new Entry(parsed.path(), parsed.namespace(), fileBase, len));
         }
         Shards shards = of(entries);
         if (shards == null) throw at(facet, 0, "resolves to zero records");

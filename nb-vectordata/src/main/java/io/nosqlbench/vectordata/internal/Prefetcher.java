@@ -195,7 +195,9 @@ public final class Prefetcher {
             return offsets;
         }
 
-        private String path() { return facet.source().toString(); }
+        /// The source locator: the file, plus the slab namespace it
+        /// names, if any — the form the per-format mapping reads.
+        private String locator() { return facet.source().toString() + (facet.namespace() == null ? "" : ":" + facet.namespace()); }
     }
 
     // -- Offset indexes --
@@ -465,7 +467,7 @@ public final class Prefetcher {
     static MappedRanges recordRangeToBytes(FacetHandle handle, long winStart, long winEnd) {
         if (winEnd <= winStart) return null;
         if (!handle.isSeries()) {
-            MappedRange mapped = mapInFile(handle.path(), winStart, winEnd, handle.data(), handle::offsets);
+            MappedRange mapped = mapInFile(handle.locator(), winStart, winEnd, handle.data(), handle::offsets);
             return mapped == null ? null : new MappedRanges(List.of(ShardRange.whole(mapped.byteStart(), mapped.byteEnd())), mapped.prerequisiteBytes());
         }
         FacetSeries series = handle.series();
@@ -473,7 +475,8 @@ public final class Prefetcher {
         long prerequisite = 0;
         for (Shards.SubWindow part : series.shards().decompose(winStart, winEnd)) {
             int file = series.fileIndexOfShard(part.shard());
-            MappedRange mapped = mapInFile(series.filePath(file), part.fileLo(), part.fileHi(), series.file(file), () -> series.publishedOffsets(file));
+            MappedRange mapped = mapInFile(series.shards().entries().get(part.shard()).locator(), part.fileLo(), part.fileHi(),
+                series.file(file), () -> series.publishedOffsets(file));
             if (mapped == null) return null;
             prerequisite += mapped.prerequisiteBytes();
             ranges.add(new ShardRange(part.shard(), mapped.byteStart(), mapped.byteEnd()));
@@ -491,7 +494,7 @@ public final class Prefetcher {
         if (hi <= lo) return null;
         String ext = extensionOf(path);
         int width;
-        try { width = ElementType.forExtension(path).width(); }
+        try { width = ElementType.forExtension(SourceSpec.stripNamespace(path)).width(); }
         catch (VectorDataException unsupported) { return null; }
         long total = storage.size();
         if (isVvecExt(ext)) {
@@ -526,7 +529,7 @@ public final class Prefetcher {
     }
 
     static String extensionOf(String source) {
-        String value = source.toLowerCase(Locale.ROOT);
+        String value = SourceSpec.stripNamespace(source).toLowerCase(Locale.ROOT);
         int slash = Math.max(value.lastIndexOf('/'), value.lastIndexOf('\\'));
         if (slash >= 0) value = value.substring(slash + 1);
         int query = value.indexOf('?');

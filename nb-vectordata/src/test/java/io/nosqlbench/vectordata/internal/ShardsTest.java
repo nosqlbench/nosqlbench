@@ -103,6 +103,22 @@ class ShardsTest {
             assertEquals(raw, SourceSpec.parse(raw).render(), "round trip of " + raw);
     }
 
+    @Test void sourceLocatorsCarryANamespace() {
+        SourceSpec plain = SourceSpec.parse("m.slab:content");
+        assertEquals("m.slab", plain.path()); assertEquals("content", plain.namespace());
+        SourceSpec windowed = SourceSpec.parse("m.slab:ns:[0..1K]");
+        assertEquals("m.slab", windowed.path()); assertEquals("ns", windowed.namespace());
+        assertEquals(new DSWindow.Interval(0, 1000), windowed.window().intervals().get(0));
+        assertEquals("m.slab:ns[0..1K]", windowed.render(), "rendered once, without the separator colon");
+        assertEquals(windowed, SourceSpec.parse(windowed.render()), "and the rendering parses back to itself");
+        assertNull(SourceSpec.parse("https://h/f.fvec").namespace(), "a URL scheme is not a namespace");
+        assertEquals("ns", SourceSpec.parse("https://h/f.slab:ns").namespace());
+        assertNull(SourceSpec.parse("C:\\data\\x.fvec").namespace(), "nor is a drive letter");
+        assertEquals("m.slab:ns", SourceSpec.parse("m.slab:ns").locator());
+        assertEquals("m.slab:ns", new Shards.Entry("m.slab", "ns", 0, 1).locator(), "a shard entry addresses its file the same way");
+        assertEquals("m.slab", new Shards.Entry("m.slab", 0, 1).locator());
+    }
+
     @Test void shardNamesAreFourDigitsExactly() {
         assertEquals("base__0007.fvec", Shards.shardFilename("base__NNNN.fvec", 7));
         assertEquals("base__0000.fvec", Shards.shardFilename("base__NNNN.fvec", 0));

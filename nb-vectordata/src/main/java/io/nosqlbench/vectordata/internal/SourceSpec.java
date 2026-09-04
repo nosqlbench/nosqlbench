@@ -19,15 +19,17 @@ import io.nosqlbench.vectordata.DSWindow;
 import io.nosqlbench.vectordata.VectorDataException;
 
 /// A parsed facet source string, in the grammar `vectordata-rs` parses:
-/// a path, an optional ordinal window, and an optional declared
-/// cardinality, in increasing specificity —
+/// a path, an optional slab namespace, an optional ordinal window, and
+/// an optional declared cardinality —
 ///
-/// | Spelling         | Cardinality                      |
-/// |------------------|----------------------------------|
-/// | `a.u8`           | discovered by opening the file   |
-/// | `a.u8=4194304`   | declared                         |
-/// | `a.u8[0..1M]`    | implied by the interval          |
-/// | `a.u8[0..1M]=1M` | implied *and* declared, checked  |
+/// | Spelling               | Meaning                                  |
+/// |------------------------|------------------------------------------|
+/// | `a.u8`                 | a file; cardinality discovered by opening |
+/// | `a.u8=4194304`         | cardinality declared                     |
+/// | `a.u8[0..1M]`          | a slice; cardinality implied             |
+/// | `a.u8[0..1M]=1M`       | implied *and* declared, checked          |
+/// | `m.slab:content`       | a namespace within a slab                |
+/// | `m.slab:ns:[0..1K]`    | namespace and window                     |
 ///
 /// The `=<count>` suffix is taken from the end and accepts the same
 /// suffixes intervals do, under two restrictions. A source containing
@@ -36,8 +38,11 @@ import io.nosqlbench.vectordata.VectorDataException;
 /// by window instead. And an `=` whose tail does not parse as a positive
 /// count stays in the path: `weird=name.u8` is a filename, not a
 /// malformed count, so recognition is positive rather than a rule the
-/// path has to escape.
-public record SourceSpec(String path, DSWindow window, String windowText, Long declaredCount) {
+/// path has to escape. A namespace is the text after the last `:` when
+/// the path before it carries an extension and the text after names no
+/// directory, so a URL scheme or a drive letter is never mistaken for
+/// one.
+public record SourceSpec(String path, String namespace, DSWindow window, String windowText, Long declaredCount) {
 
     /// Parses a source string. Only a suffix that *looks* like a window
     /// and is malformed fails — a plain path always passes through — so
@@ -54,27 +59,59 @@ public record SourceSpec(String path, DSWindow window, String windowText, Long d
             }
         }
         String[] split = splitWindowSuffix(text);
+        String pathPart = split[0];
+        // `m.slab:ns:[0..1K]` — the colon before the window is a separator, not a namespace.
+        if (split[1] != null && pathPart.endsWith(":")) pathPart = pathPart.substring(0, pathPart.length() - 1);
+        String[] located = splitNamespace(pathPart);
         DSWindow window = split[1] == null ? DSWindow.ALL : DSWindow.parse(split[1]);
-        return new SourceSpec(split[0], window, split[1], count);
+        return new SourceSpec(located[0], located[1], window, split[1], count);
     }
 
-    /// Renders the spelling back: path, then `[window]`, then `=count`.
+    /// Renders the spelling back: path, then `:namespace`, then
+    /// `[window]`, then `=count`.
     public String render() {
         StringBuilder text = new StringBuilder(path);
+        if (namespace != null) text.append(':').append(namespace);
         if (windowText != null) text.append('[').append(windowText).append(']');
         if (declaredCount != null) text.append('=').append(declaredCount);
         return text.toString();
     }
 
-    /// This spec with its path replaced — the window and count travel
-    /// with it, which is how a relative source becomes an absolute one
-    /// without losing what it said.
-    public SourceSpec withPath(String replacement) { return new SourceSpec(replacement, window, windowText, declaredCount); }
+    /// The path with its namespace, the form a slab is addressed by.
+    public String locator() { return namespace == null ? path : path + ":" + namespace; }
+
+    /// This spec with its path replaced — the namespace, window, and
+    /// count travel with it, which is how a relative source becomes an
+    /// absolute one without losing what it said.
+    public SourceSpec withPath(String replacement) { return new SourceSpec(replacement, namespace, window, windowText, declaredCount); }
+
+    /// This spec with a namespace, for a source that named none and
+    /// whose declaration supplies one beside it.
+    public SourceSpec withNamespace(String replacement) { return new SourceSpec(path, replacement, window, windowText, declaredCount); }
 
     private static Long tryCount(String tail) {
         try { long value = DSWindow.parseNumberWithSuffix(tail); return value > 0 ? value : null; }
         catch (VectorDataException notACount) { return null; }
     }
+
+    /// Splits `path:namespace` — the text after the last `:` is a
+    /// namespace when the text before it contains a `.` and the text
+    /// after is non-empty and names no directory. Returns
+    /// `{path, namespaceOrNull}`.
+    static String[] splitNamespace(String source) {
+        int colon = source.lastIndexOf(':');
+        if (colon > 0) {
+            String before = source.substring(0, colon), after = source.substring(colon + 1);
+            if (before.contains(".") && !after.isEmpty() && !after.contains("/") && !after.contains("\\")) return new String[] {before, after};
+        }
+        return new String[] {source, null};
+    }
+
+    /// A locator without its namespace: what names the file.
+    public static String stripNamespace(String locator) { return splitNamespace(locator)[0]; }
+
+    /// A locator's namespace, or `null` for the default.
+    public static String namespaceOf(String locator) { return splitNamespace(locator)[1]; }
 
     /// Splits the documented window-suffix sugar off a source string —
     /// `base.fvec[0..1M)` names the file plus a record window, with

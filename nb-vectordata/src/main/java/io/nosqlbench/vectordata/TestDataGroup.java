@@ -190,7 +190,7 @@ public final class TestDataGroup {
     /// own; without a `base_count` it is inherited as is.
     private static FacetDescriptor inheritWithWindow(FacetDescriptor facet, Long baseCount) {
         if (baseCount == null || (facet.window() != null && !facet.window().isBlank())) return facet;
-        return new FacetDescriptor(facet.name(), facet.source(), "0.." + baseCount, facet.attributes(), facet.series());
+        return new FacetDescriptor(facet.name(), facet.source(), "0.." + baseCount, facet.attributes(), facet.series(), facet.namespace());
     }
     /// The facets a profile declares itself, resolved against the
     /// manifest. Declaration shape is resolved here, once: a string
@@ -211,6 +211,9 @@ public final class TestDataGroup {
             if (rawSource == null) rawSource = values.get("path");
             if (rawSource == null) continue;
             String window = windowText(values.get("window"));
+            // A namespace beside the source applies to every source that
+            // names none of its own.
+            String mapNamespace = YamlData.optionalString(values.get("namespace") != null ? values.get("namespace") : values.get("ns"));
             Long stride = longOrNull(values.get("shard_stride"), "shard_stride");
             Integer count = values.get("shard_count") == null ? null : YamlData.integer(values.get("shard_count"), "shard_count");
             Long recordCount = longOrNull(values.get("record_count"), "record_count");
@@ -222,12 +225,14 @@ public final class TestDataGroup {
             if (!isArray && !layout && !Shards.hasShardField(raw.get(0))) {
                 SourceSpec spec = SourceSpec.parse(raw.get(0));
                 if (spec.windowText() != null) window = spec.windowText();
-                result.put(facetName, new FacetDescriptor(facetName, manifest.resolve(spec.path()), window, Map.copyOf(values)));
+                String namespace = spec.namespace() != null ? spec.namespace() : mapNamespace;
+                result.put(facetName, new FacetDescriptor(facetName, manifest.resolve(spec.path()), window, Map.copyOf(values), null, namespace));
                 continue;
             }
             List<String> entries = new ArrayList<>();
             for (String item : raw) {
                 SourceSpec spec = SourceSpec.parse(item);
+                if (spec.namespace() == null && mapNamespace != null) spec = spec.withNamespace(mapNamespace);
                 // A window suffix on a uniform pattern is the facet
                 // window: a pattern names no file, so there is no entry
                 // for it to bound. Given both ways, it is refused rather
@@ -236,7 +241,7 @@ public final class TestDataGroup {
                     if (window != null)
                         throw new VectorDataException("facet '" + facetName + "': the facet window is given twice: on the source pattern and as 'window'");
                     window = spec.windowText();
-                    spec = new SourceSpec(spec.path(), DSWindow.ALL, null, spec.declaredCount());
+                    spec = new SourceSpec(spec.path(), spec.namespace(), DSWindow.ALL, null, spec.declaredCount());
                 }
                 entries.add(spec.withPath(manifest.resolve(spec.path()).toString()).render());
             }

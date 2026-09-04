@@ -28,19 +28,24 @@ import java.util.Map;
 /// for the uniform form, as the `NNNN` *pattern*, which names no file at
 /// all. `window` is the **facet** window, in facet ordinals: a suffix on
 /// a single source, or the `window:` field a series carries, having no
-/// single source to put one on.
-public record FacetDescriptor(String name, URI source, String window, Map<String, Object> attributes, Series series) {
+/// single source to put one on. `namespace` selects a namespace within
+/// a slab source (`m.slab:content`), `null` for the default.
+public record FacetDescriptor(String name, URI source, String window, Map<String, Object> attributes, Series series, String namespace) {
 
     public FacetDescriptor(String name, URI source, String window, Map<String, Object> attributes) {
-        this(name, source, window, attributes, null);
+        this(name, source, window, attributes, null, null);
+    }
+
+    public FacetDescriptor(String name, URI source, String window, Map<String, Object> attributes, Series series) {
+        this(name, source, window, attributes, series, null);
     }
 
     /// A facet declared as a series of files. `entries` are the source
     /// strings in ordinal order, resolved against the manifest: one
     /// `NNNN` pattern for the uniform form, one per shard for the
-    /// explicit form — each carrying its own window or `=count` suffix
-    /// exactly as written, because an entry window is in that *file's*
-    /// ordinals and must stay with the entry it bounds.
+    /// explicit form — each carrying its own namespace, window, or
+    /// `=count` suffix exactly as written, because an entry window is in
+    /// that *file's* ordinals and must stay with the entry it bounds.
     public record Series(List<String> entries, boolean declaredAsArray, Long shardStride, Integer shardCount, Long recordCount) {
         public Series { entries = List.copyOf(entries); }
     }

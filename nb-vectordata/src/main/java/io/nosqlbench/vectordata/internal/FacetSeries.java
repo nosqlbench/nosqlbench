@@ -174,7 +174,7 @@ public final class FacetSeries {
     public long[] shardByteExtent(int shard) {
         Shards.Entry entry = shards.entries().get(shard);
         int file = fileIndexOfShard(shard);
-        Prefetcher.MappedRange mapped = Prefetcher.mapInFile(filePaths.get(file), entry.fileBase(), entry.fileBase() + entry.len(),
+        Prefetcher.MappedRange mapped = Prefetcher.mapInFile(entry.locator(), entry.fileBase(), entry.fileBase() + entry.len(),
             file(file), () -> publishedOffsets(file));
         return mapped == null ? null : new long[] {mapped.byteStart(), mapped.byteEnd()};
     }
