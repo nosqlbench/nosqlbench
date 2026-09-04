@@ -90,6 +90,41 @@ and `display`); a `PNode`'s display form reads back with `PNodeDisplay`.
 Reading one record from a remote facet fetches the page that holds it,
 not the file. A series of slabs is one facet of records in shard order.
 
+## Binding records to parameters
+
+Rendering produces text for a human; binding produces named, typed values
+for a driver, with the statement prepared once and only values moving per
+cycle. The layout is learned once, a binder is compiled against it, and
+the per-record path never looks at a field name:
+
+```java
+RecordFacet facet = view.openFacetRecords("metadata_content");
+Layout layout = Layout.discover(facet);                     // once: names, and what each binds as
+Binder binder = Binder.select(layout, "id", "tag")          // template order
+    .withOverrides(Map.of("id", "pk"));                     // parameter names, not field names
+List<String> parameters = binder.parameters();              // [pk, tag] — prepare the statement
+List<BindType> types = binder.types();                      // [int64, text]
+
+for (long ordinal : cycle) {                                // cycle → ordinal is the caller's policy
+    binder.bindEach(facet.recordBytes(ordinal), (slot, field) -> {
+        if (slot == 0) statement.setLong(slot, field.longValue());
+        else statement.setString(slot, field.stringValue());
+    });
+}
+
+List<Form> offered = Forms.of(facet);                       // declared in the `forms` namespace, or one implicit form
+Binder row = Forms.byName(facet, "row").binder(layout);
+
+PredicateBinder where = PredicateBinder.compile(template, layout);   // shape once, typed from the fields
+where.bindEach(predicates.recordBytes(ordinal), (condition, comparands) -> { /* condition.parameter(), condition.bindType() */ });
+```
+
+A `Field` is a view over the record's own bytes; its primitive accessors
+copy nothing, and `field.value()` materializes the AST view for a caller
+that wants structure. A `Half` binds as a float, a `DateTime` as text, and
+a container's element type as undetermined — the bind types answer what
+a value *is*, which the schema vernaculars, right about DDL, do not.
+
 ## Facets spread across several files
 
 A facet may be a series of files forming one dense ordinal space, in either

@@ -147,6 +147,32 @@ implementation's current behavior and its format tests are normative.
   inference (quoted strings, bare integers, decimal-point floats,
   `true`/`false`, each language's null); the schema, value, and display
   renderings refuse to, naming themselves.
+- Binding: the reference's `binding` module, for driving load rather
+  than rendering text. A `Layout` is learned **once** from a facet's
+  first record — names in wire order, each with the `BindType` its tag
+  implies — and a `Binder` compiled against it (`all`, or `select` in
+  template order, with parameter renames applied at compile time) binds
+  every record after by position: the walk in `Scan.fields` skips names
+  and reaches each value as a `Field` view over the record's own bytes,
+  read through primitive accessors typed by the wire form, or through
+  `value()` for the AST view. A field the facet lacks is refused when the
+  binder is built, naming what it has; a record whose layout differs
+  from the compiled one is refused, not bound short. `BindType` is its
+  own exhaustive mapping from the tag, distinct from the schema
+  vernaculars': a `Half` binds as `FLOAT16`, `DateTime` as
+  `TIMESTAMP_TEXT`, `Null` as no type, and containers with their element
+  types left undetermined rather than guessed as text. Forms are read
+  from the facet's `forms` namespace — one JSON record per form, unknown
+  keys preserved, unreadable records skipped — and a facet without one
+  offers exactly one implicit form named `default`, which is every
+  dataset written before forms existed; an unknown form is refused
+  naming what is offered, the implicit one not listed as a choice. A
+  `PredicateBinder` compiles a flat conjunction against a sample
+  predicate **and** the layout, typing each `Condition` from the field's
+  tag rather than the comparand's variant, and binds a record's
+  comparands only after its leader byte says PNode and its fingerprint
+  matches the compiled shape; a disjunctive or nested template is
+  refused at compile time.
 - Facet shape: every extension the spec names belongs to a `FacetFormat`
   with a `FacetShape` — element runs, or opaque records — and `facetShape`
   answers it so a caller handling both branches on the fact rather than
@@ -236,12 +262,25 @@ Remaining representation differences:
   relies on its JSON library's map, whose order is that library's choice.
   Numbers follow the reference's inference: no point or exponent and fits
   a long is an integer, anything else numeric is a float.
-- **Record binding forms are not ported.** The reference binds decoded
-  records to operation parameters and walks MNode fields without
-  allocating; both belong to workload generation, not to the access API,
-  and are out of this module's scope. Slab facets take part in everything
-  else — windows, shards, residency, planning, prefetch, the
-  whole-profile prebuffer, and now records by ordinal.
+- **A bound field is a small view object.** The reference hands out a
+  borrowed `Field` by value; here each field the walk meets is one
+  object holding offsets into the record's bytes, and its primitive
+  accessors (`longValue`, `doubleValue`, …) copy nothing. What the
+  contract forbids — resolving or copying a field *name* per record — is
+  honored: names are read only when a layout is discovered. A Java
+  caller wanting the allocation-free loop uses `bindEach` with the
+  primitive accessors and never calls `name()` or `value()` per cycle.
+- **A form's unknown keys are kept as node values.** The reference keeps
+  them as its JSON library's values; here `Form.extra()` holds the
+  `MValue`s the JSON vernacular parses them to, typed as that parse
+  types them.
+- **The raw predicate scanner is not ported.** The reference's
+  `mnode::scan` also compiles predicates to positions and evaluates them
+  against raw bytes for its predicate-index pipeline; that is workload
+  generation, not the access API. The walk, the schema discovery, and
+  the predicate flattening it shares with binding are here; predicate
+  evaluation over a record goes through `PredicateEvaluator` on the
+  decoded node.
 - **A windowed reader's `prebuffer` fetches its window.** The reference's
   windowed reader inherits a no-op `precache`; here the reader a view hands
   back for a windowed facet warms the same bytes the whole-profile prebuffer
