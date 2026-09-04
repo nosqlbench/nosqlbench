@@ -34,11 +34,57 @@ PrefetchHandle bg = view.prefetchInBackground("base_vectors", window, WholeFacet
 bg.join();
 ```
 
-The plan reports byte ranges, chunk-level residency, overfetch, and the
-offset-index prerequisite for variable-length facets. A window that cannot be
-resolved for its format is refused rather than silently fetching the whole
-facet; pass `WholeFacetFallback.ALLOW` to accept that, or pass `DSWindow.ALL`
-to request the whole facet outright, which needs no permission.
+The plan reports byte ranges — each qualified by the shard it lies in —
+chunk-level residency, overfetch, and the offset-index prerequisite for
+variable-length facets. A window that cannot be resolved for its format is
+refused rather than silently fetching the whole facet; pass
+`WholeFacetFallback.ALLOW` to accept that, or pass `DSWindow.ALL` to request
+the whole facet outright, which needs no permission.
+
+## Prebuffering a profile
+
+`prebuffer` drives every facet of a profile to resident state, each fetched
+**against the window it declares** — so a sized profile over a
+multi-terabyte base pulls the records it can address and nothing more:
+
+```java
+view.prebuffer(WholeFacetFallback.REFUSE, (cached, total) -> meter.update(cached, total));
+```
+
+Every facet is planned before any is fetched. A declared window the format
+cannot map is refused under `REFUSE`, exactly as a requested window would be;
+`ALLOW` accepts the whole facet instead.
+
+## Facets spread across several files
+
+A facet may be a series of files forming one dense ordinal space, in either
+of the reference forms:
+
+```yaml
+format_version: 2
+profiles:
+  default:
+    base_vectors:                      # uniform: names follow the pattern
+      source: base_vectors__NNNN.fvec
+      shard_stride: 1000000
+      shard_count: 12
+      record_count: 11412003
+    metadata_content:                  # explicit: files named as they are
+      source:
+        - corpus-a.u8[0..1M]=1M
+        - corpus-b.u8[500K..1500K]=1M
+        - corpus-b.u8[3M..3250K]=250K
+      record_count: 2250000
+  10m:
+    base_count: 10000000               # inherits the base, windowed to 10M
+```
+
+Readers present the same surface whatever the layout: `count()` is the
+series total and `get(o)` reads from the shard that owns ordinal `o`. A
+window in the facet's `window:` (or as a suffix on the uniform pattern) is
+in facet ordinals and clips the series, not a shard; a window on an explicit
+entry is in that file's ordinals and carves the shard out of it. Prefetch
+plans decompose a window across the shards it touches and fetch only those.
 
 For a release canary against a Rust-hosted dataset, run Maven with
 `-Dvectordata.canary.catalog=<catalog-url>` and
