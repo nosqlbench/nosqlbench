@@ -563,4 +563,37 @@ class PrefetchRemoteIntegrationTest {
         assertTrue(resident > 0 && resident < whole.facetBytes() / 4, "one record fetched " + resident + " of " + whole.facetBytes() + " bytes");
         assertFalse(whole.isResident());
     }
+
+    /// A template runtime can compile against a remote dataset: the
+    /// layout is learned from the first record — one page — and the
+    /// binder built from it drives a cycle over records scattered
+    /// through the facet. The schema is remote, the values are remote,
+    /// and the file is never downloaded.
+    @Test void aBinderCompilesAndBindsOverHttp() throws Exception {
+        Path published = Files.createDirectories(temporary.resolve("pub-bind"));
+        List<byte[]> records = new java.util.ArrayList<>();
+        for (int i = 0; i < 4000; i++)
+            records.add(new io.nosqlbench.vectordata.anode.MNode().insert("id", new io.nosqlbench.vectordata.anode.MValue.Int32(i))
+                .insert("bucket", new io.nosqlbench.vectordata.anode.MValue.Int32(i % 4)).toBytes());
+        Path slab = FixtureSupport.slabOf(published, "m.slab", records, 50);
+        Files.write(published.resolve("m.slab.mref"), FixtureSupport.mref(Files.readAllBytes(slab), CHUNK));
+        HttpServer server = serveDirectory(published, new AtomicInteger(), true);
+        String base = "http://127.0.0.1:" + server.getAddress().getPort() + "/";
+        TestDataView view = seriesView("slab-binding", "name: slab\nprofiles:\n  default:\n    metadata_content: " + base + "m.slab\n", "default");
+        var facet = view.openFacetRecords("metadata_content");
+        var layout = io.nosqlbench.vectordata.binding.Layout.discover(facet);
+        assertEquals(List.of("id", "bucket"), layout.names());
+        assertEquals(List.of(io.nosqlbench.vectordata.binding.BindType.INT32, io.nosqlbench.vectordata.binding.BindType.INT32), layout.types());
+        var binder = io.nosqlbench.vectordata.binding.Binder.select(layout, "bucket", "id");
+        for (long o : new long[] {0, 1, 1500, 3999}) {
+            binder.bindEach(facet.recordBytes(o), (slot, value) -> {
+                if (slot == 0) assertEquals(o % 4, value.longValue(), "bucket at " + o);
+                else assertEquals(o, value.longValue(), "id at " + o);
+            });
+        }
+        PrefetchPlan whole = view.prefetchPlan("metadata_content", DSWindow.ALL);
+        long resident = whole.fills().stream().mapToLong(f -> (long) f.chunksResident() * f.chunkSize()).sum();
+        assertFalse(whole.isResident(), "compiling and binding must not have pulled the facet down");
+        assertTrue(resident < whole.facetBytes() / 4, "bound four records with " + resident + " of " + whole.facetBytes() + " bytes");
+    }
 }
