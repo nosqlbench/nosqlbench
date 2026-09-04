@@ -393,6 +393,54 @@ class PrefetchRemoteIntegrationTest {
         assertTrue(view.prefetchPlan("base_vectors", DSWindow.parse("20..30")).isResident());
     }
 
+    private static void assertOnlyTheWindowIsResident(TestDataView view, long windowRecords) {
+        VectorReader<float[]> reader = view.baseVectors();
+        CacheStats stats = reader.cacheStats();
+        assertTrue(stats.cachedBytes() >= windowRecords * SERIES_BPR,
+            "the window's own bytes must be resident (" + stats.cachedBytes() + " of " + stats.totalBytes() + ")");
+        assertTrue(!reader.isComplete() && stats.cachedBytes() <= stats.totalBytes() * 2 / 3,
+            "precaching the " + windowRecords + "-record window fetched " + stats.cachedBytes() + " of " + stats.totalBytes()
+                + " bytes: the last shard was dragged in");
+        assertEquals(windowRecords, reader.count());
+        assertEquals((windowRecords - 1) * 100f, reader.get(windowRecords - 1)[0]);
+    }
+
+    /// The whole-profile prebuffer honours the window a facet declares,
+    /// a series included: a "small part" of a sharded base costs what
+    /// it can address, not the whole base.
+    @Test void prebufferingASizedProfileOfASeriesFetchesOnlyItsWindow() throws Exception {
+        String base = publishSeries(3, 400, true);
+        TestDataView small = seriesView("sized", uniformYaml(base, 3, 400, """
+              small:
+                base_count: 500
+                base_vectors:
+                  source: %sbig__NNNN.fvec[0..500]
+                  shard_stride: 400
+                  shard_count: 3
+                  record_count: 1200
+            """.formatted(base)), "small");
+        small.prebuffer(WholeFacetFallback.REFUSE, PrebufferProgress.NONE);
+        assertOnlyTheWindowIsResident(small, 500);
+    }
+
+    /// A sized profile that inherits the base declares its window by
+    /// `base_count`; the same rule applies through inheritance.
+    @Test void anInheritedSizedWindowIsHonouredToo() throws Exception {
+        String base = publishSeries(3, 400, true);
+        TestDataView small = seriesView("sized-inherit", uniformYaml(base, 3, 400, "  small:\n    base_count: 500\n"), "small");
+        small.prebuffer(PrebufferProgress.NONE);
+        assertOnlyTheWindowIsResident(small, 500);
+    }
+
+    /// The reader a windowed facet hands back warms its window, not the
+    /// files it was cut from.
+    @Test void aWindowedReaderPrebuffersOnlyItsWindow() throws Exception {
+        String base = publishSeries(3, 400, true);
+        TestDataView small = seriesView("sized-reader", uniformYaml(base, 3, 400, "  small:\n    base_count: 500\n"), "small");
+        small.baseVectors().prebuffer();
+        assertOnlyTheWindowIsResident(small, 500);
+    }
+
     @Test void aFacetByteRangePrebuffersTheShardItLivesIn() throws Exception {
         String base = publishSeries(3, 400, true);
         TestDataView view = seriesView("deep", uniformYaml(base, 3, 400, ""), "default");

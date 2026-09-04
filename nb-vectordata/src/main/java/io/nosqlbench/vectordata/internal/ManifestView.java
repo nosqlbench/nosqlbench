@@ -32,7 +32,9 @@ import io.nosqlbench.vectordata.VectorReaders;
 import io.nosqlbench.vectordata.VvecReader;
 import io.nosqlbench.vectordata.WholeFacetFallback;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,7 +71,27 @@ public final class ManifestView implements TestDataView {
         return facet.isSeries() ? new ShardedVvecReader<>(handle(name).series()) : VectorReaders.openVvec(facet.source(), settings, dataset);
     }
     @Override public Map<String, Object> attributes() { return attributes; }
-    @Override public void prebuffer(PrebufferProgress progress) { for (String name : facets.keySet()) openFacet(name).prebuffer(progress); }
+    @Override public void prebuffer(WholeFacetFallback fallback, PrebufferProgress progress) {
+        // One plan per facet, from the planner the selective prefetch
+        // uses, against the window the facet declares for itself. The
+        // per-reader fetch this replaced answered "the whole file" for
+        // every facet, so a sized profile over a large base downloaded
+        // the whole base. Every facet is planned before any is fetched,
+        // so a refusal costs nothing.
+        List<Map.Entry<Prefetcher.FacetHandle, PrefetchPlan>> planned = new ArrayList<>();
+        for (FacetDescriptor facet : facets.values()) {
+            Prefetcher.FacetHandle handle = handle(facet.name());
+            PrefetchPlan plan = Prefetcher.plan(handle, Prefetcher.facetDeclaredWindow(facet));
+            // A declared window the format cannot map is refused unless
+            // the caller accepted the whole facet, exactly as a
+            // requested window is. Widening a profile's own window to
+            // its whole base in silence is not a fallback; it is the
+            // download the window existed to prevent.
+            Prefetcher.checkFallback(facet.name(), plan, fallback);
+            planned.add(Map.entry(handle, plan));
+        }
+        for (Map.Entry<Prefetcher.FacetHandle, PrefetchPlan> entry : planned) fetch(entry.getKey(), entry.getValue(), progress);
+    }
     @Override public PrefetchPlan prefetchPlan(String facet, DSWindow window) { return Prefetcher.plan(handle(facet), window); }
     @Override public PrefetchReport prefetch(String facet, DSWindow window, WholeFacetFallback fallback, PrebufferProgress progress) {
         // One handle for both the plan and the fetch, so the offset
@@ -117,9 +139,12 @@ public final class ManifestView implements TestDataView {
     }
     /// Wraps a reader in the facet's declared window — in facet
     /// ordinals, so it selects the same records over one file or over
-    /// five.
-    private static <T> VectorReader<T> window(FacetDescriptor facet, VectorReader<T> reader) {
-        return facet.window() == null || facet.window().isBlank() ? reader : new WindowedVectorReader<>(reader, facet.window());
+    /// five — with a prebuffer planned against that window rather than
+    /// the file it was cut from.
+    private <T> VectorReader<T> window(FacetDescriptor facet, VectorReader<T> reader) {
+        if (facet.window() == null || facet.window().isBlank()) return reader;
+        return new WindowedVectorReader<>(reader, facet.window(),
+            progress -> prefetch(facet.name(), Prefetcher.facetDeclaredWindow(facet), WholeFacetFallback.REFUSE, progress));
     }
     private static String canonical(String name) { return FacetNames.canonical(name); }
 }

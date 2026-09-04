@@ -41,7 +41,22 @@ public interface TestDataView {
     /// none. This is how a workload derives configuration from the
     /// dataset instead of restating it.
     Map<String, Object> attributes();
-    void prebuffer(PrebufferProgress progress);
+
+    /// Drives every facet of this profile to resident state, each
+    /// fetched **against the window it declares** — a sized profile
+    /// over a multi-terabyte base pulls what it can address and nothing
+    /// more, a series included. A declared window the format cannot
+    /// map is refused under [WholeFacetFallback#REFUSE] and fetched
+    /// whole under [WholeFacetFallback#ALLOW], exactly as a requested
+    /// window is: widening a profile's own window to its whole base in
+    /// silence is not a fallback, it is the download the window existed
+    /// to prevent. Every facet is planned before any is fetched, so a
+    /// refusal costs nothing.
+    void prebuffer(WholeFacetFallback fallback, PrebufferProgress progress);
+
+    /// Same as [#prebuffer(WholeFacetFallback, PrebufferProgress)] under
+    /// [WholeFacetFallback#REFUSE].
+    default void prebuffer(PrebufferProgress progress) { prebuffer(WholeFacetFallback.REFUSE, progress); }
 
     /// What prefetching `window` on `facet` would cost, without
     /// fetching any of it. `window` is in **record** coordinates and is

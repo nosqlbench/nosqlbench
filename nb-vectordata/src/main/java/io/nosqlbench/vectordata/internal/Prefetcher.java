@@ -406,6 +406,20 @@ public final class Prefetcher {
         return new PrefetchPlan(requested, issued, fills, prerequisite, false, facetBytes);
     }
 
+    /// The window a facet declares for itself, in facet ordinals: a
+    /// suffix on a single source, or the `window:` field a series
+    /// carries — the descriptor holds either as `window`. This is the
+    /// window a whole-profile prebuffer honours per facet. A malformed
+    /// window is an error, not an absent one.
+    public static DSWindow facetDeclaredWindow(FacetDescriptor facet) {
+        String window = facet.window();
+        if (window == null || window.isBlank()) return DSWindow.ALL;
+        try { return DSWindow.parse(window); }
+        catch (VectorDataException malformed) {
+            throw new VectorDataException("facet '" + facet.name() + "': window '" + window + "' is malformed: " + malformed.getMessage());
+        }
+    }
+
     /// Refuses a plan that would fetch the whole facet, unless allowed.
     /// The message carries the size, because that is the decision the
     /// caller is being asked to make.
