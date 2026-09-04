@@ -26,14 +26,33 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Dataset manifest and its selectable profiles. */
+/// Dataset manifest and its selectable profiles.
+///
+/// Profiles name only what differs and inherit the rest. A non-default
+/// profile inherits unstated facets from the profile it names with
+/// `inherits:` (or the older `extends:`), else from `default` — and
+/// **what inherits depends on the axis**. Across the size axis (parent
+/// `default`), `base_vectors` and `metadata_content` inherit under the
+/// child's `base_count` window, while the neighbor facets do not: ground
+/// truth is derived from `base_count`, so a sized profile that omits its
+/// own fails loudly rather than reading the full base's. Across any
+/// other axis every facet is invariant and inherits as is. A
+/// `partition: true` profile is an oracle partition with independent
+/// base vectors, not a windowed subset, and inherits nothing.
 public final class TestDataGroup {
-    private static final Set<String> NON_FACETS = Set.of("extends", "base_count", "query_count", "maxk", "partition", "name", "description", "tags");
+    private static final Set<String> NON_FACETS = Set.of("extends", "inherits", "base_count", "query_count", "maxk", "partition",
+        "attributes", "name", "description", "tags");
+    /// Per-profile outputs that do not cross the size axis.
+    private static final Set<String> SIZE_AXIS_OUTPUTS = Set.of("neighbor_indices", "neighbor_distances",
+        "prefiltered_neighbor_indices", "prefiltered_neighbor_distances", "postfiltered_neighbor_indices", "postfiltered_neighbor_distances");
+    /// Facets that inherit under the child's `base_count` window.
+    private static final Set<String> WINDOWED_ON_INHERIT = Set.of("base_vectors", "metadata_content");
     private final String name; private final URI manifest; private final Map<String, Map<String, Object>> profiles; private final VectorDataSettings settings;
     private final Map<String, Object> attributes;
     private TestDataGroup(String name, URI manifest, Map<String, Map<String, Object>> profiles, VectorDataSettings settings,
@@ -133,20 +152,45 @@ public final class TestDataGroup {
     private Map<String, FacetDescriptor> facets(String profile) {
         Map<String, Object> definition = profiles.get(profile);
         if (definition == null) throw new VectorDataException("Dataset " + name + " has no profile " + profile);
-        Map<String, FacetDescriptor> inherited = new LinkedHashMap<>();
-        // Profiles name only what differs: facets a profile does not
-        // declare resolve from `default`. A sized profile like `100k`
-        // carries a windowed base and its own neighbor facets and
-        // inherits the rest — query vectors included — without an
-        // explicit `extends`.
-        if (!"default".equals(profile) && profiles.containsKey("default")) inherited.putAll(facets("default"));
-        String parent = YamlData.optionalString(definition.get("extends"));
-        if (parent != null) {
-            if (parent.equals(profile)) throw new VectorDataException("Profile cannot extend itself: " + profile);
-            inherited.putAll(facets(parent));
+        Map<String, FacetDescriptor> own = declared(profile, definition);
+        // A cycle — `a` inherits `b`, `b` inherits `a` — never settles,
+        // so its members, and anything inheriting from them, keep only
+        // what they declare.
+        Set<String> lineage = new HashSet<>();
+        for (String at = profile; at != null; at = parentOf(at, profiles.get(at))) if (!lineage.add(at)) return own;
+        String parentName = parentOf(profile, definition);
+        if (parentName == null) return own;
+        Map<String, FacetDescriptor> parent = facets(parentName);
+        boolean sizeAxis = "default".equals(parentName);
+        Long baseCount = longOrNull(definition.get("base_count"), "base_count");
+        Map<String, FacetDescriptor> merged = new LinkedHashMap<>();
+        for (Map.Entry<String, FacetDescriptor> inherited : parent.entrySet()) {
+            String facetName = inherited.getKey();
+            if (own.containsKey(facetName)) continue;
+            if (sizeAxis && SIZE_AXIS_OUTPUTS.contains(facetName)) continue;
+            merged.put(facetName, WINDOWED_ON_INHERIT.contains(facetName) ? inheritWithWindow(inherited.getValue(), baseCount) : inherited.getValue());
         }
-        inherited.putAll(declared(profile, definition));
-        return inherited;
+        merged.putAll(own);
+        return merged;
+    }
+    /// The profile a non-default profile inherits unstated facets from,
+    /// or `null` when it inherits nothing: `default` itself, and a
+    /// `partition: true` profile.
+    private String parentOf(String profile, Map<String, Object> definition) {
+        if ("default".equals(profile)) return null;
+        Object partition = definition.get("partition");
+        if (Boolean.TRUE.equals(partition) || "true".equalsIgnoreCase(String.valueOf(partition))) return null;
+        String named = YamlData.optionalString(definition.get("inherits"));
+        if (named == null) named = YamlData.optionalString(definition.get("extends"));
+        if (named != null && !named.equals(profile) && profiles.containsKey(named)) return named;
+        return profiles.containsKey("default") ? "default" : null;
+    }
+    /// A base facet inherited across the size axis is windowed to the
+    /// child's `base_count` unless it already carries a window of its
+    /// own; without a `base_count` it is inherited as is.
+    private static FacetDescriptor inheritWithWindow(FacetDescriptor facet, Long baseCount) {
+        if (baseCount == null || (facet.window() != null && !facet.window().isBlank())) return facet;
+        return new FacetDescriptor(facet.name(), facet.source(), "0.." + baseCount, facet.attributes(), facet.series());
     }
     /// The facets a profile declares itself, resolved against the
     /// manifest. Declaration shape is resolved here, once: a string
