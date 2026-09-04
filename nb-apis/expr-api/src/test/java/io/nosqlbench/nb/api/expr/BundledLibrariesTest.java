@@ -19,6 +19,10 @@ package io.nosqlbench.nb.api.expr;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
@@ -120,6 +124,28 @@ class BundledLibrariesTest {
     void testCurrentTime() {
         String result = processor.process("{{= currentTime() }}", null, Map.of());
         assertTrue(result.matches("\\d{2}:\\d{2}:\\d{2}"));
+    }
+
+    /// The seconds field is optional in the ISO forms of `LocalTime` and
+    /// `LocalDateTime`: `toString()` omits it entirely when the second
+    /// is `00`, so a shape assertion against the wall clock only catches
+    /// the defect one second in sixty. `millisToDateTime` takes its
+    /// instant from the caller and shares the same rendering, so the
+    /// boundary can be pinned exactly rather than waited for.
+    @Test
+    void timesOnAWholeMinuteStillRenderTheirSeconds() {
+        long onTheMinute = ZonedDateTime.now(ZoneId.systemDefault())
+            .truncatedTo(ChronoUnit.MINUTES).toInstant().toEpochMilli();
+        String atSecondZero = processor.process("{{= millisToDateTime(" + onTheMinute + ") }}", null, Map.of());
+        assertTrue(atSecondZero.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"),
+            "a timestamp on a whole minute must still render seconds, got: " + atSecondZero);
+        assertTrue(atSecondZero.endsWith(":00"), "and those seconds are 00, got: " + atSecondZero);
+
+        String atSecondThirty = processor.process(
+            "{{= millisToDateTime(" + (onTheMinute + 30_000) + ") }}", null, Map.of());
+        assertTrue(atSecondThirty.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"),
+            "and a non-zero second renders the same width, got: " + atSecondThirty);
+        assertTrue(atSecondThirty.endsWith(":30"), atSecondThirty);
     }
 
     @Test

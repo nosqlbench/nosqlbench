@@ -76,7 +76,10 @@ def currentDate() {
 )
 @ExprExample(expectNotNull = true)
 def currentTime() {
-    LocalTime.now().truncatedTo(ChronoUnit.SECONDS).toString()
+    // Explicit pattern, not toString(): LocalTime's ISO form omits the
+    // seconds field entirely when the second is 00, so toString() emits
+    // HH:mm once a minute and HH:mm:ss the rest of the time.
+    LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 }
 
 @ExprFunctionSpec(
@@ -85,7 +88,8 @@ def currentTime() {
 )
 @ExprExample(expectNotNull = true)
 def currentDateTime() {
-    LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).toString()
+    // See currentTime(): the ISO form drops seconds at second 00.
+    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
 }
 
 @ExprFunctionSpec(
@@ -266,11 +270,12 @@ def millisToDate(millis) {
 )
 @ExprExample(expectNotNull = true)
 def millisToDateTime(millis) {
+    // See currentTime(): the ISO form drops seconds at second 00, so a
+    // timestamp landing on a whole minute rendered as yyyy-MM-ddTHH:mm.
     Instant.ofEpochMilli(millis as long)
            .atZone(ZoneId.systemDefault())
            .toLocalDateTime()
-           .truncatedTo(ChronoUnit.SECONDS)
-           .toString()
+           .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
 }
 
 @ExprFunctionSpec(
@@ -300,5 +305,6 @@ def currentDateInZone(timezone) {
 )
 @ExprExample(expectNotNull = true)
 def currentTimeInZone(timezone) {
-    LocalTime.now(ZoneId.of(timezone)).truncatedTo(ChronoUnit.SECONDS).toString()
+    // See currentTime(): the ISO form drops seconds at second 00.
+    LocalTime.now(ZoneId.of(timezone)).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 }
