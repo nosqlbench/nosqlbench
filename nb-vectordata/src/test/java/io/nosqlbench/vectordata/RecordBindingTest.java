@@ -374,6 +374,24 @@ class RecordBindingTest {
         assertTrue(e.getMessage().contains("flat conjunction"), e.getMessage());
     }
 
+    /// A caller that decoded the record itself — to read its fingerprint
+    /// and pick one binder per shape — binds the node directly, with the
+    /// same shape check, and the binder names the shape it was compiled
+    /// against.
+    @Test void aDecodedPredicateBindsWithoutASecondDecode() throws IOException {
+        Layout layout = typedLayout("decoded");
+        PNode template = and(pred("created", OpType.GE, new Comparand.Int(0)), pred("tag", OpType.EQ, new Comparand.Text("")));
+        PredicateBinder binder = PredicateBinder.compile(template, layout);
+        assertEquals("(created >= 0 AND tag = '')", binder.shape());
+        PNode actual = and(pred("created", OpType.GE, new Comparand.Int(7)), pred("tag", OpType.EQ, new Comparand.Text("red")));
+        assertEquals(binder.shape(), actual.fingerprint().display(), "the same shape keys the same binder");
+        List<Comparand> bound = new ArrayList<>();
+        binder.bindEach(actual, (cond, cs) -> bound.add(cs.get(0)));
+        assertEquals(List.of(new Comparand.Int(7), new Comparand.Text("red")), bound);
+        PNode other = pred("id", OpType.EQ, new Comparand.Int(1));
+        assertTrue(assertThrows(BindException.class, () -> binder.bindEach(other, (c, cs) -> { })).getMessage().contains("shape differs"));
+    }
+
     // ── error paths and the small surface ──────────────────────────
 
     /// A facet with no records has no layout to learn, and says so

@@ -70,6 +70,11 @@ public final class PredicateBinder {
     /// The conditions, in order. Read once, to build the filter.
     public List<Condition> conditions() { return conditions; }
 
+    /// The shape this binder was compiled against, in the display
+    /// grammar with every comparand replaced by its type default — the
+    /// identity a caller keys one binder per shape by.
+    public String shape() { return shape.display(); }
+
     /// Receives one condition's comparands from a bound predicate.
     @FunctionalInterface
     public interface ConditionSink { void accept(Condition condition, List<Comparand> comparands); }
@@ -91,9 +96,17 @@ public final class PredicateBinder {
         // template cannot make an MNode into a predicate.
         if (!(node instanceof ANode.P p))
             throw BindException.record("this record is not a predicate — its dialect byte says MNode, and a form does not override what a record is");
-        if (!p.node().isCongruent(shape))
+        bindEach(p.node(), sink);
+    }
+
+    /// Binds one already-decoded predicate, for a caller that decoded
+    /// the record itself — to read its fingerprint and choose the
+    /// binder, say — so the node is not decoded twice. The shape check
+    /// is the same.
+    public void bindEach(PNode predicate, ConditionSink sink) {
+        if (!predicate.isCongruent(shape))
             throw BindException.record("this predicate's shape differs from the one this binder was compiled against; its values would bind to the wrong conditions");
-        List<Scan.FlatCondition> flat = Scan.flattenAnd(p.node());
+        List<Scan.FlatCondition> flat = Scan.flattenAnd(predicate);
         if (flat == null) throw BindException.record("predicate is not a flat conjunction");
         for (int i = 0; i < conditions.size() && i < flat.size(); i++) sink.accept(conditions.get(i), flat.get(i).comparands());
     }
