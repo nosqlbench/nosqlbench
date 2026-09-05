@@ -33,6 +33,10 @@ import io.nosqlbench.vectordata.TestDataView;
 import io.nosqlbench.vectordata.VectorReader;
 import io.nosqlbench.vectordata.VvecReader;
 import io.nosqlbench.vectordata.WholeFacetFallback;
+import io.nosqlbench.vectordata.anode.MNode;
+import io.nosqlbench.vectordata.binding.Layout;
+import io.nosqlbench.vectordata.records.RecordFacet;
+import io.nosqlbench.virtdata.lib.vectors.vectordata.CqlColumns;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.PrefetchMeter;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.WindowedReader;
 import org.apache.logging.log4j.LogManager;
@@ -242,4 +246,36 @@ public class VectorDataExprs implements ExprFunctionProvider {
             "[" + start.longValue() + ".." + end.longValue() + ")");
     }
 
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_content\""}, expectNotNull = true)
+    @ExprFunctionSpec(
+        name = "recordLayout",
+        synopsis = "recordLayout(\"dataset:profile\", \"facet_name\")",
+        description = "Return the field layout of a facet of opaque records — names in wire order, with the bind type of each — learned from its first record."
+    )
+    public Layout recordLayout(String datasetNameAndProfile, String facetName) {
+        return Layout.discover(dataset(datasetNameAndProfile).openFacetRecords(facetName));
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_content\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "recordFields",
+        synopsis = "recordFields(\"dataset:profile\", \"facet_name\")",
+        description = "Return the field names of a facet of opaque records as a comma-separated list, in wire order — the column list an INSERT names."
+    )
+    public String recordFields(String datasetNameAndProfile, String facetName) {
+        return String.join(", ", recordLayout(datasetNameAndProfile, facetName).names());
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_content\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "recordColumns",
+        synopsis = "recordColumns(\"dataset:profile\", \"facet_name\")",
+        description = "Return CQL column definitions for a facet of opaque records — 'name type, name type, ...' in wire order, typed from the bind types so the columns accept what RecordField and RecordFields bind. Container element types come from the first record."
+    )
+    public String recordColumns(String datasetNameAndProfile, String facetName) {
+        RecordFacet facet = dataset(datasetNameAndProfile).openFacetRecords(facetName);
+        Layout layout = Layout.discover(facet);
+        MNode sample = facet.count() == 0 ? null : MNode.fromBytes(facet.recordBytes(0));
+        return CqlColumns.columns(layout, sample);
+    }
 }

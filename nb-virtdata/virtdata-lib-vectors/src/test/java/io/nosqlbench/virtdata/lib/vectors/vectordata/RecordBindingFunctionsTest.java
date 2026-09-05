@@ -193,6 +193,28 @@ public class RecordBindingFunctionsTest {
         assertTrue(e.available().contains("id"), "naming what the facet has");
     }
 
+    @Test
+    void recordTextRendersAVernacularPerRecord() {
+        RecordText cql = new RecordText("records:default", "metadata_predicates", "cql", settings);
+        assertEquals("created >= " + (EPOCH_MILLIS + 3) + " AND tag = 't0'", cql.apply(3), "a predicate as a bare WHERE clause, comparands inlined");
+        assertEquals(20, cql.count());
+        RecordText json = new RecordText("records:default", "metadata_content", "jsonl", settings);
+        assertTrue(json.apply(1).startsWith("{\"id\":1,\"tag\":\"t1\""), json.apply(1));
+        RuntimeException unknown = assertThrows(RuntimeException.class, () -> new RecordText("records:default", "metadata_content", "klingon", settings));
+        assertTrue(unknown.getMessage().contains("cql") && unknown.getMessage().contains("json"), unknown.getMessage());
+    }
+
+    @Test
+    void cqlColumnsFollowTheLayoutAndTheSample() {
+        byte[] record = row(1);
+        String columns = CqlColumns.columns(io.nosqlbench.vectordata.binding.Layout.discover(record), MNode.fromBytes(record));
+        assertEquals("id bigint, tag text, score double, created timestamp, owner uuid, flags list<bigint>, h float, n timestamp, count int", columns);
+        assertEquals("list<text>", CqlColumns.cqlType(BindType.list(null), null), "an element type nothing determines is text");
+        assertEquals("map<text, text>", CqlColumns.cqlType(BindType.map(null, null), null));
+        assertEquals("smallint", CqlColumns.cqlType(BindType.INT16, null));
+        assertEquals("text", CqlColumns.cqlType(BindType.TIMESTAMP_TEXT, null), "text on the wire, text in the column");
+    }
+
     // ── fixture writers ────────────────────────────────────────────
 
     static void fvec(Path path, float[][] vectors) throws IOException {
