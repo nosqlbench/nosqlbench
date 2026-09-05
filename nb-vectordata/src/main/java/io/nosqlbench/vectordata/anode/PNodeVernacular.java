@@ -34,7 +34,9 @@ public final class PNodeVernacular {
     public static String toSql(PNode node) { return expr(node, Dialect.SQL); }
 
     /// A CQL `WHERE` expression: `!=` becomes a `<`/`>` disjunction and
-    /// `MATCHES` becomes `LIKE`, which is what CQL offers.
+    /// `MATCHES` becomes `LIKE`, which is what CQL offers. A conjunction
+    /// renders as the bare `a AND b` a CQL `WHERE` clause accepts —
+    /// the reference wraps it in parentheses, which Cassandra rejects.
     public static String toCql(PNode node) { return expr(node, Dialect.CQL); }
 
     /// A CDDL group: `{ field: "age", op: "gt", value: 18 }`, conjugates
@@ -73,7 +75,12 @@ public final class PNodeVernacular {
         PNode.Conjugate c = (PNode.Conjugate) node;
         List<String> parts = new ArrayList<>();
         for (PNode child : c.children()) parts.add(expr(child, dialect));
-        return parts.size() == 1 ? parts.get(0) : "(" + String.join(" " + c.type().name() + " ", parts) + ")";
+        if (parts.size() == 1) return parts.get(0);
+        String joined = String.join(" " + c.type().name() + " ", parts);
+        // A CQL WHERE clause is a bare list of relations: it has no
+        // grouping parentheses, and Cassandra rejects a conjunction
+        // wrapped in them. SQL keeps the grouping.
+        return dialect == Dialect.CQL && c.type() == PNode.ConjugateType.AND ? joined : "(" + joined + ")";
     }
 
     private static String single(String field, OpType op, List<Comparand> cs, Dialect dialect) {

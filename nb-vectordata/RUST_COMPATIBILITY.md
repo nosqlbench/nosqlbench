@@ -274,6 +274,13 @@ Remaining representation differences:
   them as its JSON library's values; here `Form.extra()` holds the
   `MValue`s the JSON vernacular parses them to, typed as that parse
   types them.
+- **A CQL conjunction renders without parentheses.** The reference's
+  CQL vernacular wraps `AND`-joined relations in parentheses, as its SQL
+  vernacular does; a CQL `WHERE` clause has no grouping parentheses and
+  Cassandra rejects the wrapped form. Here the CQL rendering of a
+  conjunction is the bare `a AND b`, and the SQL rendering, the `!=`
+  rewrite, and an `OR` keep the reference's parentheses. To be
+  reconciled upstream.
 - **The raw predicate scanner is not ported.** The reference's
   `mnode::scan` also compiles predicates to positions and evaluates them
   against raw bytes for its predicate-index pipeline; that is workload

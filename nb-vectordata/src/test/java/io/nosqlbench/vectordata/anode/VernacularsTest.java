@@ -97,7 +97,7 @@ class VernacularsTest {
         String sql = render(p, Vernacular.SQL);
         assertTrue(sql.contains("age > 18")); assertTrue(sql.contains("status IN (1, 2, 3)")); assertTrue(sql.contains("AND"));
         assertEquals("(age > 18 AND status IN (1, 2, 3))", sql);
-        assertEquals(sql, render(p, Vernacular.CQL));
+        assertEquals("age > 18 AND status IN (1, 2, 3)", render(p, Vernacular.CQL), "CQL takes no grouping parentheses");
         String json = render(p, Vernacular.JSON);
         assertTrue(json.contains("\"and\"")); assertTrue(json.contains("\"age\""));
         assertEquals("{\"type\":\"and\",\"children\":[{\"type\":\"predicate\",\"field\":\"age\",\"op\":\">\",\"value\":18},{\"type\":\"predicate\",\"field\":\"status\",\"op\":\"IN\",\"values\":[1,2,3]}]}",
@@ -196,5 +196,20 @@ class VernacularsTest {
         @SuppressWarnings("unchecked") Map<String, Object> p = (Map<String, Object>) Vernaculars.toTree(ANode.of(samplePNode()));
         assertEquals("and", p.get("type"));
         assertEquals(2, ((List<?>) p.get("children")).size());
+    }
+
+    /// A CQL WHERE clause has no grouping parentheses, so a conjunction
+    /// renders bare there — unlike SQL, which keeps the grouping, and
+    /// unlike the reference, which parenthesizes both (to be reconciled
+    /// upstream). The `!=` rewrite keeps its parentheses in both.
+    @Test void aCqlConjunctionRendersWithoutGroupingParentheses() {
+        PNode and = new PNode.Conjugate(PNode.ConjugateType.AND, java.util.List.of(
+            new PNode.Predicate(new PNode.FieldRef.Named("topic"), PNode.OpType.EQ, java.util.List.of(new PNode.Comparand.Text("tax"))),
+            new PNode.Predicate(new PNode.FieldRef.Named("pct"), PNode.OpType.GE, java.util.List.of(new PNode.Comparand.Int(99)))));
+        assertEquals("topic = 'tax' AND pct >= 99", Vernaculars.render(ANode.of(and), Vernacular.CQL));
+        assertEquals("(topic = 'tax' AND pct >= 99)", Vernaculars.render(ANode.of(and), Vernacular.SQL));
+        PNode nested = new PNode.Conjugate(PNode.ConjugateType.AND, java.util.List.of(and,
+            new PNode.Predicate(new PNode.FieldRef.Named("year"), PNode.OpType.NE, java.util.List.of(new PNode.Comparand.Int(2020)))));
+        assertEquals("topic = 'tax' AND pct >= 99 AND (year < 2020 OR year > 2020)", Vernaculars.render(ANode.of(nested), Vernacular.CQL));
     }
 }
