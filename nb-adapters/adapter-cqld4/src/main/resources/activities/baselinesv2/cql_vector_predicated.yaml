@@ -1,0 +1,245 @@
+min_version: "5.25"
+
+description: |
+  Predicated vector search — an ANN query restricted by a metadata
+  filter — against a dataset that publishes metadata records, one
+  predicate per query, and filtered ground truth. Everything
+  dataset-shaped is derived from the dataset itself; the only input is
+  the dataset spec, given as dataset='<dataset>:<profile>':
+    dataset: {{spec == paramOr('dataset', 'tessera:1m')}}
+    dimensions: {{dimensions == baseVectors(spec).dimension()}}
+    trainsize: {{trainsize == baseVectors(spec).count()}}
+    testsize: {{testsize == queryVectors(spec).count()}}
+    maxk: {{maxk == facet(spec, 'prefiltered_neighbor_indices').dimension()}}
+    similarity: {{similarity == dataset(spec).attributes().getOrDefault('distance_function','COSINE').toString().toLowerCase()}}
+    metadata columns: {{columns == recordColumns(spec, 'metadata_content')}}
+
+  The rampup phase stores each base vector with its metadata record,
+  bound field by field through a prepared statement: RecordField reads
+  one field of the record at the cycle's ordinal, typed as the record
+  types it, and the table's metadata columns are derived from the same
+  layout (recordColumns) so they accept exactly those values.
+
+  The search phase runs, per cycle, the query vector at that ordinal
+  under the predicate published for that query. The predicates differ
+  in shape from one query to the next — an equality on one column, a
+  bounded range on another, a conjunction of both — so no single
+  prepared statement fits them; the predicate is rendered as a CQL
+  WHERE expression (RecordText, vernacular 'cql') and inlined into a
+  simple statement, while the vector still binds as a literal. The
+  columns the predicates reference carry SAI indexes, which is what
+  lets the filter combine with ANN ordering.
+
+  Results are verified against the pre-filtered ground truth — the
+  exact top-k among the base vectors that satisfy the predicate — since
+  SAI restricts before it ranks. Pass groundtruth=postfiltered to
+  compare against the top-k of an unfiltered search with the
+  non-matching neighbors removed instead. When fewer than k base
+  vectors satisfy a predicate, the ground-truth row is padded with -1
+  sentinels, which count as misses, so recall on very selective
+  predicates reads low by construction. The unfiltered search block is
+  included for the baseline comparison.
+
+  Operational knobs stay conventional: keyspace, table, rf, and cl are
+  TEMPLATE parameters with the usual defaults. The base facet is warmed
+  to the profile's window before rampup starts; base_window names a
+  record range to warm instead (base_window='[0..100k)' for a partial
+  load, with cycles to match) and base_prefetch chooses eager,
+  background, or none, as for every vector mapper.
+
+scenarios:
+  default:
+    drop: >-
+      run tags='block:drop' threads===1 cycles===UNDEF errors=count
+    schema_ks: >-
+      run tags='block:schema_ks' threads===1 cycles===UNDEF
+    schema: >-
+      run tags='block:schema' threads===1 cycles===UNDEF
+    rampup: >-
+      run tags='block:rampup' threads=TEMPLATE(rampup_threads,auto)
+      cycles={{@trainsize}} errors=count,warn
+    search_and_verify: >-
+      run alias=search_and_verify tags='block:search_and_verify,optype=select'
+      threads=TEMPLATE(search_threads,auto) cycles={{@testsize}}
+      errors=count,warn
+  unfiltered:
+    search_and_verify: >-
+      run alias=search_unfiltered tags='block:search_unfiltered,optype=select'
+      threads=TEMPLATE(search_threads,auto) cycles={{@testsize}}
+      errors=count,warn
+
+bindings:
+  id: ToString()
+  train_vec: BaseVectors('{{@spec}}','TEMPLATE(base_window,)','TEMPLATE(base_prefetch,eager)'); ToCqlVector();
+  test_vec: QueryVectors('{{@spec}}'); ToCqlVector();
+  # The predicate published for the query at this ordinal, as a CQL
+  # WHERE expression with its comparands inlined.
+  where: RecordText('{{@spec}}','metadata_predicates','cql')
+  relevant_indices: Facet('{{@spec}}','TEMPLATE(groundtruth,prefiltered)_neighbor_indices')
+  unfiltered_indices: NeighborIndices('{{@spec}}')
+  # One metadata field each, bound at the base ordinal the cycle names.
+  corpusid: RecordField('{{@spec}}','metadata_content','corpusid')
+  section: RecordField('{{@spec}}','metadata_content','section')
+  year: RecordField('{{@spec}}','metadata_content','year')
+  citationcount: RecordField('{{@spec}}','metadata_content','citationcount')
+  isopenaccess: RecordField('{{@spec}}','metadata_content','isopenaccess')
+  field: RecordField('{{@spec}}','metadata_content','field')
+  venue: RecordField('{{@spec}}','metadata_content','venue')
+  topic_l1: RecordField('{{@spec}}','metadata_content','topic_l1')
+  topic_l2: RecordField('{{@spec}}','metadata_content','topic_l2')
+  topic_l3: RecordField('{{@spec}}','metadata_content','topic_l3')
+  section_class: RecordField('{{@spec}}','metadata_content','section_class')
+  citation_percentile: RecordField('{{@spec}}','metadata_content','citation_percentile')
+  passage_position: RecordField('{{@spec}}','metadata_content','passage_position')
+  word_count: RecordField('{{@spec}}','metadata_content','word_count')
+  sample_bucket: RecordField('{{@spec}}','metadata_content','sample_bucket')
+
+blocks:
+  drop:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+      timeout: 600
+    ops:
+      drop_embedding_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_embedding_idx;
+      drop_year_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_year_idx;
+      drop_sample_bucket_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_sample_bucket_idx;
+      drop_topic_l1_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_topic_l1_idx;
+      drop_topic_l2_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_topic_l2_idx;
+      drop_topic_l3_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_topic_l3_idx;
+      drop_citation_percentile_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_citation_percentile_idx;
+      drop_word_count_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_word_count_idx;
+      drop_passage_position_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_passage_position_idx;
+      drop_isopenaccess_index: |
+        DROP INDEX IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)_isopenaccess_idx;
+      drop_table: |
+        DROP TABLE IF EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages);
+
+  schema_ks:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+    ops:
+      create_keyspace: |
+        CREATE KEYSPACE IF NOT EXISTS TEMPLATE(keyspace,baselines)
+        WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'TEMPLATE(rf,1)'}
+        AND durable_writes = true;
+
+  schema:
+    params:
+      cl: TEMPLATE(cl,LOCAL_QUORUM)
+      prepared: false
+    ops:
+      # The metadata columns are the record layout, typed so that the
+      # bound values fit them; the key is the base ordinal, which is
+      # what the ground truth names.
+      create_table: |
+        CREATE TABLE IF NOT EXISTS TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (
+          key TEXT,
+          {{@columns}},
+          embedding vector<float,{{@dimensions}}>,
+          PRIMARY KEY (key)
+        );
+      create_embedding_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (embedding)
+        USING 'StorageAttachedIndex'
+        WITH OPTIONS = {'similarity_function' : '{{@similarity}}'};
+      # One SAI index per column the predicates reference: equalities
+      # on the topic labels and bounded ranges on the numeric columns.
+      create_year_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (year) USING 'StorageAttachedIndex';
+      create_sample_bucket_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (sample_bucket) USING 'StorageAttachedIndex';
+      create_topic_l1_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (topic_l1) USING 'StorageAttachedIndex';
+      create_topic_l2_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (topic_l2) USING 'StorageAttachedIndex';
+      create_topic_l3_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (topic_l3) USING 'StorageAttachedIndex';
+      create_citation_percentile_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (citation_percentile) USING 'StorageAttachedIndex';
+      create_word_count_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (word_count) USING 'StorageAttachedIndex';
+      create_passage_position_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (passage_position) USING 'StorageAttachedIndex';
+      create_isopenaccess_index: |
+        CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (isopenaccess) USING 'StorageAttachedIndex';
+
+  rampup:
+    params:
+      cl: TEMPLATE(write_cl,LOCAL_QUORUM)
+      prepared: true
+    ops:
+      insert: |
+        INSERT INTO TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)
+        (key, corpusid, section, year, citationcount, isopenaccess, field, venue,
+         topic_l1, topic_l2, topic_l3, section_class, citation_percentile,
+         passage_position, word_count, sample_bucket, embedding)
+        VALUES ({id}, {corpusid}, {section}, {year}, {citationcount}, {isopenaccess}, {field}, {venue},
+         {topic_l1}, {topic_l2}, {topic_l3}, {section_class}, {citation_percentile},
+         {passage_position}, {word_count}, {sample_bucket}, {train_vec});
+
+  search_and_verify:
+    ops:
+      # A simple statement, rendered per cycle: the predicate's shape
+      # changes from query to query, so the WHERE clause is text; the
+      # vector inlines as a literal.
+      select_ann_predicated:
+        simple: |
+          SELECT key FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)
+          WHERE {where}
+          ORDER BY embedding ANN OF {test_vec} LIMIT {{@maxk}};
+        tags:
+          optype: select
+        verifier-init: |
+          k={{@maxk}}
+          relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
+        verifier: |
+          actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
+          // A filtered search returns fewer than k rows when fewer than k
+          // satisfy the predicate. The ground truth pads such rows with -1;
+          // pad the result with sentinels that can match nothing, so the
+          // missing rows count as misses on both sides alike.
+          if (actual_indices.length < k) {
+            padded = new int[k];
+            System.arraycopy(actual_indices, 0, padded, 0, actual_indices.length);
+            for (i = actual_indices.length; i < k; i++) padded[i] = -2 - i;
+            actual_indices = padded;
+          }
+          relevancy.accept({relevant_indices},actual_indices);
+          return true;
+
+  search_unfiltered:
+    ops:
+      # The same queries with no predicate, verified against the
+      # unfiltered ground truth, for the baseline the filtered numbers
+      # are read against.
+      select_ann:
+        prepared: |
+          SELECT key FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)
+          ORDER BY embedding ANN OF {test_vec} LIMIT {{@maxk}};
+        tags:
+          optype: select
+        verifier-init: |
+          k={{@maxk}}
+          relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+        verifier: |
+          actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
+          relevancy.accept({unfiltered_indices},actual_indices);
+          return true;
