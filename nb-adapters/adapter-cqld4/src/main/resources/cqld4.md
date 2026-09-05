@@ -139,7 +139,11 @@ ops:
 
 Each distinct predicate shape becomes one prepared statement, keyed by
 the predicate's fingerprint; the comparands bind as parameters typed
-from the metadata fields they constrain.
+from the metadata fields they constrain. The predicate facet is
+surveyed when the binding is built, and the forms are printed on the
+console before the first cycle — the number of prepared statements the
+run will hold, and how many predicates take each — so a run declares
+its shapes before it starts.
 
 ## CQLd4 Op Template Examples
 

@@ -13,6 +13,7 @@ description: |
     maxk: {{maxk == facet(spec, 'prefiltered_neighbor_indices').dimension()}}
     similarity: {{similarity == dataset(spec).attributes().getOrDefault('distance_function','COSINE').toString().toLowerCase()}}
     metadata columns: {{columns == recordColumns(spec, 'metadata_content')}}
+    predicate forms: {{forms == predicateForms(spec, 'metadata_predicates', 'metadata_content')}}
 
   The rampup phase stores each base vector with its metadata record,
   bound field by field through a prepared statement: RecordField reads
@@ -28,10 +29,13 @@ description: |
   the template: the {predicate} bind point takes a fragment
   (PredicateClause) carrying the shape's WHERE clause with a marker per
   comparand, the comparands as values typed from the metadata fields,
-  and the predicate's fingerprint as the form key. The adapter prepares
-  one statement per form the first time that form is seen and binds
-  every later query of that shape through it, so each statement form is
-  initialized once and applied from then on. The columns the predicates
+  and the predicate's fingerprint as the form key. The facet is
+  surveyed when the binding is built — every predicate read once, every
+  distinct shape initialized — and the forms are printed on the console
+  before the first cycle, with the count of predicates of each; the same
+  survey is what predicateForms reports above. The adapter prepares one
+  statement per form and binds every query of that shape through it, so
+  each statement form is initialized once and applied from then on. The columns the predicates
   reference carry SAI indexes, which is what lets the filter combine
   with ANN ordering. (RecordText renders the same predicate as inline
   text, for a driver that cannot prepare.)
@@ -51,7 +55,17 @@ description: |
   to the profile's window before rampup starts; base_window names a
   record range to warm instead (base_window='[0..100k)' for a partial
   load, with cycles to match) and base_prefetch chooses eager,
-  background, or none, as for every vector mapper.
+  background, or none, as for every vector mapper. Against a single
+  small node, throttle the rampup — rampup_threads=16 cyclerate=1500 —
+  since threads=auto sizes the writer pool from the client's cores, and
+  an overloaded node drops mutations that errors=count only counts.
+
+  The schema indexes every column the predicates reference, which is
+  what SAI needs for a filtered ANN query. For this dataset that is
+  nine columns; five of them — sample_bucket, topic_l3, year,
+  citation_percentile, word_count — carry over 99% of the predicates,
+  and the vector index, not the scalar ones, is the bulk of the index
+  cost. Drop an index only if its predicates may fail.
 
 scenarios:
   default:
@@ -162,6 +176,8 @@ blocks:
         WITH OPTIONS = {'similarity_function' : '{{@similarity}}'};
       # One SAI index per column the predicates reference: equalities
       # on the topic labels and bounded ranges on the numeric columns.
+      # Ordered by how many predicates use each column; the last four
+      # serve under 1% of them.
       create_year_index: |
         CREATE CUSTOM INDEX IF NOT EXISTS ON TEMPLATE(keyspace,baselines).TEMPLATE(table,passages) (year) USING 'StorageAttachedIndex';
       create_sample_bucket_index: |
