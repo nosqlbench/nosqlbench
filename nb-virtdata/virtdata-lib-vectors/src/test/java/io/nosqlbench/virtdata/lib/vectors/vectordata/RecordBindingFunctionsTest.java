@@ -222,7 +222,15 @@ public class RecordBindingFunctionsTest {
     @Test
     void predicateClauseInitializesOneFormPerShapeAndBindsThroughIt() {
         PredicateClause clause = new PredicateClause("records:default", "metadata_predicates", "metadata_content", settings);
-        assertTrue(clause.forms().isEmpty(), "no form until a shape is met");
+        // Surveyed when built: every shape known and initialized before
+        // the first cycle, most common first.
+        PredicateClause.Survey survey = clause.survey();
+        assertEquals(2, survey.forms());
+        assertEquals(20, survey.predicates());
+        assertEquals(List.of("(created >= 0 AND tag = '')", "id IN (0, 0)"), new ArrayList<>(survey.countsByForm().keySet()));
+        assertEquals(List.of(18L, 2L), new ArrayList<>(survey.countsByForm().values()));
+        assertTrue(survey.toString().startsWith("2 predicate forms across 20 predicates"), survey.toString());
+        assertTrue(survey.report().contains("created >= ? AND tag = ?"), survey.report());
         io.nosqlbench.virtdata.core.templates.PreparedFragment third = clause.apply(3);
         assertEquals("created >= ? AND tag = ?", third.text());
         assertEquals("(created >= 0 AND tag = '')", third.formKey(), "keyed by the predicate's fingerprint");
@@ -232,6 +240,7 @@ public class RecordBindingFunctionsTest {
         assertEquals(List.of(List.of(6L, 7L)), List.of(sixth.values()), "a membership condition binds a list");
         for (long o = 0; o < 20; o++) clause.apply(o);
         assertEquals(Map.of("(created >= 0 AND tag = '')", "created >= ? AND tag = ?", "id IN (0, 0)", "id IN ?"), clause.forms(), "two shapes, two forms, initialized once each");
+        assertEquals(2, clause.survey().forms(), "applying cycles adds no forms the survey did not see");
         assertSame(third.formKey(), clause.apply(10).formKey(), "the form key is the same instance every cycle, so an adapter's lookup allocates nothing");
     }
 

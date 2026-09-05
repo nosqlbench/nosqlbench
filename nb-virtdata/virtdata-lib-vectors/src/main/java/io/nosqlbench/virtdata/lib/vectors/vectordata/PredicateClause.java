@@ -39,10 +39,10 @@ import io.nosqlbench.virtdata.api.annotations.ThreadSafeMapper;
 import io.nosqlbench.virtdata.core.templates.PreparedFragment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongFunction;
 
 /*
@@ -50,15 +50,16 @@ import java.util.function.LongFunction;
  * fragment: the WHERE clause of the predicate's shape with a marker per
  * comparand, the comparands as bind values typed from the metadata
  * fields they constrain, and the predicate's fingerprint as the form
- * key. A facet whose predicates differ in shape from query to query
- * yields one form per shape, and each form is initialized once — its
- * clause text composed and its binder compiled against the metadata
- * layout on the first predicate of that shape — after which a cycle
- * costs the record read, the fingerprint lookup, and the value
- * projection. Placed at a bind point of a prepared statement, the
- * fragment has the adapter prepare one statement per form and bind the
- * values through it. Only flat conjunctions over named fields have a
- * clause; '!=' is refused, since CQL has no such relation, and 'IN'
+ * key. The facet is surveyed when the function is built — every
+ * predicate read once, every distinct shape initialized: its clause
+ * composed and its binder compiled against the metadata layout — and
+ * the forms are reported on the console before the first cycle, so how
+ * many prepared statements the run will hold is known up front. From
+ * then on a cycle costs the record read, the fingerprint lookup, and
+ * the value projection. Placed at a bind point of a prepared statement,
+ * the fragment has the adapter prepare one statement per form and bind
+ * the values through it. Only flat conjunctions over named fields have
+ * a clause; '!=' is refused, since CQL has no such relation, and 'IN'
  * binds a list. The cycle value is the predicate record's ordinal. */
 @ThreadSafeMapper
 @Categories(Category.vectors)
@@ -68,42 +69,106 @@ public class PredicateClause implements LongFunction<PreparedFragment> {
     /// binder that types and orders its values.
     record Form(String key, String text, PredicateBinder binder, int arity) { }
 
+    /// What a survey of the facet found: how many predicates, and each
+    /// form with the number of predicates of that shape, most common
+    /// first.
+    public record Survey(String facet, long predicates, Map<String, Long> countsByForm, Map<String, String> clauseByForm) {
+        /// The number of distinct forms.
+        public int forms() { return countsByForm.size(); }
+
+        /// One line per form: count, clause, and the fingerprint.
+        public String report() {
+            StringBuilder out = new StringBuilder();
+            countsByForm.forEach((key, count) -> out.append(String.format("%8d  %s   [%s]%n", count, clauseByForm.get(key), key)));
+            return out.toString();
+        }
+
+        @Override public String toString() { return forms() + " predicate forms across " + predicates + " predicates in " + facet; }
+    }
+
     private final TestDataView tdv;
     private final RecordFacet predicates;
     private final Layout layout;
-    private final ConcurrentHashMap<String, Form> forms = new ConcurrentHashMap<>();
+    private final Map<String, Form> forms = new LinkedHashMap<>();
+    private final Survey survey;
 
     @Example({"PredicateClause('exampledataset:exampleprofile','metadata_predicates','metadata_content')",
-        "Each predicate as a prepared WHERE fragment — 'year >= ? AND topic = ?' with its values — one prepared form per predicate shape"})
+        "Each predicate as a prepared WHERE fragment — 'year >= ? AND topic = ?' with its values — one prepared form per predicate shape, the forms surveyed and reported before the first cycle"})
     public PredicateClause(String datasetAndProfile, String predicateFacet, String metadataFacet) {
         this(datasetAndProfile, predicateFacet, metadataFacet, VectorDataSettings.defaults());
     }
 
     /** Construct with explicit vectordata settings, including an isolated cache location. */
     public PredicateClause(String datasetAndProfile, String predicateFacet, String metadataFacet, VectorDataSettings settings) {
+        this(datasetAndProfile, predicateFacet, metadataFacet, settings, true);
+    }
+
+    /// The binding form reports its survey on the console; a survey
+    /// taken for its own sake — the `predicateForms` expression — does
+    /// not, since a workload evaluates its expressions at every step.
+    PredicateClause(String datasetAndProfile, String predicateFacet, String metadataFacet, VectorDataSettings settings, boolean report) {
         tdv = Catalog.of(CatalogSources.defaults(), settings).openProfile(datasetAndProfile);
         predicates = tdv.openFacetRecords(FacetNames.canonical(predicateFacet));
         layout = Layout.discover(tdv.openFacetRecords(FacetNames.canonical(metadataFacet)));
+        survey = survey(datasetAndProfile + ":" + FacetNames.canonical(predicateFacet));
+        if (report) System.err.printf("[vectordata] %s%n%s", survey, survey.report());
     }
 
-    /// The forms initialized so far: fingerprint to clause text. Grows
-    /// as shapes are met; complete once every distinct shape has been
-    /// applied.
-    public Map<String, String> forms() {
-        Map<String, String> out = new LinkedHashMap<>();
-        forms.forEach((key, form) -> out.put(key, form.text()));
-        return out;
+    /// A survey without a binding: the forms a facet holds, quietly.
+    public static Survey surveyOf(String datasetAndProfile, String predicateFacet, String metadataFacet) {
+        return new PredicateClause(datasetAndProfile, predicateFacet, metadataFacet, VectorDataSettings.defaults(), false).survey();
     }
 
-    @Override
-    public PreparedFragment apply(long ordinal) {
+    /// Reads every predicate once, initializing each shape the first
+    /// time it appears and counting the rest. A shape that cannot be
+    /// prepared is reported with the others, and refused after the
+    /// survey rather than on the cycle that would have met it.
+    private Survey survey(String label) {
+        Map<String, Long> counts = new LinkedHashMap<>();
+        Map<String, String> clauses = new LinkedHashMap<>();
+        Map<String, String> refused = new LinkedHashMap<>();
+        long total = predicates.count();
+        for (long ordinal = 0; ordinal < total; ordinal++) {
+            PNode predicate = decode(ordinal);
+            String key = predicate.fingerprint().display();
+            counts.merge(key, 1L, Long::sum);
+            if (forms.containsKey(key) || refused.containsKey(key)) continue;
+            try { forms.put(key, initialize(key, predicate)); clauses.put(key, forms.get(key).text()); }
+            catch (BindException e) { refused.put(key, e.getMessage()); clauses.put(key, "(refused: " + e.getMessage() + ")"); }
+        }
+        List<Map.Entry<String, Long>> ordered = new ArrayList<>(counts.entrySet());
+        ordered.sort((a, b) -> Long.compare(b.getValue(), a.getValue()));
+        Map<String, Long> byCount = new LinkedHashMap<>();
+        Map<String, String> clauseByCount = new LinkedHashMap<>();
+        for (Map.Entry<String, Long> e : ordered) { byCount.put(e.getKey(), e.getValue()); clauseByCount.put(e.getKey(), clauses.get(e.getKey())); }
+        Survey found = new Survey(label, total, Collections.unmodifiableMap(byCount), Collections.unmodifiableMap(clauseByCount));
+        if (!refused.isEmpty()) {
+            System.err.printf("[vectordata] %s%n%s", found, found.report());
+            throw BindException.record(refused.size() + " of the " + found.forms() + " predicate forms in " + label + " cannot be prepared: " + refused);
+        }
+        return found;
+    }
+
+    private PNode decode(long ordinal) {
         ANode node;
         try { node = ANode.decode(predicates.recordBytes(ordinal)); }
         catch (ANodeException e) { throw BindException.record(e.getMessage()); }
         if (!(node instanceof ANode.P p))
             throw BindException.record("facet '" + predicates.name() + "' record " + ordinal + " is not a predicate — its dialect byte says MNode");
-        PNode predicate = p.node();
-        Form form = forms.computeIfAbsent(predicate.fingerprint().display(), key -> initialize(key, predicate));
+        return p.node();
+    }
+
+    /// The survey taken when this function was built.
+    public Survey survey() { return survey; }
+
+    /// The forms, fingerprint to clause text, most common first.
+    public Map<String, String> forms() { return survey.clauseByForm(); }
+
+    @Override
+    public PreparedFragment apply(long ordinal) {
+        PNode predicate = decode(ordinal);
+        Form form = forms.get(predicate.fingerprint().display());
+        if (form == null) throw BindException.record("predicate " + ordinal + " has a shape the survey did not see: " + predicate.display());
         Object[] values = new Object[form.arity()];
         int[] slot = {0};
         form.binder().bindEach(predicate, (condition, comparands) -> values[slot[0]++] = value(condition, comparands));

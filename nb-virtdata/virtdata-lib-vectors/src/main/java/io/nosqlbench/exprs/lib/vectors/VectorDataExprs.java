@@ -37,6 +37,7 @@ import io.nosqlbench.vectordata.anode.MNode;
 import io.nosqlbench.vectordata.binding.Layout;
 import io.nosqlbench.vectordata.records.RecordFacet;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.CqlColumns;
+import io.nosqlbench.virtdata.lib.vectors.vectordata.PredicateClause;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.PrefetchMeter;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.WindowedReader;
 import org.apache.logging.log4j.LogManager;
@@ -277,5 +278,15 @@ public class VectorDataExprs implements ExprFunctionProvider {
         Layout layout = Layout.discover(facet);
         MNode sample = facet.count() == 0 ? null : MNode.fromBytes(facet.recordBytes(0));
         return CqlColumns.columns(layout, sample);
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_predicates\"", "\"metadata_content\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "predicateForms",
+        synopsis = "predicateForms(\"dataset:profile\", \"predicate_facet\", \"metadata_facet\")",
+        description = "Survey a predicate facet: return the number of distinct predicate forms and the number of predicates, with forms() and report() for the detail. Each form is one prepared statement in a predicated search."
+    )
+    public PredicateClause.Survey predicateForms(String datasetNameAndProfile, String predicateFacet, String metadataFacet) {
+        return PredicateClause.surveyOf(datasetNameAndProfile, predicateFacet, metadataFacet);
     }
 }
