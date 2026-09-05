@@ -307,6 +307,12 @@ java -jar nb5.jar run driver=stdout cycles=10 \
   "op={{RecordForm('example:default','metadata_content','row');Stringify()}}"
 java -jar nb5.jar run driver=stdout cycles=10 \
   "op={{PredicateParams('example:default','metadata_predicates','metadata_content');Stringify()}}"
+
+# The other contract — rendering, for a statement whose shape changes
+# per cycle: a predicate as a CQL WHERE clause with its comparands
+# inlined, or a metadata record in any vernacular:
+java -jar nb5.jar run driver=stdout cycles=10 \
+  "op={{RecordText('example:default','metadata_predicates','cql')}}"
 ```
 
 Prefetch modes on every vector mapper: `eager` (default; aliases
