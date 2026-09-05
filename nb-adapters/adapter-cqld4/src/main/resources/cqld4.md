@@ -113,6 +113,34 @@ The previous form will work, but you will get a warning, as these should be depr
 forward. It is best to use the forms in the examples below. The defaults and field names for the
 classic form have not changed.
 
+### Prepared statements whose text varies by form
+
+A bind value may be a *prepared fragment* — statement text with its own
+`?` markers, the values for them, and a key naming the form the text
+has. When a bind point of a `prepared` op yields one, the fragment's
+text takes the bind point's place in the statement and its values take
+the place of that bind value. The statement is prepared once per
+distinct form key, the first time that form is seen, and every later
+cycle of the same form binds through the statement already prepared.
+This is how a structure that changes per cycle — a predicate facet
+whose filters differ in shape from query to query — drives a prepared
+statement rather than an inlined one:
+
+```yaml
+bindings:
+  predicate: PredicateClause('mydataset:myprofile','metadata_predicates','metadata_content')
+  test_vec: QueryVectors('mydataset:myprofile'); ToCqlVector();
+ops:
+  select_ann_predicated:
+    prepared: |
+      SELECT key FROM ks.t WHERE {predicate}
+      ORDER BY embedding ANN OF {test_vec} LIMIT 100;
+```
+
+Each distinct predicate shape becomes one prepared statement, keyed by
+the predicate's fingerprint; the comparands bind as parameters typed
+from the metadata fields they constrain.
+
 ## CQLd4 Op Template Examples
 
 ```yaml
