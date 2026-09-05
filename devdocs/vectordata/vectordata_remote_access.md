@@ -313,6 +313,13 @@ java -jar nb5.jar run driver=stdout cycles=10 \
 # inlined, or a metadata record in any vernacular:
 java -jar nb5.jar run driver=stdout cycles=10 \
   "op={{RecordText('example:default','metadata_predicates','cql')}}"
+
+# And the prepared form of the same: a fragment per predicate — the
+# shape's WHERE clause with markers, the comparands as values, the
+# fingerprint as the form key — which the cqld4 adapter prepares once
+# per shape (see cql_vector_predicated for the whole workload):
+java -jar nb5.jar run driver=stdout cycles=10 \
+  "op={{PredicateClause('example:default','metadata_predicates','metadata_content')}}"
 ```
 
 Prefetch modes on every vector mapper: `eager` (default; aliases

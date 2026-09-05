@@ -21,14 +21,20 @@ description: |
   layout (recordColumns) so they accept exactly those values.
 
   The search phase runs, per cycle, the query vector at that ordinal
-  under the predicate published for that query. The predicates differ
-  in shape from one query to the next — an equality on one column, a
-  bounded range on another, a conjunction of both — so no single
-  prepared statement fits them; the predicate is rendered as a CQL
-  WHERE expression (RecordText, vernacular 'cql') and inlined into a
-  simple statement, while the vector still binds as a literal. The
-  columns the predicates reference carry SAI indexes, which is what
-  lets the filter combine with ANN ordering.
+  under the predicate published for that query, through a prepared
+  statement. The predicates differ in shape from one query to the next
+  — an equality on one column, a bounded range on another, a
+  conjunction of both — so the predicate's structure is reified through
+  the template: the {predicate} bind point takes a fragment
+  (PredicateClause) carrying the shape's WHERE clause with a marker per
+  comparand, the comparands as values typed from the metadata fields,
+  and the predicate's fingerprint as the form key. The adapter prepares
+  one statement per form the first time that form is seen and binds
+  every later query of that shape through it, so each statement form is
+  initialized once and applied from then on. The columns the predicates
+  reference carry SAI indexes, which is what lets the filter combine
+  with ANN ordering. (RecordText renders the same predicate as inline
+  text, for a driver that cannot prepare.)
 
   Results are verified against the pre-filtered ground truth — the
   exact top-k among the base vectors that satisfy the predicate — since
@@ -72,9 +78,10 @@ bindings:
   id: ToString()
   train_vec: BaseVectors('{{@spec}}','TEMPLATE(base_window,)','TEMPLATE(base_prefetch,eager)'); ToCqlVector();
   test_vec: QueryVectors('{{@spec}}'); ToCqlVector();
-  # The predicate published for the query at this ordinal, as a CQL
-  # WHERE expression with its comparands inlined.
-  where: RecordText('{{@spec}}','metadata_predicates','cql')
+  # The predicate published for the query at this ordinal, as a prepared
+  # fragment: its shape's WHERE clause with markers, its comparands as
+  # values, its fingerprint as the form key.
+  predicate: PredicateClause('{{@spec}}','metadata_predicates','metadata_content')
   relevant_indices: Facet('{{@spec}}','TEMPLATE(groundtruth,prefiltered)_neighbor_indices')
   unfiltered_indices: NeighborIndices('{{@spec}}')
   # One metadata field each, bound at the base ordinal the cycle names.
@@ -190,13 +197,13 @@ blocks:
 
   search_and_verify:
     ops:
-      # A simple statement, rendered per cycle: the predicate's shape
-      # changes from query to query, so the WHERE clause is text; the
-      # vector inlines as a literal.
+      # One prepared statement per predicate shape: the fragment at
+      # {predicate} supplies the shape's clause and its values, and the
+      # adapter prepares each shape once, keyed by the fingerprint.
       select_ann_predicated:
-        simple: |
+        prepared: |
           SELECT key FROM TEMPLATE(keyspace,baselines).TEMPLATE(table,passages)
-          WHERE {where}
+          WHERE {predicate}
           ORDER BY embedding ANN OF {test_vec} LIMIT {{@maxk}};
         tags:
           optype: select
