@@ -77,7 +77,11 @@ public class RecordBindingFunctionsTest {
             .toBytes();
     }
 
+    /// Two shapes: a conjunction for most queries, and every seventh
+    /// query a lone equality on the id — so a facet's predicates differ
+    /// in shape the way a published one's do.
     static byte[] predicate(int i) {
+        if (i % 7 == 6) return new PNode.Predicate(new FieldRef.Named("id"), OpType.IN, List.of(new Comparand.Int(i), new Comparand.Int(i + 1))).toBytesNamed();
         return new PNode.Conjugate(ConjugateType.AND, List.of(
             new PNode.Predicate(new FieldRef.Named("created"), OpType.GE, List.of(new Comparand.Int(EPOCH_MILLIS + i))),
             new PNode.Predicate(new FieldRef.Named("tag"), OpType.EQ, List.of(new Comparand.Text("t" + i % 3))))).toBytesNamed();
@@ -213,6 +217,22 @@ public class RecordBindingFunctionsTest {
         assertEquals("map<text, text>", CqlColumns.cqlType(BindType.map(null, null), null));
         assertEquals("smallint", CqlColumns.cqlType(BindType.INT16, null));
         assertEquals("text", CqlColumns.cqlType(BindType.TIMESTAMP_TEXT, null), "text on the wire, text in the column");
+    }
+
+    @Test
+    void predicateClauseInitializesOneFormPerShapeAndBindsThroughIt() {
+        PredicateClause clause = new PredicateClause("records:default", "metadata_predicates", "metadata_content", settings);
+        assertTrue(clause.forms().isEmpty(), "no form until a shape is met");
+        io.nosqlbench.virtdata.core.templates.PreparedFragment third = clause.apply(3);
+        assertEquals("created >= ? AND tag = ?", third.text());
+        assertEquals("(created >= 0 AND tag = '')", third.formKey(), "keyed by the predicate's fingerprint");
+        assertArrayEquals(new Object[] {Instant.ofEpochMilli(EPOCH_MILLIS + 3), "t0"}, third.values(), "values typed from the metadata fields");
+        io.nosqlbench.virtdata.core.templates.PreparedFragment sixth = clause.apply(6);
+        assertEquals("id IN ?", sixth.text());
+        assertEquals(List.of(List.of(6L, 7L)), List.of(sixth.values()), "a membership condition binds a list");
+        for (long o = 0; o < 20; o++) clause.apply(o);
+        assertEquals(Map.of("(created >= 0 AND tag = '')", "created >= ? AND tag = ?", "id IN (0, 0)", "id IN ?"), clause.forms(), "two shapes, two forms, initialized once each");
+        assertSame(third.formKey(), clause.apply(10).formKey(), "the form key is the same instance every cycle, so an adapter's lookup allocates nothing");
     }
 
     // ── fixture writers ────────────────────────────────────────────
