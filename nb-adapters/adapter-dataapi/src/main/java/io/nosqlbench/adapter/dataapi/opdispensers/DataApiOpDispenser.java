@@ -34,6 +34,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.*;
 import java.util.function.LongFunction;
+import java.util.stream.Stream;
 
 public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, DataApiSpace> {
     protected final LongFunction<String> targetFunction;
@@ -225,34 +226,39 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     protected Projection[] getProjectionFromOp(ParsedOp op, long l) {
-        Projection[] projection = null;
         Optional<LongFunction<Map>> projectionFunction = op.getAsOptionalFunction("projection", Map.class);
-        if (projectionFunction.isPresent()) {
-            @SuppressWarnings("unchecked")
-            Map<String,List<String>> projectionFields = projectionFunction.get().apply(l);
-            for (Map.Entry<String,List<String>> field : projectionFields.entrySet()) {
-                List<String> includeFields = field.getValue();
-                StringBuffer sb = new StringBuffer();
-                for (String includeField : includeFields) {
-                    sb.append(includeField).append(",");
-                }
-                sb.deleteCharAt(sb.length() - 1);
-                if (field.getKey().equalsIgnoreCase("include")) {
-                    projection = Projection.include(sb.toString());
-                } else if (field.getKey().equalsIgnoreCase("exclude")) {
-                    projection = Projection.exclude(sb.toString());
-                } else {
-                    logger.error("Projection " + field + " not supported");
-                }
-            }
+        if (projectionFunction.isEmpty()) {
+            return null;
         }
-        return projection;
+        @SuppressWarnings("unchecked")
+        Map<String, List<String>> projectionFields = projectionFunction.get().apply(l);
+        return projectionFields.entrySet().stream()
+            .flatMap(field -> {
+                String[] arr = field.getValue().toArray(new String[0]);
+                if (field.getKey().equalsIgnoreCase("include")) {
+                    return Arrays.stream(Projection.include(arr));
+                } else if (field.getKey().equalsIgnoreCase("exclude")) {
+                    return Arrays.stream(Projection.exclude(arr));
+                } else {
+                    logger.error("Projection directive '" + field.getKey() + "' not supported");
+                    return Stream.<Projection>empty();
+                }
+            }).toArray(Projection[]::new);
     }
 
     protected Boolean getUpsertFromOp(ParsedOp op, long l) {
         Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
         if (upsertFunction.isPresent()) {
             LongFunction<Boolean> uf = upsertFunction.get();
+            return uf.apply(l);
+        }
+        return null;
+    }
+
+    protected Boolean getIncludeSimilarityFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Boolean>> includeSimFunction = op.getAsOptionalFunction("include_similarity", Boolean.class);
+        if (includeSimFunction.isPresent()) {
+            LongFunction<Boolean> uf = includeSimFunction.get();
             return uf.apply(l);
         }
         return null;

@@ -41,7 +41,7 @@ public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiCollectionFindOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
+            Filter filter = getLegacyFilterFromOp(op, l);
             CollectionFindOneOptions options = getCollectionFindOneOptions(op, l);
             return new DataApiCollectionFindOneOp(
                 db,
@@ -62,7 +62,13 @@ public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
         if (projection != null) {
             options = options.projection(projection);
         }
-        options.includeSimilarity(true);
+        Boolean includeSimilarity = getIncludeSimilarityFromOp(op, l);
+        if (includeSimilarity != null) {
+            options.includeSimilarity(includeSimilarity);
+        } else {
+            // defaulting to true
+            options.includeSimilarity(true);
+        }
         return options;
     }
 
