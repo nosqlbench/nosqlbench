@@ -38,7 +38,6 @@ public enum DataApiOpType {
     insert_one,
     insert_one_vector,
     find,
-    find_one,
     find_vector,
     find_vector_filter,
     find_by_id,
@@ -60,6 +59,7 @@ public enum DataApiOpType {
     create_collection_with_class,
     // in-collection ops:
     find_distinct,
+    find_one,
     find_one_and_update,
 
     // NEW-STYLE OPS
@@ -67,5 +67,6 @@ public enum DataApiOpType {
     // db-admin ops:
     // in-database ops:
     // in-collection ops:
+    collection_find_one,
     collection_find_one_and_update,
 }

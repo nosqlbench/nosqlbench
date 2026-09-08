@@ -37,8 +37,13 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
     private static final Map<DataApiOpType, DataApiOpType> DEPRECATED_OP_TYPES;
     static {
         DEPRECATED_OP_TYPES = new HashMap<>();
+        // admin ops:
         DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection_with_class, null);
+        // db-admin ops:
+        // in-database ops:
+        // in-collection ops:
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_distinct,               null);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one,                    DataApiOpType.collection_find_one);
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_update,         DataApiOpType.collection_find_one_and_update);
     }
 
@@ -91,7 +96,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_one_vector -> new DataApiCollectionInsertOneVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find -> new DataApiCollectionFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_one -> new DataApiCollectionFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_vector -> new DataApiCollectionFindVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_vector_filter -> new DataApiCollectionFindVectorFilterOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_by_id -> new DataApiCollectionFindByIdOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -114,9 +118,11 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case create_collection_with_class -> new DataApiDbLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case find_distinct -> new DataApiCollectionLegacyFindDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_one -> new DataApiCollectionLegacyFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_one_and_update -> new DataApiCollectionLegacyFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
             // NEW-STYLE OPS
+            case collection_find_one -> new DataApiCollectionFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find_one_and_update -> new DataApiCollectionFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
