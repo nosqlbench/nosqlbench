@@ -95,10 +95,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case insert_many -> new DataApiCollectionInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_one_vector -> new DataApiCollectionInsertOneVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find -> new DataApiCollectionFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_vector -> new DataApiCollectionFindVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_vector_filter -> new DataApiCollectionFindVectorFilterOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case find_by_id -> new DataApiCollectionFindByIdOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case update_one -> new DataApiCollectionUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case update_many -> new DataApiCollectionUpdateManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete_one -> new DataApiCollectionDeleteOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -117,6 +113,10 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // in-database ops:
             case create_collection_with_class -> new DataApiDbLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
+            case find -> new DataApiCollectionLegacyFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_vector -> new DataApiCollectionLegacyFindVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_vector_filter -> new DataApiCollectionLegacyFindVectorFilterOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case find_by_id -> new DataApiCollectionLegacyFindByIdOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_distinct -> new DataApiCollectionLegacyFindDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_one -> new DataApiCollectionLegacyFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_one_and_update -> new DataApiCollectionLegacyFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);

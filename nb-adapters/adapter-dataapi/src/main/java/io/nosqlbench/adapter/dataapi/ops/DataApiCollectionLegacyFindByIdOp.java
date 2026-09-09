@@ -19,28 +19,18 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
-import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
-
-import java.util.List;
-
-public class DataApiCollectionFindOp extends DataApiBaseOp {
+public class DataApiCollectionLegacyFindByIdOp extends DataApiBaseOp {
     private final Collection<Document> collection;
-    private final Filter filter;
-    private final CollectionFindOptions options;
+    private final Object id;
 
-    public DataApiCollectionFindOp(Database db, Collection<Document> collection, Filter filter, CollectionFindOptions options) {
+    public DataApiCollectionLegacyFindByIdOp(Database db, Collection<Document> collection, Object id) {
         super(db);
         this.collection = collection;
-        this.filter = filter;
-        this.options = options;
+        this.id = id;
     }
 
     @Override
-    public List<Document> apply(long value) {
-        CollectionFindCursor<Document, Document> cursor = collection.find(filter, options);
-        // Caution: might bloat memory
-        return cursor.toList();
+    public Object apply(long value) {
+        return collection.findById(id);
     }
 }

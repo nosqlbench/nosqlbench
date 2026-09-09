@@ -20,28 +20,28 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindVectorFilterOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionLegacyFindVectorFilterOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiCollectionFindVectorFilterOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindVectorFilterOpDispenser.class);
-    private final LongFunction<DataApiCollectionFindVectorFilterOp> opFunction;
-    public DataApiCollectionFindVectorFilterOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionLegacyFindVectorFilterOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyFindVectorFilterOpDispenser.class);
+    private final LongFunction<DataApiCollectionLegacyFindVectorFilterOp> opFunction;
+    public DataApiCollectionLegacyFindVectorFilterOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionFindVectorFilterOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionLegacyFindVectorFilterOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             float[] vector = getVectorValues(op, l);
             Filter filter = getLegacyFilterFromOp(op, l);
             int limit = getLimit(op, l);
-            return new DataApiCollectionFindVectorFilterOp(
+            return new DataApiCollectionLegacyFindVectorFilterOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 vector,
