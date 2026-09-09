@@ -89,39 +89,6 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             return new Filter(filterMap);
         }
         return null;
-        /*
-        // TODO choose whether to switch to the free-form route (performant? viable re: bindings?)
-        Filter filter = null;
-        Optional<LongFunction<List>> filterFunction = op.getAsOptionalFunction("filters", List.class)
-            .or(() -> op.getAsOptionalFunction("filter",List.class));
-
-        if (filterFunction.isPresent()) {
-            @SuppressWarnings("unchecked")
-            List<Map<String,Object>> filters = filterFunction.get().apply(l);
-            List<Filter> andFilterList = new ArrayList<>();
-            List<Filter> orFilterList = new ArrayList<>();
-            for (Map<String,Object> filterFields : filters) {
-                switch ((String)filterFields.get("conjunction")) {
-                    case "and" ->
-                        addOperatorFilter(andFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
-                    case "or" ->
-                        addOperatorFilter(orFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
-                    default -> logger.error(() -> "Conjunction " + filterFields.get("conjunction") + " not supported");
-                }
-            }
-            if (!andFilterList.isEmpty() && !orFilterList.isEmpty()) {
-                throw new OpConfigError(
-                    "filters list mixes 'and' and 'or' conjunctions, which is not supported; " +
-                    "use only one conjunction type per filters list"
-                );
-            }
-            if (!andFilterList.isEmpty())
-                filter = Filters.and(andFilterList.toArray(new Filter[0]));
-            if (!orFilterList.isEmpty())
-                filter = Filters.or(orFilterList.toArray(new Filter[0]));
-        }
-        return filter;
-        */
     }
 
     protected void addOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
@@ -159,21 +126,6 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     protected Update getUpdateFromOp(ParsedOp op, long l) {
         Map<String, Object> updateMap = getFreeFormFromOp(op, l, "update", true);
         return new Update(updateMap);
-        /* TODO choose whether to switch to freeform for update
-        Update update = Update.create();
-        Optional<LongFunction<List>> updatesFunction = op.getAsOptionalFunction("updates", List.class);
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> updatesList = updatesFunction
-            .map(f -> (List<Map<String, Object>>) f.apply(l))
-            .orElse(List.of());
-        for (Map<String, Object> entry : updatesList) {
-            String operation = entry.get("operation").toString();
-            String field = entry.get("field").toString();
-            Object value = entry.get("value");
-            applyUpdateOperation(update, operation, field, value);
-        }
-        return update;
-        */
     }
 
     private void applyUpdateOperation(Update update, String operation, String field, Object value) {
