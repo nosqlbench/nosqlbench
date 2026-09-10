@@ -18,12 +18,12 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOneOptions;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
 import com.datastax.astra.client.core.query.Projection;
 import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,20 +31,20 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOneOpDispenser.class);
-    private final LongFunction<DataApiCollectionFindOneOp> opFunction;
-    public DataApiCollectionFindOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOpDispenser.class);
+    private final LongFunction<DataApiCollectionFindOp> opFunction;
+    public DataApiCollectionFindOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionFindOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionFindOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            CollectionFindOneOptions options = getCollectionFindOneOptions(op, l);
-            return new DataApiCollectionFindOneOp(
+            CollectionFindOptions options = getCollectionFindOptions(op, l);
+            return new DataApiCollectionFindOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
@@ -53,8 +53,8 @@ public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private CollectionFindOneOptions getCollectionFindOneOptions(ParsedOp op, long l) {
-        CollectionFindOneOptions options = new CollectionFindOneOptions();
+    private CollectionFindOptions getCollectionFindOptions(ParsedOp op, long l) {
+        CollectionFindOptions options = new CollectionFindOptions();
         Sort sort = getSortFromOp(op, l);
         if (sort != null) {
             options = options.sort(sort);
@@ -62,6 +62,14 @@ public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
             options = options.projection(projection);
+        }
+        Optional<Integer> limit = getLimitFromOp(op, l);
+        if (limit.isPresent()) {
+            options = options.limit(limit.get());
+        }
+        Optional<Integer> skip = getSkipFromOp(op, l);
+        if (skip.isPresent()) {
+            options = options.skip(skip.get());
         }
         Optional<Boolean> includeSimilarity = getIncludeSimilarityFromOp(op, l);
         if (includeSimilarity.isPresent()) {

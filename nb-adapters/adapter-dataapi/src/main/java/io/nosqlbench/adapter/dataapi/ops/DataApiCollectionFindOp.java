@@ -25,12 +25,12 @@ import com.datastax.astra.client.collections.commands.cursor.CollectionFindCurso
 
 import java.util.List;
 
-public class DataApiCollectionLegacyFindOp extends DataApiBaseOp {
+public class DataApiCollectionFindOp extends DataApiBaseOp {
     private final Collection<Document> collection;
     private final Filter filter;
     private final CollectionFindOptions options;
 
-    public DataApiCollectionLegacyFindOp(Database db, Collection<Document> collection, Filter filter, CollectionFindOptions options) {
+    public DataApiCollectionFindOp(Database db, Collection<Document> collection, Filter filter, CollectionFindOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;

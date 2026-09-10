@@ -28,6 +28,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiCollectionLegacyFindOneOpDispenser extends DataApiOpDispenser {
@@ -62,11 +63,11 @@ public class DataApiCollectionLegacyFindOneOpDispenser extends DataApiOpDispense
         if (projection != null) {
             options = options.projection(projection);
         }
-        Boolean includeSimilarity = getIncludeSimilarityFromOp(op, l);
-        if (includeSimilarity != null) {
-            options.includeSimilarity(includeSimilarity);
+        Optional<Boolean> includeSimilarity = getIncludeSimilarityFromOp(op, l);
+        if (includeSimilarity.isPresent()) {
+            options.includeSimilarity(includeSimilarity.get());
         } else {
-            // defaulting to true
+            // defaulting to true (backward-compatibility)
             options.includeSimilarity(true);
         }
         return options;

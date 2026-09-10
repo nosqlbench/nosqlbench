@@ -67,6 +67,7 @@ public enum DataApiOpType {
     // db-admin ops:
     // in-database ops:
     // in-collection ops:
+    collection_find,
     collection_find_one,
     collection_find_one_and_update,
 }

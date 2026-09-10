@@ -207,13 +207,31 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return null;
     }
 
-    protected Boolean getIncludeSimilarityFromOp(ParsedOp op, long l) {
+    protected Optional<Boolean> getIncludeSimilarityFromOp(ParsedOp op, long l) {
         Optional<LongFunction<Boolean>> includeSimFunction = op.getAsOptionalFunction("include_similarity", Boolean.class);
         if (includeSimFunction.isPresent()) {
             LongFunction<Boolean> uf = includeSimFunction.get();
-            return uf.apply(l);
+            return Optional.of(uf.apply(l));
         }
-        return null;
+        return Optional.empty();
+    }
+
+    protected Optional<Integer> getLimitFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Integer>> limitFunction = op.getAsOptionalFunction("limit", Integer.class);
+        if (limitFunction.isPresent()) {
+            LongFunction<Integer> lf = limitFunction.get();
+            return Optional.of(lf.apply(l));
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<Integer> getSkipFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Integer>> skipFunction = op.getAsOptionalFunction("skip", Integer.class);
+        if (skipFunction.isPresent()) {
+            LongFunction<Integer> sf = skipFunction.get();
+            return Optional.of(sf.apply(l));
+        }
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")

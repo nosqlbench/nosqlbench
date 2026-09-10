@@ -42,6 +42,10 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
         // db-admin ops:
         // in-database ops:
         // in-collection ops:
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find,                        DataApiOpType.collection_find);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_vector,                 DataApiOpType.collection_find);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_vector_filter,          DataApiOpType.collection_find);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_by_id,                  null);
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_distinct,               null);
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_one,                    DataApiOpType.collection_find_one);
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_update,         DataApiOpType.collection_find_one_and_update);
@@ -122,6 +126,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case find_one_and_update -> new DataApiCollectionLegacyFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
             // NEW-STYLE OPS
+            case collection_find -> new DataApiCollectionFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find_one -> new DataApiCollectionFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find_one_and_update -> new DataApiCollectionFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
