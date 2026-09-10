@@ -19,10 +19,10 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 
-public class DataApiCollectionDeleteAllOp extends DataApiBaseOp {
+public class DataApiCollectionLegacyDeleteAllOp extends DataApiBaseOp {
     private final Collection collection;
 
-    public DataApiCollectionDeleteAllOp(Database db, Collection collection) {
+    public DataApiCollectionLegacyDeleteAllOp(Database db, Collection collection) {
         super(db);
         this.collection = collection;
     }

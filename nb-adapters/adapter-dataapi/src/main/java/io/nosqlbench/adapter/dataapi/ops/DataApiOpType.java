@@ -39,10 +39,7 @@ public enum DataApiOpType {
     insert_one_vector,
     update_one,
     update_many,
-    delete_one,
     find_one_and_delete,
-    delete_many,
-    delete_all,
     replace_one,
     find_one_and_replace,
     estimated_document_count,
@@ -54,6 +51,9 @@ public enum DataApiOpType {
     // in-database ops:
     create_collection_with_class,
     // in-collection ops:
+    delete_one,
+    delete_many,
+    delete_all,
     find,
     find_vector,
     find_vector_filter,
@@ -67,6 +67,8 @@ public enum DataApiOpType {
     // db-admin ops:
     // in-database ops:
     // in-collection ops:
+    collection_delete_many,
+    collection_delete_one,
     collection_find,
     collection_find_one,
     collection_find_one_and_update,
