@@ -115,7 +115,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // admin ops:
             // db-admin ops:
             // in-database ops:
-            case create_collection_with_class -> new DataApiDbLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_collection_with_class -> new DataApiLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case find -> new DataApiCollectionLegacyFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_vector -> new DataApiCollectionLegacyFindVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);

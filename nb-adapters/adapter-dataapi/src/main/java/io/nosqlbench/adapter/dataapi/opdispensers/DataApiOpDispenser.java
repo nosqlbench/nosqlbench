@@ -368,15 +368,17 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 optionsBldr = optionsBldr.vectorize(pf.apply(l), mf.apply(l));
             }
         }
-        Optional<LongFunction<List>> allowFunc = op.getAsOptionalFunction("allowIndex", List.class);
+        @SuppressWarnings("unchecked")
+        Optional<LongFunction<List<String>>> allowFunc = (Optional<LongFunction<List<String>>>) (Optional<?>) op.getAsOptionalFunction("allowIndex", List.class);
         if (allowFunc.isPresent()) {
-            LongFunction<List> af = allowFunc.get();
-            optionsBldr = optionsBldr.indexingAllow(Arrays.toString(af.apply(l).toArray(new String[0])));
+            LongFunction<List<String>> af = allowFunc.get();
+            optionsBldr = optionsBldr.indexingAllow(af.apply(l).toArray(new String[0]));
         }
-        Optional<LongFunction<List>> denyFunc = op.getAsOptionalFunction("denyIndex", List.class);
+        @SuppressWarnings("unchecked")
+        Optional<LongFunction<List<String>>> denyFunc = (Optional<LongFunction<List<String>>>) (Optional<?>) op.getAsOptionalFunction("denyIndex", List.class);
         if (denyFunc.isPresent()) {
-            LongFunction<List> df = denyFunc.get();
-            optionsBldr = optionsBldr.indexingDeny(Arrays.toString(df.apply(l).toArray(new String[0])));
+            LongFunction<List<String>> df = denyFunc.get();
+            optionsBldr = optionsBldr.indexingDeny(df.apply(l).toArray(new String[0]));
         }
 
         return optionsBldr;
