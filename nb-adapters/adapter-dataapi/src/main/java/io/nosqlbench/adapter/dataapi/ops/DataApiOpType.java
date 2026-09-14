@@ -42,9 +42,8 @@ public enum DataApiOpType {
     find_one_and_delete,
     replace_one,
     find_one_and_replace,
-    estimated_document_count,
     count_documents,
-
+    
     // LEGACY OPS
     // admin ops:
     // db-admin ops:
@@ -61,6 +60,7 @@ public enum DataApiOpType {
     find_distinct,
     find_one,
     find_one_and_update,
+    estimated_document_count,
 
     // NEW-STYLE OPS
     // admin ops:
@@ -72,4 +72,5 @@ public enum DataApiOpType {
     collection_find,
     collection_find_one,
     collection_find_one_and_update,
+    collection_estimated_document_count,
 }

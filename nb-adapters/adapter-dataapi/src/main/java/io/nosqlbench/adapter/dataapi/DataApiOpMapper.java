@@ -52,6 +52,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_distinct,               null);
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_one,                    DataApiOpType.collection_find_one);
         DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_update,         DataApiOpType.collection_find_one_and_update);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.estimated_document_count,    DataApiOpType.collection_estimated_document_count);
     }
 
     private final DataApiDriverAdapter adapter;
@@ -107,8 +108,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case find_one_and_delete -> new DataApiCollectionFindOneAndDeleteOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case replace_one -> new DataApiCollectionReplaceOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_one_and_replace -> new DataApiCollectionFindOneAndReplaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case estimated_document_count ->
-                new DataApiCollectionEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case count_documents -> new DataApiCollectionCountDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
             // LEGACY OPS
@@ -129,11 +128,15 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case find_distinct -> new DataApiCollectionLegacyFindDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_one -> new DataApiCollectionLegacyFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_one_and_update -> new DataApiCollectionLegacyFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case estimated_document_count ->
+                new DataApiCollectionEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
             // NEW-STYLE OPS
             case collection_find -> new DataApiCollectionFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find_one -> new DataApiCollectionFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find_one_and_update -> new DataApiCollectionFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case collection_estimated_document_count ->
+                new DataApiCollectionEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 
