@@ -103,7 +103,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case insert_many -> new DataApiCollectionInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_one_vector -> new DataApiCollectionInsertOneVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case update_one -> new DataApiCollectionUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case update_one -> new DataApiCollectionLegacyUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case update_many -> new DataApiCollectionUpdateManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case find_one_and_delete -> new DataApiCollectionFindOneAndDeleteOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case replace_one -> new DataApiCollectionReplaceOneOpDispenser(adapter, op, typeAndTarget.targetFunction);

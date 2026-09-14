@@ -32,11 +32,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateOneOpDispenser.class);
+public class DataApiCollectionLegacyUpdateOneOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyUpdateOneOpDispenser.class);
     private final LongFunction<DataApiCollectionUpdateOneOp> opFunction;
 
-    public DataApiCollectionUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
@@ -44,7 +44,7 @@ public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiCollectionUpdateOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
+            Filter filter = getLegacyFilterFromOp(op, l);
             CollectionUpdateOneOptions options = getCollectionUpdateOneOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("update", Map.class);
 
