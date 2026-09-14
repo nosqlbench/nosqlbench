@@ -22,17 +22,12 @@ import com.datastax.astra.client.collections.exceptions.TooManyDocumentsToCountE
 import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.query.Filter;
 
-import java.util.Optional;
-
-public class DataApiCollectionCountDocumentsOp extends DataApiBaseOp {
+public class DataApiCollectionLegacyCountDocumentsOp extends DataApiBaseOp {
     private final Collection<Document> collection;
     private final Filter filter;
-    private final Optional<Integer> upperBound;
+    private final int upperBound;
 
-    private final int MAX_UPPER_BOUND = 1000;
-    private final int SILENT_FAILED_COUNT_RESULT = -1;
-
-    public DataApiCollectionCountDocumentsOp(Database db, Collection<Document> collection, Filter filter, Optional<Integer> upperBound) {
+    public DataApiCollectionLegacyCountDocumentsOp(Database db, Collection<Document> collection, Filter filter, int upperBound) {
         super(db);
         this.collection = collection;
         this.filter = filter;
@@ -41,21 +36,10 @@ public class DataApiCollectionCountDocumentsOp extends DataApiBaseOp {
 
     @Override
     public Object apply(long value) {
-        // upper-bound being optional enables a pattern that ignores the "moreData"
-        // (getting rid of the 'upper bound' client-only feature). Still honored if passed (incl. throwing the error).
-        int upperBoundToUse = MAX_UPPER_BOUND;
-        boolean shouldThrowBoundExceeded = false;
-        if (upperBound.isPresent()) {
-            upperBoundToUse = upperBound.get();
-            shouldThrowBoundExceeded = true;
-        }
         try {
-            return collection.countDocuments(filter, upperBoundToUse);
+            return collection.countDocuments(filter, upperBound);
         } catch (TooManyDocumentsToCountException e) {
-            if (shouldThrowBoundExceeded) {
-                throw new RuntimeException(e);
-            }
-            return SILENT_FAILED_COUNT_RESULT;
+            throw new RuntimeException(e);
         }
     }
 }
