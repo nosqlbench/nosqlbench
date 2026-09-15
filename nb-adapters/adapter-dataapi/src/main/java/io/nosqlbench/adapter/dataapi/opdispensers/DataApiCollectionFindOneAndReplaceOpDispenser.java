@@ -31,7 +31,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
@@ -48,14 +47,13 @@ public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDisp
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             CollectionFindOneAndReplaceOptions options = getCollectionFindOneAndReplaceOptions(op, l);
-            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("replacement", Map.class);
-            LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
+            Document replacement = getReplacementFromOp(op, l);
 
             return new DataApiCollectionFindOneAndReplaceOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                docFunc.apply(l),
+                replacement,
                 options
             );
         };

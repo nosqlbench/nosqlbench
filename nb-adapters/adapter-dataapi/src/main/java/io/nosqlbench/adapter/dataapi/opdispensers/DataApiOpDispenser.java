@@ -20,6 +20,7 @@ import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.core.query.Filters;
 import com.datastax.astra.client.collections.definition.CollectionDefinition;
 import com.datastax.astra.client.collections.definition.CollectionDefaultIdTypes;
+import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.collections.commands.ReturnDocument;
 import com.datastax.astra.client.collections.commands.Update;
 import com.datastax.astra.client.collections.commands.Updates;
@@ -90,6 +91,11 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             return new Filter(filterMap);
         }
         return null;
+    }
+
+    protected Document getReplacementFromOp(ParsedOp op, long l) {
+        Map<String, Object> docMap = getFreeFormFromOp(op, l, "replacement", true);
+        return new Document(docMap);
     }
 
     protected void addOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
@@ -256,7 +262,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             return dmf.apply(l);
         } else {
             if (required) {
-                logger.error("Required field '" + fieldName + "' not supplied.");
+                throw new OpConfigError(
+                    "Required field '" + fieldName + "' not supplied."
+                );
             }
             return null;
         }
