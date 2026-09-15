@@ -34,11 +34,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOneAndReplaceOpDispenser.class);
+public class DataApiCollectionLegacyFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyFindOneAndReplaceOpDispenser.class);
     private final LongFunction<DataApiCollectionFindOneAndReplaceOp> opFunction;
 
-    public DataApiCollectionFindOneAndReplaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyFindOneAndReplaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
@@ -46,9 +46,9 @@ public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDisp
     private LongFunction<DataApiCollectionFindOneAndReplaceOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
+            Filter filter = getLegacyFilterFromOp(op, l);
             CollectionFindOneAndReplaceOptions options = getCollectionFindOneAndReplaceOptions(op, l);
-            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("replacement", Map.class);
+            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
             LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
 
             return new DataApiCollectionFindOneAndReplaceOp(
@@ -71,13 +71,16 @@ public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDisp
         if (projection != null) {
             options = options.projection(projection);
         }
-        Boolean upsert = getUpsertFromOp(op, l);
-        if (upsert != null) {
-            options = options.upsert(upsert);
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            options = options.upsert(upsertFunction.get().apply(l));
         }
-        ReturnDocument returnDocument = getReturnDocumentFromOp(op, l);
-        if (returnDocument != null){
-            options = options.returnDocument(returnDocument);
+        if (op.isDefined("returnDocument")) {
+            options = switch ((String) op.get("returnDocument", l)) {
+                case "after" -> options.returnDocument(ReturnDocument.AFTER);
+                case "before" -> options.returnDocument(ReturnDocument.BEFORE);
+                default -> throw new RuntimeException("Invalid returnDocument value: " + op.get("returnDocument", l));
+            };
         }
         return options;
     }

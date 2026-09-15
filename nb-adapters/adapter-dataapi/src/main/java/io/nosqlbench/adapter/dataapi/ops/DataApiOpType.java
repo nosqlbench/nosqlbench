@@ -39,7 +39,6 @@ public enum DataApiOpType {
     insert_one_vector,
     update_many,
     replace_one,
-    find_one_and_replace,
     
     // LEGACY OPS
     // admin ops:
@@ -59,6 +58,7 @@ public enum DataApiOpType {
     find_one,
     update_one,
     find_one_and_update,
+    find_one_and_replace,
     estimated_document_count,
     count_documents,
 
@@ -74,6 +74,7 @@ public enum DataApiOpType {
     collection_find_one,
     collection_update_one,
     collection_find_one_and_update,
+    collection_find_one_and_replace,
     collection_estimated_document_count,
     collection_count_documents,
 }

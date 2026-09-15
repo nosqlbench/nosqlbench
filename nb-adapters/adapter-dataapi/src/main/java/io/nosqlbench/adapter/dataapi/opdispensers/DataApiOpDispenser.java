@@ -20,6 +20,7 @@ import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.core.query.Filters;
 import com.datastax.astra.client.collections.definition.CollectionDefinition;
 import com.datastax.astra.client.collections.definition.CollectionDefaultIdTypes;
+import com.datastax.astra.client.collections.commands.ReturnDocument;
 import com.datastax.astra.client.collections.commands.Update;
 import com.datastax.astra.client.collections.commands.Updates;
 import com.datastax.astra.client.core.query.Sort;
@@ -203,6 +204,19 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         if (upsertFunction.isPresent()) {
             LongFunction<Boolean> uf = upsertFunction.get();
             return uf.apply(l);
+        }
+        return null;
+    }
+
+    protected ReturnDocument getReturnDocumentFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<String>> rdf = op.getAsOptionalFunction("return_document", String.class);
+        if (rdf.isPresent()) {
+            String rdValue = rdf.get().apply(l);
+            return switch (rdValue) {
+                case "after" -> ReturnDocument.AFTER;
+                case "before" -> ReturnDocument.BEFORE;
+                default -> throw new RuntimeException("Invalid returnDocument value: " + op.get("return_document", l));
+            };
         }
         return null;
     }
