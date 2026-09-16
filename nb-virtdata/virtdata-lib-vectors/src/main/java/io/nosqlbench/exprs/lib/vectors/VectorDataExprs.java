@@ -37,6 +37,7 @@ import io.nosqlbench.vectordata.anode.MNode;
 import io.nosqlbench.vectordata.binding.Layout;
 import io.nosqlbench.vectordata.records.RecordFacet;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.CqlColumns;
+import io.nosqlbench.virtdata.lib.vectors.vectordata.GroundTruthCoverage;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.PredicateClause;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.PrefetchMeter;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.WindowedReader;
@@ -278,6 +279,30 @@ public class VectorDataExprs implements ExprFunctionProvider {
         Layout layout = Layout.discover(facet);
         MNode sample = facet.count() == 0 ? null : MNode.fromBytes(facet.recordBytes(0));
         return CqlColumns.columns(layout, sample);
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"neighbor_indices\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "groundTruthCoverage",
+        synopsis = "groundTruthCoverage(\"dataset:profile\", \"ground_truth_facet\")",
+        description = "Survey a ground-truth facet before anything is loaded: how many of its queries have all k neighbors, how many have none, and the recall@k ceiling a perfect search would score under the strict recall measure — a negative entry is a sentinel for a neighbor that does not exist, which a filtered ground truth over a small slice carries whenever a predicate matches fewer than k rows. Fields: queries, k, fullRows, emptyRows, ceiling, isComplete."
+    )
+    public GroundTruthCoverage groundTruthCoverage(String datasetNameAndProfile, String groundTruthFacet) {
+        return GroundTruthCoverage.of(datasetNameAndProfile + ":" + groundTruthFacet, dataset(datasetNameAndProfile).openFacet(groundTruthFacet));
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"neighbor_indices\"", "0.95"}, matches = ".+")
+    @ExprExample(args = {"\"airports:demo\"", "\"neighbor_indices\"", "\"0\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "requireAttainableRecall",
+        synopsis = "requireAttainableRecall(\"dataset:profile\", \"ground_truth_facet\", minimum)",
+        description = "The coverage of groundTruthCoverage, refused when its recall@k ceiling is below minimum: a run whose strict recall could never be read is stopped before it loads anything, with a message naming the ceiling and the profiles that would read. Pass 0 to let a smoke run through and read recall_attainable instead."
+    )
+    public GroundTruthCoverage requireAttainableRecall(String datasetNameAndProfile, String groundTruthFacet, Object minimum) {
+        double floor = minimum instanceof Number number ? number.doubleValue() : Double.parseDouble(String.valueOf(minimum).trim());
+        GroundTruthCoverage coverage = groundTruthCoverage(datasetNameAndProfile, groundTruthFacet);
+        System.err.printf("[vectordata] %s%n", coverage);
+        return coverage.require(floor);
     }
 
     @ExprExample(args = {"\"airports:demo\"", "\"metadata_predicates\"", "\"metadata_content\""}, matches = ".+")
