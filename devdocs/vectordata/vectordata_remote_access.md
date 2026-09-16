@@ -211,6 +211,11 @@ passes through untouched. The vectordata expr functions:
 # {{warmup = prefetchBackground("example:default", "base_vectors", "[0..1M)")}}
 # {{= warmup.join().rangesFetched()}}
 
+# What a filtered ground truth can pay out, before anything is loaded —
+# see "Reading recall on a filtered search" below:
+# {{= groundTruthCoverage("example:default", "prefiltered_neighbor_indices")}}
+# {{= requireAttainableRecall("example:default", "prefiltered_neighbor_indices", 0.95).ceiling()}}
+
 # Readers, for expr-driven checks:
 # {{= baseVectors("example:default").count()}}
 # {{= facet("example:default", "metadata_results").count()}}
@@ -337,6 +342,118 @@ demand-pages, as it would with no window. Ordinals mean the same thing
 here, in `VariableFacet`, and in `prefetchCycles`. The window is
 translated into dataset coordinates for the fetch, so the warmed bytes
 are the bytes the reader will expose.
+
+## Reading recall on a filtered search
+
+A predicated search is verified against a **filtered** ground truth: for
+each query, the exact top-k among the base vectors that satisfy that
+query's predicate. That ground truth is only as deep as the predicate's
+match set, and on a small profile the match set is often shallower than
+k. Read this section before holding a system to a recall number from a
+sized profile, because the number can be low for a reason that has
+nothing to do with the system.
+
+### How recall degrades at low-cardinality strata
+
+A predicate of selectivity `s` over a slice of `N` base vectors matches
+about `s x N` rows. The ground truth for that query holds the top-k
+among those rows and no more, so when `s x N < k` the row is padded to k
+with `-1` sentinels: entries that name no vector and that no search can
+return. The strict recall measure divides the hits by k regardless, so
+a query with `m < k` attainable neighbors can score at most `m / k` even
+when the search returns every one of them.
+
+Averaged over a query set, that gives the profile a **ceiling**: the
+mean of `min(m, k) / k` across its queries, which is the recall@k a
+perfect search would score. A published dataset carries a ladder of
+selectivities meant for its full size; cut the same predicates to a
+small slice and the ladder walks off the bottom of it. On a million-row
+slice a selectivity of `1e-3` still yields about a thousand matches per
+predicate, comfortably above k = 100; on a hundred-thousand-row slice
+the same ladder's `1e-4` rung yields ten, `1e-5` yields one, and
+everything below yields nothing. The mixed ladder on a 100k slice
+therefore reads like this, measured against a local Cassandra:
+
+| Profile | Queries with all k | Queries with none | Ceiling | Measured recall@100 |
+|---|---|---|---|---|
+| 100k, mixed ladder | 916 of 10,000 | 3,860 | 0.1428 | 0.1428 |
+| 300k, uniform `1e-3` | 7,902 of 10,000 | 0 | 0.9881 | not run |
+| 1m, uniform `1e-3` | 10,000 of 10,000 | 0 | 1.0000 | 0.9999 |
+
+The first row is the cascade: a search that found **every** attainable
+neighbor reads at 14 %, and a threshold written for the third row
+fails it. The middle row shows why the arithmetic is only a first
+guess: `1e-3 x 300k` is 300 matches on average, yet a fifth of its
+queries still fall short of k, because a selectivity is a band the
+generator aims for and the per-predicate counts spread around it. The
+survey, not the multiplication, decides.
+
+Three consequences follow, and the tooling encodes each.
+
+### Survey before loading
+
+The ground-truth facet alone says what the profile can pay out, and it
+is a few megabytes against the hours a load can take. `groundTruthCoverage`
+reads it and reports the query count, how many queries have all k
+neighbors, how many have none, and the ceiling; `requireAttainableRecall`
+refuses the run when the ceiling is below what you will accept, naming
+the ceiling and what to do instead:
+
+```bash
+# Survey any profile from the CLI without loading a row:
+java -jar nb5.jar run driver=stdout cycles=1 \
+  "op={{= groundTruthCoverage('example:100k', 'prefiltered_neighbor_indices')}}"
+
+# The predicated workload does this itself in its derived parameters and
+# refuses below min_attainable (default 0.95) before its first phase:
+java -jar nb5.jar cql_vector_predicated default.schema_ks default.schema default.rampup default.search_and_verify \
+  driver=cqld4 dataset=example:100k hosts=... localdc=...
+#   -> attainable recall@100 ceiling is 0.1428, below the required 0.95 ...
+
+# A smoke run of the binding path on a padded profile, on purpose:
+java -jar nb5.jar cql_vector_predicated ... dataset=example:100k min_attainable=0
+```
+
+### Report the attainable measure beside the strict one
+
+`RelevancyFunctions.attainable_recall("recall_attainable", k)` leaves the
+sentinels out of the denominator: of the neighbors that exist for the
+query, the share found in the first k results. A query with no
+attainable neighbor scores 1.0, since nothing could be found and
+nothing was missed; how many such queries there are is the ground
+truth's business and the survey has already said. The predicated
+workload reports both, so the two together tell the story: on the 100k
+row above, `recall` at the ceiling and `recall_attainable` at 1.0 means
+the search recovered everything there was. On a complete profile the
+two measures agree, and the strict one is the number to publish.
+
+### Choose the profile by what it can pay out
+
+Hold a system to strict recall only on a profile whose survey is at or
+near 1.0. A uniform predicate set at a size where its selectivity
+yields matches well above k is where to look, and the selector says
+which candidates to survey:
+
+```java
+// every uniform set from a million rows up, size-ordered, each surveyed
+TestDataGroup group = Catalog.of(CatalogSources.defaults()).openGroup("example");
+for (String profile : group.select("family=uniform,base_count>=1m")) {
+    VectorReader<?> gt = group.profile(profile).openFacet("prefiltered_neighbor_indices");
+    System.out.println(GroundTruthCoverage.of(profile, gt));   // ... ceiling 1.0000 is the one to hold to
+}
+```
+
+A single-profile surface such as `dataset("example:...")` takes a
+selector too, but refuses one that names more than one profile; the set
+surfaces are `TestDataGroup.select` and `Catalog.openProfiles`.
+
+A mixed ladder on a slice far smaller than the size it was cut for is a
+smoke test of the binding path, not a recall measurement; run it with
+`min_attainable=0` and read `recall_attainable`. Since the ceiling is a
+property of the ground truth and not of the store under test, it is
+worth recording once per profile alongside the dataset, so a regression
+suite compares each run against the ceiling its profile has rather than
+against 1.0.
 
 ## Verifying that warming happened
 
