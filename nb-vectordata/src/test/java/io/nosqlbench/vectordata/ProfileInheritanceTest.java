@@ -425,4 +425,21 @@ class ProfileInheritanceTest {
         assertEquals(List.of("default", "2r", "3r", "10m", "label_2", "label_10"), group(dir).profileNames(),
             "default first, then by base_count or the name read as a count, then naturally by name");
     }
+
+    @Test void aGroupPrebuffersTheProfilesASelectorNames() throws Exception {
+        Path dir = layered("""
+              default:
+                base_vectors: base.fvec
+                query_vectors: query.fvec
+              2r:
+                inherits: default
+                base_count: 2
+            """);
+        TestDataGroup group = group(dir);
+        List<String> seen = new java.util.ArrayList<>();
+        long[] warned = {-1};
+        group.prebuffer(group.select("profile=*"), WholeFacetFallback.REFUSE, profile -> (cached, total) -> seen.add(profile), total -> warned[0] = total);
+        assertEquals(-1, warned[0], "a few hundred bytes is not a large download");
+        assertTrue(seen.contains("2r") && seen.contains("default"), "every named profile is fetched: " + seen);
+    }
 }

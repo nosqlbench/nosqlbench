@@ -17,6 +17,7 @@ package io.nosqlbench.vectordata;
 
 import io.nosqlbench.vectordata.internal.HttpTransport;
 import io.nosqlbench.vectordata.internal.ManifestView;
+import io.nosqlbench.vectordata.internal.Prefetcher;
 import io.nosqlbench.vectordata.internal.ProfileParents;
 import io.nosqlbench.vectordata.internal.Shards;
 import io.nosqlbench.vectordata.internal.SourceSpec;
@@ -30,9 +31,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.LongConsumer;
 
 /// Dataset manifest and its selectable profiles.
 ///
@@ -68,6 +72,9 @@ public final class TestDataGroup {
         "prefiltered_neighbor_indices", "prefiltered_neighbor_distances", "postfiltered_neighbor_indices", "postfiltered_neighbor_distances");
     /// Facets that inherit under the child's `base_count` window.
     private static final Set<String> WINDOWED_ON_INHERIT = Set.of("base_vectors", "metadata_content");
+    /// Threshold above which a group-level prebuffer reports its
+    /// announced total as a large download: a reminder, not a limit.
+    public static final long PREBUFFER_LARGE_WARNING_BYTES = 250L * 1024 * 1024;
 
     private final String name; private final URI manifest; private final Map<String, Map<String, Object>> profiles; private final VectorDataSettings settings;
     private final Map<String, Object> attributes;
@@ -215,6 +222,44 @@ public final class TestDataGroup {
     /// The one profile a selector names, for a surface that takes a
     /// single profile; more than one match fails.
     public String selectOne(String selector) { return ProfileSelector.resolveOne(selector, profileFacts()); }
+
+    /// Prebuffers every profile, in [#profileNames] order; see
+    /// [#prebuffer(List, WholeFacetFallback, Function, LongConsumer)].
+    public void prebufferAll(WholeFacetFallback fallback, Function<String, PrebufferProgress> progress, LongConsumer largeDownload) {
+        prebuffer(profileNames(), fallback, progress, largeDownload);
+    }
+
+    /// Prebuffers the named profiles in the order given — what a set
+    /// selector resolved to — each facet against the window it declares,
+    /// as [TestDataView#prebuffer] does. The announced total across the
+    /// profiles is tallied first and handed to `largeDownload` when it
+    /// reaches [#PREBUFFER_LARGE_WARNING_BYTES], so a caller can warn
+    /// before the work begins; the prebuffer continues regardless.
+    /// `progress` supplies the sink for each profile by name.
+    public void prebuffer(List<String> names, WholeFacetFallback fallback, Function<String, PrebufferProgress> progress, LongConsumer largeDownload) {
+        // One view per profile for both the tally and the fetch, so the
+        // offset index a plan loads is the one the prebuffer uses.
+        Map<String, TestDataView> views = new LinkedHashMap<>();
+        for (String profile : new LinkedHashSet<>(names)) views.put(profile, profile(profile));
+        long total = 0;
+        for (TestDataView view : views.values()) {
+            for (FacetDescriptor facet : view.facets().values()) {
+                // The plan the prebuffer will run: each facet's own
+                // window, decomposed across its shards, net of what is
+                // already resident. A facet that cannot be planned is
+                // left to the prebuffer to refuse.
+                PrefetchPlan plan;
+                try { plan = view.prefetchPlan(facet.name(), Prefetcher.facetDeclaredWindow(facet)); }
+                catch (VectorDataException unplannable) { continue; }
+                total += plan.degradesToFullDownload() ? plan.facetBytes() : plan.bytesToFetch();
+            }
+        }
+        if (total >= PREBUFFER_LARGE_WARNING_BYTES) largeDownload.accept(total);
+        for (Map.Entry<String, TestDataView> view : views.entrySet()) {
+            PrebufferProgress sink = progress == null ? null : progress.apply(view.getKey());
+            view.getValue().prebuffer(fallback, sink == null ? PrebufferProgress.NONE : sink);
+        }
+    }
 
     /// The format version this manifest's content requires: tagged if
     /// it declares a tag schema or a profile names a parent other than
