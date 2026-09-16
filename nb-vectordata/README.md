@@ -21,6 +21,35 @@ Local paths and HTTP(S) URLs are both accepted for manifests, catalogs, and
 facet sources. HTTP data is range-cached and uses a `.mref` sidecar whenever a
 server provides one.
 
+## Selecting profiles
+
+The second argument to `open` is a **selector**: a bare profile name as it
+always was, or an expression over the profile's automatic `profile` tag, its
+structural fields (`base_count`, `maxk`, `partition`, `inherits`), and its
+declared `attributes:`. `null` means `default`; `profile=*` means every
+profile. A single-profile surface refuses a set, and the set surface returns
+every match in the dataset's size order:
+
+```java
+TestDataView one = catalog.open("tessera", "size=10m,predicates=uniform-2");   // exactly one, or an error
+List<TestDataView> ladder = catalog.openProfiles("tessera", "family=uniform,selectivity=1e-3..1e-2");
+TestDataView spec = catalog.openProfile("https://host/ds:profile=^10m-.*$");    // the head is found by its shape
+TestDataGroup group = catalog.openGroup("tessera");
+List<String> names = group.select("or(10m,20m)");                              // size-ordered
+group.prebuffer(names, WholeFacetFallback.REFUSE, profile -> meter.forProfile(profile), total -> warn(total));
+```
+
+Values are read by their spelling — `^…`/`…$` a regular expression, `*`/`?`/`[`
+a glob, `lo..hi` a half-open interval, `10m`/`128mi`/`1e-3` numbers under the
+window count rule, `true`/`false`, anything else or anything quoted a literal
+— and every comparison folds case. A `,` is AND; `and(…)`, `or(…)`, and
+`not(…)` nest; an absent attribute matches nothing, `not(key=x)` included. A
+catalog entry resolves the same selector before anything is fetched
+(`entry.select(...)`) and states the dataset's `formatVersion()`, so a
+consumer can refuse a listed dataset it cannot read. A failure is a
+`SelectionException` whose `kind()` is `SYNTAX`, `NO_MATCH`, `AMBIGUOUS`, or
+`NO_DEFAULT`, with the profiles on offer in the message.
+
 ## Prefetching a window
 
 Any facet can be warmed for a record range the caller names — a profile's
@@ -154,7 +183,49 @@ series total and `get(o)` reads from the shard that owns ordinal `o`. A
 window in the facet's `window:` (or as a suffix on the uniform pattern) is
 in facet ordinals and clips the series, not a shard; a window on an explicit
 entry is in that file's ordinals and carves the shard out of it. Prefetch
-plans decompose a window across the shards it touches and fetch only those.
+plans decompose a window across the shards it touches and fetch only those,
+and a `FacetDescriptor` reports its `shardCount()` before the series is
+realized.
+
+## Format versions, layers, and tags
+
+`format_version` is a minimum reader requirement, and an absent field means
+`1` with the dataset held to it: a manifest that never said what it is is
+read as single-file, pre-inheritance, pre-tag, and content that needs more
+is refused naming the version to declare. Version `2` is a multi-file facet;
+version `3` is a dataset whose profiles state their parents — `inherits:`
+on every profile but `default`, every parent real — and may declare a
+`profile_tags` schema:
+
+```yaml
+format_version: 3
+profile_tags:
+  size: ~                # a naming tag: no default, set per profile
+  predicates: ~
+  family: stratified     # carried by every profile, but not a name
+profiles:
+  default:
+    base_vectors: base.fvec
+    metadata_predicates: profiles/base/predicates.slab
+  10m:                   # a size layer: the unfiltered benchmark at ten million
+    inherits: default
+    base_count: 10000000
+    neighbor_indices: profiles/10m/neighbor_indices.ivecs
+    attributes: { size: 10m }
+  10m-uniform-2-1e-2:    # a predicate set at the layer's size
+    inherits: 10m
+    metadata_predicates: profiles/10m-uniform-2-1e-2/predicates.slab
+    metadata_results: profiles/10m-uniform-2-1e-2/results.slab
+    attributes: { size: 10m, predicates: uniform-2, selectivity: 1e-2, family: uniform }
+```
+
+What a profile inherits depends on the axis of the step, which is derived
+from `base_count`: a child whose count differs from its parent's is a size
+step — the base facets arrive re-cut to `[0..base_count)`, and the per-size
+outputs (ground truth, `metadata_results`) do not cross — while a child at
+its parent's count inherits everything it does not override, `base_count`
+included. `group.profileTags()` and `group.formatVersion()` expose the
+schema and the version a caller may need before choosing a profile.
 
 For a release canary against a Rust-hosted dataset, run Maven with
 `-Dvectordata.canary.catalog=<catalog-url>` and
