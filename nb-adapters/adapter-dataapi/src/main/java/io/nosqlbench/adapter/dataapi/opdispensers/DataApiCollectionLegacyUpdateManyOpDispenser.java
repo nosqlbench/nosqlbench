@@ -27,13 +27,15 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateManyOpDispenser.class);
+public class DataApiCollectionLegacyUpdateManyOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyUpdateManyOpDispenser.class);
     private final LongFunction<DataApiCollectionUpdateManyOp> opFunction;
 
-    public DataApiCollectionUpdateManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyUpdateManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
@@ -41,15 +43,15 @@ public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiCollectionUpdateManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
+            Filter filter = getLegacyFilterFromOp(op, l);
             CollectionUpdateManyOptions options = getCollectionUpdateManyOptions(op, l);
-            Update update = getUpdateFromOp(op, l);
+            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("updates", Map.class);
 
             return new DataApiCollectionUpdateManyOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                update,
+                new Update(docMapFunc.apply(l)),
                 options
             );
         };
@@ -57,10 +59,11 @@ public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
 
     private CollectionUpdateManyOptions getCollectionUpdateManyOptions(ParsedOp op, long l) {
         CollectionUpdateManyOptions options = new CollectionUpdateManyOptions();
-        Boolean upsert = getUpsertFromOp(op, l);
-        if (upsert != null) {
-            options = options.upsert(upsert);
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            options = options.upsert(upsertFunction.get().apply(l));
         }
+
         return options;
     }
 
