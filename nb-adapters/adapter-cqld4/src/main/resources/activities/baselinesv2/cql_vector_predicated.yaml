@@ -14,6 +14,7 @@ description: |
     similarity: {{similarity == dataset(spec).attributes().getOrDefault('distance_function','COSINE').toString().toLowerCase()}}
     metadata columns: {{columns == recordColumns(spec, 'metadata_content')}}
     predicate forms: {{forms == predicateForms(spec, 'metadata_predicates', 'metadata_content')}}
+    ground truth: {{coverage == requireAttainableRecall(spec, paramOr('groundtruth','prefiltered') + '_neighbor_indices', paramOr('min_attainable','0.95'))}}
 
   The rampup phase stores each base vector with its metadata record,
   bound field by field through a prepared statement: RecordField reads
@@ -44,11 +45,28 @@ description: |
   exact top-k among the base vectors that satisfy the predicate — since
   SAI restricts before it ranks. Pass groundtruth=postfiltered to
   compare against the top-k of an unfiltered search with the
-  non-matching neighbors removed instead. When fewer than k base
-  vectors satisfy a predicate, the ground-truth row is padded with -1
-  sentinels, which count as misses, so recall on very selective
-  predicates reads low by construction. The unfiltered search block is
-  included for the baseline comparison.
+  non-matching neighbors removed instead.
+
+  Reading recall. When fewer than k base vectors satisfy a predicate,
+  the ground-truth row is padded with -1 sentinels, which the strict
+  recall counts as misses, so on a slice too small for its predicates
+  recall reads low by construction — not because the search missed.
+  Two things keep that from cascading into a false failure. First, the
+  ground-truth facet is surveyed before anything is loaded (the
+  coverage line above): the recall@k ceiling a perfect search would
+  score is printed, and the run is refused when it is below
+  min_attainable (default 0.95) — pass min_attainable=0 for a smoke
+  run on a padded profile. Second, the verifier reports
+  recall_attainable beside recall: the share of the neighbors that
+  exist which were found, so a padded profile still reads through.
+  A profile whose predicates all reach k matches reads at a ceiling of
+  1.0, and its strict recall is the number to hold a system to. A
+  uniform set with selectivity x base_count comfortably above k is the
+  place to look — tessera's 1m-uniform-2-1e-3 is complete, while its
+  300k-uniform-2-1e-3 leaves a fifth of its queries short — but the
+  survey, not the arithmetic, decides; a mixed ladder at a small size
+  is a smoke test. The unfiltered search block is included for the
+  baseline comparison.
 
   Operational knobs stay conventional: keyspace, table, rf, and cl are
   TEMPLATE parameters with the usual defaults. The base facet is warmed
@@ -227,6 +245,7 @@ blocks:
           k={{@maxk}}
           relevancy=new io.nosqlbench.nb.api.engine.metrics.wrappers.RelevancyMeasures(_parsed_op)
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+          relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.attainable_recall("recall_attainable",k));
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
           relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));

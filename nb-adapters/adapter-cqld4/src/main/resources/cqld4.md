@@ -145,6 +145,44 @@ console before the first cycle — the number of prepared statements the
 run will hold, and how many predicates take each — so a run declares
 its shapes before it starts.
 
+### Reading recall on a predicated search
+
+A filtered ground truth holds, per query, the top-k among the rows
+that satisfy its predicate. On a slice too small for the predicate —
+a selectivity of one in a million against a hundred thousand rows —
+fewer than k rows satisfy it, and the row is padded with `-1`
+sentinels that no search can return. The strict `recall` divides by k
+regardless, so such a profile reads low by construction, and a regime
+that holds a system to that number fails for a reason that has
+nothing to do with the system.
+
+Three rules keep the reading honest, and `cql_vector_predicated`
+follows all three:
+
+- **Survey before loading.** `groundTruthCoverage(spec, facet)` reads
+  the ground truth alone — a few megabytes — and reports how many
+  queries have all k neighbors, how many have none, and the recall@k
+  ceiling a perfect search would score. `requireAttainableRecall(spec,
+  facet, minimum)` refuses the run below the ceiling you will accept,
+  before a million rows are loaded for a number that cannot be read;
+  `min_attainable=0` lets a smoke run through.
+- **Report the attainable measure beside the strict one.**
+  `RelevancyFunctions.attainable_recall("recall_attainable", k)` leaves
+  the sentinels out of the denominator: the share of the neighbors that
+  exist which were found. A padded profile whose `recall` equals its
+  ceiling and whose `recall_attainable` is 1.0 found everything there
+  was.
+- **Choose the profile by what it can pay out.** A uniform predicate
+  set whose `selectivity x base_count` is comfortably above k is where
+  to look — `1m-uniform-2-1e-3` on a base of a million has a ceiling of
+  1.0, and its strict recall is the number to hold a system to — but
+  the survey decides, not the arithmetic: `300k-uniform-2-1e-3` nominally
+  reaches 300 matches per predicate and still leaves a fifth of its
+  queries short, at a ceiling of 0.988. A mixed ladder that runs far
+  below the slice size is a smoke test of the binding path, and the
+  selector says which candidates to survey:
+  `dataset:family=uniform,base_count>=1m`.
+
 ## CQLd4 Op Template Examples
 
 ```yaml
