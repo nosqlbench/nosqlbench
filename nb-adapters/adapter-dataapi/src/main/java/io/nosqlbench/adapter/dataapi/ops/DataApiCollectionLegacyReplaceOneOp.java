@@ -21,13 +21,13 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.collections.commands.options.CollectionReplaceOneOptions;
 
-public class DataApiCollectionReplaceOneOp extends DataApiBaseOp {
+public class DataApiCollectionLegacyReplaceOneOp extends DataApiBaseOp {
     private final Collection collection;
     private final Filter filter;
     private final Object replacement;
     private final CollectionReplaceOneOptions options;
 
-    public DataApiCollectionReplaceOneOp(Database db, Collection collection, Filter filter, Object replacement, CollectionReplaceOneOptions options) {
+    public DataApiCollectionLegacyReplaceOneOp(Database db, Collection collection, Filter filter, Object replacement, CollectionReplaceOneOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;
