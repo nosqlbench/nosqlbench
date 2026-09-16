@@ -75,6 +75,7 @@ class RecordFacetsTest {
         FixtureSupport.slabOf(dir, "meta__0002.slab", metadataRecords(20, 5), 4);
         FixtureSupport.fvec(dir, "base.fvec", new float[][] {{0f, 1f, 2f, 3f}});
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: sharded-meta
             profiles:
               default:

@@ -37,12 +37,17 @@ class CatalogManifestTest {
         FixtureSupport.fvec(dataset, "query.fvec", new float[][] {{3f, 4f}});
         FixtureSupport.ivec(dataset, "neighbors.ivecs", new int[][] {{9, 10}});
         FixtureSupport.ivec(dataset, "metadata.ivecs", new int[][] {{11, 12}});
+        // A named parent other than `default` is what version 3 says,
+        // and at 3 every profile states its parent.
         Files.writeString(dataset.resolve("dataset.yaml"), """
+            format_version: 3
             name: sample
             profiles:
-              parent:
+              default:
                 base: base.fvec
                 custom_scores: {source: metadata.ivecs}
+              parent:
+                inherits: default
               demo:
                 extends: parent
                 query: {source: query.fvec, window: 0..1}

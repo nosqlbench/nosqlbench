@@ -139,6 +139,7 @@ class SlabWindowsTest {
         FixtureSupport.slab(dir, "m__0001.slab", 50, 25, 64);
         FixtureSupport.fvec(dir, "base.fvec", new float[][] {{0f, 1f, 2f, 3f}});
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: slab-series
             profiles:
               default:
@@ -171,6 +172,7 @@ class SlabWindowsTest {
         FixtureSupport.slab(dir, "m__0001.slab", 20, 10, 64);
         FixtureSupport.fvec(dir, "base.fvec", new float[][] {{0f, 1f, 2f, 3f}});
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: visit-sharded
             profiles:
               default:
@@ -194,6 +196,7 @@ class SlabWindowsTest {
         FixtureSupport.slab(dir, "m.slab", 200, 25, 64);
         FixtureSupport.fvec(dir, "base.fvec", new float[][] {{0f, 1f, 2f, 3f}});
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: sliced-slab
             profiles:
               default:

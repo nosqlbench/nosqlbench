@@ -61,6 +61,7 @@ class ShardedFacetsTest {
         fvec(dir, "base__0001.fvec", 100, 100);
         fvec(dir, "base__0002.fvec", 40, 200);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: sharded
             profiles:
               default:
@@ -106,6 +107,7 @@ class ShardedFacetsTest {
         Path dir = Files.createDirectories(temporary.resolve("bad"));
         fvec(dir, "base__0000.fvec", 100, 0);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: bad
             profiles:
               default:
@@ -122,6 +124,7 @@ class ShardedFacetsTest {
     @Test void anExplicitSeriesOpensFromNamedFiles() throws Exception {
         Path dir = uniformSeries("");
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: explicit
             profiles:
               default:
@@ -140,6 +143,7 @@ class ShardedFacetsTest {
     @Test void bareNamesResolveToTheSameFacetAsCountedOnes() throws Exception {
         Path dir = uniformSeries("");
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: bare
             profiles:
               default:
@@ -158,6 +162,7 @@ class ShardedFacetsTest {
         for (int i = 0; i < values.length; i++) values[i] = i;
         FixtureSupport.scalarI32(dir, "corpus.u32", values);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: sliced
             profiles:
               default:
@@ -189,6 +194,7 @@ class ShardedFacetsTest {
         Path dir = Files.createDirectories(temporary.resolve("gap"));
         fvec(dir, "base__0000.fvec", 100, 0);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: gap
             profiles:
               default:
@@ -211,6 +217,7 @@ class ShardedFacetsTest {
         fvec(dir, "base__0000.fvec", 100, 0);
         fvec(dir, "base__0001.fvec", 100, 100);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: win
             profiles:
               default:
@@ -235,6 +242,7 @@ class ShardedFacetsTest {
     @Test void aWindowOnAUniformPatternBoundsTheReader() throws Exception {
         Path dir = uniformSeries("");
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: suffix
             profiles:
               default:
@@ -249,6 +257,7 @@ class ShardedFacetsTest {
         assertEquals(149 * 100f, base.get(149)[0], "record 149 lives in shard 1");
         assertEquals("0..150", view(dir).facet("base_vectors").orElseThrow().window(), "the suffix is reported as the facet window");
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: twice
             profiles:
               default:
@@ -283,6 +292,7 @@ class ShardedFacetsTest {
         fvec(dir, "base__0000.fvec", 10, 0);
         fvec(dir, "base__0001.fvec", 10, 10);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: nm
             profiles:
               default:
@@ -315,6 +325,7 @@ class ShardedFacetsTest {
         FixtureSupport.vvec(dir, "meta__0001.ivvec", second);
         fvec(dir, "base.fvec", 8, 0);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: vvec
             profiles:
               default:
@@ -419,14 +430,33 @@ class ShardedFacetsTest {
         assertTrue(refused.getMessage().contains("understate"), refused.getMessage());
     }
 
-    @Test void anAbsentVersionIsNotAnUnderstatement() throws Exception {
-        TestDataView view = view(uniformSeries(""));
-        assertEquals(240, view.baseVectors().count(), "an unannotated sharded dataset loads: absence is not a claim");
-        Path generous = uniformSeries("");
-        Files.writeString(generous.resolve("dataset.yaml"), "format_version: 2\n" + Files.readString(generous.resolve("dataset.yaml")));
-        assertEquals(240, view(generous).baseVectors().count(), "a version equal to the content's requirement is accepted");
+    @Test void anAbsentVersionIsHeldToOne() throws Exception {
+        // The uniform fixture states version 2; without it the same
+        // content is refused naming the version to declare, because an
+        // unversioned manifest is read as the least it could be.
+        Path unversioned = uniformSeries("");
+        Files.writeString(unversioned.resolve("dataset.yaml"), Files.readString(unversioned.resolve("dataset.yaml")).replace("format_version: 2\n", ""));
+        VectorDataException refused = assertThrows(VectorDataException.class, () -> TestDataGroup.load(unversioned.toUri(), settings()),
+            "an unannotated sharded dataset is held to version 1 and refused");
+        assertTrue(refused.getMessage().contains("no format_version"), refused.getMessage());
+        assertTrue(refused.getMessage().contains("format_version: 2"), "names the version to declare: " + refused.getMessage());
+        assertEquals(240, view(uniformSeries("")).baseVectors().count(), "a version equal to the content's requirement is accepted");
         Path plain = dataset("generous", "format_version: 2\nname: g\nprofiles:\n  default:\n    base_vectors: base.fvec\n");
         assertNotNull(TestDataGroup.load(plain.toUri(), settings()), "a version higher than the content requires is merely generous");
+        assertEquals(2, TestDataGroup.load(plain.toUri(), settings()).formatVersion(), "the stated version is exposed");
+        assertEquals(1, TestDataGroup.load(dataset("plainest", "name: p\nprofiles:\n  default:\n    base_vectors: base.fvec\n").toUri(), settings()).formatVersion(),
+            "an absent version reads as 1");
+    }
+
+    @Test void aSeriesReportsItsShardCount() throws Exception {
+        TestDataView view = view(uniformSeries(""));
+        assertEquals(3, view.facet("base_vectors").orElseThrow().shardCount(), "a uniform series says how many files it spans");
+        Path dir = Files.createDirectories(temporary.resolve("explicit-count"));
+        fvec(dir, "a.fvec", 2, 0); fvec(dir, "b.fvec", 2, 2);
+        TestDataView explicit = view(dataset("explicit-count", "format_version: 2\nname: e\nprofiles:\n  default:\n    base_vectors:\n      source: [ a.fvec=2, b.fvec=2 ]\n      record_count: 4\n"));
+        assertNull(explicit.facet("base_vectors").orElseThrow().shardCount(), "the explicit form's files are its entries");
+        assertEquals(2, explicit.facet("base_vectors").orElseThrow().series().entries().size());
+        assertNull(view(dataset("one", "name: one\nprofiles:\n  default:\n    base_vectors: base.fvec\n")).facet("base_vectors").orElseThrow().shardCount(), "a single file spans none");
     }
 
     // -- Files that are not one facet, and what a series promises --
@@ -436,6 +466,7 @@ class ShardedFacetsTest {
         fvec(dir, "base__0000.fvec", 10, 0);
         FixtureSupport.fvec(dir, "base__0001.fvec", new float[10][8]);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: disagree
             profiles:
               default:
@@ -456,6 +487,7 @@ class ShardedFacetsTest {
         fvec(dir, "base__0001.fvec", 10, 10);
         fvec(dir, "base__0003.fvec", 5, 30);
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: midgap
             profiles:
               default:

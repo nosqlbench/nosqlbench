@@ -343,6 +343,7 @@ class PrefetchRemoteIntegrationTest {
 
     private static String uniformYaml(String base, int shards, int records, String extra) {
         return """
+            format_version: 2
             name: remote-series
             profiles:
               default:
@@ -366,6 +367,7 @@ class PrefetchRemoteIntegrationTest {
     @Test void anExplicitSeriesReadsOverHttp() throws Exception {
         String base = publishSeries(2, 25, false);
         VectorReader<float[]> reader = seriesView("explicit-http", """
+            format_version: 2
             name: explicit
             profiles:
               default:

@@ -17,6 +17,7 @@ package io.nosqlbench.vectordata;
 
 import io.nosqlbench.vectordata.internal.HttpTransport;
 import io.nosqlbench.vectordata.internal.ManifestView;
+import io.nosqlbench.vectordata.internal.ProfileParents;
 import io.nosqlbench.vectordata.internal.Shards;
 import io.nosqlbench.vectordata.internal.SourceSpec;
 import io.nosqlbench.vectordata.internal.YamlData;
@@ -26,6 +27,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,27 +39,44 @@ import java.util.Set;
 /// Profiles name only what differs and inherit the rest. A non-default
 /// profile inherits unstated facets from the profile it names with
 /// `inherits:` (or the older `extends:`), else from `default` — and
-/// **what inherits depends on the axis**. Across the size axis (parent
-/// `default`), `base_vectors` and `metadata_content` inherit under the
-/// child's `base_count` window, while the neighbor facets do not: ground
-/// truth is derived from `base_count`, so a sized profile that omits its
-/// own fails loudly rather than reading the full base's. Across any
-/// other axis every facet is invariant and inherits as is. A
+/// **what inherits depends on the axis**, which is derived from
+/// `base_count`: a step is on the size axis when the child's count
+/// differs from its parent's effective one, whatever the parent is
+/// called. Across the size axis `base_vectors` and `metadata_content`
+/// inherit **re-cut** to the child's `base_count` window, while the
+/// per-size outputs — the neighbor facets and `metadata_results` — do
+/// not: they are derived from `base_count`, so a sized profile that
+/// omits its own fails loudly rather than reading the full base's.
+/// Across a step at one size every facet is invariant and inherits as
+/// is, and so does `base_count`; `maxk` crosses every step. A
 /// `partition: true` profile is an oracle partition with independent
 /// base vectors, not a windowed subset, and inherits nothing.
+///
+/// From `format_version` 3 every profile other than `default` states
+/// its parent, and an absent, unknown, self, or cyclic parent — or a
+/// partition that names one — is refused at load naming the profiles
+/// involved. Below 3 an unknown or self parent falls back to `default`
+/// and a cycle leaves its members with what they declare.
 public final class TestDataGroup {
     private static final Set<String> NON_FACETS = Set.of("extends", "inherits", "base_count", "query_count", "maxk", "partition",
         "attributes", "name", "description", "tags");
-    /// Per-profile outputs that do not cross the size axis.
-    private static final Set<String> SIZE_AXIS_OUTPUTS = Set.of("neighbor_indices", "neighbor_distances",
+    /// Per-profile outputs derived from `base_count`, which do not
+    /// cross the size axis: a results index maps each predicate to base
+    /// ordinals, so a parent's at another size is wrong for this
+    /// profile in the same way its ground truth is.
+    private static final Set<String> SIZE_AXIS_OUTPUTS = Set.of("neighbor_indices", "neighbor_distances", "metadata_results",
         "prefiltered_neighbor_indices", "prefiltered_neighbor_distances", "postfiltered_neighbor_indices", "postfiltered_neighbor_distances");
     /// Facets that inherit under the child's `base_count` window.
     private static final Set<String> WINDOWED_ON_INHERIT = Set.of("base_vectors", "metadata_content");
+
     private final String name; private final URI manifest; private final Map<String, Map<String, Object>> profiles; private final VectorDataSettings settings;
     private final Map<String, Object> attributes;
+    private final Map<String, Object> profileTags;
+    private final int formatVersion;
     private TestDataGroup(String name, URI manifest, Map<String, Map<String, Object>> profiles, VectorDataSettings settings,
-                          Map<String, Object> attributes) {
+                          Map<String, Object> attributes, Map<String, Object> profileTags, int formatVersion) {
         this.name = name; this.manifest = manifest; this.profiles = profiles; this.settings = settings; this.attributes = attributes;
+        this.profileTags = profileTags; this.formatVersion = formatVersion;
     }
     public static TestDataGroup load(String source) { return load(uri(source), VectorDataSettings.defaults()); }
     /** Builds a group from a legacy knn_entries layout whose sources are already resolved. */
@@ -71,7 +90,8 @@ public final class TestDataGroup {
             profiles.put(entry.getKey(), profile);
         }
         if (profiles.isEmpty()) throw new VectorDataException("Legacy catalog has no profiles for " + name);
-        return new TestDataGroup(name, origin, profiles, settings, Map.of());
+        // Synthesized in memory: version 1 by construction.
+        return new TestDataGroup(name, origin, profiles, settings, Map.of(), Map.of(), FormatVersion.BASE);
     }
     public static TestDataGroup load(URI source, VectorDataSettings settings) {
         if (!isYaml(source)) {
@@ -95,7 +115,7 @@ public final class TestDataGroup {
         // anything else is read from it: the field exists to turn "no
         // such file" into a diagnosis.
         Integer stated = root.get("format_version") == null ? null : YamlData.integer(root.get("format_version"), "format_version");
-        FormatVersion.checkSupported(stated);
+        int version = FormatVersion.checkSupported(stated);
         String name = YamlData.optionalString(root.get("name")); if (name == null) name = basename(manifest);
         Object rawProfiles = root.get("profiles");
         Map<String, Map<String, Object>> profiles = new LinkedHashMap<>();
@@ -107,7 +127,18 @@ public final class TestDataGroup {
         if (profiles.isEmpty()) throw new VectorDataException("Manifest contains no profiles: " + manifest);
         Map<String, Object> attributes = root.get("attributes") instanceof Map<?, ?> declared
             ? Map.copyOf(YamlData.map(declared, "attributes")) : Map.of();
-        TestDataGroup group = new TestDataGroup(name, manifest, profiles, settings, attributes);
+        // The tag schema, in naming order: a dropped or reordered tag
+        // would silently rename every generated profile.
+        Map<String, Object> profileTags = root.get("profile_tags") instanceof Map<?, ?> declared
+            ? Collections.unmodifiableMap(YamlData.map(declared, "profile_tags")) : Map.of();
+        TestDataGroup group = new TestDataGroup(name, manifest, profiles, settings, attributes, profileTags, version);
+        // Stated parents: at version 3 every parent is real and stated,
+        // or the load is refused naming the profiles; below 3 the
+        // fallbacks stand.
+        List<ProfileParents.Facts> parents = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Object>> profile : profiles.entrySet())
+            parents.add(new ProfileParents.Facts(profile.getKey(), isPartition(profile.getValue()), statedParent(profile.getKey(), profile.getValue())));
+        ProfileParents.check(version, parents);
         // The version the content requires is derived by folding every
         // declaration, never asserted — and every declaration is
         // checked for self-consistency here, before a facet opens.
@@ -137,59 +168,101 @@ public final class TestDataGroup {
     }
     public String name() { return name; }
     public Map<String, Map<String, Object>> profiles() { return Map.copyOf(profiles); }
+    /// The `format_version` this dataset states, or [FormatVersion#BASE]
+    /// when it states none — exposed so a caller can decide before it
+    /// fetches anything.
+    public int formatVersion() { return formatVersion; }
+    /// The profile tag schema, naming tags in order, each mapped to its
+    /// default or to `null` for a naming tag. Empty when the dataset
+    /// declares none.
+    public Map<String, Object> profileTags() { return profileTags; }
+    /// Opens a profile by its exact name. A `null` or blank name opens
+    /// `default`, or the first profile when there is none.
     public TestDataView profile(String profile) {
         String selected = profile == null || profile.isBlank() ? (profiles.containsKey("default") ? "default" : profiles.keySet().iterator().next()) : profile;
-        return new ManifestView(name, selected, facets(selected), settings, attributes);
+        return new ManifestView(name, selected, resolve(selected).facets(), settings, attributes);
     }
-    /// The format version this manifest's content requires: sharded if
-    /// any profile declares a multi-file facet, base otherwise.
+    /// The format version this manifest's content requires: tagged if
+    /// it declares a tag schema or a profile names a parent other than
+    /// `default`, sharded if any profile declares a multi-file facet,
+    /// base otherwise.
     private int requiredVersion() {
+        boolean sharded = false;
         for (Map.Entry<String, Map<String, Object>> profile : profiles.entrySet())
             for (FacetDescriptor facet : declared(profile.getKey(), profile.getValue()).values())
-                if (facet.isSeries()) return FormatVersion.SHARDED;
-        return FormatVersion.BASE;
+                if (facet.isSeries()) sharded = true;
+        boolean tagged = !profileTags.isEmpty();
+        for (Map.Entry<String, Map<String, Object>> profile : profiles.entrySet()) {
+            String parent = statedParent(profile.getKey(), profile.getValue());
+            if (!"default".equals(profile.getKey()) && parent != null && !"default".equals(parent)) tagged = true;
+        }
+        return tagged ? FormatVersion.TAGGED : sharded ? FormatVersion.SHARDED : FormatVersion.BASE;
     }
-    private Map<String, FacetDescriptor> facets(String profile) {
+    /// A profile as loaded: its facets after inheritance, and the
+    /// `base_count` and `maxk` it ends up with.
+    private record Resolved(Map<String, FacetDescriptor> facets, Long baseCount, Integer maxk) { }
+    private Resolved resolve(String profile) {
         Map<String, Object> definition = profiles.get(profile);
         if (definition == null) throw new VectorDataException("Dataset " + name + " has no profile " + profile);
         Map<String, FacetDescriptor> own = declared(profile, definition);
+        Long ownCount = longOrNull(definition.get("base_count"), "base_count");
+        Integer ownMaxk = definition.get("maxk") == null ? null : YamlData.integer(definition.get("maxk"), "maxk");
         // A cycle — `a` inherits `b`, `b` inherits `a` — never settles,
         // so its members, and anything inheriting from them, keep only
         // what they declare.
         Set<String> lineage = new HashSet<>();
-        for (String at = profile; at != null; at = parentOf(at, profiles.get(at))) if (!lineage.add(at)) return own;
+        for (String at = profile; at != null; at = parentOf(at, profiles.get(at))) if (!lineage.add(at)) return new Resolved(own, ownCount, ownMaxk);
         String parentName = parentOf(profile, definition);
-        if (parentName == null) return own;
-        Map<String, FacetDescriptor> parent = facets(parentName);
-        boolean sizeAxis = "default".equals(parentName);
-        Long baseCount = longOrNull(definition.get("base_count"), "base_count");
+        if (parentName == null) return new Resolved(own, ownCount, ownMaxk);
+        Resolved parent = resolve(parentName);
+        // The axis of a step is derived from `base_count`: a size step
+        // when the child's count differs from the parent's effective
+        // one, whatever the parent is called; otherwise the step is at
+        // one size and every facet crosses as it is.
+        boolean sizeAxis = ownCount != null && !ownCount.equals(parent.baseCount());
         Map<String, FacetDescriptor> merged = new LinkedHashMap<>();
-        for (Map.Entry<String, FacetDescriptor> inherited : parent.entrySet()) {
+        for (Map.Entry<String, FacetDescriptor> inherited : parent.facets().entrySet()) {
             String facetName = inherited.getKey();
             if (own.containsKey(facetName)) continue;
             if (sizeAxis && SIZE_AXIS_OUTPUTS.contains(facetName)) continue;
-            merged.put(facetName, WINDOWED_ON_INHERIT.contains(facetName) ? inheritWithWindow(inherited.getValue(), baseCount) : inherited.getValue());
+            merged.put(facetName, WINDOWED_ON_INHERIT.contains(facetName) ? inheritWithWindow(inherited.getValue(), ownCount) : inherited.getValue());
         }
         merged.putAll(own);
-        return merged;
+        return new Resolved(merged, ownCount != null ? ownCount : parent.baseCount(), ownMaxk != null ? ownMaxk : parent.maxk());
     }
     /// The profile a non-default profile inherits unstated facets from,
     /// or `null` when it inherits nothing: `default` itself, and a
-    /// `partition: true` profile.
+    /// `partition: true` profile. Below version 3 an unknown or self
+    /// parent falls back to `default`; at 3 the loader has refused it.
     private String parentOf(String profile, Map<String, Object> definition) {
         if ("default".equals(profile)) return null;
-        Object partition = definition.get("partition");
-        if (Boolean.TRUE.equals(partition) || "true".equalsIgnoreCase(String.valueOf(partition))) return null;
-        String named = YamlData.optionalString(definition.get("inherits"));
-        if (named == null) named = YamlData.optionalString(definition.get("extends"));
+        if (isPartition(definition)) return null;
+        String named = statedParent(profile, definition);
         if (named != null && !named.equals(profile) && profiles.containsKey(named)) return named;
         return profiles.containsKey("default") ? "default" : null;
     }
-    /// A base facet inherited across the size axis is windowed to the
-    /// child's `base_count` unless it already carries a window of its
-    /// own; without a `base_count` it is inherited as is.
+    private static boolean isPartition(Map<String, Object> definition) {
+        Object partition = definition.get("partition");
+        return Boolean.TRUE.equals(partition) || "true".equalsIgnoreCase(String.valueOf(partition));
+    }
+    /// The parent a profile states under `inherits:` (or the older
+    /// `extends:`), as written, or `null` for none. A name YAML read as
+    /// a number — a rung such as `100` — comes back as the name it
+    /// spells; anything else is refused.
+    private static String statedParent(String profile, Map<String, Object> definition) {
+        Object raw = definition.containsKey("inherits") ? definition.get("inherits") : definition.get("extends");
+        if (raw == null) return null;
+        if (raw instanceof String text) return text;
+        if (raw instanceof Number number) return String.valueOf(number);
+        throw new VectorDataException("profile " + profile + " inherits: expected a profile name, found " + raw);
+    }
+    /// A base facet inherited across the size axis is **re-cut** to the
+    /// child's `base_count`: a window the parent carries is replaced,
+    /// so a `20m` that builds on `10m` reads the first twenty million
+    /// of the same file, not its parent's ten. Without a `base_count`
+    /// it is inherited as is.
     private static FacetDescriptor inheritWithWindow(FacetDescriptor facet, Long baseCount) {
-        if (baseCount == null || (facet.window() != null && !facet.window().isBlank())) return facet;
+        if (baseCount == null) return facet;
         return new FacetDescriptor(facet.name(), facet.source(), "0.." + baseCount, facet.attributes(), facet.series(), facet.namespace());
     }
     /// The facets a profile declares itself, resolved against the

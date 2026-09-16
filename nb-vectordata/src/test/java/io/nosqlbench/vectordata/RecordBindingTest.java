@@ -261,6 +261,7 @@ class RecordBindingTest {
         }
         FixtureSupport.fvec(dir, "base.fvec", new float[][] {{0f, 1f, 2f, 3f}});
         Files.writeString(dir.resolve("dataset.yaml"), """
+            format_version: 2
             name: sh
             profiles:
               default:
