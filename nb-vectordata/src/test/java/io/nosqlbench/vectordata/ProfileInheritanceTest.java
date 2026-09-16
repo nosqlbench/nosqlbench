@@ -158,6 +158,9 @@ class ProfileInheritanceTest {
         TestDataView uniform = view(dir, "2r-uniform");
         assertArrayEquals(new int[] {3, 4}, uniform.neighborIndices().get(0));
         assertTrue(view(dir, "2r").facet("metadata_results").isEmpty(), "a layer holds no predicate group of its own");
+        List<ProfileFacts> facts = group(dir).profileFacts();
+        ProfileFacts noCount = facts.stream().filter(f -> f.name().equals("2r-uniform")).findFirst().orElseThrow();
+        assertEquals(2L, noCount.baseCount(), "a set without a count is at its layer's");
     }
 
     /// A results index is derived from `base_count` like the ground
@@ -248,6 +251,7 @@ class ProfileInheritanceTest {
                 inherits: 100
             """);
         assertArrayEquals(new int[] {3, 4}, view(dir, "child").neighborIndices().get(0), "a parent YAML read as a number is the name it spells");
+        assertEquals(List.of("default", "100", "child"), group(dir).profileNames());
     }
 
     // -- format_version 3: stated parents --
@@ -362,5 +366,63 @@ class ProfileInheritanceTest {
         assertTrue(unversioned.getMessage().contains("format_version: 3"), "a schema alone needs version 3: " + unversioned.getMessage());
         assertTrue(refused(dataset("format_version: 2\nprofile_tags:\n  size: ~\n", "  default:\n    base_vectors: base.fvec\n")).getMessage().contains("understate"));
         assertTrue(group(dataset("  default:\n    base_vectors: base.fvec\n")).profileTags().isEmpty(), "a dataset without a schema declares none");
+    }
+
+    // -- what a selector reads --
+
+    /// Attributes never inherit: a child of a named parent selects on
+    /// its own attributes and on the structure it inherits.
+    @Test void attributesNeverInheritButStructureDoes() throws Exception {
+        Path dir = layered("""
+              default:
+                base_vectors: base.fvec
+                maxk: 100
+              1m:
+                inherits: default
+                base_count: 2
+                attributes:
+                  family: sized
+              1m-sel:
+                inherits: 1m
+                query_vectors: query.fvec
+                attributes:
+                  selectivity: 0.01
+            """);
+        TestDataGroup group = group(dir);
+        ProfileFacts child = group.profileFacts().stream().filter(f -> f.name().equals("1m-sel")).findFirst().orElseThrow();
+        assertEquals(2L, child.baseCount(), "structure is read after inheritance");
+        assertEquals(100, child.maxk());
+        assertEquals("1m", child.inherits());
+        assertEquals(Map.of("selectivity", 0.01), child.attributes(), "a parent's attributes are not the child's");
+        assertTrue(ProfileSelector.parse("family=sized").matches(group.profileFacts().stream().filter(f -> f.name().equals("1m")).findFirst().orElseThrow()));
+        assertFalse(ProfileSelector.parse("family=sized").matches(child));
+        assertTrue(ProfileSelector.parse("base_count=2,selectivity=1e-2").matches(child));
+        assertEquals(List.of("1m-sel"), group.select("selectivity=1e-2"));
+        assertEquals("1m", group.selectOne("1M"));
+        assertEquals(List.of("default", "1m", "1m-sel"), group.select("profile=*"));
+        assertEquals(List.of("default"), group.select(null));
+    }
+
+    @Test void profileNamesAreSizeOrdered() throws Exception {
+        Path dir = layered("""
+              default:
+                base_vectors: base.fvec
+              label_10:
+                partition: true
+                base_vectors: part.fvec
+              label_2:
+                partition: true
+                base_vectors: part.fvec
+              3r:
+                inherits: default
+                base_count: 3
+              2r:
+                inherits: default
+                base_count: 2
+              10m:
+                inherits: default
+            """);
+        assertEquals(List.of("default", "2r", "3r", "10m", "label_2", "label_10"), group(dir).profileNames(),
+            "default first, then by base_count or the name read as a count, then naturally by name");
     }
 }

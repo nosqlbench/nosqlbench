@@ -177,11 +177,45 @@ public final class TestDataGroup {
     /// declares none.
     public Map<String, Object> profileTags() { return profileTags; }
     /// Opens a profile by its exact name. A `null` or blank name opens
-    /// `default`, or the first profile when there is none.
+    /// `default`, or the first profile when there is none. For a
+    /// selector expression see [#selectOne] and [#select].
     public TestDataView profile(String profile) {
         String selected = profile == null || profile.isBlank() ? (profiles.containsKey("default") ? "default" : profiles.keySet().iterator().next()) : profile;
         return new ManifestView(name, selected, resolve(selected).facets(), settings, attributes);
     }
+    /// Profile names size-ordered: `default` first, then ascending by
+    /// `base_count` — or by the name read as a count, `10m` before
+    /// `100m` — with a natural tiebreak by name. The order every
+    /// selection follows.
+    public List<String> profileNames() {
+        List<String> names = new ArrayList<>(profiles.keySet());
+        names.sort((a, b) -> {
+            int bySize = Long.compare(sortKey(a, resolve(a).baseCount()), sortKey(b, resolve(b).baseCount()));
+            return bySize != 0 ? bySize : naturalCompare(a, b);
+        });
+        return names;
+    }
+    /// Everything a selector can read of every profile, in
+    /// [#profileNames] order: structure as loaded, after inheritance;
+    /// attributes the profile's own.
+    public List<ProfileFacts> profileFacts() {
+        List<ProfileFacts> facts = new ArrayList<>();
+        for (String profile : profileNames()) {
+            Map<String, Object> definition = profiles.get(profile);
+            Resolved resolved = resolve(profile);
+            Map<String, Object> own = definition.get("attributes") instanceof Map<?, ?> declared ? YamlData.map(declared, "attributes") : Map.of();
+            facts.add(new ProfileFacts(profile, resolved.baseCount(), resolved.maxk(), isPartition(definition), statedParent(profile, definition), own));
+        }
+        return facts;
+    }
+    /// The profiles a selector names, size-ordered. `null` is `default`,
+    /// `profile=*` is every profile, and a selector that matches
+    /// nothing fails listing what was on offer.
+    public List<String> select(String selector) { return ProfileSelector.resolve(selector, profileFacts()); }
+    /// The one profile a selector names, for a surface that takes a
+    /// single profile; more than one match fails.
+    public String selectOne(String selector) { return ProfileSelector.resolveOne(selector, profileFacts()); }
+
     /// The format version this manifest's content requires: tagged if
     /// it declares a tag schema or a profile names a parent other than
     /// `default`, sharded if any profile declares a multi-file facet,
@@ -357,6 +391,30 @@ public final class TestDataGroup {
             if (min instanceof Number && max instanceof Number) return min + ".." + max;
         }
         throw new VectorDataException("Unrecognized window interval: " + item);
+    }
+    /// The size sort key of a profile: `default` first, then its
+    /// `base_count`, else its name read as a count, else last.
+    static long sortKey(String profile, Long baseCount) {
+        if ("default".equals(profile)) return 0;
+        if (baseCount != null) return baseCount;
+        try { return DSWindow.parseNumberWithSuffix(profile); } catch (VectorDataException notACount) { return Long.MAX_VALUE - 1; }
+    }
+    /// Natural comparison: digit runs compare by value, so `label_2`
+    /// sorts before `label_10`, and text compares character by character.
+    static int naturalCompare(String a, String b) {
+        int i = 0, j = 0;
+        while (i < a.length() && j < b.length()) {
+            char ac = a.charAt(i), bc = b.charAt(j);
+            if (Character.isDigit(ac) && Character.isDigit(bc)) {
+                long an = 0; while (i < a.length() && Character.isDigit(a.charAt(i))) { an = an * 10 + (a.charAt(i) - '0'); i++; }
+                long bn = 0; while (j < b.length() && Character.isDigit(b.charAt(j))) { bn = bn * 10 + (b.charAt(j) - '0'); j++; }
+                if (an != bn) return Long.compare(an, bn);
+            } else {
+                if (ac != bc) return Character.compare(ac, bc);
+                i++; j++;
+            }
+        }
+        return Integer.compare(a.length() - i, b.length() - j);
     }
     private static boolean isYaml(URI source) { String path = source.getPath() == null ? "" : source.getPath().toLowerCase(); return path.endsWith(".yaml") || path.endsWith(".yml"); }
     private static URI child(URI source, String name) { String text = source.toString(); return URI.create(text.endsWith("/") ? text + name : text + "/" + name); }
