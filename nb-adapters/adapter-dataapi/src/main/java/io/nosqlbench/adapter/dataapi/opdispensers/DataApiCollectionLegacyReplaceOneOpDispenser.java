@@ -18,11 +18,14 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Projection;
+import com.datastax.astra.client.core.query.Sort;
+import com.datastax.astra.client.collections.commands.ReturnDocument;
 import com.datastax.astra.client.collections.commands.options.CollectionReplaceOneOptions;
 import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionReplaceOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionLegacyReplaceOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,24 +34,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionReplaceOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionReplaceOneOpDispenser.class);
-    private final LongFunction<DataApiCollectionReplaceOneOp> opFunction;
+public class DataApiCollectionLegacyReplaceOneOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyReplaceOneOpDispenser.class);
+    private final LongFunction<DataApiCollectionLegacyReplaceOneOp> opFunction;
 
-    public DataApiCollectionReplaceOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyReplaceOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionReplaceOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionLegacyReplaceOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
+            Filter filter = getLegacyFilterFromOp(op, l);
             CollectionReplaceOneOptions options = getCollectionReplaceOneOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
             LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
 
-            return new DataApiCollectionReplaceOneOp(
+            return new DataApiCollectionLegacyReplaceOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
@@ -60,10 +63,24 @@ public class DataApiCollectionReplaceOneOpDispenser extends DataApiOpDispenser {
 
     private CollectionReplaceOneOptions getCollectionReplaceOneOptions(ParsedOp op, long l) {
         CollectionReplaceOneOptions options = new CollectionReplaceOneOptions();
-
+        Sort sort = getSortFromOp(op, l);
+        if (sort != null) {
+            options = options.sort(sort);
+        }
+        Projection[] projection = getProjectionFromOp(op, l);
+        if (projection != null) {
+            options = options.projection(projection);
+        }
         Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
         if (upsertFunction.isPresent()) {
             options = options.upsert(upsertFunction.get().apply(l));
+        }
+        if (op.isDefined("returnDocument")) {
+            options = switch ((String) op.get("returnDocument", l)) {
+                case "after" -> options.returnDocument(ReturnDocument.AFTER);
+                case "before" -> options.returnDocument(ReturnDocument.BEFORE);
+                default -> throw new RuntimeException("Invalid returnDocument value: " + op.get("returnDocument", l));
+            };
         }
         return options;
     }
