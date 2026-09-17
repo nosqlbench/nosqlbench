@@ -37,13 +37,12 @@ public class DataApiCollectionInsertOneOpDispenser extends DataApiOpDispenser {
     }
 
     private LongFunction<DataApiCollectionInsertOneOp> createOpFunction(ParsedOp op) {
-        LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
-        LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
         return (l) -> {
+            Document document = getDocumentFromOp(op, l);
             return new DataApiCollectionInsertOneOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
-                docFunc.apply(l)
+                document
             );
         };
     }

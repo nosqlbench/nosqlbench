@@ -98,6 +98,16 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return new Document(docMap);
     }
 
+    protected Document getDocumentFromOp(ParsedOp op, long l) {
+        Map<String, Object> docMap = getFreeFormFromOp(op, l, "document", true);
+        return new Document(docMap);
+    }
+
+    protected List<Document> getDocumentsFromOp(ParsedOp op, long l) {
+        List<Map<String, Object>> docMapList = getFreeFormListFromOp(op, l, "documents", true);
+        return docMapList.stream().map(Document::new).toList();
+    }
+
     protected void addOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
         switch (operator) {
             case "all" ->
@@ -214,6 +224,24 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return null;
     }
 
+    protected Integer getChunkSizeFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Integer>> csFunction = op.getAsOptionalFunction("chunk_size", Integer.class);
+        if (csFunction.isPresent()) {
+            LongFunction<Integer> cs = csFunction.get();
+            return cs.apply(l);
+        }
+        return null;
+    }
+
+    protected Boolean getOrderedFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Boolean>> orderedFunction = op.getAsOptionalFunction("ordered", Boolean.class);
+        if (orderedFunction.isPresent()) {
+            LongFunction<Boolean> of = orderedFunction.get();
+            return of.apply(l);
+        }
+        return null;
+    }
+
     protected ReturnDocument getReturnDocumentFromOp(ParsedOp op, long l) {
         Optional<LongFunction<String>> rdf = op.getAsOptionalFunction("return_document", String.class);
         if (rdf.isPresent()) {
@@ -259,6 +287,22 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Optional<LongFunction<Map>> ffMapFunc = op.getAsOptionalFunction(fieldName, Map.class);
         if (ffMapFunc.isPresent()) {
             LongFunction<Map> dmf = ffMapFunc.get();
+            return dmf.apply(l);
+        } else {
+            if (required) {
+                throw new OpConfigError(
+                    "Required field '" + fieldName + "' not supplied."
+                );
+            }
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<Map<String, Object>> getFreeFormListFromOp(ParsedOp op, long l, String fieldName, Boolean required) {
+        Optional<LongFunction<List>> ffMapFunc = op.getAsOptionalFunction(fieldName, List.class);
+        if (ffMapFunc.isPresent()) {
+            LongFunction<List> dmf = ffMapFunc.get();
             return dmf.apply(l);
         } else {
             if (required) {

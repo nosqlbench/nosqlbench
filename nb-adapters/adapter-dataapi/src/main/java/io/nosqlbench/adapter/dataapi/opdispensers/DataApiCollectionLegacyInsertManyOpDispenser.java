@@ -31,18 +31,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionInsertManyOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertManyOpDispenser.class);
+public class DataApiCollectionLegacyInsertManyOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyInsertManyOpDispenser.class);
     private final LongFunction<DataApiCollectionInsertManyOp> opFunction;
 
-    public DataApiCollectionInsertManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyInsertManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
     private LongFunction<DataApiCollectionInsertManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            List<Document> documents = getDocumentsFromOp(op, l);
+            List<Document> documents = new ArrayList<>();
+            op.getAsRequiredFunction("documents", List.class).apply(l).forEach(o -> documents.add(Document.parse(o.toString())));
             return new DataApiCollectionInsertManyOp(
                 spaceFunction.apply(l).getDatabase(),
                 targetFunction.apply(l),
@@ -54,15 +55,21 @@ public class DataApiCollectionInsertManyOpDispenser extends DataApiOpDispenser {
 
     private CollectionInsertManyOptions getCollectionInsertManyOptions(ParsedOp op, long l) {
         CollectionInsertManyOptions options = new CollectionInsertManyOptions();
-        options = options.concurrency(1); // hardcoded: avoid client concurrency, let NB use its own.
-        Integer chunkSize = getChunkSizeFromOp(op, l);
-        if (chunkSize != null) {
-            logger.warn(() -> "Setting insertion 'chunk_size'. This is discouraged, as it usually signals an intention to not have 1:1 between ops and HTTP requests.");
-            options = options.chunkSize(chunkSize);
-        }
-        Boolean ordered = getOrderedFromOp(op, l);
-        if (ordered != null) {
-            options = options.ordered(ordered);
+        Optional<LongFunction<Map>> optionsFunction = op.getAsOptionalFunction("options", Map.class);
+        if (optionsFunction.isPresent()) {
+            Map<String, String> optionFields = optionsFunction.get().apply(l);
+            for(Map.Entry<String,String> entry: optionFields.entrySet()) {
+                switch(entry.getKey()) {
+                    case "chunkSize"->
+                        options = options.chunkSize(Integer.parseInt(entry.getValue()));
+                    case "concurrency" ->
+                        options = options.concurrency(Integer.parseInt(entry.getValue()));
+                    case "ordered" ->
+                        options = options.ordered(Boolean.parseBoolean(entry.getValue()));
+                    case "timeout" ->
+                        options = options.timeout(Integer.parseInt(entry.getValue()));
+                }
+            }
         }
         return options;
     }
