@@ -33,8 +33,6 @@ public enum DataApiOpType {
     delete_collection,
     list_collections,
     list_collection_names,
-    // in-collection ops:
-    insert_many,
     
     // LEGACY OPS
     // admin ops:
@@ -44,6 +42,7 @@ public enum DataApiOpType {
     // in-collection ops:
     insert_one,
     insert_one_vector,
+    insert_many,
     delete_one,
     delete_many,
     delete_all,
@@ -68,6 +67,7 @@ public enum DataApiOpType {
     // in-database ops:
     // in-collection ops:
     collection_insert_one,
+    collection_insert_many,
     collection_delete_many,
     collection_delete_one,
     collection_find_one_and_delete,
