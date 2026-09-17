@@ -16,23 +16,27 @@
 
 package io.nosqlbench.adapter.dataapi.ops;
 
+import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.CollectionDefinition;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Filters;
 
-public class DataApiCreateCollectionWithClassOp extends DataApiBaseOp {
-    private final String collectionName;
-    private final CollectionDefinition definition;
-    private final Class<?> clazz;
+public class DataApiCollectionLegacyFindDistinctOp extends DataApiBaseOp {
+    private final Collection collection;
+    private final String fieldName;
+    private final Filter filter;
+    private final Class<?> resultClass;
 
-    public DataApiCreateCollectionWithClassOp(Database db, String collectionName, CollectionDefinition definition, Class<?> clazz) {
+    public DataApiCollectionLegacyFindDistinctOp(Database db, Collection collection, String fieldName, Filter filter, Class<?> resultClass) {
         super(db);
-        this.collectionName = collectionName;
-        this.definition = definition;
-        this.clazz = clazz;
+        this.collection = collection;
+        this.fieldName = fieldName;
+        this.filter = filter;
+        this.resultClass = resultClass;
     }
 
     @Override
     public Object apply(long value) {
-        return db.createCollection(collectionName, definition, clazz);
+        return collection.distinct(fieldName, filter, resultClass);
     }
 }

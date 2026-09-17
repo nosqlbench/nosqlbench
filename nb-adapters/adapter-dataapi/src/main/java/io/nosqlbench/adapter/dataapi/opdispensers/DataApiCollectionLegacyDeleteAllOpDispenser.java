@@ -19,27 +19,27 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 import com.datastax.astra.client.databases.Database;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionDeleteAllOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionLegacyDeleteAllOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiCollectionDeleteAllOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionDeleteAllOpDispenser.class);
-    private final LongFunction<DataApiCollectionDeleteAllOp> opFunction;
+public class DataApiCollectionLegacyDeleteAllOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyDeleteAllOpDispenser.class);
+    private final LongFunction<DataApiCollectionLegacyDeleteAllOp> opFunction;
 
-    public DataApiCollectionDeleteAllOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyDeleteAllOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionDeleteAllOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionLegacyDeleteAllOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
 
-            return new DataApiCollectionDeleteAllOp(
+            return new DataApiCollectionLegacyDeleteAllOp(
                 db,
                 db.getCollection(targetFunction.apply(l))
             );

@@ -18,24 +18,23 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.collections.commands.results.CollectionInsertOneResult;
 
-public class DataApiCollectionFindDistinctOp extends DataApiBaseOp {
-    private final Collection collection;
-    private final String fieldName;
-    private final Filter filter;
-    private final Class<?> resultClass;
+public class DataApiCollectionLegacyInsertOneVectorOp extends DataApiBaseOp {
+    private final Document doc;
+    private final String collectionName;
 
-    public DataApiCollectionFindDistinctOp(Database db, Collection collection, String fieldName, Filter filter, Class<?> resultClass) {
+    public DataApiCollectionLegacyInsertOneVectorOp(Database db, String collectionName, Document doc, float[] vector) {
         super(db);
-        this.collection = collection;
-        this.fieldName = fieldName;
-        this.filter = filter;
-        this.resultClass = resultClass;
+        this.collectionName = collectionName;
+        this.doc = doc.vector(vector);
     }
 
     @Override
     public Object apply(long value) {
-        return collection.distinct(fieldName, filter, resultClass);
+        Collection<Document> collection = db.getCollection(collectionName);
+        CollectionInsertOneResult result = collection.insertOne(doc);
+        return result;
     }
 }

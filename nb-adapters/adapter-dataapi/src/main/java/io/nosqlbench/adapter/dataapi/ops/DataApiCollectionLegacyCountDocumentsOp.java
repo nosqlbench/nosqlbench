@@ -18,23 +18,28 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.exceptions.TooManyDocumentsToCountException;
 import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.collections.commands.results.CollectionInsertOneResult;
+import com.datastax.astra.client.core.query.Filter;
 
-public class DataApiCollectionInsertOneVectorOp extends DataApiBaseOp {
-    private final Document doc;
-    private final String collectionName;
+public class DataApiCollectionLegacyCountDocumentsOp extends DataApiBaseOp {
+    private final Collection<Document> collection;
+    private final Filter filter;
+    private final int upperBound;
 
-    public DataApiCollectionInsertOneVectorOp(Database db, String collectionName, Document doc, float[] vector) {
+    public DataApiCollectionLegacyCountDocumentsOp(Database db, Collection<Document> collection, Filter filter, int upperBound) {
         super(db);
-        this.collectionName = collectionName;
-        this.doc = doc.vector(vector);
+        this.collection = collection;
+        this.filter = filter;
+        this.upperBound = upperBound;
     }
 
     @Override
     public Object apply(long value) {
-        Collection<Document> collection = db.getCollection(collectionName);
-        CollectionInsertOneResult result = collection.insertOne(doc);
-        return result;
+        try {
+            return collection.countDocuments(filter, upperBound);
+        } catch (TooManyDocumentsToCountException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

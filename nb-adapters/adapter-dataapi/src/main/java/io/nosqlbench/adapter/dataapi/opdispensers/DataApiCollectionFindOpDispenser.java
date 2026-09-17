@@ -56,33 +56,24 @@ public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
     private CollectionFindOptions getCollectionFindOptions(ParsedOp op, long l) {
         CollectionFindOptions options = new CollectionFindOptions();
         Sort sort = getSortFromOp(op, l);
-        if (op.isDefined("vector")) {
-            float[] vector = getVectorValues(op, l);
-            if (sort != null) {
-                options = vector != null ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
-            } else if (vector != null) {
-                options = options.sort(Sort.vector(vector));
-            }
+        if (sort != null) {
+            options = options.sort(sort);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
             options = options.projection(projection);
         }
-        Optional<LongFunction<Integer>> limitFunction = op.getAsOptionalFunction("limit", Integer.class);
-        if (limitFunction.isPresent()) {
-            options = options.limit(limitFunction.get().apply(l));
+        Optional<Integer> limit = getLimitFromOp(op, l);
+        if (limit.isPresent()) {
+            options = options.limit(limit.get());
         }
-        Optional<LongFunction<Integer>> skipFunction = op.getAsOptionalFunction("skip", Integer.class);
-        if (skipFunction.isPresent()) {
-            options = options.skip(skipFunction.get().apply(l));
+        Optional<Integer> skip = getSkipFromOp(op, l);
+        if (skip.isPresent()) {
+            options = options.skip(skip.get());
         }
-        Optional<LongFunction<Boolean>> includeSimilarityFunction = op.getAsOptionalFunction("includeSimilarity", Boolean.class);
-        if (includeSimilarityFunction.isPresent()) {
-            options.includeSimilarity(includeSimilarityFunction.get().apply(l));
-        }
-        Optional<LongFunction<String>> pageStateFunction = op.getAsOptionalFunction("pageState", String.class);
-        if (pageStateFunction.isPresent()) {
-            options.pageState(pageStateFunction.get().apply(l));
+        Optional<Boolean> includeSimilarity = getIncludeSimilarityFromOp(op, l);
+        if (includeSimilarity.isPresent()) {
+            options.includeSimilarity(includeSimilarity.get());
         }
         return options;
     }

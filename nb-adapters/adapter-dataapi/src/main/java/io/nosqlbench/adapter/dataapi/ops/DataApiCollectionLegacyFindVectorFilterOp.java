@@ -24,12 +24,12 @@ import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.core.query.Sort;
 
-public class DataApiCollectionFindVectorFilterOp extends DataApiBaseOp {
+public class DataApiCollectionLegacyFindVectorFilterOp extends DataApiBaseOp {
     private final Collection<Document> collection;
     private final Filter filter;
     private final CollectionFindOptions options;
 
-    public DataApiCollectionFindVectorFilterOp(Database db, Collection<Document> collection, float[] vector, int limit, Filter filter) {
+    public DataApiCollectionLegacyFindVectorFilterOp(Database db, Collection<Document> collection, float[] vector, int limit, Filter filter) {
         super(db);
         this.collection = collection;
         this.filter = filter;

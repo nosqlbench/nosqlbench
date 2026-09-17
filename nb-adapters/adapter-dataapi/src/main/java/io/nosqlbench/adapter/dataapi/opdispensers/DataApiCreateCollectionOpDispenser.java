@@ -41,7 +41,7 @@ public class DataApiCreateCollectionOpDispenser extends DataApiOpDispenser {
                 new DataApiCreateCollectionOp(
                     spaceFunction.apply(l).getDatabase(),
                     targetFunction.apply(l),
-                    this.getCollectionDefinitionFromOp(op, l)
+                    this.getLegacyCollectionDefinitionFromOp(op, l)
                 );
 
             return dataApiCreateCollectionOp;

@@ -18,25 +18,25 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.core.query.Sort;
-import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
+import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.collections.commands.options.CollectionReplaceOneOptions;
 
-public class DataApiCollectionFindVectorOp extends DataApiBaseOp {
-    private final Collection<Document> collection;
-    private final CollectionFindOptions options;
+public class DataApiCollectionLegacyReplaceOneOp extends DataApiBaseOp {
+    private final Collection collection;
+    private final Filter filter;
+    private final Object replacement;
+    private final CollectionReplaceOneOptions options;
 
-    public DataApiCollectionFindVectorOp(Database db, Collection<Document> collection, float[] vector, int limit) {
+    public DataApiCollectionLegacyReplaceOneOp(Database db, Collection collection, Filter filter, Object replacement, CollectionReplaceOneOptions options) {
         super(db);
         this.collection = collection;
-        this.options = new CollectionFindOptions().sort(Sort.vector(vector)).limit(limit);
+        this.filter = filter;
+        this.replacement = replacement;
+        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        CollectionFindCursor<Document, Document> cursor = collection.find(options);
-        // Caution: might bloat memory
-        return cursor.toList();
+        return collection.replaceOne(filter, replacement, options);
     }
 }

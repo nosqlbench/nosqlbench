@@ -20,40 +20,31 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.core.query.Filter;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionCountDocumentsOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionDeleteManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
-import java.util.Optional;
 
-public class DataApiCollectionCountDocumentsOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionCountDocumentsOpDispenser.class);
-    private final LongFunction<DataApiCollectionCountDocumentsOp> opFunction;
+public class DataApiCollectionLegacyDeleteManyOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyDeleteManyOpDispenser.class);
+    private final LongFunction<DataApiCollectionDeleteManyOp> opFunction;
 
-    public DataApiCollectionCountDocumentsOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyDeleteManyOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionCountDocumentsOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionDeleteManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
-            Optional<LongFunction<Integer>> ubf = op.getAsOptionalFunction("upper_bound", Integer.class);
-            Optional<Integer> upperBound;
-            if (ubf.isPresent()) {
-                upperBound = Optional.of(ubf.get().apply(l));
-            } else {
-                upperBound = Optional.empty();
-            }
+            Filter filter = getLegacyFilterFromOp(op, l);
 
-            return new DataApiCollectionCountDocumentsOp(
+            return new DataApiCollectionDeleteManyOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
-                filter,
-                upperBound
+                filter
             );
         };
     }

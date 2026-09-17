@@ -17,36 +17,66 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 public enum DataApiOpType {
-    create_collection,
-    insert_many,
-    insert_one,
-    insert_one_vector,
-    find,
-    find_one,
-    find_one_and_delete,
-    find_one_and_update,
-    find_vector,
-    find_vector_filter,
-    update_one,
-    update_many,
-    delete_one,
-    delete_many,
-    delete_collection,
-    list_collections,
-    list_collection_names,
-    estimated_document_count,
-    find_by_id,
-    find_distinct,
-    count_documents,
-    replace_one,
-    find_one_and_replace,
-    delete_all,
-    create_collection_with_class,
+
+    // TO-DO OPS
+    // admin ops:
     create_database,
     list_databases,
     drop_database,
     get_database_info,
+    // db-admin ops:
     create_namespace,
     list_namespaces,
     drop_namespace,
+    // in-database ops:
+    create_collection,
+    delete_collection,
+    list_collections,
+    list_collection_names,
+    
+    // LEGACY OPS
+    // admin ops:
+    // db-admin ops:
+    // in-database ops:
+    create_collection_with_class,
+    // in-collection ops:
+    insert_one,
+    insert_one_vector,
+    insert_many,
+    delete_one,
+    delete_many,
+    delete_all,
+    find_one_and_delete,
+    find,
+    find_vector,
+    find_vector_filter,
+    find_by_id,
+    find_distinct,
+    find_one,
+    update_one,
+    find_one_and_update,
+    replace_one,
+    find_one_and_replace,
+    update_many,
+    estimated_document_count,
+    count_documents,
+
+    // NEW-STYLE OPS
+    // admin ops:
+    // db-admin ops:
+    // in-database ops:
+    // in-collection ops:
+    collection_insert_one,
+    collection_insert_many,
+    collection_delete_many,
+    collection_delete_one,
+    collection_find_one_and_delete,
+    collection_find,
+    collection_find_one,
+    collection_update_one,
+    collection_find_one_and_update,
+    collection_find_one_and_replace,
+    collection_update_many,
+    collection_estimated_document_count,
+    collection_count_documents,
 }

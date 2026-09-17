@@ -12,52 +12,54 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.commands.options.CollectionDeleteOneOptions;
 import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Sort;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionFindDistinctOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionDeleteOneOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiCollectionFindDistinctOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindDistinctOpDispenser.class);
-    private final LongFunction<DataApiCollectionFindDistinctOp> opFunction;
-    public DataApiCollectionFindDistinctOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionLegacyDeleteOneOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyDeleteOneOpDispenser.class);
+    private final LongFunction<DataApiCollectionDeleteOneOp> opFunction;
+
+    public DataApiCollectionLegacyDeleteOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionFindDistinctOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionDeleteOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
-            Class<?> targetClass = getTargetClass(op, l);
-            return new DataApiCollectionFindDistinctOp(
+            Filter filter = getLegacyFilterFromOp(op, l);
+            CollectionDeleteOneOptions options = getCollectionDeleteOneOptions(op, l);
+
+            return new DataApiCollectionDeleteOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
-                op.getAsRequiredFunction("fieldName", String.class).apply(l),
                 filter,
-                targetClass
+                options
             );
         };
     }
 
-    private Class<?> getTargetClass(ParsedOp op, long l) {
-        String className = op.getAsFunctionOr("resultClass", "java.lang.String").apply(l);
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+    private CollectionDeleteOneOptions getCollectionDeleteOneOptions(ParsedOp op, long l) {
+        CollectionDeleteOneOptions options = new CollectionDeleteOneOptions();
+        Sort sort = getSortFromOp(op, l);
+        if (sort != null) {
+            options = options.sort(sort);
         }
+        return options;
     }
 
     @Override
