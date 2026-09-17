@@ -21,11 +21,11 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.collections.commands.results.CollectionInsertOneResult;
 
-public class DataApiCollectionInsertOneVectorOp extends DataApiBaseOp {
+public class DataApiCollectionLegacyInsertOneVectorOp extends DataApiBaseOp {
     private final Document doc;
     private final String collectionName;
 
-    public DataApiCollectionInsertOneVectorOp(Database db, String collectionName, Document doc, float[] vector) {
+    public DataApiCollectionLegacyInsertOneVectorOp(Database db, String collectionName, Document doc, float[] vector) {
         super(db);
         this.collectionName = collectionName;
         this.doc = doc.vector(vector);
