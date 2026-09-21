@@ -430,8 +430,11 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                     optionsBldr.vectorize(pf.apply(l), mf.apply(l), ak.apply(l), paramFunc.get().apply(l)) :
                     optionsBldr.vectorize(pf.apply(l), mf.apply(l), ak.apply(l));
             } else {
-                // paramFunc ignored (due to signature of vectorize method)
-                optionsBldr = optionsBldr.vectorize(pf.apply(l), mf.apply(l));
+                if (paramFunc.isPresent()) {
+                    optionsBldr = optionsBldr.vectorize(pf.apply(l), mf.apply(l), paramFunc.get().apply(l));
+                } else {
+                    optionsBldr = optionsBldr.vectorize(pf.apply(l), mf.apply(l));
+                }
             }
         }
         @SuppressWarnings("unchecked")
