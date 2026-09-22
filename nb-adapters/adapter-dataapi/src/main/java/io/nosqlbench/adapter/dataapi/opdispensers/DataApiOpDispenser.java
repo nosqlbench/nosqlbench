@@ -145,16 +145,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return new Update(updateMap);
     }
 
-    private void applyUpdateOperation(Update update, String operation, String field, Object value) {
-        switch (operation) {
-            case "set" -> update.set(field, value);
-            case "inc" -> update.inc(field, ((Number) value).doubleValue());
-            case "unset" -> update.unset(field);
-            case "addToSet" -> update.addToSet(field, value);
-            case "min" -> update.min(field, ((Number) value).doubleValue());
-            case "rename" -> update.rename(field, value.toString());
-            default -> logger.error(() -> "Operation '" + operation + "' not supported");
-        }
+    protected Map<String, Object> getCollectionDefinitionFromOp(ParsedOp op, long l) {
+        Map<String, Object> definition = getFreeFormFromOp(op, l, "definition", true);
+        return definition;
     }
 
     protected float[] getVectorValues(ParsedOp op, long l) {

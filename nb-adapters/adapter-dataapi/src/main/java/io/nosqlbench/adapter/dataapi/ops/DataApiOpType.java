@@ -29,7 +29,6 @@ public enum DataApiOpType {
     list_namespaces,
     drop_namespace,
     // in-database ops:
-    create_collection,
     delete_collection,
     list_collections,
     list_collection_names,
@@ -38,6 +37,7 @@ public enum DataApiOpType {
     // admin ops:
     // db-admin ops:
     // in-database ops:
+    create_collection,
     create_collection_with_class,
     // in-collection ops:
     insert_one,
@@ -65,6 +65,7 @@ public enum DataApiOpType {
     // admin ops:
     // db-admin ops:
     // in-database ops:
+    db_create_collection,
     // in-collection ops:
     collection_insert_one,
     collection_insert_many,

@@ -17,13 +17,16 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.CollectionDefinition;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.core.commands.Command;
 
-public class DataApiCreateCollectionOp extends DataApiBaseOp {
+import java.util.Map;
+
+public class DataApiDbCreateCollectionOp extends DataApiBaseOp {
     private final String collectionName;
-    private final CollectionDefinition definition;
+    private final Map<String, Object> definition;
 
-    public DataApiCreateCollectionOp(Database db, String collectionName, CollectionDefinition definition) {
+    public DataApiDbCreateCollectionOp(Database db, String collectionName, Map<String, Object> definition) {
         super(db);
         this.collectionName = collectionName;
         this.definition = definition;
@@ -31,6 +34,10 @@ public class DataApiCreateCollectionOp extends DataApiBaseOp {
 
     @Override
     public Object apply(long value) {
-        return db.createCollection(collectionName, definition);
+        Document ccPayload = new Document();
+        ccPayload.append("name", collectionName);
+        ccPayload.append("options", definition);
+        Command ccCommand = new Command("createCollection", ccPayload);
+        return db.runCommand(ccCommand);
     }
 }

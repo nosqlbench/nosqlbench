@@ -38,30 +38,31 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
     static {
         DEPRECATED_OP_TYPES = new HashMap<>();
         // admin ops:
-        DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection_with_class, null); // TODO => newstyle create coll.
+        DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection_with_class, DataApiOpType.db_create_collection);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection,            DataApiOpType.db_create_collection);
         // db-admin ops:
         // in-database ops:
         // in-collection ops:
-        DEPRECATED_OP_TYPES.put(DataApiOpType.insert_one,                  DataApiOpType.collection_insert_one);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.insert_one_vector,           DataApiOpType.collection_insert_one);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.insert_many,                 DataApiOpType.collection_insert_many);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.delete_all,                  DataApiOpType.collection_delete_many);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.delete_many,                 DataApiOpType.collection_delete_many);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.delete_one,                  DataApiOpType.collection_delete_one);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_delete,         DataApiOpType.collection_find_one_and_delete);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find,                        DataApiOpType.collection_find);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_vector,                 DataApiOpType.collection_find);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_vector_filter,          DataApiOpType.collection_find);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_by_id,                  DataApiOpType.collection_find_one);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_distinct,               null); // not a Data API primitive, it's client-emulated
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one,                    DataApiOpType.collection_find_one);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.update_one,                  DataApiOpType.collection_update_one);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_update,         DataApiOpType.collection_find_one_and_update);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.replace_one,                 null); // not a Data API primitive, it's client-emulated
-        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_replace,        DataApiOpType.collection_find_one_and_replace);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.update_many,                 DataApiOpType.collection_update_many);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.count_documents,             DataApiOpType.collection_count_documents);
-        DEPRECATED_OP_TYPES.put(DataApiOpType.estimated_document_count,    DataApiOpType.collection_estimated_document_count);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.insert_one,                   DataApiOpType.collection_insert_one);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.insert_one_vector,            DataApiOpType.collection_insert_one);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.insert_many,                  DataApiOpType.collection_insert_many);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.delete_all,                   DataApiOpType.collection_delete_many);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.delete_many,                  DataApiOpType.collection_delete_many);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.delete_one,                   DataApiOpType.collection_delete_one);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_delete,          DataApiOpType.collection_find_one_and_delete);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find,                         DataApiOpType.collection_find);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_vector,                  DataApiOpType.collection_find);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_vector_filter,           DataApiOpType.collection_find);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_by_id,                   DataApiOpType.collection_find_one);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_distinct,                null); // not a Data API primitive, it's client-emulated
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one,                     DataApiOpType.collection_find_one);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.update_one,                   DataApiOpType.collection_update_one);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_update,          DataApiOpType.collection_find_one_and_update);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.replace_one,                  null); // not a Data API primitive, it's client-emulated
+        DEPRECATED_OP_TYPES.put(DataApiOpType.find_one_and_replace,         DataApiOpType.collection_find_one_and_replace);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.update_many,                  DataApiOpType.collection_update_many);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.count_documents,              DataApiOpType.collection_count_documents);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.estimated_document_count,     DataApiOpType.collection_estimated_document_count);
     }
 
     private final DataApiDriverAdapter adapter;
@@ -103,7 +104,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case list_namespaces -> new DataApiListNamespacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_namespace -> new DataApiDropNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
-            case create_collection -> new DataApiCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case delete_collection -> new DataApiDropCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_collections -> new DataApiListCollectionsOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_collection_names ->
@@ -113,6 +113,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // admin ops:
             // db-admin ops:
             // in-database ops:
+            case create_collection -> new DataApiLegacyCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection_with_class -> new DataApiLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -138,6 +139,8 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
                 new DataApiCollectionEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
             // NEW-STYLE OPS
+            // in-database ops:
+            case db_create_collection -> new DataApiDbCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case collection_insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_insert_many -> new DataApiCollectionInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
