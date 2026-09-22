@@ -40,6 +40,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
         // admin ops:
         DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection_with_class, DataApiOpType.db_create_collection);
         DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection,            DataApiOpType.db_create_collection);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.delete_collection,            DataApiOpType.db_delete_collection);
         // db-admin ops:
         // in-database ops:
         // in-collection ops:
@@ -104,7 +105,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case list_namespaces -> new DataApiListNamespacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_namespace -> new DataApiDropNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
-            case delete_collection -> new DataApiDropCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_collections -> new DataApiListCollectionsOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_collection_names ->
                 new DataApiListCollectionNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -115,6 +115,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // in-database ops:
             case create_collection -> new DataApiLegacyCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection_with_class -> new DataApiLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_collection -> new DataApiLegacyDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_one_vector -> new DataApiCollectionLegacyInsertOneVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -141,6 +142,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // NEW-STYLE OPS
             // in-database ops:
             case db_create_collection -> new DataApiDbCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_delete_collection -> new DataApiDbDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case collection_insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_insert_many -> new DataApiCollectionInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
