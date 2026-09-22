@@ -148,6 +148,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case collection_insert_many -> new DataApiCollectionInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find -> new DataApiCollectionFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find_one -> new DataApiCollectionFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case collection_find_and_rerank -> new DataApiCollectionFindAndRerankOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_update_one -> new DataApiCollectionUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_find_one_and_update -> new DataApiCollectionFindOneAndUpdateOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_delete_many -> new DataApiCollectionDeleteManyOpDispenser(adapter, op, typeAndTarget.targetFunction);

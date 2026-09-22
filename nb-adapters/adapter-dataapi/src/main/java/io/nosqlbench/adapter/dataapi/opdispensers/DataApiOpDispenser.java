@@ -24,7 +24,9 @@ import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.collections.commands.ReturnDocument;
 import com.datastax.astra.client.collections.commands.Update;
 import com.datastax.astra.client.collections.commands.Updates;
+import com.datastax.astra.client.core.hybrid.Hybrid;
 import com.datastax.astra.client.core.query.Sort;
+import com.datastax.astra.client.core.rerank.RerankServiceOptions;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
@@ -251,8 +253,17 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     protected Optional<Boolean> getIncludeSimilarityFromOp(ParsedOp op, long l) {
         Optional<LongFunction<Boolean>> includeSimFunction = op.getAsOptionalFunction("include_similarity", Boolean.class);
         if (includeSimFunction.isPresent()) {
-            LongFunction<Boolean> uf = includeSimFunction.get();
-            return Optional.of(uf.apply(l));
+            LongFunction<Boolean> sf = includeSimFunction.get();
+            return Optional.of(sf.apply(l));
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<Boolean> getIncludeSortVectorFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Boolean>> includeSvFunction = op.getAsOptionalFunction("include_sort_vector", Boolean.class);
+        if (includeSvFunction.isPresent()) {
+            LongFunction<Boolean> sv = includeSvFunction.get();
+            return Optional.of(sv.apply(l));
         }
         return Optional.empty();
     }
@@ -305,6 +316,127 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             }
             return null;
         }
+    }
+
+    protected Optional<Boolean> getIncludeScoresFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Boolean>> includeScFunction = op.getAsOptionalFunction("include_scores", Boolean.class);
+        if (includeScFunction.isPresent()) {
+            LongFunction<Boolean> isf = includeScFunction.get();
+            return Optional.of(isf.apply(l));
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<String> getRerankQueryFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<String>> rqf = op.getAsOptionalFunction("rerank_query", String.class);
+        if (rqf.isPresent()) {
+            String rqValue = rqf.get().apply(l);
+            return Optional.of(rqValue);
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<String> getRerankOnFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<String>> rof = op.getAsOptionalFunction("rerank_on", String.class);
+        if (rof.isPresent()) {
+            String roValue = rof.get().apply(l);
+            return Optional.of(roValue);
+        }
+        return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Optional<Object> getHybridLimitsFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Object>> hlFunc = op.getAsOptionalFunction("hybrid_limits", Object.class);
+        if (hlFunc.isPresent()) {
+            Object hlValue = hlFunc.get().apply(l);
+            if (hlValue instanceof Integer || hlValue instanceof Long) {
+                return Optional.of(hlValue);
+            } else if (hlValue instanceof Map<?, ?> rawMap) {
+                return Optional.of((Map<String, Object>) rawMap);
+            } else {
+                throw new OpConfigError(
+                    "'hybrid_limits' must be an integer or a map, got: " + hlValue.getClass().getSimpleName()
+                );
+            }
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<RerankServiceOptions> getRerankServiceFromOp(ParsedOp op, long l) {
+        Map<String, Object> rerankService = getFreeFormFromOp(op, l, "rerank", false);
+        if (rerankService != null) {
+            RerankServiceOptions rsOptions = new RerankServiceOptions();
+            if (rerankService.containsKey("provider")) {
+                rsOptions = rsOptions.provider((String) rerankService.get("provider"));
+            }
+            if (rerankService.containsKey("modelName")) {
+                rsOptions = rsOptions.modelName((String) rerankService.get("modelName"));
+            }
+            if (rerankService.containsKey("authentication")) {
+                rsOptions = rsOptions.authentication((Map<String, Object>) rerankService.get("authentication"));
+            }
+            if (rerankService.containsKey("parameters")) {
+                rsOptions = rsOptions.parameters((Map<String, Object>) rerankService.get("parameters"));
+            }
+            return Optional.of(rsOptions);
+        }
+        return Optional.empty();
+    }
+
+    protected Sort getFindAndRerankSortFromOp(ParsedOp op, long l) {
+        Map<String, Object> docMap = getFreeFormFromOp(op, l, "sort", true);
+
+        if (docMap.size() != 1 || !docMap.containsKey("$hybrid")) {
+            throw new OpConfigError("'sort' must contain exactly one key: '$hybrid'");
+        }
+
+        Object hybridValue = docMap.get("$hybrid");
+
+        if (hybridValue instanceof String hybridString) {
+            return Sort.hybrid(hybridString);
+        }
+
+        if (hybridValue instanceof Map<?, ?> rawMap) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> hybMap = (Map<String, Object>) rawMap;
+
+            boolean hasVectorize = hybMap.containsKey("$vectorize");
+            boolean hasVector = hybMap.containsKey("$vector");
+            if (!hasVectorize && !hasVector) {
+                throw new OpConfigError(
+                    "'$hybrid' sub-object must contain at least one of '$vectorize' or '$vector'"
+                );
+            }
+
+            Set<String> allowedKeys = Set.of("$vectorize", "$vector", "$lexical");
+            for (String key : hybMap.keySet()) {
+                if (!allowedKeys.contains(key)) {
+                    throw new OpConfigError("Unexpected key in '$hybrid' sub-object: '" + key + "'");
+                }
+            }
+
+            Hybrid hyb = new Hybrid();
+            if (hasVectorize) {
+                hyb = hyb.vectorize((String) hybMap.get("$vectorize"));
+            }
+            if (hasVector) {
+                @SuppressWarnings("unchecked")
+                List<? extends Number> vectorList = (List<? extends Number>) hybMap.get("$vector");
+                float[] vectorArray = new float[vectorList.size()];
+                int i = 0;
+                for (Number n : vectorList) vectorArray[i++] = n.floatValue();
+                hyb = hyb.vector(vectorArray);
+            }
+            if (hybMap.containsKey("$lexical")) {
+                hyb = hyb.lexical((String) hybMap.get("$lexical"));
+            }
+            return Sort.hybrid(hyb);
+        }
+
+        throw new OpConfigError(
+            "'$hybrid' value must be a string or a sub-object, got: " + hybridValue.getClass().getSimpleName()
+        );
     }
 
      /* LEGACY OP DISPENSER UTILS START HERE */

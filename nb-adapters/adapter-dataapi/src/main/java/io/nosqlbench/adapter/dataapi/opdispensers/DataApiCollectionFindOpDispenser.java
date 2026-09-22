@@ -71,6 +71,10 @@ public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
         if (skip.isPresent()) {
             options = options.skip(skip.get());
         }
+        Optional<Boolean> includeSortVector = getIncludeSortVectorFromOp(op, l);
+        if (includeSortVector.isPresent()) {
+            options = options.includeSortVector(includeSortVector.get());
+        }
         Optional<Boolean> includeSimilarity = getIncludeSimilarityFromOp(op, l);
         if (includeSimilarity.isPresent()) {
             options.includeSimilarity(includeSimilarity.get());

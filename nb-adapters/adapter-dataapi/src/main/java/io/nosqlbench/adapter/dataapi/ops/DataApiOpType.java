@@ -75,6 +75,7 @@ public enum DataApiOpType {
     collection_find_one_and_delete,
     collection_find,
     collection_find_one,
+    collection_find_and_rerank,
     collection_update_one,
     collection_find_one_and_update,
     collection_find_one_and_replace,
