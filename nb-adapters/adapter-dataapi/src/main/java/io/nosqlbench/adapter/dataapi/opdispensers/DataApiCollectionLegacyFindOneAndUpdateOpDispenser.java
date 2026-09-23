@@ -42,8 +42,8 @@ public class DataApiCollectionLegacyFindOneAndUpdateOpDispenser extends DataApiO
     private LongFunction<DataApiCollectionLegacyFindOneAndUpdateOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
-            Update update = getLegacyUpdateFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
+            Update update = legacyGetUpdateFromOp(op, l);
             CollectionFindOneAndUpdateOptions options = getCollectionLegacyFindOneAndUpdateOptions(op, l);
 
             return new DataApiCollectionLegacyFindOneAndUpdateOp(

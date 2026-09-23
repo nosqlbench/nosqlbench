@@ -39,7 +39,7 @@ public class DataApiCollectionLegacyDeleteManyOpDispenser extends DataApiOpDispe
     private LongFunction<DataApiCollectionDeleteManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
 
             return new DataApiCollectionDeleteManyOp(
                 db,

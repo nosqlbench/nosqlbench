@@ -39,7 +39,7 @@ public class DataApiCollectionLegacyFindDistinctOpDispenser extends DataApiOpDis
     private LongFunction<DataApiCollectionLegacyFindDistinctOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             Class<?> targetClass = getTargetClass(op, l);
             return new DataApiCollectionLegacyFindDistinctOp(
                 db,

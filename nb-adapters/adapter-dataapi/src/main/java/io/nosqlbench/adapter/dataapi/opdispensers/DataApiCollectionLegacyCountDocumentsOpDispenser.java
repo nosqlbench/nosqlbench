@@ -39,7 +39,7 @@ public class DataApiCollectionLegacyCountDocumentsOpDispenser extends DataApiOpD
     private LongFunction<DataApiCollectionLegacyCountDocumentsOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             int upperBound = op.getAsRequiredFunction("upperbound", Integer.class).apply(l);
 
             return new DataApiCollectionLegacyCountDocumentsOp(

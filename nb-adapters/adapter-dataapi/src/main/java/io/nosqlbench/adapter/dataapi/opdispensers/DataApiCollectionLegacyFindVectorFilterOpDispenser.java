@@ -39,7 +39,7 @@ public class DataApiCollectionLegacyFindVectorFilterOpDispenser extends DataApiO
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             float[] vector = getVectorValues(op, l);
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             int limit = getLimit(op, l);
             return new DataApiCollectionLegacyFindVectorFilterOp(
                 db,

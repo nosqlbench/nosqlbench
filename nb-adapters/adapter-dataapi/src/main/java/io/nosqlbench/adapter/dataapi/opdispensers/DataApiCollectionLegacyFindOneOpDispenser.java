@@ -42,7 +42,7 @@ public class DataApiCollectionLegacyFindOneOpDispenser extends DataApiOpDispense
     private LongFunction<DataApiCollectionFindOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             CollectionFindOneOptions options = getCollectionFindOneOptions(op, l);
             return new DataApiCollectionFindOneOp(
                 db,

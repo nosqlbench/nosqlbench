@@ -27,6 +27,7 @@ import com.datastax.astra.client.collections.commands.Updates;
 import com.datastax.astra.client.core.hybrid.Hybrid;
 import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.core.rerank.RerankServiceOptions;
+import com.datastax.astra.client.core.vector.DataAPIVector;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
@@ -69,6 +70,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         if (op.isDefined("vector")) {
             float[] vector = getVectorValues(op, l);
             if (vector != null) {
+                // TODO use DataAPIVector as soon as the client allows here:
                 vectorSort = Sort.vector(vector);
             }
         }
@@ -100,46 +102,23 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return new Document(docMap);
     }
 
+    protected Document getDocumentFromRawMap(Map<String, Object> docMap) {
+        Document doc = new Document(docMap);
+        // if docMap has a '$vector' key, invoke:
+        if (docMap.containsKey("$vector")) {
+            doc.vector(new DataAPIVector(getVectorValues(docMap.get("$vector"))));
+        }
+        return doc;
+    }
+
     protected Document getDocumentFromOp(ParsedOp op, long l) {
         Map<String, Object> docMap = getFreeFormFromOp(op, l, "document", true);
-        return new Document(docMap);
+        return getDocumentFromRawMap(docMap);
     }
 
     protected List<Document> getDocumentsFromOp(ParsedOp op, long l) {
         List<Map<String, Object>> docMapList = getFreeFormListFromOp(op, l, "documents", true);
-        return docMapList.stream().map(Document::new).toList();
-    }
-
-    protected void addOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
-        switch (operator) {
-            case "all" ->
-                filtersList.add(Filters.all(fieldName, fieldValue));
-            case "eq" ->
-                filtersList.add(Filters.eq(fieldName, fieldValue));
-            case "exists" -> {
-                if (fieldValue != null) {
-                    logger.warn(() -> "'exists' operator does not support value field");
-                }
-                filtersList.add(Filters.exists(fieldName));
-            }
-            case "gt" ->
-                filtersList.add(Filters.gt(fieldName, ((Number) fieldValue).longValue()));
-            case "gte" ->
-                filtersList.add(Filters.gte(fieldName, ((Number) fieldValue).longValue()));
-            case "hasSize" ->
-                filtersList.add(Filters.hasSize(fieldName, ((Number) fieldValue).intValue()));
-            case "in" ->
-                filtersList.add(Filters.in(fieldName, fieldValue));
-            case "lt" ->
-                filtersList.add(Filters.lt(fieldName, ((Number) fieldValue).longValue()));
-            case "lte" ->
-                filtersList.add(Filters.lte(fieldName, ((Number) fieldValue).longValue()));
-            case "ne" ->
-                filtersList.add(Filters.ne(fieldName, fieldValue));
-            case "nin" ->
-                filtersList.add(Filters.nin(fieldName, fieldValue));
-            default -> logger.error(() -> "Operation '" + operator + "' not supported");
-        }
+        return docMapList.stream().map((docMap) -> getDocumentFromRawMap(docMap)).toList();
     }
 
     protected Update getUpdateFromOp(ParsedOp op, long l) {
@@ -421,12 +400,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 hyb = hyb.vectorize((String) hybMap.get("$vectorize"));
             }
             if (hasVector) {
-                @SuppressWarnings("unchecked")
-                List<? extends Number> vectorList = (List<? extends Number>) hybMap.get("$vector");
-                float[] vectorArray = new float[vectorList.size()];
-                int i = 0;
-                for (Number n : vectorList) vectorArray[i++] = n.floatValue();
-                hyb = hyb.vector(vectorArray);
+                hyb = hyb.vector(new DataAPIVector(getVectorValues(hybMap.get("$vector"))));
             }
             if (hybMap.containsKey("$lexical")) {
                 hyb = hyb.lexical((String) hybMap.get("$lexical"));
@@ -448,7 +422,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             field: "incd field"
             value: 500
      */
-    protected Update getLegacyUpdateFromOp(ParsedOp op, long l) {
+    protected Update legacyGetUpdateFromOp(ParsedOp op, long l) {
         Update update = new Update();
         Optional<LongFunction<Map>> updatesFunction = op.getAsOptionalFunction("updates", Map.class);
         if (updatesFunction.isPresent()) {
@@ -480,6 +454,38 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return update;
     }
 
+    protected void legacyAddOperatorFilter(List<Filter> filtersList, String operator, String fieldName, Object fieldValue) {
+        switch (operator) {
+            case "all" ->
+                filtersList.add(Filters.all(fieldName, fieldValue));
+            case "eq" ->
+                filtersList.add(Filters.eq(fieldName, fieldValue));
+            case "exists" -> {
+                if (fieldValue != null) {
+                    logger.warn(() -> "'exists' operator does not support value field");
+                }
+                filtersList.add(Filters.exists(fieldName));
+            }
+            case "gt" ->
+                filtersList.add(Filters.gt(fieldName, ((Number) fieldValue).longValue()));
+            case "gte" ->
+                filtersList.add(Filters.gte(fieldName, ((Number) fieldValue).longValue()));
+            case "hasSize" ->
+                filtersList.add(Filters.hasSize(fieldName, ((Number) fieldValue).intValue()));
+            case "in" ->
+                filtersList.add(Filters.in(fieldName, fieldValue));
+            case "lt" ->
+                filtersList.add(Filters.lt(fieldName, ((Number) fieldValue).longValue()));
+            case "lte" ->
+                filtersList.add(Filters.lte(fieldName, ((Number) fieldValue).longValue()));
+            case "ne" ->
+                filtersList.add(Filters.ne(fieldName, fieldValue));
+            case "nin" ->
+                filtersList.add(Filters.nin(fieldName, fieldValue));
+            default -> logger.error(() -> "Operation '" + operator + "' not supported");
+        }
+    }
+
     /*
     filters:
         - conjunction: "and"
@@ -491,7 +497,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         field: "field2"
         value: 111
      */
-    protected Filter getLegacyFilterFromOp(ParsedOp op, long l) {
+    protected Filter legacyGetFilterFromOp(ParsedOp op, long l) {
         Filter filter = null;
         Optional<LongFunction<List>> filterFunction = op.getAsOptionalFunction("filters", List.class)
             .or(() -> op.getAsOptionalFunction("filter",List.class));
@@ -504,9 +510,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             for (Map<String,Object> filterFields : filters) {
                 switch ((String)filterFields.get("conjunction")) {
                     case "and" ->
-                        addOperatorFilter(andFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
+                        legacyAddOperatorFilter(andFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
                     case "or" ->
-                        addOperatorFilter(orFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
+                        legacyAddOperatorFilter(orFilterList, filterFields.get("operator").toString(), filterFields.get("field").toString(), filterFields.get("value"));
                     default -> logger.error(() -> "Conjunction " + filterFields.get("conjunction") + " not supported");
                 }
             }
@@ -525,7 +531,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     @SuppressWarnings("unchecked")
-    protected CollectionDefinition getLegacyCollectionDefinitionFromOp(ParsedOp op, long l) {
+    protected CollectionDefinition legacyGetCollectionDefinitionFromOp(ParsedOp op, long l) {
         CollectionDefinition optionsBldr = new CollectionDefinition();
         Optional<LongFunction<Integer>> dimFunc = op.getAsOptionalFunction("dimensions", Integer.class);
         if (dimFunc.isPresent()) {

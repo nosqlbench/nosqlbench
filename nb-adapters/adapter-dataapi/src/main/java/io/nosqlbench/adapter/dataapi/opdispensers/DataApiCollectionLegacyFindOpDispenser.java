@@ -42,7 +42,7 @@ public class DataApiCollectionLegacyFindOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiCollectionFindOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             CollectionFindOptions options = getCollectionFindOptions(op, l);
             return new DataApiCollectionFindOp(
                 db,

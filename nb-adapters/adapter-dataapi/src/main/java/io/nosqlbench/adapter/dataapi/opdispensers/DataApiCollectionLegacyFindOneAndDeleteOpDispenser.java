@@ -42,7 +42,7 @@ public class DataApiCollectionLegacyFindOneAndDeleteOpDispenser extends DataApiO
     private LongFunction<DataApiCollectionFindOneAndDeleteOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             CollectionFindOneAndDeleteOptions options = getCollectionFindOneAndDeleteOptions(op, l);
 
             return new DataApiCollectionFindOneAndDeleteOp(

@@ -43,7 +43,7 @@ public class DataApiCollectionLegacyUpdateManyOpDispenser extends DataApiOpDispe
     private LongFunction<DataApiCollectionUpdateManyOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             CollectionUpdateManyOptions options = getCollectionUpdateManyOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("updates", Map.class);
 

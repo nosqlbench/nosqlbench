@@ -46,7 +46,7 @@ public class DataApiCollectionLegacyReplaceOneOpDispenser extends DataApiOpDispe
     private LongFunction<DataApiCollectionLegacyReplaceOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getLegacyFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             CollectionReplaceOneOptions options = getCollectionReplaceOneOptions(op, l);
             LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
             LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
