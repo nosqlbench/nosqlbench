@@ -53,7 +53,15 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     protected Sort getSortFromOp(ParsedOp op, long l) {
-        Sort fieldSort = null;
+        Sort sort = null;
+
+        long sortKeyCount = Stream.of("sort", "vector", "vectorize").filter(op::isDefined).count();
+        if (sortKeyCount > 1) {
+            throw new OpConfigError(
+                "Can sort by only one of: 'sort' (regular asc/desc), 'vector', 'vectorize' in an op."
+            );
+        }
+
         Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
         if (sortFunction.isPresent()) {
             @SuppressWarnings("unchecked")
@@ -61,32 +69,28 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             String sortOrder = sortFields.get("type").toString();
             String sortField = sortFields.get("field").toString();
             switch(sortOrder) {
-                case "asc" -> fieldSort = Sort.ascending(sortField);
-                case "desc" -> fieldSort = Sort.descending(sortField);
+                case "asc" -> sort = Sort.ascending(sortField);
+                case "desc" -> sort = Sort.descending(sortField);
             }
         }
 
-        Sort vectorSort = null;
         if (op.isDefined("vector")) {
             float[] vector = getVectorValues(op, l);
             if (vector != null) {
                 // TODO use DataAPIVector as soon as the client allows here:
-                vectorSort = Sort.vector(vector);
+                sort = Sort.vector(vector);
             }
         }
 
-        if (fieldSort != null && vectorSort != null) {
-            throw new OpConfigError(
-                "cannot sort by vector and regular asc/desc criteria at the same time."
-            );
+        if (op.isDefined("vectorize")) {
+            Optional<LongFunction<String>> vzeFunction = op.getAsOptionalFunction("vectorize", String.class);
+            if (vzeFunction.isPresent()){
+                String vectorize = vzeFunction.get().apply(l);
+                sort = Sort.vectorize(vectorize);
+            }
         }
-        if (vectorSort != null) {
-            return vectorSort;
-        }
-        if (fieldSort != null) {
-            return fieldSort;
-        }
-        return null;
+
+        return sort;
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
