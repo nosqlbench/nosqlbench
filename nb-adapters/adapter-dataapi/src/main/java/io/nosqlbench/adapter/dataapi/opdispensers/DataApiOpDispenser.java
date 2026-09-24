@@ -39,6 +39,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.*;
 import java.util.function.LongFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, DataApiSpace> {
@@ -52,8 +53,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         this.spaceFunction = adapter.getSpaceFunc(op);
     }
 
-    protected Sort getSortFromOp(ParsedOp op, long l) {
-        Sort sort = null;
+    protected Sort[] getSortFromOp(ParsedOp op, long l) {
+        List<Sort> sorts = null;
 
         long sortKeyCount = Stream.of("sort", "vector", "vectorize").filter(op::isDefined).count();
         if (sortKeyCount > 1) {
@@ -66,19 +67,30 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         if (sortFunction.isPresent()) {
             @SuppressWarnings("unchecked")
             Map<String,Object> sortFields = sortFunction.get().apply(l);
-            String sortOrder = sortFields.get("type").toString();
-            String sortField = sortFields.get("field").toString();
-            switch(sortOrder) {
-                case "asc" -> sort = Sort.ascending(sortField);
-                case "desc" -> sort = Sort.descending(sortField);
-            }
+            
+            sorts = sortFields.entrySet().stream()
+                .map(e -> {
+                    String field = e.getKey();
+                    String sortOrder = String.valueOf(e.getValue()).trim();
+                    if (sortOrder.equalsIgnoreCase("asc") || sortOrder.equalsIgnoreCase("ascending")) {
+                        return Sort.ascending(field);
+                    } else if (sortOrder.equalsIgnoreCase("desc") || sortOrder.equalsIgnoreCase("descending")) {
+                        return Sort.descending(field);
+                    } else {
+                        throw new OpConfigError(
+                            "Invalid sort order '" + sortOrder + "' for field '" + field +
+                            "'; expected 'asc' or 'desc' (case-insensitive)."
+                        );
+                    }
+                })
+                .collect(Collectors.toList());
         }
 
         if (op.isDefined("vector")) {
             float[] vector = getVectorValues(op, l);
             if (vector != null) {
                 // TODO use DataAPIVector as soon as the client allows here:
-                sort = Sort.vector(vector);
+                sorts = List.of(Sort.vector(vector));
             }
         }
 
@@ -86,11 +98,14 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             Optional<LongFunction<String>> vzeFunction = op.getAsOptionalFunction("vectorize", String.class);
             if (vzeFunction.isPresent()){
                 String vectorize = vzeFunction.get().apply(l);
-                sort = Sort.vectorize(vectorize);
+                sorts = List.of(Sort.vectorize(vectorize));
             }
         }
 
-        return sort;
+        if (sorts != null) {
+            return sorts.toArray(new Sort[0]);
+        }
+        return null;
     }
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
@@ -532,6 +547,55 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
                 filter = Filters.or(orFilterList.toArray(new Filter[0]));
         }
         return filter;
+    }
+
+    /*
+    sort:
+       field: the_field
+       type: desc
+     */
+    protected Sort[] legacyGetSortFromOp(ParsedOp op, long l) {
+        List<Sort> sorts = null;
+
+        long sortKeyCount = Stream.of("sort", "vector", "vectorize").filter(op::isDefined).count();
+        if (sortKeyCount > 1) {
+            throw new OpConfigError(
+                "Can sort by only one of: 'sort' (regular asc/desc), 'vector', 'vectorize' in an op."
+            );
+        }
+
+        Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
+        if (sortFunction.isPresent()) {
+            @SuppressWarnings("unchecked")
+            Map<String,Object> sortFields = sortFunction.get().apply(l);
+            String sortOrder = sortFields.get("type").toString();
+            String sortField = sortFields.get("field").toString();
+            switch(sortOrder) {
+                case "asc" -> sorts = List.of(Sort.ascending(sortField));
+                case "desc" -> sorts = List.of(Sort.descending(sortField));
+            }
+        }
+
+        if (op.isDefined("vector")) {
+            float[] vector = getVectorValues(op, l);
+            if (vector != null) {
+                // TODO use DataAPIVector as soon as the client allows here:
+                sorts = List.of(Sort.vector(vector));
+            }
+        }
+
+        if (op.isDefined("vectorize")) {
+            Optional<LongFunction<String>> vzeFunction = op.getAsOptionalFunction("vectorize", String.class);
+            if (vzeFunction.isPresent()){
+                String vectorize = vzeFunction.get().apply(l);
+                sorts = List.of(Sort.vectorize(vectorize));
+            }
+        }
+
+        if (sorts != null) {
+            return sorts.toArray(new Sort[0]);
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")

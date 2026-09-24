@@ -58,10 +58,10 @@ public class DataApiCollectionLegacyFindOneAndUpdateOpDispenser extends DataApiO
 
     private CollectionFindOneAndUpdateOptions getCollectionLegacyFindOneAndUpdateOptions(ParsedOp op, long l) {
         CollectionFindOneAndUpdateOptions options = new CollectionFindOneAndUpdateOptions();
-        Sort sort = getSortFromOp(op, l);
+        Sort[] sorts = legacyGetSortFromOp(op, l);
         Boolean upsert = getUpsertFromOp(op, l);
-        if (sort != null) {
-            options = options.sort(sort);
+        if (sorts != null) {
+            options = options.sort(sorts);
         }
         if ( upsert != null ){
             options = options.upsert(upsert);

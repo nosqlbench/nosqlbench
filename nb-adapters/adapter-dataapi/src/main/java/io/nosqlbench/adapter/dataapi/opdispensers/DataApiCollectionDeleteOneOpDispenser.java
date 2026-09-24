@@ -55,9 +55,9 @@ public class DataApiCollectionDeleteOneOpDispenser extends DataApiOpDispenser {
 
     private CollectionDeleteOneOptions getCollectionDeleteOneOptions(ParsedOp op, long l) {
         CollectionDeleteOneOptions options = new CollectionDeleteOneOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (sort != null) {
-            options = options.sort(sort);
+        Sort[] sorts = getSortFromOp(op, l);
+        if (sorts != null) {
+            options = options.sort(sorts);
         }
         return options;
     }

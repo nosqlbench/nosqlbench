@@ -60,11 +60,10 @@ public class DataApiCollectionLegacyUpdateOneOpDispenser extends DataApiOpDispen
 
     private CollectionUpdateOneOptions getCollectionUpdateOneOptions(ParsedOp op, long l) {
         CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (sort != null) {
-            options = options.sort(sort);
+        Sort[] sorts = legacyGetSortFromOp(op, l);
+        if (sorts != null) {
+            options = options.sort(sorts);
         }
-
         Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
         if (upsertFunction.isPresent()) {
             options = options.upsert(upsertFunction.get().apply(l));

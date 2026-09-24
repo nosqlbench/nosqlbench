@@ -55,9 +55,9 @@ public class DataApiCollectionLegacyFindOpDispenser extends DataApiOpDispenser {
 
     private CollectionFindOptions getCollectionFindOptions(ParsedOp op, long l) {
         CollectionFindOptions options = new CollectionFindOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (sort != null) {
-            options = options.sort(sort);
+        Sort[] sorts = legacyGetSortFromOp(op, l);
+        if (sorts != null) {
+            options = options.sort(sorts);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {

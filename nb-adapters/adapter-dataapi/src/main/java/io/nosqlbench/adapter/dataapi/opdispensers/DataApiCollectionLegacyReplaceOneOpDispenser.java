@@ -63,9 +63,9 @@ public class DataApiCollectionLegacyReplaceOneOpDispenser extends DataApiOpDispe
 
     private CollectionReplaceOneOptions getCollectionReplaceOneOptions(ParsedOp op, long l) {
         CollectionReplaceOneOptions options = new CollectionReplaceOneOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (sort != null) {
-            options = options.sort(sort);
+        Sort[] sorts = legacyGetSortFromOp(op, l);
+        if (sorts != null) {
+            options = options.sort(sorts);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
