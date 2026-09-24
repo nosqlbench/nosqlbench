@@ -1,0 +1,403 @@
+# NOTE: this file only lists the (legacy) operations and their syntax in a self-documenting comment-rich form.
+#       It is not a full NB workload file. Refer to the full examples for the overall format.
+
+blocks:
+  bl_do_debug:
+    ops:
+
+      # LEGACY "deleteCollection", fully documented:
+      delcoll_legacy:
+        delete_collection: "TEMPLATE(collection)"
+
+      # LEGACY "createCollection", fully documented:
+      crcoll_legacy:
+        create_collection: "TEMPLATE(collection)"
+        ### optional vector dimensionality (if present, it's a vector collection. Note plural, 'dimensions'):
+        # dimensions: 1024
+        #### optional similarity function for vector (case-insensitive "COSINE"/"EUCLIDEAN"/"DOT_PRODUCT"):
+        # similarity: DOT_PRODUCT
+        #### optional (required for vectorize) service provider:
+        # serviceProvider: voyageAI
+        #### optional (required for vectorize) service model (note a typo, 'mode'):
+        # serviceMode: voyage-2
+        #### optional KMS secret name for vectorize API key:
+        # serviceSharedSecretKey: SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI
+        #### optional parameters map for vectorize service/model:
+        # serviceParameters:
+        #   autoTruncate: true
+        #### optional default ID type (case-sensitive "objectId"/"uuidv6"/"uuidv7"/"uuid"):
+        # collectionType: objectId
+        #### optional, allow-list for indexing (error if denyIndex present as well):
+        # allowIndex:
+        #   - aField1
+        #   - aField2
+        #### optional, deny-list for indexing (error if allowIndex present as well):
+        # denyIndex:
+        #   - aField1
+        #   - aField2
+
+      # LEGACY "insertMany", fully documented:
+      im_legacy:
+        insert_many: "TEMPLATE(collection)"
+        # required documents to insert (a list of strings, each a serialized JSON):
+        documents:
+          - "{\"a\": 1}"
+          - "{\"a\": 2}"
+          - "{\"a\": 3}"
+        #### optional, options (each must be a string if provided):
+        # options:
+        #   # how to split the input list into separate requests (default 50):
+        #   chunkSize: "20"
+        #   # concurrency level for running chunk insertions (must be 1 if ordered=true):
+        #   concurrency: "5"
+        #   # ordered insertion? true = insert sequentially and fail fast; false = no order guarantees, proceed even if errors:
+        #   ordered: "false"
+        #   # timeout for each individual chunk insertion (milliseconds):
+        #   timeout: "5000"
+
+      # LEGACY "insertOne", fully documented (note: identical to new-style op except in the op name):
+      i1_legacy:
+        insert_one: "TEMPLATE(collection)"
+        #### required document to insert, free-form (_id can be omitted; note alternate forms for optional $vector):
+        document:
+          new: true
+          # $vector: [1,2,3,4,5,6,7,8,9,0]
+          # $vector:
+          #   $binary: "P4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAA=="
+
+      # LEGACY "insertOne" with explicit vector, fully documented:
+      i1vec_legacy:
+        insert_one_vector: "TEMPLATE(collection)"
+        #### required document to insert, free-form (_id can be omitted, $vector is ignored):
+        document:
+          new: true
+        # required vector value to come with the document (three alternate forms):
+        vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+        # vector: "1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0"
+        # vector:
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+        #   - 1.0
+
+      # LEGACY "updateMany", fully documented:
+      um_legacy:
+        update_many: "TEMPLATE(collection)"
+        #### required update, free-form:
+        updates:
+          $set:
+            updated: "yes!"
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "old"
+        #     value: true
+        #### optional upsert:
+        # upsert: true
+
+      # LEGACY replace_one, fully documented:
+      repl1_legacy:
+        replace_one: "TEMPLATE(collection)"
+        #### required replacement document in its entirety, free-form (_id can be omitted):
+        document:
+          new: true
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "old"
+        #     value: true
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (either include or exclude, list of fields):
+        # projection:
+        #   exclude:
+        #     - "_id"
+        #### optional upsert:
+        # upsert: true
+        #### optional 'returnDocument' (values: 'after'/'before')
+        # returnDocument: after
+
+      # LEGACY "findOneAndReplace". Fully documented:
+      f1repl_legacy:
+        find_one_and_replace: "TEMPLATE(collection)"
+        #### required replacement document in its entirety, free-form (_id can be omitted):
+        document:
+          new: true
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "idx"
+        #     value: 20
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (either include or exclude, list of fields):
+        # projection:
+        #   exclude:
+        #     - "idx"
+        #### optional upsert:
+        # upsert: true
+        #### optional 'returnDocument' (values: 'after'/'before')
+        # returnDocument: after
+
+      # LEGACY "findOneAndDelete". Fully documented:
+      f1del_legacy:
+        find_one_and_delete: "TEMPLATE(collection)"
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "idx"
+        #     value: 20
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (either include or exclude, list of fields):
+        # projection:
+        #   exclude:
+        #     - "idx"
+
+      # LEGACY "updateOne". Fully documented:
+      u1_legacy:
+        update_one: "TEMPLATE(collection)"
+        #### required update (free-form):
+        # update:
+        #   $set:
+        #     updated: true
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "idx"
+        #     value: 29
+        #### optional upsert:
+        # upsert: true
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+
+      # LEGACY countDocuments. Fully documented:
+      cd_legacy:
+        count_documents: "TEMPLATE(collection)"
+        #### required upper bound (a client-side notion. Error thrown if result exceeds it):
+        upperbound: 100
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "lt"
+        #     field: "idx"
+        #     value: 100
+
+      # LEGACY estimatedDocumentCount (only the op name differs from 'new'). Fully documented:
+      edc_legacy:
+        estimated_document_count: "TEMPLATE(collection)"
+
+      # LEGACY delete-all, i.e. "deleteMany" with no filters (truncate). Fully documented:
+      da_legacy:
+        delete_all: "TEMPLATE(collection_to_truncate)"
+
+      # LEGACY "deleteMany". Fully documented:
+      dm_legacy:
+        delete_many: "TEMPLATE(collection)"
+        #### required filter (either all 'and' or all 'or', cannot be empty):
+        filters:
+          - conjunction: "and"
+            operator: "gt"
+            field: "idx"
+            value: 52
+
+      # LEGACY "deleteOne". Fully documented:
+      d1_legacy:
+        delete_one: "TEMPLATE(collection)"
+        #### required filter (either all 'and' or all 'or', cannot be empty):
+        filters:
+          - conjunction: "and"
+            operator: "lt"
+            field: "idx"
+            value: 100
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+
+      # LEGACY "find (no vectors)". Fully documented:
+      find_legacy:
+        find: "TEMPLATE(collection)"
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "lt"
+        #     field: "idx"
+        #     value: 80
+        #### optional limit:
+        # limit: 40
+        #### optional skip:
+        # skip: 1
+        #### optional includeSimilarity (default to true in this op):
+        # includeSimilarity: true
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (either include or exclude, list of fields):
+        # projection:
+        #   include:
+        #     - "idx"
+        #### optional pageState to start the find from:
+        # pageState: "LQAAAAEBAAAAJDc1NDgyNzk5LTQwN2ItNGEyOC04ODI3LTk5NDA3YmFhMjg4YQDwf///zQA="
+
+      # LEGACY "find with vector". Fully documented:
+      find_vector_legacy:
+        find_vector: "TEMPLATE(collection)"
+        #### required sort vector (float list/string repr with commas):
+        vector: "{seq_vector}"
+        #### optional, limit (defaults to 100):
+        # limit: 3
+
+      # LEGACY "find with vector and a filter". Fully documented:
+      find_vector_filter_legacy:
+        find_vector_filter: "TEMPLATE(collection)"
+        #### required sort vector (float list/string repr with commas):
+        vector: "{seq_vector}"
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "lt"
+        #     field: "idx"
+        #     value: 80
+        #### optional, limit (defaults to 100):
+        # limit: 3
+
+      # LEGACY "findOne (by ID)". Fully documented:
+      find_by_id_legacy:
+        find_by_id: "TEMPLATE(collection)"
+        #### required id of the target document:
+        id: "zzz"
+
+      # LEGACY "findOne". Fully documented:
+      f1_legacy:
+        find_one: "TEMPLATE(collection)"
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "field1"
+        #     value: 74
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (either include or exclude, list of fields):
+        # projection:
+        #   include:
+        #     - "field1"
+        #     - "field2"
+        #### optional includeSimilarity (default to true in this op):
+        # include_similarity: false
+
+      # LEGACY "findOneAndUpdate". Fully documented:
+      f1upd_legacy:
+        find_one_and_update: "TEMPLATE(collection)"
+        #### required update (can only 1 update op, legacy op limitation):
+        updates:
+          update:
+            operation: inc
+            field: "incd field"
+            value: 500
+        #### optional sort (can only 1 sort, not if 'vector/ize'):
+        # sort:
+        #   type: "asc"
+        #   field: "idx"
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "field1"
+        #     value: 74
+        #### optional upsert:
+        # upsert: true
+
+      # LEGACY find-distinct (client-side operation). Fully documented:
+      find_distinct_op_legacy:
+        find_distinct: "TEMPLATE(collection)"
+        #### required field to read:
+        fieldName: "the_field"
+        #### optional filter (either all 'and' or all 'or'):
+        # filters:
+        #   - conjunction: "and"
+        #     operator: "eq"
+        #     field: "field1"
+        #     value: 74
+        #### optional class for the result (default: java.lang.String)
+        # resultClass: "java.lang.Double"
+
+      # LEGACY create collection 'with class' (the 'with class' is a client-side operation only). Fully documented:
+      create_collection_with_class_legacy:
+        create_collection_with_class: "TEMPLATE(collection_to_create)"
+        #### required class name for the collection instance returned (default is shown):
+        createClass: "com.datastax.astra.client.collections.definition.documents.Document"
+        #### optional vector dimension:
+        # dimensions: 1024
+        #### optional similarity function (for vector):
+        # similarity: "DOT_PRODUCT"
+        #### optional default ID type:
+        # collectionType: objectId
+        #### optional vectorize provider:
+        # serviceProvider: voyageAI
+        #### optional vectorize model (note the param typo, 'Mode'):
+        # serviceMode: "voyage-2"
+        #### optional embedding API key name in KMS:
+        # serviceSharedSecretKey: SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI
+        #### optional parameters for the embedding service (depend on model):
+        # serviceParameters:
+        #   autoTruncate: true
+        #### optional selective indexing (only one of 'allowIndex'/'denyIndex'):
+        # allowIndex:
+        #   - field1
+        #   - field2

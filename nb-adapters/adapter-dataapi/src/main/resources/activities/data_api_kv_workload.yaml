@@ -1,4 +1,4 @@
-min_version: "5.21.0"
+# min_version: "5.21.0" TBD depends on the planned next version
 
 description: |
  A basic workload that uses the DataStax Data API Client in Java, emulating what
