@@ -1,0 +1,343 @@
+# NOTE: this file only lists the operations and their syntax in a self-documenting comment-rich form.
+#       It is not a full NB workload file. Refer to the full examples for the overall format.
+
+blocks:
+  bl_do_debug:
+    ops:
+
+      # NEW "deleteCollection", fully documented:
+      delcoll:
+        db_delete_collection: "TEMPLATE(collection)"
+
+      # NEW "createCollection", fully documented:
+      crcoll:
+        db_create_collection: "TEMPLATE(collection)"
+        #### required collection definition (free-form, must be valid Data API syntax)
+        definition:
+          vector:
+            dimension: 1024
+            metric: "dot_product"
+            service:
+              provider: "voyageAI"
+              modelName: "voyage-2"
+              authentication:
+                providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
+              parameters:
+                autoTruncate: true
+          indexing:
+            allow:
+              - aField1
+              - aField2
+          defaultId:
+            type: objectId
+
+      # NEW "insertMany", fully documented:
+      im:
+        collection_insert_many: "TEMPLATE(collection)"
+        # required documents to insert, list of free-form objects:
+        documents:
+          - {"a": 1}
+          - a: 2
+            b: my_string
+            c:
+              c1: subitem1
+              c2: 1999
+          - a: 3
+            $vector: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+        #### optional ordered flag, default=false (true = insert sequentially and fail fast; false = no order guarantees, proceed even if errors):
+        # ordered: false
+        #### optional for splitting the input list into separate requests (default 50):
+        ####      NOTE: in a typical NoSQLBench workload, this should not count and not be used, meaning the amount of documents
+        ####      submitted should be <= chunk size. This is because NB supposedly works in unit of requests to the server,
+        ####      not mediated by manipulations from the Data API client.
+        # chunk_size: 20
+
+      # NEW "insertOne", fully documented:
+      i1:
+        collection_insert_one: "TEMPLATE(collection)"
+        #### required document to insert, free-form (_id can be omitted; note alternate forms for optional $vector):
+        document:
+          newv2: true
+          # $vector: [1,2,3,4,5,6,7,8,9,0]
+          # $vector:
+          #   $binary: "P4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAA=="
+
+      # NEW "updateMany", fully documented:
+      um:
+        collection_update_many: "TEMPLATE(collection)"
+        #### (Note: may fail to update more than first page until fix to https://github.com/datastax/astra-db-java/issues/106 is released)
+        #### required update (free-form):
+        # update:
+        #   $set:
+        #     updated: "yes!"
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - marker_field: present
+        #     - not_a_field:
+        #         $exists: false
+        #### optional upsert:
+        # upsert: true
+
+      # NEW "findOneAndReplace". Fully documented:
+      f1repl:
+        collection_find_one_and_replace: "TEMPLATE(collection)"
+        #### required replacement document in its entirety, free-form (_id can be omitted):
+        replacement:
+          new: true
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - _id:
+        #         $ne: abcd0123
+        #     - not_a_field:
+        #         $exists: false
+        #### optional upsert:
+        # upsert: true
+        #### optional 'return_document' (values: 'after'/'before')
+        # return_document: after
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   exclude:
+        #     - "idx"
+
+      # NEW "findOneAndDelete". Fully documented:
+      f1del:
+        collection_find_one_and_delete: "TEMPLATE(collection)"
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - idx:
+        #         $gte: 21
+        #     - not_a_field:
+        #         $exists: false
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   exclude:
+        #     - "idx"
+
+      # NEW "updateOne". Fully documented:
+      u1:
+        collection_update_one: "TEMPLATE(collection)"
+        #### required update (free-form):
+        update:
+          $set:
+            updated: true
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - idx: 29
+        #     - not_a_field:
+        #         $exists: false
+        #### optional upsert:
+        # upsert: true
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+
+      # NEW "countDocuments". Fully documented:
+      cd:
+        collection_count_documents: "TEMPLATE(collection)"
+        #### optional filter (free-form):
+        # filter:
+        #   fake_field:
+        #     $exists: false
+        #### optional upper bound (a client-side notion. *If provided*, error thrown when exceeded)
+        # upper_bound: 100
+
+      # NEW "estimatedDocumentCount". Fully documented:
+      edc:
+        collection_estimated_document_count: "TEMPLATE(collection)"
+
+      # NEW "deleteMany". Fully documented:
+      dm:
+        collection_delete_many: "TEMPLATE(collection)"
+        #### required filter (free-form. truncate with 'filter: {}')
+        filter:
+          idx:
+            $gt: 40
+
+      # NEW "deleteOne". Fully documented:
+      d1:
+        collection_delete_one: "TEMPLATE(collection)"
+        #### required filter (free-form):
+        filter:
+          $and:
+            - idx:
+                $gte: 45
+            - the_field:
+                $exists: false
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+
+      # NEW "find". Fully documented:
+      f:
+        collection_find: "TEMPLATE(collection)"
+        #### optional filter (free-form):
+        # filter:
+        #   $or:
+        #     - idx:
+        #         $lt: 99
+        #     - idx:
+        #         $exists: false
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional limit:
+        # limit: 36
+        #### optional skip (only with non-vector sorting):
+        # skip: 45
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   include:
+        #     - "idx"
+        #     - "bloppo"
+        #### optional includeSimilarity (default true for nb):
+        # include_similarity: false
+        #### optional includeSortVector (default false):
+        # include_sort_vector: true
+
+      # NEW "findOne". Fully documented:
+      f1:
+        collection_find_one: "TEMPLATE(collection)"
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - field1: "{the_value}"
+        #     - field2:
+        #         $eq: "{the_value}"
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   include:
+        #     - "field1"
+        #     - "field2"
+        #### optional includeSimilarity:
+        # include_similarity: false
+
+      # NEW "findOneAndUpdate". Fully documented:
+      f1upd:
+        collection_find_one_and_update: "TEMPLATE(collection)"
+        #### required update
+        update:
+          $set:
+            myfield2: "new_val"
+          $inc:
+            myfield: 200
+            myfield1: 20
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: "{seq_vector_w}"
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - field1: "{the_value}"
+        #     - field2:
+        #         $eq: "{the_value}"
+        #### optional upsert:
+        # upsert: true
+
+      # NEW "findAndRerank", fully documented:
+      farr:
+        collection_find_and_rerank: "TEMPLATE(collection)"
+        #### required sort clause. Must have '$hybrid' key, with one of the various forms accepted (also depending on collection settings):
+        sort:
+          $hybrid: bla
+        ## alternative (explicit per-leg) sort form:
+        # sort:
+        #   $hybrid:
+        #     $vectorize: bli
+        #     $lexical: blo
+        ## alternative (explicit per-leg) sort form:
+        # sort:
+        #   $hybrid:
+        #     $vector: [0.1,0.2,0.3]
+        #     $lexical: "bla"
+        ## alternative (no-lexical) sort form:
+        # sort:
+        #   $hybrid:
+        #     $vectorize: bli
+        ## alternative (no-lexical) sort form:
+        # sort:
+        #   $hybrid:
+        #     $vector: [0.1,0.2,0.3]
+        #### optional filter (free-form):
+        # filter:
+        #   $vectorize:
+        #     $exists: true
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   include:
+        #     - $vectorize
+        #   exclude:
+        #     - _id
+        #### optional limit:
+        # limit: 1
+        #### optional hybridLimits (can have either form):
+        # hybrid_limits: 10
+        ## alternative (explicit per-leg) hybridLimits form:
+        # hybrid_limits:
+        #   $vector: 11
+        #   $lexical: 9
+        #### optional rerankOn:
+        # rerank_on: "$lexical"
+        #### optional rerankQuery:
+        # rerank_query: "ble"
+        #### optional includeScores (default false):
+        # include_scores: true
+        #### optional includeSortVector (default false):
+        # include_sort_vector: true
+        #### optional rerank override for this one call:
+        #### (Note: may not work until fix to https://github.com/datastax/astra-db-java/issues/109 released)
+        # rerank:
+        #   provider: theProvider"
+        #   modelName: "theModelName"
+        #   authentication:
+        #     providerKey: "bla"
+        #   parameters:
+        #     param1: value1
+        #     param2: 999
