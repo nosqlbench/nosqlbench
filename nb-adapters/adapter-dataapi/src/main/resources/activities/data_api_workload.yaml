@@ -1,0 +1,274 @@
+# Run with e.g.:
+#
+#    nb TODO.yaml <SCENARIO_NAME> \
+#       astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+#       astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+#       namespace=$ASTRA_DB_KEYSPACE \
+#       [main-cycles=<e.g. 200>] \
+#       [rampup-insertmany-cycles=<e.g. 10, relevant if vector>]
+#
+# where <SCENARIO_NAME> = data_api_scenario_base / data_api_scenario_vector
+
+description: |
+ A simple workload that uses the Data API Client to perform
+ writes, reads and vector reads similar to a realistic general-purpose application.
+ One scenario does not involve vectors, the other does.
+ The vector scenario demonstrates bulk insert (which can be done regardless of vector or not).
+
+ data_api_scenario_base:
+    schema
+    rampup (single-document insertions)
+    find one by document _id
+    find one by another document field
+    find (many) with a inequality filter on a field
+ data_api_scenario_vector:
+    schema
+    rampup (single-document insertions)
+    rampup (fewer multi-document insert-many)
+    find one by document _id
+    find one by another document field
+    find (many) with a inequality filter on a field
+    vector ANN find
+    vector ANN find plus filter conditions on other fields
+
+ NOTE: 'rampup-threads' cannot exceed 'cardinality'
+
+ cardinality=TEMPLATE(cardinality,1000)
+ collection=TEMPLATE(collection,dataapi_collection)
+ dimension=TEMPLATE(dimension,1536)
+ similarity=TEMPLATE(similarity,cosine)
+ valuecount=TEMPLATE(valuecount,TEMPLATE(cardinality))
+ rampup-threads=TEMPLATE(rampup-threads,100)
+ rampup-insertmany-cycles=TEMPLATE(rampup-insertmany-cycles,5)
+
+scenarios:
+
+  data_api_scenario_base:
+    schema: >-
+      run driver=dataapi
+      tags==block:schema_base
+      threads==1 cycles==UNDEF
+    rampup:
+      run driver=dataapi
+      tags==block:rampup_base
+      cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    find_by_id:
+      run driver=dataapi
+      tags==block:find_by_id
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_value:
+      run driver=dataapi
+      tags==block:find_by_value
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_ineq:
+      run driver=dataapi
+      tags==block:find_by_ineq
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+
+  data_api_scenario_vector:
+    schema: >-
+      run driver=dataapi
+      tags==block:schema_vector
+      threads==1 cycles==UNDEF
+    rampup:
+      run driver=dataapi
+      tags==block:rampup_vector
+      cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    rampup_insertmany:
+      run driver=dataapi
+      tags==block:rampup_vector_insertmany
+      cycles===TEMPLATE(rampup-insertmany-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    find_by_id:
+      run driver=dataapi
+      tags==block:find_by_id
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_value:
+      run driver=dataapi
+      tags==block:find_by_value
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_ineq:
+      run driver=dataapi
+      tags==block:find_by_ineq
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    vector_find:
+      run driver=dataapi
+      tags==block:vector_find
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    filtered_vector_find:
+      run driver=dataapi
+      tags==block:filtered_vector_find
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+
+bindings:
+  my_seq: Mod(TEMPLATE(cardinality))
+  my_value: Hash(); ToString() -> String
+  my_id: Mod(TEMPLATE(cardinality)); ToString() -> String
+  my_vector: Add(100); HashedFloatVectors(TEMPLATE(dimension,1536));
+  # vectors for batches of "insert_many":
+  ins_vector_00: Add(200); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_01: Add(201); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_02: Add(202); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_03: Add(203); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_04: Add(204); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_05: Add(205); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_06: Add(206); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_07: Add(207); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_08: Add(208); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_09: Add(209); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_10: Add(210); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_11: Add(211); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_12: Add(212); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_13: Add(213); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_14: Add(214); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_15: Add(215); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_16: Add(216); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_17: Add(217); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_18: Add(218); HashedFloatVectors(TEMPLATE(dimension,1536));
+  ins_vector_19: Add(219); HashedFloatVectors(TEMPLATE(dimension,1536));
+
+blocks:
+
+  schema_base:
+    ops:
+      create_collection_base_op:
+        db_create_collection: "TEMPLATE(collection)"
+        definition: {}
+
+  schema_vector:
+    ops:
+      create_collection_vector_op:
+        db_create_collection: "TEMPLATE(collection)"
+        definition:
+          vector:
+            dimension: TEMPLATE(dimension,1536)
+            metric: TEMPLATE(similarity,cosine)
+
+  rampup_base:
+    ops:
+      insert_one_base_op:
+        collection_insert_one: "TEMPLATE(collection)"
+        document:
+          _id: "{my_id}"
+          some_value: "{my_value}"
+          seq: "{my_seq}"
+
+  rampup_vector:
+    ops:
+      insert_one_vector_op:
+        collection_insert_one: "TEMPLATE(collection)"
+        document:
+          _id: "{my_id}"
+          some_value: "{my_value}"
+          seq: "{my_seq}"
+          $vector: "{my_vector}"
+
+  rampup_vector_insertmany:
+    ops:
+      insert_many_vector_op:
+        collection_insert_many: "TEMPLATE(collection)"
+        documents:
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_00}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_01}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_02}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_03}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_04}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_05}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_06}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_07}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_08}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_09}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_10}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_11}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_12}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_13}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_14}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_15}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_16}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_17}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_18}"}
+          - {"some_value":"{my_value}","seq":"{my_seq}","$vector":"{ins_vector_19}"}
+
+  find_by_id:
+    ops:
+      find_by_id_op:
+        collection_find_one: "TEMPLATE(collection)"
+        filter:
+          _id: "{my_id}"
+        projection:
+          include:
+            - "value"
+            - "seq"
+
+  find_by_value:
+    ops:
+      find_by_value_op:
+        collection_find_one: "TEMPLATE(collection)"
+        filter:
+          some_value: "{my_value}"
+        projection:
+          include:
+            - "*"
+        
+  find_by_ineq:
+    ops:
+      find_by_ineq_op:
+        collection_find: "TEMPLATE(collection)"
+        filter:
+          seq:
+            $lt: "{my_seq}"
+        limit: 10
+        sort:
+          seq: desc
+        projection:
+          include:
+            - "seq"
+
+  vector_find:
+    ops:
+      vector_find_op:
+        collection_find: "TEMPLATE(collection)"
+        limit: 10
+        vector: "{my_vector}"
+        include_similarity: true
+        projection:
+          include:
+            - "seq"
+
+  filtered_vector_find:
+    ops:
+      vector_find_op:
+        collection_find: "TEMPLATE(collection)"
+        limit: 10
+        vector: "{my_vector}"
+        filter:
+          seq:
+            $lt: "{my_seq}"
+          some_value:
+            $exists: true
+        projection:
+          include:
+            - "seq"
+          exclude:
+            - "_id"

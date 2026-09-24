@@ -77,6 +77,6 @@ Consult the self-documenting YAML examples here:
 
 - a simple [minimal running workload](activities/example_workload.yaml);
     - (a simple [legacy minimal running workload](activities/example_workload_legacy.yaml));
-- a realistic, [ready-to-run workload](activities/data_api_kv_workload.yaml) demonstrating several ops
+- a realistic, [ready-to-run workload](activities/data_api_workload.yaml) demonstrating several ops
 - [new-style ops full reference](activities/ops_reference.yaml);
     - ([legacy ops full reference](activities/legacy_ops_reference.yaml)).
