@@ -2,7 +2,7 @@
 #       It is not a full NB workload file. Refer to the full examples for the overall format.
 
 blocks:
-  bl_do_debug:
+  my_block:
     ops:
 
       # NEW "deleteCollection", fully documented:
@@ -59,17 +59,15 @@ blocks:
         document:
           newv2: true
           # $vector: [1,2,3,4,5,6,7,8,9,0]
-          # $vector:
-          #   $binary: "P4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAA=="
 
       # NEW "updateMany", fully documented:
       um:
         collection_update_many: "TEMPLATE(collection)"
         #### (Note: may fail to update more than first page until fix to https://github.com/datastax/astra-db-java/issues/106 is released)
         #### required update (free-form):
-        # update:
-        #   $set:
-        #     updated: "yes!"
+        update:
+          $set:
+            updated: "yes!"
         #### optional filter (free-form):
         # filter:
         #   $and:
@@ -101,7 +99,7 @@ blocks:
         #   block: asc
         #   idx: desc
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector}"
+        # vector: [1,2,3,4,5,6,7,8,9,0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (lists of fields; include and exclude can coexist only for special fields):
@@ -124,7 +122,7 @@ blocks:
         #   block: asc
         #   idx: desc
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector}"
+        # vector: [1,2,3,4,5,6,7,8,9,0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (lists of fields; include and exclude can coexist only for special fields):
@@ -152,7 +150,7 @@ blocks:
         #   block: asc
         #   idx: desc
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector}"
+        # vector: [1,2,3,4,5,6,7,8,9,0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
@@ -193,7 +191,7 @@ blocks:
         #   block: asc
         #   idx: desc
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector}"
+        # vector: [1,2,3,4,5,6,7,8,9,0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
@@ -212,7 +210,7 @@ blocks:
         #   block: asc
         #   idx: desc
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1,2,3,4,5,6,7,8,9,0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional limit:
@@ -235,15 +233,15 @@ blocks:
         #### optional filter (free-form):
         # filter:
         #   $and:
-        #     - field1: "{the_value}"
+        #     - field1: "value1"
         #     - field2:
-        #         $eq: "{the_value}"
+        #         $eq: 123
         #### optional sort (order matters; can't use if 'vector/ize'):
         # sort:
         #   block: asc
         #   idx: desc
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1,2,3,4,5,6,7,8,9,0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (lists of fields; include and exclude can coexist only for special fields):
@@ -257,7 +255,7 @@ blocks:
       # NEW "findOneAndUpdate". Fully documented:
       f1upd:
         collection_find_one_and_update: "TEMPLATE(collection)"
-        #### required update
+        #### required update (free-form):
         update:
           $set:
             myfield2: "new_val"
@@ -269,15 +267,15 @@ blocks:
         #   block: asc
         #   idx: desc
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1,2,3,4,5,6,7,8,9,0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional filter (free-form):
         # filter:
         #   $and:
-        #     - field1: "{the_value}"
+        #     - field1: "value1"
         #     - field2:
-        #         $eq: "{the_value}"
+        #         $eq: 123
         #### optional upsert:
         # upsert: true
 
@@ -332,7 +330,7 @@ blocks:
         #### optional includeSortVector (default false):
         # include_sort_vector: true
         #### optional rerank override for this one call:
-        #### (Note: may not work until fix to https://github.com/datastax/astra-db-java/issues/109 released)
+        #### (Note: may not have effects until fix to https://github.com/datastax/astra-db-java/issues/109 released)
         # rerank:
         #   provider: theProvider"
         #   modelName: "theModelName"

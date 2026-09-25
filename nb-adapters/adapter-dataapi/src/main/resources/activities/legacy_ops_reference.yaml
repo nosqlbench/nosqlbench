@@ -2,7 +2,7 @@
 #       It is not a full NB workload file. Refer to the full examples for the overall format.
 
 blocks:
-  bl_do_debug:
+  my_block:
     ops:
 
       # LEGACY "deleteCollection", fully documented:
@@ -119,7 +119,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (either include or exclude, list of fields):
@@ -148,7 +148,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (either include or exclude, list of fields):
@@ -174,7 +174,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (either include or exclude, list of fields):
@@ -186,9 +186,9 @@ blocks:
       u1_legacy:
         update_one: "TEMPLATE(collection)"
         #### required update (free-form):
-        # update:
-        #   $set:
-        #     updated: true
+        update:
+          $set:
+            updated: true
         #### optional filter (either all 'and' or all 'or'):
         # filters:
         #   - conjunction: "and"
@@ -202,7 +202,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
@@ -250,7 +250,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
@@ -274,7 +274,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (either include or exclude, list of fields):
@@ -288,7 +288,7 @@ blocks:
       find_vector_legacy:
         find_vector: "TEMPLATE(collection)"
         #### required sort vector (float list/string repr with commas):
-        vector: "{seq_vector}"
+        vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional, limit (defaults to 100):
         # limit: 3
 
@@ -296,7 +296,7 @@ blocks:
       find_vector_filter_legacy:
         find_vector_filter: "TEMPLATE(collection)"
         #### required sort vector (float list/string repr with commas):
-        vector: "{seq_vector}"
+        vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional filter (either all 'and' or all 'or'):
         # filters:
         #   - conjunction: "and"
@@ -326,7 +326,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional projection (either include or exclude, list of fields):
@@ -351,7 +351,7 @@ blocks:
         #   type: "asc"
         #   field: "idx"
         #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: "{seq_vector_w}"
+        # vector: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
         #### optional filter (either all 'and' or all 'or'):
@@ -382,22 +382,26 @@ blocks:
         create_collection_with_class: "TEMPLATE(collection_to_create)"
         #### required class name for the collection instance returned (default is shown):
         createClass: "com.datastax.astra.client.collections.definition.documents.Document"
-        #### optional vector dimension:
+        ### optional vector dimensionality (if present, it's a vector collection. Note plural, 'dimensions'):
         # dimensions: 1024
-        #### optional similarity function (for vector):
-        # similarity: "DOT_PRODUCT"
-        #### optional default ID type:
-        # collectionType: objectId
-        #### optional vectorize provider:
+        #### optional similarity function for vector (case-insensitive "COSINE"/"EUCLIDEAN"/"DOT_PRODUCT"):
+        # similarity: DOT_PRODUCT
+        #### optional (required for vectorize) service provider:
         # serviceProvider: voyageAI
-        #### optional vectorize model (note the param typo, 'Mode'):
-        # serviceMode: "voyage-2"
-        #### optional embedding API key name in KMS:
+        #### optional (required for vectorize) service model (note a typo, 'mode'):
+        # serviceMode: voyage-2
+        #### optional KMS secret name for vectorize API key:
         # serviceSharedSecretKey: SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI
-        #### optional parameters for the embedding service (depend on model):
+        #### optional parameters map for vectorize service/model:
         # serviceParameters:
         #   autoTruncate: true
-        #### optional selective indexing (only one of 'allowIndex'/'denyIndex'):
+        #### optional default ID type (case-sensitive "objectId"/"uuidv6"/"uuidv7"/"uuid"):
+        # collectionType: objectId
+        #### optional, allow-list for indexing (error if denyIndex present as well):
         # allowIndex:
-        #   - field1
-        #   - field2
+        #   - aField1
+        #   - aField2
+        #### optional, deny-list for indexing (error if allowIndex present as well):
+        # denyIndex:
+        #   - aField1
+        #   - aField2
