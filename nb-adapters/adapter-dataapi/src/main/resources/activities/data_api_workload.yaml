@@ -1,11 +1,11 @@
 # Run with e.g.:
 #
-#    nb TODO.yaml <SCENARIO_NAME> \
+#    nb data_api_workload.yaml <SCENARIO_NAME> \
 #       astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
 #       astraToken=$ASTRA_DB_APPLICATION_TOKEN \
 #       namespace=$ASTRA_DB_KEYSPACE \
 #       [main-cycles=<e.g. 200>] \
-#       [rampup-insertmany-cycles=<e.g. 10, relevant if vector>]
+#       [rampup-insertmany-cycles=<e.g. 10, relevant if vector scenario which has an insert many>]
 #
 # where <SCENARIO_NAME> = data_api_scenario_base / data_api_scenario_vector
 
