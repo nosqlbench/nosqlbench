@@ -18,27 +18,26 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.Update;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndUpdateOptions;
+import com.datastax.astra.client.collections.definition.documents.Document;
+import com.datastax.astra.client.collections.commands.cursor.CollectionFindAndRerankCursor;
+import com.datastax.astra.client.collections.commands.options.CollectionFindAndRerankOptions;
 
-public class DataApiCollectionFindOneAndUpdateOp extends DataApiBaseOp {
+public class DataApiCollectionFindAndRerankOp extends DataApiBaseOp {
     private final Collection<Document> collection;
     private final Filter filter;
-    private final Update update;
-    private final CollectionFindOneAndUpdateOptions options;
+    private final CollectionFindAndRerankOptions options;
 
-    public DataApiCollectionFindOneAndUpdateOp(Database db, Collection<Document> collection, Filter filter, Update update, CollectionFindOneAndUpdateOptions options) {
+    public DataApiCollectionFindAndRerankOp(Database db, Collection<Document> collection, Filter filter, CollectionFindAndRerankOptions options) {
         super(db);
         this.collection = collection;
         this.filter = filter;
-        this.update = update;
         this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        return collection.findOneAndUpdate(filter, update, options);
+        CollectionFindAndRerankCursor<Document, Document> cursor = collection.findAndRerank(filter, options);
+        return cursor.toList();
     }
 }

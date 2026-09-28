@@ -31,10 +31,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionFindOpDispenser.class);
+public class DataApiCollectionLegacyFindOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyFindOpDispenser.class);
     private final LongFunction<DataApiCollectionFindOp> opFunction;
-    public DataApiCollectionFindOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyFindOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
@@ -42,7 +42,7 @@ public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiCollectionFindOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             CollectionFindOptions options = getCollectionFindOptions(op, l);
             return new DataApiCollectionFindOp(
                 db,
@@ -55,7 +55,7 @@ public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
 
     private CollectionFindOptions getCollectionFindOptions(ParsedOp op, long l) {
         CollectionFindOptions options = new CollectionFindOptions();
-        Sort[] sorts = getSortFromOp(op, l);
+        Sort[] sorts = legacyGetSortFromOp(op, l);
         if (sorts != null) {
             options = options.sort(sorts);
         }
@@ -63,21 +63,21 @@ public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
         if (projection != null) {
             options = options.projection(projection);
         }
-        Optional<Integer> limit = getLimitFromOp(op, l);
-        if (limit.isPresent()) {
-            options = options.limit(limit.get());
+        Optional<LongFunction<Integer>> limitFunction = op.getAsOptionalFunction("limit", Integer.class);
+        if (limitFunction.isPresent()) {
+            options = options.limit(limitFunction.get().apply(l));
         }
-        Optional<Integer> skip = getSkipFromOp(op, l);
-        if (skip.isPresent()) {
-            options = options.skip(skip.get());
+        Optional<LongFunction<Integer>> skipFunction = op.getAsOptionalFunction("skip", Integer.class);
+        if (skipFunction.isPresent()) {
+            options = options.skip(skipFunction.get().apply(l));
         }
-        Optional<Boolean> includeSortVector = getIncludeSortVectorFromOp(op, l);
-        if (includeSortVector.isPresent()) {
-            options = options.includeSortVector(includeSortVector.get());
+        Optional<LongFunction<Boolean>> includeSimilarityFunction = op.getAsOptionalFunction("includeSimilarity", Boolean.class);
+        if (includeSimilarityFunction.isPresent()) {
+            options.includeSimilarity(includeSimilarityFunction.get().apply(l));
         }
-        Optional<Boolean> includeSimilarity = getIncludeSimilarityFromOp(op, l);
-        if (includeSimilarity.isPresent()) {
-            options.includeSimilarity(includeSimilarity.get());
+        Optional<LongFunction<String>> pageStateFunction = op.getAsOptionalFunction("pageState", String.class);
+        if (pageStateFunction.isPresent()) {
+            options.pageState(pageStateFunction.get().apply(l));
         }
         return options;
     }

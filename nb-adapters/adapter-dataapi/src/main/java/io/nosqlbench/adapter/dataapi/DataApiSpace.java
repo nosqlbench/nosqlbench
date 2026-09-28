@@ -20,6 +20,9 @@ import com.datastax.astra.client.DataAPIClient;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
 import com.datastax.astra.client.admin.DatabaseAdmin;
+// TODO: remove this - it's to log Data API requests and responses
+import com.datastax.astra.client.core.options.DataAPIClientOptions;
+
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
 import io.nosqlbench.nb.api.config.standard.NBConfigModel;

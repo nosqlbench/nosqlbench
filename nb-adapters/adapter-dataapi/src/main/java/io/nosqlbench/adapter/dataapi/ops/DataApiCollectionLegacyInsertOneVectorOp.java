@@ -19,26 +19,22 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.Update;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndUpdateOptions;
+import com.datastax.astra.client.collections.commands.results.CollectionInsertOneResult;
 
-public class DataApiCollectionFindOneAndUpdateOp extends DataApiBaseOp {
-    private final Collection<Document> collection;
-    private final Filter filter;
-    private final Update update;
-    private final CollectionFindOneAndUpdateOptions options;
+public class DataApiCollectionLegacyInsertOneVectorOp extends DataApiBaseOp {
+    private final Document doc;
+    private final String collectionName;
 
-    public DataApiCollectionFindOneAndUpdateOp(Database db, Collection<Document> collection, Filter filter, Update update, CollectionFindOneAndUpdateOptions options) {
+    public DataApiCollectionLegacyInsertOneVectorOp(Database db, String collectionName, Document doc, float[] vector) {
         super(db);
-        this.collection = collection;
-        this.filter = filter;
-        this.update = update;
-        this.options = options;
+        this.collectionName = collectionName;
+        this.doc = doc.vector(vector);
     }
 
     @Override
     public Object apply(long value) {
-        return collection.findOneAndUpdate(filter, update, options);
+        Collection<Document> collection = db.getCollection(collectionName);
+        CollectionInsertOneResult result = collection.insertOne(doc);
+        return result;
     }
 }

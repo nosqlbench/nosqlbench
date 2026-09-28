@@ -27,8 +27,6 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
@@ -45,13 +43,13 @@ public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             CollectionUpdateManyOptions options = getCollectionUpdateManyOptions(op, l);
-            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("updates", Map.class);
+            Update update = getUpdateFromOp(op, l);
 
             return new DataApiCollectionUpdateManyOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                new Update(docMapFunc.apply(l)),
+                update,
                 options
             );
         };
@@ -59,11 +57,10 @@ public class DataApiCollectionUpdateManyOpDispenser extends DataApiOpDispenser {
 
     private CollectionUpdateManyOptions getCollectionUpdateManyOptions(ParsedOp op, long l) {
         CollectionUpdateManyOptions options = new CollectionUpdateManyOptions();
-        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
-        if (upsertFunction.isPresent()) {
-            options = options.upsert(upsertFunction.get().apply(l));
+        Boolean upsert = getUpsertFromOp(op, l);
+        if (upsert != null) {
+            options = options.upsert(upsert);
         }
-
         return options;
     }
 
