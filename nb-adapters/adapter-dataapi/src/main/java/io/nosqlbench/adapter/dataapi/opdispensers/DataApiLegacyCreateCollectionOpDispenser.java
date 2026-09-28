@@ -16,34 +16,34 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
-import com.datastax.astra.client.collections.definition.documents.Document;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionInsertOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiLegacyCreateCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionInsertOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertOneOpDispenser.class);
-    private final LongFunction<DataApiCollectionInsertOneOp> opFunction;
+public class DataApiLegacyCreateCollectionOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiLegacyCreateCollectionOpDispenser.class);
+    private final LongFunction<DataApiLegacyCreateCollectionOp> opFunction;
 
-    public DataApiCollectionInsertOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiLegacyCreateCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionInsertOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiLegacyCreateCollectionOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            Document document = getDocumentFromOp(op, l);
-            return new DataApiCollectionInsertOneOp(
-                spaceFunction.apply(l).getDatabase(),
-                targetFunction.apply(l),
-                document
-            );
+            DataApiLegacyCreateCollectionOp dataApiCreateCollectionOp =
+                new DataApiLegacyCreateCollectionOp(
+                    spaceFunction.apply(l).getDatabase(),
+                    targetFunction.apply(l),
+                    this.legacyGetCollectionDefinitionFromOp(op, l)
+                );
+
+            return dataApiCreateCollectionOp;
         };
     }
 
@@ -51,4 +51,6 @@ public class DataApiCollectionInsertOneOpDispenser extends DataApiOpDispenser {
     public DataApiBaseOp getOp(long cycle) {
         return opFunction.apply(cycle);
     }
+
+
 }

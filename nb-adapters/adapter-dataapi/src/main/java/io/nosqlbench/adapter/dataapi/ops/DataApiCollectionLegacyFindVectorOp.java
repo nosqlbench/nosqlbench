@@ -19,26 +19,24 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.collections.Collection;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.collections.definition.documents.Document;
-import com.datastax.astra.client.core.query.Filter;
-import com.datastax.astra.client.collections.commands.Update;
-import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndUpdateOptions;
+import com.datastax.astra.client.core.query.Sort;
+import com.datastax.astra.client.collections.commands.cursor.CollectionFindCursor;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOptions;
 
-public class DataApiCollectionFindOneAndUpdateOp extends DataApiBaseOp {
+public class DataApiCollectionLegacyFindVectorOp extends DataApiBaseOp {
     private final Collection<Document> collection;
-    private final Filter filter;
-    private final Update update;
-    private final CollectionFindOneAndUpdateOptions options;
+    private final CollectionFindOptions options;
 
-    public DataApiCollectionFindOneAndUpdateOp(Database db, Collection<Document> collection, Filter filter, Update update, CollectionFindOneAndUpdateOptions options) {
+    public DataApiCollectionLegacyFindVectorOp(Database db, Collection<Document> collection, float[] vector, int limit) {
         super(db);
         this.collection = collection;
-        this.filter = filter;
-        this.update = update;
-        this.options = options;
+        this.options = new CollectionFindOptions().sort(Sort.vector(vector)).limit(limit);
     }
 
     @Override
     public Object apply(long value) {
-        return collection.findOneAndUpdate(filter, update, options);
+        CollectionFindCursor<Document, Document> cursor = collection.find(options);
+        // Caution: might bloat memory
+        return cursor.toList();
     }
 }
