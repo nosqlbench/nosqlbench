@@ -83,8 +83,18 @@ public class Cqld4PreparedStmtDispenser extends Cqld4BaseOpDispenser<Cqld4CqlPre
             LongFunction<PreparedStatement> cachedStatementF =
                 (long l) -> lookupSpaceF.apply(l).getOrCreatePreparedStatement(refKey,prepareStatementF);
 
-            LongFunction<Statement> boundStatementF =
-                (long l) -> cachedStatementF.apply(l).bind(fieldsF.apply(l));
+            // A bind value may be a fragment — statement text with its own
+            // markers and values, keyed by its form. Such a cycle binds
+            // through the statement prepared for that form, prepared the
+            // first time the form is seen; a cycle without one takes the
+            // single-statement path unchanged.
+            LongFunction<Statement> boundStatementF = (long l) -> {
+                Object[] fields = fieldsF.apply(l);
+                if (!DynamicForms.hasFragment(fields)) return cachedStatementF.apply(l).bind(fields);
+                PreparedStatement form = lookupSpaceF.apply(l).getOrCreatePreparedForm(
+                    refKey, DynamicForms.formKey(fields), key -> sessionF.apply(l).prepare(DynamicForms.text(stmtTpl, fields)));
+                return form.bind(DynamicForms.spread(fields));
+            };
 
             return super.getEnhancedStmtFunc(boundStatementF, op);
 

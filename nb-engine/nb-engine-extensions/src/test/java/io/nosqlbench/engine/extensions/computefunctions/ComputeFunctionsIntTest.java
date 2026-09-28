@@ -58,6 +58,21 @@ class ComputeFunctionsIntTest {
   }
 
   @Test
+  public void attainableRecallLeavesSentinelsOutOfTheDenominator() {
+    int[] padded = new int[]{3, 7, -1, -1, -1};
+    assertThat(ComputeFunctions.recall(padded, int_3_7_1_9_5, 5)).as(
+        "strict recall counts a sentinel as a miss").isCloseTo(0.4d, offset);
+    assertThat(ComputeFunctions.attainableRecall(padded, int_3_7_1_9_5, 5)).as(
+        "both attainable neighbors were found").isCloseTo(1.0d, offset);
+    assertThat(ComputeFunctions.attainableRecall(padded, new int[]{3, 8, -2, -3, -4}, 5)).as(
+        "one of two attainable neighbors found; padded results never match").isCloseTo(0.5d, offset);
+    assertThat(ComputeFunctions.attainableRecall(new int[]{-1, -1, -1, -1, -1}, int_3_7_1_9_5, 5)).as(
+        "nothing attainable, nothing missed").isCloseTo(1.0d, offset);
+    assertThat(ComputeFunctions.attainableRecall(allInts, int_3_7_1_9_5, 5)).as(
+        "with no sentinels it is the strict recall").isCloseTo(ComputeFunctions.recall(allInts, int_3_7_1_9_5, 5), offset);
+  }
+
+  @Test
   public void testProportionalIntersectionAtSomeK() {
     int[] image = new int[]{101,102,103,104,105};
     int[] gt = new int[]{34,30,12,9,37};

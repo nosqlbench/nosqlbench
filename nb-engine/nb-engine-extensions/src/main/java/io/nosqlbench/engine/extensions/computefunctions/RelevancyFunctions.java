@@ -34,6 +34,18 @@ public class RelevancyFunctions {
         return new Recall(name, k);
     }
 
+    public static AttainableRecall attainable_recall(String name, int k, Map<String, String> labels) {
+        return new AttainableRecall(name, k, labels);
+    }
+
+    public static AttainableRecall attainable_recall(String name, int k, Object... labels) {
+        return new AttainableRecall(name, k, labels);
+    }
+
+    public static AttainableRecall attainable_recall(String name, int k) {
+        return new AttainableRecall(name, k);
+    }
+
     public static Precision precision(String name, int k, Map<String, String> labels) {
         return new Precision(name, k, labels);
     }

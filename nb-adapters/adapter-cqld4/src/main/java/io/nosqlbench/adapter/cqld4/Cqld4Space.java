@@ -49,6 +49,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.LongFunction;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Cqld4Space extends BaseSpace<Cqld4Space> {
@@ -56,6 +58,9 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
 
     private CqlSession session;
     private ConcurrentIndexCache<PreparedStatement> preparedStmtCache = new ConcurrentIndexCache<>("pstmts");
+    /// Prepared statements of ops whose text varies by form, keyed by
+    /// the op's reference key and then by the form's own key.
+    private final ConcurrentHashMap<Integer, ConcurrentHashMap<String, PreparedStatement>> preparedForms = new ConcurrentHashMap<>();
 
     public Cqld4Space(Cqld4DriverAdapter adapter, long spaceidx, NBConfiguration cfg) {
         super(adapter,spaceidx);
@@ -358,5 +363,12 @@ public class Cqld4Space extends BaseSpace<Cqld4Space> {
     ) {
         PreparedStatement ps = preparedStmtCache.get(refkey, psF);
         return ps;
+    }
+
+    /// The prepared statement for one form of an op: prepared through
+    /// `prepareF` the first time this form key is seen for this op, and
+    /// held for every later cycle of the form.
+    public PreparedStatement getOrCreatePreparedForm(int refkey, String formKey, Function<String, PreparedStatement> prepareF) {
+        return preparedForms.computeIfAbsent(refkey, k -> new ConcurrentHashMap<>()).computeIfAbsent(formKey, prepareF);
     }
 }

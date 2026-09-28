@@ -39,18 +39,46 @@ public final class Catalog {
         return new Catalog(entries, settings);
     }
     public Map<String, CatalogEntry> entries() { return entries; }
-    public TestDataView open(String dataset, String profile) {
+    /// Loads a dataset's manifest as a group, without choosing a profile.
+    public TestDataGroup openGroup(String dataset) {
         CatalogEntry entry = entries.get(dataset);
         if (entry == null) throw new VectorDataException("Dataset is not in configured catalogs: " + dataset);
         if ("knn_entries.yaml".equals(entry.datasetType())) {
             @SuppressWarnings("unchecked") Map<String, Map<String, Object>> profiles = (Map<String, Map<String, Object>>) entry.attributes().get("profiles");
-            return TestDataGroup.fromLegacyEntries(dataset, entry.manifest(), profiles, settings).profile(profile);
+            return TestDataGroup.fromLegacyEntries(dataset, entry.manifest(), profiles, settings);
         }
-        return TestDataGroup.load(entry.manifest(), settings).profile(profile);
+        return TestDataGroup.load(entry.manifest(), settings);
     }
-    public TestDataView openProfile(String datasetAndProfile) {
-        int separator = datasetAndProfile.lastIndexOf(':');
-        return separator < 0 ? open(datasetAndProfile, null) : open(datasetAndProfile.substring(0, separator), datasetAndProfile.substring(separator + 1));
+    /// Opens the one profile of a dataset a selector names. `selector`
+    /// is a bare name as it always was, or an expression such as
+    /// `size=10m,predicates=uniform-2`; `null` opens `default`. It must
+    /// name exactly one profile: a set fails here, and [#openProfiles]
+    /// is the surface that takes one.
+    public TestDataView open(String dataset, String selector) {
+        TestDataGroup group = openGroup(dataset);
+        return group.profile(selectOne(group, dataset, selector));
+    }
+    /// Opens every profile of a dataset a selector names, size-ordered.
+    /// `null` opens `default`; `profile=*` opens them all.
+    public List<TestDataView> openProfiles(String dataset, String selector) {
+        TestDataGroup group = openGroup(dataset);
+        List<String> selected;
+        try { selected = group.select(selector); }
+        catch (SelectionException e) { throw e.inDataset(dataset); }
+        List<TestDataView> views = new ArrayList<>();
+        for (String profile : selected) views.add(group.profile(profile));
+        return views;
+    }
+    /// Opens the one profile a dataset spec names — `<dataset>` or
+    /// `<dataset>:<selector>`, split by the head's shape as
+    /// [DatasetSpec] describes, so a selector may carry a colon.
+    public TestDataView openProfile(String spec) {
+        DatasetSpec parsed = DatasetSpec.parse(spec);
+        return open(parsed.head(), parsed.selectorText());
+    }
+    private static String selectOne(TestDataGroup group, String dataset, String selector) {
+        try { return group.selectOne(selector); }
+        catch (SelectionException e) { throw e.inDataset(dataset); }
     }
     private static void load(URI source, VectorDataSettings settings, Map<String, CatalogEntry> output) {
         if (!isCatalogFile(source)) { loadDirectory(source, settings, output); return; }

@@ -31,7 +31,6 @@
     <description>Programmatic Java access to vectordata-rs datasets.</description>
 
     <properties>
-        <maven.compiler.release>17</maven.compiler.release>
         <automatic.module.name>io.nosqlbench.vectordata</automatic.module.name>
     </properties>
 

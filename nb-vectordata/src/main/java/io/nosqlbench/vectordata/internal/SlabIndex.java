@@ -129,7 +129,7 @@ public final class SlabIndex {
 
     /// The size a page declares in its header, or `null` when the
     /// header cannot be read.
-    static Long pageSizeAt(ByteStorage storage, long offset) {
+    public static Long pageSizeAt(ByteStorage storage, long offset) {
         try {
             if (offset < 0 || offset + HEADER > storage.size()) return null;
             return Integer.toUnsignedLong(storage.read(offset + 4, 4).order(ByteOrder.LITTLE_ENDIAN).getInt());
@@ -172,6 +172,33 @@ public final class SlabIndex {
     static long recordCountFromBuf(byte[] page, String label) {
         if (page.length < HEADER + FOOTER) throw fail(label, "last page", "truncated page of " + page.length + " bytes");
         return Footer.parse(java.util.Arrays.copyOfRange(page, page.length - FOOTER, page.length), label, "last page").recordCount();
+    }
+
+    /// The record count of a page held in a buffer, from its footer.
+    public static long recordCount(ByteBuffer page, String label) {
+        int length = page.remaining();
+        if (length < HEADER + FOOTER) throw fail(label, "page", "truncated page of " + length + " bytes");
+        int footer = page.position() + length - FOOTER;
+        return (page.get(footer + 5) & 0xffL) | (page.get(footer + 6) & 0xffL) << 8 | (page.get(footer + 7) & 0xffL) << 16;
+    }
+
+    /// One record out of a page held in a buffer, by its index within
+    /// the page: reads the two offsets that bound it and copies just
+    /// those bytes, never the page's other records.
+    public static byte[] record(ByteBuffer page, int local, String label) {
+        int base = page.position(), length = page.remaining();
+        long count = recordCount(page, label);
+        if (local < 0 || local >= count) throw fail(label, "page", "record " + local + " of " + count);
+        int offsetsAt = base + length - FOOTER - 4 * ((int) count + 1);
+        if (offsetsAt < base + HEADER) throw fail(label, "page", "offset array does not fit " + count + " records");
+        ByteBuffer little = page.duplicate().order(ByteOrder.LITTLE_ENDIAN);
+        long start = Integer.toUnsignedLong(little.getInt(offsetsAt + 4 * local));
+        long end = Integer.toUnsignedLong(little.getInt(offsetsAt + 4 * local + 4));
+        if (start < HEADER || end < start || base + end > offsetsAt) throw fail(label, "page", "record " + local + " offsets are out of range");
+        byte[] out = new byte[(int) (end - start)];
+        little.position(base + (int) start);
+        little.get(out);
+        return out;
     }
 
     private static VectorDataException fail(String label, String what, String detail) {

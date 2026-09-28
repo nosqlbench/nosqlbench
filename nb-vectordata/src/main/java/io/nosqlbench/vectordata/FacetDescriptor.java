@@ -52,4 +52,11 @@ public record FacetDescriptor(String name, URI source, String window, Map<String
 
     /// Whether this facet spans more than one file.
     public boolean isSeries() { return series != null; }
+
+    /// How many files a uniform series spans, as its `shard_count`
+    /// declares; `null` for a single file, and for the explicit form,
+    /// whose files are its entries. A series has no single source path,
+    /// and a caller that reports what opening the facet will cost needs
+    /// this number without realizing the series first.
+    public Integer shardCount() { return series == null ? null : series.shardCount(); }
 }

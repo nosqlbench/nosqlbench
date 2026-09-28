@@ -18,7 +18,12 @@ package io.nosqlbench.vectordata.internal;
 import io.nosqlbench.vectordata.DSWindow;
 import io.nosqlbench.vectordata.ElementType;
 import io.nosqlbench.vectordata.FacetDescriptor;
+import io.nosqlbench.vectordata.FacetFormat;
 import io.nosqlbench.vectordata.FacetNames;
+import io.nosqlbench.vectordata.FacetShape;
+import io.nosqlbench.vectordata.WrongFacetShapeException;
+import io.nosqlbench.vectordata.records.RecordException;
+import io.nosqlbench.vectordata.records.RecordFacet;
 import io.nosqlbench.vectordata.PrebufferProgress;
 import io.nosqlbench.vectordata.PrefetchHandle;
 import io.nosqlbench.vectordata.PrefetchPlan;
@@ -68,7 +73,50 @@ public final class ManifestView implements TestDataView {
     @Override public VectorReader<?> openFacet(String name) { FacetDescriptor facet = require(name); return window(facet, open(facet)); }
     @Override public VvecReader<?> openVariableFacet(String name) {
         FacetDescriptor facet = require(name);
+        requireShape(facet, FacetShape.ELEMENTS);
         return facet.isSeries() ? new ShardedVvecReader<>(handle(name).series()) : VectorReaders.openVvec(facet.source(), settings, dataset);
+    }
+    @Override public FacetShape facetShape(String name) {
+        FacetDescriptor facet = require(name);
+        String extension = extensionOf(facet);
+        FacetFormat format = FacetFormat.fromExtension(extension);
+        if (format == null)
+            throw new VectorDataException("facet '" + facet.name() + "': the spec names no format for '" + (extension.isEmpty() ? "(none)" : extension) + "'");
+        return format.shape();
+    }
+    @Override public RecordFacet openFacetRecords(String name) {
+        FacetDescriptor facet = require(name);
+        // The mirror of the vector path's guard: an element-shaped facet
+        // brought here would fail as a slab parse error about a footer,
+        // which says nothing about what went wrong.
+        FacetFormat format = FacetFormat.fromExtension(extensionOf(facet));
+        if (format != null && format.shape() == FacetShape.ELEMENTS) throw RecordException.wrongShape(facet.name(), FacetShape.ELEMENTS.reader());
+        Prefetcher.FacetHandle handle = handle(name);
+        List<ByteStorage> shards = new ArrayList<>();
+        if (!facet.isSeries()) shards.add(handle.data());
+        else {
+            // One container per shard, in ordinal order, so the facet's
+            // ordinal space is the concatenation the shard map describes.
+            FacetSeries series = handle.series();
+            for (int shard = 0; shard < series.shards().shardCount(); shard++) shards.add(series.file(series.fileIndexOfShard(shard)));
+        }
+        // A namespace written into the declaration selects a document
+        // inside the container and travels with the facet.
+        return RecordFacet.over(facet.name(), facet.namespace(), shards);
+    }
+    /// The extension the facet's format is named by: its one file's,
+    /// or its first shard's, since every shard shares one format.
+    private static String extensionOf(FacetDescriptor facet) {
+        return Prefetcher.extensionOf(facet.isSeries() ? SourceSpec.parse(facet.series().entries().get(0)).path() : facet.source().toString());
+    }
+    /// Refuses a facet whose shape a reader cannot address, naming the
+    /// one that can. A facet of the wrong shape is not unreadable — it
+    /// is readable elsewhere — so the error says where rather than
+    /// describing the symptom the caller happened to hit. A format the
+    /// spec does not name is left to the reader that will try it.
+    private static void requireShape(FacetDescriptor facet, FacetShape attempted) {
+        FacetFormat format = FacetFormat.fromExtension(extensionOf(facet));
+        if (format != null && format.shape() != attempted) throw new WrongFacetShapeException(facet.name(), format.shape(), attempted);
     }
     @Override public Map<String, Object> attributes() { return attributes; }
     @Override public void prebuffer(WholeFacetFallback fallback, PrebufferProgress progress) {
@@ -131,6 +179,7 @@ public final class ManifestView implements TestDataView {
     }
     private FacetDescriptor require(String name) { return facet(name).orElseThrow(() -> new VectorDataException("Profile " + profile + " lacks facet " + name)); }
     private VectorReader<?> open(FacetDescriptor facet) {
+        requireShape(facet, FacetShape.ELEMENTS);
         return facet.isSeries() ? new ShardedVectorReader<>(handle(facet.name()).series()) : VectorReaders.open(facet.source(), settings, dataset);
     }
     private <T> VectorReader<T> fixed(String name, ElementType type) {

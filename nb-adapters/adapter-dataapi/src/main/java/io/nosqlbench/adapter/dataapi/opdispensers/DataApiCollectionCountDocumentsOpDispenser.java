@@ -26,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
+import java.util.Optional;
 
 public class DataApiCollectionCountDocumentsOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionCountDocumentsOpDispenser.class);
@@ -40,7 +41,13 @@ public class DataApiCollectionCountDocumentsOpDispenser extends DataApiOpDispens
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
-            int upperBound = op.getAsRequiredFunction("upperbound", Integer.class).apply(l);
+            Optional<LongFunction<Integer>> ubf = op.getAsOptionalFunction("upper_bound", Integer.class);
+            Optional<Integer> upperBound;
+            if (ubf.isPresent()) {
+                upperBound = Optional.of(ubf.get().apply(l));
+            } else {
+                upperBound = Optional.empty();
+            }
 
             return new DataApiCollectionCountDocumentsOp(
                 db,

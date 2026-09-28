@@ -1,0 +1,47 @@
+scenarios:
+  default:
+    find_one: run driver=dataapi tags==blocks:find_one cycles=2
+
+# Run with e.g.:
+#    nb example_workload.yaml \
+#       astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+#       astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+#       namespace=$ASTRA_DB_KEYSPACE
+
+bindings:
+  query_vector: Add(37); HashedFloatVectors(TEMPLATE(dimensions,1024));
+
+blocks:
+  find_one:
+    ops:
+      example_regular_find:
+        collection_find: "TEMPLATE(collection)"
+        filter:
+          $and:
+            - field:
+                $lt: 10
+            - block:
+                $eq: "A"
+        sort:
+          idx: asc
+        limit: 5
+        projection:
+          include:
+            - "idx"
+            - "block"
+          exclude:
+            - "_id"
+
+      example_vector_find:
+        collection_find: "TEMPLATE(collection)"
+        vector: "{query_vector}"
+        # alternatively:
+        # vector: "1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0..."
+        # vector: [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0...]
+        limit: 5
+        projection:
+          include:
+            - "idx"
+            - "block"
+          exclude:
+            - "_id"

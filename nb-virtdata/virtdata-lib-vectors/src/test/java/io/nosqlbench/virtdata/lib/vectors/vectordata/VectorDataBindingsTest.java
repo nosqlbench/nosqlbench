@@ -89,6 +89,7 @@ public class VectorDataBindingsTest {
         ivec(sharded.resolve("gt.ivecs"), new int[][] {{3, 4}});
         ivec(sharded.resolve("gt_half.ivecs"), new int[][] {{1, 2}});
         Files.writeString(sharded.resolve("dataset.yaml"), """
+            format_version: 2
             name: sharded
             profiles:
               default:

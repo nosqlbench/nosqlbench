@@ -135,6 +135,30 @@ public class ComputeFunctions extends NBBaseComponent {
     return (double) common_indices / (double) k;
   }
 
+    /// Recall against the neighbors that exist. Of the first `k`
+    /// ground-truth entries, a negative one is a **sentinel** for a
+    /// neighbor that does not exist — a filtered search over a slice too
+    /// small for its predicate leaves such rows padded — and is left out
+    /// of both the numerator and the denominator: the result is the
+    /// share of the attainable neighbors found in the first `k` results.
+    /// A row with no attainable neighbor scores `1.0`, since nothing
+    /// could be found and nothing was missed; how many such rows there
+    /// are is a fact about the ground truth, reported before a run by
+    /// its coverage, not a fact about the search. The strict
+    /// [#recall(int[], int[], int)] divides by `k` regardless and is
+    /// the measure to read on a ground truth with no sentinels.
+    public static double attainableRecall(int[] ground_truth, int[] actual, int k) {
+        if (ground_truth.length < k) {
+            throw new RuntimeException("ground truth size " + ground_truth.length + " is less than k=" + k);
+        }
+        int[] attainable = Arrays.stream(ground_truth, 0, k).filter(entry -> entry >= 0).toArray();
+        if (attainable.length == 0) return 1.0d;
+        int[] found = Arrays.stream(actual, 0, Math.min(k, actual.length)).filter(entry -> entry >= 0).toArray();
+        Arrays.sort(attainable);
+        Arrays.sort(found);
+        return (double) Intersections.count(attainable, found) / (double) attainable.length;
+    }
+
     public static double precision(int[] relevant, int[] actual) {
         Arrays.sort(relevant);
         Arrays.sort(actual);

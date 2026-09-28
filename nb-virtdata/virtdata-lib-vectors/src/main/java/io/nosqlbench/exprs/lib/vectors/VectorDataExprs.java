@@ -33,6 +33,12 @@ import io.nosqlbench.vectordata.TestDataView;
 import io.nosqlbench.vectordata.VectorReader;
 import io.nosqlbench.vectordata.VvecReader;
 import io.nosqlbench.vectordata.WholeFacetFallback;
+import io.nosqlbench.vectordata.anode.MNode;
+import io.nosqlbench.vectordata.binding.Layout;
+import io.nosqlbench.vectordata.records.RecordFacet;
+import io.nosqlbench.virtdata.lib.vectors.vectordata.CqlColumns;
+import io.nosqlbench.virtdata.lib.vectors.vectordata.GroundTruthCoverage;
+import io.nosqlbench.virtdata.lib.vectors.vectordata.PredicateClause;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.PrefetchMeter;
 import io.nosqlbench.virtdata.lib.vectors.vectordata.WindowedReader;
 import org.apache.logging.log4j.LogManager;
@@ -242,4 +248,70 @@ public class VectorDataExprs implements ExprFunctionProvider {
             "[" + start.longValue() + ".." + end.longValue() + ")");
     }
 
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_content\""}, expectNotNull = true)
+    @ExprFunctionSpec(
+        name = "recordLayout",
+        synopsis = "recordLayout(\"dataset:profile\", \"facet_name\")",
+        description = "Return the field layout of a facet of opaque records — names in wire order, with the bind type of each — learned from its first record."
+    )
+    public Layout recordLayout(String datasetNameAndProfile, String facetName) {
+        return Layout.discover(dataset(datasetNameAndProfile).openFacetRecords(facetName));
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_content\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "recordFields",
+        synopsis = "recordFields(\"dataset:profile\", \"facet_name\")",
+        description = "Return the field names of a facet of opaque records as a comma-separated list, in wire order — the column list an INSERT names."
+    )
+    public String recordFields(String datasetNameAndProfile, String facetName) {
+        return String.join(", ", recordLayout(datasetNameAndProfile, facetName).names());
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_content\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "recordColumns",
+        synopsis = "recordColumns(\"dataset:profile\", \"facet_name\")",
+        description = "Return CQL column definitions for a facet of opaque records — 'name type, name type, ...' in wire order, typed from the bind types so the columns accept what RecordField and RecordFields bind. Container element types come from the first record."
+    )
+    public String recordColumns(String datasetNameAndProfile, String facetName) {
+        RecordFacet facet = dataset(datasetNameAndProfile).openFacetRecords(facetName);
+        Layout layout = Layout.discover(facet);
+        MNode sample = facet.count() == 0 ? null : MNode.fromBytes(facet.recordBytes(0));
+        return CqlColumns.columns(layout, sample);
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"neighbor_indices\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "groundTruthCoverage",
+        synopsis = "groundTruthCoverage(\"dataset:profile\", \"ground_truth_facet\")",
+        description = "Survey a ground-truth facet before anything is loaded: how many of its queries have all k neighbors, how many have none, and the recall@k ceiling a perfect search would score under the strict recall measure — a negative entry is a sentinel for a neighbor that does not exist, which a filtered ground truth over a small slice carries whenever a predicate matches fewer than k rows. Fields: queries, k, fullRows, emptyRows, ceiling, isComplete."
+    )
+    public GroundTruthCoverage groundTruthCoverage(String datasetNameAndProfile, String groundTruthFacet) {
+        return GroundTruthCoverage.of(datasetNameAndProfile + ":" + groundTruthFacet, dataset(datasetNameAndProfile).openFacet(groundTruthFacet));
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"neighbor_indices\"", "0.95"}, matches = ".+")
+    @ExprExample(args = {"\"airports:demo\"", "\"neighbor_indices\"", "\"0\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "requireAttainableRecall",
+        synopsis = "requireAttainableRecall(\"dataset:profile\", \"ground_truth_facet\", minimum)",
+        description = "The coverage of groundTruthCoverage, refused when its recall@k ceiling is below minimum: a run whose strict recall could never be read is stopped before it loads anything, with a message naming the ceiling and the profiles that would read. Pass 0 to let a smoke run through and read recall_attainable instead."
+    )
+    public GroundTruthCoverage requireAttainableRecall(String datasetNameAndProfile, String groundTruthFacet, Object minimum) {
+        double floor = minimum instanceof Number number ? number.doubleValue() : Double.parseDouble(String.valueOf(minimum).trim());
+        GroundTruthCoverage coverage = groundTruthCoverage(datasetNameAndProfile, groundTruthFacet);
+        System.err.printf("[vectordata] %s%n", coverage);
+        return coverage.require(floor);
+    }
+
+    @ExprExample(args = {"\"airports:demo\"", "\"metadata_predicates\"", "\"metadata_content\""}, matches = ".+")
+    @ExprFunctionSpec(
+        name = "predicateForms",
+        synopsis = "predicateForms(\"dataset:profile\", \"predicate_facet\", \"metadata_facet\")",
+        description = "Survey a predicate facet: return the number of distinct predicate forms and the number of predicates, with forms() and report() for the detail. Each form is one prepared statement in a predicated search."
+    )
+    public PredicateClause.Survey predicateForms(String datasetNameAndProfile, String predicateFacet, String metadataFacet) {
+        return PredicateClause.surveyOf(datasetNameAndProfile, predicateFacet, metadataFacet);
+    }
 }

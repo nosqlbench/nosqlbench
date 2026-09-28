@@ -30,8 +30,6 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDispenser {
@@ -48,14 +46,13 @@ public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDisp
             Database db = spaceFunction.apply(l).getDatabase();
             Filter filter = getFilterFromOp(op, l);
             CollectionFindOneAndReplaceOptions options = getCollectionFindOneAndReplaceOptions(op, l);
-            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("document", Map.class);
-            LongFunction<Document> docFunc = (long m) -> new Document(docMapFunc.apply(m));
+            Document replacement = getReplacementFromOp(op, l);
 
             return new DataApiCollectionFindOneAndReplaceOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                docFunc.apply(l),
+                replacement,
                 options
             );
         };
@@ -63,29 +60,21 @@ public class DataApiCollectionFindOneAndReplaceOpDispenser extends DataApiOpDisp
 
     private CollectionFindOneAndReplaceOptions getCollectionFindOneAndReplaceOptions(ParsedOp op, long l) {
         CollectionFindOneAndReplaceOptions options = new CollectionFindOneAndReplaceOptions();
-        Sort sort = getSortFromOp(op, l);
-        if (op.isDefined("vector")) {
-            float[] vector = getVectorValues(op, l);
-            if (sort != null) {
-                options = vector != null ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
-            } else if (vector != null) {
-                options = options.sort(Sort.vector(vector));
-            }
+        Sort[] sorts = getSortFromOp(op, l);
+        if (sorts != null) {
+            options = options.sort(sorts);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
             options = options.projection(projection);
         }
-        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
-        if (upsertFunction.isPresent()) {
-            options = options.upsert(upsertFunction.get().apply(l));
+        Boolean upsert = getUpsertFromOp(op, l);
+        if (upsert != null) {
+            options = options.upsert(upsert);
         }
-        if (op.isDefined("returnDocument")) {
-            options = switch ((String) op.get("returnDocument", l)) {
-                case "after" -> options.returnDocument(ReturnDocument.AFTER);
-                case "before" -> options.returnDocument(ReturnDocument.BEFORE);
-                default -> throw new RuntimeException("Invalid returnDocument value: " + op.get("returnDocument", l));
-            };
+        ReturnDocument returnDocument = getReturnDocumentFromOp(op, l);
+        if (returnDocument != null){
+            options = options.returnDocument(returnDocument);
         }
         return options;
     }

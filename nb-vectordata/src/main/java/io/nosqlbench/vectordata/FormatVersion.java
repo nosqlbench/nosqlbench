@@ -16,10 +16,14 @@
 package io.nosqlbench.vectordata;
 
 /// The `dataset.yaml` format version: a **minimum reader requirement**,
-/// not a timestamp. Absent means [#BASE], which is every dataset in
-/// circulation and not a distinct unversioned state. A writer emits the
-/// lowest version describing what it wrote, so only a change that older
-/// readers would misread — multi-file facets were the first — bumps it.
+/// not a timestamp. Absent means [#BASE], and the dataset is **held to
+/// it**: an unversioned manifest is read as what every dataset was
+/// before the field existed — single-file facets, one implicit parent,
+/// no tag schema — and content that needs more is refused naming the
+/// version to declare. A writer emits the lowest version describing
+/// what it wrote, so only a change that older readers would misread
+/// bumps it: multi-file facets were the first, stated parents and
+/// profile tag schemas the second.
 public final class FormatVersion {
     private FormatVersion() { }
 
@@ -27,8 +31,11 @@ public final class FormatVersion {
     public static final int BASE = 1;
     /// Multi-file facet series.
     public static final int SHARDED = 2;
+    /// Profiles that state their parents, a parent other than `default`
+    /// among them, and carry a `profile_tags` schema.
+    public static final int TAGGED = 3;
     /// The highest version this implementation reads.
-    public static final int SUPPORTED = SHARDED;
+    public static final int SUPPORTED = TAGGED;
 
     /// Refuses a dataset this implementation cannot read, naming both
     /// numbers, and returns the effective version otherwise. Shared by
@@ -42,13 +49,23 @@ public final class FormatVersion {
         return version;
     }
 
-    /// Refuses a declaration that understates what it holds: a stated
+    /// Refuses a declaration that understates what it holds. A stated
     /// version lower than the content requires is a declaration
     /// contradicting itself, the same class of fault as a record count
-    /// that disagrees with its shards. An absent field is not a claim
-    /// and passes; a version higher than needed is merely generous.
+    /// that disagrees with its shards. An **absent** field means
+    /// [#BASE] and the dataset is held to it: content that needs more
+    /// is refused naming the version to declare, so a file that never
+    /// said what it is is read as the least it could be rather than the
+    /// most a new reader can make of it. A version higher than needed
+    /// is merely generous.
     public static void checkStatedAgainstContent(Integer stated, int required) {
-        if (stated != null && required > stated)
+        if (stated == null) {
+            if (required > BASE)
+                throw new VectorDataException("dataset declares no format_version and carries content that requires "
+                    + required + "; declare format_version: " + required);
+            return;
+        }
+        if (required > stated)
             throw new VectorDataException("dataset declares format_version " + stated + " but its content requires "
                 + required + " — a declaration cannot understate what it holds");
     }
