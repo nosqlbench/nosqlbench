@@ -32,11 +32,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateOneOpDispenser.class);
+public class DataApiCollectionLegacyUpdateOneOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyUpdateOneOpDispenser.class);
     private final LongFunction<DataApiCollectionUpdateOneOp> opFunction;
 
-    public DataApiCollectionUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiCollectionLegacyUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
@@ -44,15 +44,15 @@ public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiCollectionUpdateOneOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
             CollectionUpdateOneOptions options = getCollectionUpdateOneOptions(op, l);
-            Update update = getUpdateFromOp(op, l);
+            LongFunction<Map> docMapFunc = op.getAsRequiredFunction("update", Map.class);
 
             return new DataApiCollectionUpdateOneOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
-                update,
+                new Update(docMapFunc.apply(l)),
                 options
             );
         };
@@ -60,13 +60,13 @@ public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
 
     private CollectionUpdateOneOptions getCollectionUpdateOneOptions(ParsedOp op, long l) {
         CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
-        Sort[] sorts = getSortFromOp(op, l);
-        Boolean upsert = getUpsertFromOp(op, l);
+        Sort[] sorts = legacyGetSortFromOp(op, l);
         if (sorts != null) {
             options = options.sort(sorts);
         }
-        if ( upsert != null ){
-            options = options.upsert(upsert);
+        Optional<LongFunction<Boolean>> upsertFunction = op.getAsOptionalFunction("upsert", Boolean.class);
+        if (upsertFunction.isPresent()) {
+            options = options.upsert(upsertFunction.get().apply(l));
         }
         return options;
     }

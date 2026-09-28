@@ -17,38 +17,36 @@
 package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.commands.options.CollectionUpdateOneOptions;
-import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.core.query.Filter;
+import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.collections.commands.Update;
+import com.datastax.astra.client.collections.commands.options.CollectionFindOneAndUpdateOptions;
+
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionUpdateOneOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionLegacyFindOneAndUpdateOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCollectionUpdateOneOpDispenser.class);
-    private final LongFunction<DataApiCollectionUpdateOneOp> opFunction;
-
-    public DataApiCollectionUpdateOneOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiCollectionLegacyFindOneAndUpdateOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiCollectionLegacyFindOneAndUpdateOpDispenser.class);
+    private final LongFunction<DataApiCollectionLegacyFindOneAndUpdateOp> opFunction;
+    public DataApiCollectionLegacyFindOneAndUpdateOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCollectionUpdateOneOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiCollectionLegacyFindOneAndUpdateOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            Filter filter = getFilterFromOp(op, l);
-            CollectionUpdateOneOptions options = getCollectionUpdateOneOptions(op, l);
-            Update update = getUpdateFromOp(op, l);
+            Filter filter = legacyGetFilterFromOp(op, l);
+            Update update = legacyGetUpdateFromOp(op, l);
+            CollectionFindOneAndUpdateOptions options = getCollectionLegacyFindOneAndUpdateOptions(op, l);
 
-            return new DataApiCollectionUpdateOneOp(
+            return new DataApiCollectionLegacyFindOneAndUpdateOp(
                 db,
                 db.getCollection(targetFunction.apply(l)),
                 filter,
@@ -58,9 +56,9 @@ public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
         };
     }
 
-    private CollectionUpdateOneOptions getCollectionUpdateOneOptions(ParsedOp op, long l) {
-        CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
-        Sort[] sorts = getSortFromOp(op, l);
+    private CollectionFindOneAndUpdateOptions getCollectionLegacyFindOneAndUpdateOptions(ParsedOp op, long l) {
+        CollectionFindOneAndUpdateOptions options = new CollectionFindOneAndUpdateOptions();
+        Sort[] sorts = legacyGetSortFromOp(op, l);
         Boolean upsert = getUpsertFromOp(op, l);
         if (sorts != null) {
             options = options.sort(sorts);

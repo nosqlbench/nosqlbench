@@ -28,6 +28,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
 public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
@@ -54,18 +55,18 @@ public class DataApiCollectionFindOneOpDispenser extends DataApiOpDispenser {
 
     private CollectionFindOneOptions getCollectionFindOneOptions(ParsedOp op, long l) {
         CollectionFindOneOptions options = new CollectionFindOneOptions();
-        Sort sort = getSortFromOp(op, l);
-        float[] vector = getVectorValues(op, l);
-        if (sort != null) {
-            options = vector != null ? options.sort(Sort.vector(vector), sort) : options.sort(sort);
-        } else if (vector != null) {
-            options = options.sort(Sort.vector(vector));
+        Sort[] sorts = getSortFromOp(op, l);
+        if (sorts != null) {
+            options = options.sort(sorts);
         }
         Projection[] projection = getProjectionFromOp(op, l);
         if (projection != null) {
             options = options.projection(projection);
         }
-        options.includeSimilarity(true);
+        Optional<Boolean> includeSimilarity = getIncludeSimilarityFromOp(op, l);
+        if (includeSimilarity.isPresent()) {
+            options.includeSimilarity(includeSimilarity.get());
+        }
         return options;
     }
 
