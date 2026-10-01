@@ -34,16 +34,66 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 
 **Done:**
 
-- all collection DML ops;
-- create/delete collection DDL;
-- All known bugs in legacy operations are fixed.
+- All collection DML ops;
+- Create/delete collection DDL;
+- All known bugs in legacy operations are fixed;
+- **Table support** (partial, see below).
 
 **Coming next:**
 
-- introduction of Table support;
 - Administrative functions (create keyspace and so on), currently left as they were before the overhaul;
 - Ability to target non-Astra and non-prod environments in full;
-- Ability to supply special Data API-related secrets (such as embedding provider API keys for $vectorize operations).
+- Ability to supply special Data API-related secrets (such as embedding provider API keys for `$vectorize` operations).
+- User Defined Type (UDT) and table index operations support for tables. 
+
+## Table support
+
+This release introduces partial support for **Data API Tables**. Tables are the schemaed counterpart to the schemaless collection.
+
+> Note: We say partial support because table support only can perform CRUD operations for now. UDT and index functionality soon to come!
+
+### New table DDL ops
+
+| Op name | Description |
+|---|---|
+| `db_create_table` | Create a table with a given schema |
+| `db_drop_table` | Drop a table |
+| `db_list_tables` | List tables |
+| `db_list_table_names` | List table names only |
+| `table_create_vector_index` | Create a vector index on a table column (allows searching on non-partition key columns) |
+
+> Note: more index features soon to come. Only table_create_vector_index is supported for now. 
+
+### New table DML ops
+
+| Op name | Description |
+|---|---|
+| `table_insert_one` | Insert a single row |
+| `table_insert_many` | Insert multiple rows |
+| `table_find` | Find rows matching a filter |
+| `table_find_one` | Find the first row matching a filter |
+| `table_distinct` | Return distinct values for a column |
+| `table_update_one` | Update the first row matching a filter |
+| `table_delete_one` | Delete the first row matching a filter |
+| `table_delete_many` | Delete all rows matching a filter |
+
+### Code organisation
+
+All table related op dispensers live under the `opdispensers/tables/` subdir and their corresponding op implementations under `ops/tables/`. Likewise, collection ops have been moved into the `opdispensers/collections/` and `ops/collections/` subdirs to keep the codebase cleaner.
+
+### Reference workload
+
+A comprehensive table workload covering all ops is available at [`activities/table_mega_test.yaml`](activities/table_mega_test.yaml). You can run this workload with the following:
+
+```bash
+$ java -jar nb5.jar \
+  nb-adapters/adapter-dataapi/src/main/resources/activities/table_mega_test.yaml \
+  smoke_test \
+  astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+  astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+  namespace=default_keyspace \
+  --log-level-override com.datastax.astra.client:DEBUG
+```
 
 ## Usage notes (new-style ops)
 
