@@ -30,6 +30,25 @@ import com.datastax.astra.client.core.rerank.RerankServiceOptions;
 import com.datastax.astra.client.core.vector.DataAPIVector;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
+import com.datastax.astra.client.tables.commands.AlterTypeAddFields;
+import com.datastax.astra.client.tables.commands.AlterTypeOperation;
+import com.datastax.astra.client.tables.commands.AlterTypeRenameFields;
+import com.datastax.astra.client.tables.commands.TableUpdateOperation;
+import com.datastax.astra.client.tables.commands.options.CreateIndexOptions;
+import com.datastax.astra.client.tables.commands.options.CreateTableOptions;
+import com.datastax.astra.client.tables.commands.options.CreateTextIndexOptions;
+import com.datastax.astra.client.tables.commands.options.CreateTypeOptions;
+import com.datastax.astra.client.tables.commands.options.CreateVectorIndexOptions;
+import com.datastax.astra.client.tables.commands.options.DropTableIndexOptions;
+import com.datastax.astra.client.tables.commands.options.DropTypeOptions;
+import com.datastax.astra.client.tables.definition.TableDefinition;
+import com.datastax.astra.client.tables.definition.columns.TableColumnTypes;
+import com.datastax.astra.client.tables.definition.indexes.TableRegularIndexDefinition;
+import com.datastax.astra.client.tables.definition.indexes.TableTextIndexDefinition;
+import com.datastax.astra.client.tables.definition.indexes.TableVectorIndexDefinition;
+import com.datastax.astra.client.tables.definition.rows.Row;
+import com.datastax.astra.client.tables.definition.types.TableUserDefinedTypeDefinition;
+import com.datastax.astra.client.tables.definition.types.TableUserDefinedTypeFieldTypes;
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
@@ -650,6 +669,294 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         }
 
         return optionsBldr;
+    }
+
+    /* TABLE OP DISPENSER UTILS START HERE */
+
+    /**
+     * Builds a {@link Row} from the op's "row" field, which is expected to be a free-form map of column->value.
+     */
+    protected Row getRowFromOp(ParsedOp op, long l) {
+        Map<String, Object> rowMap = getFreeFormFromOp(op, l, "row", true);
+        Row row = Row.create();
+        rowMap.forEach(row::add);
+        return row;
+    }
+
+    /**
+     * Builds a list of {@link Row}s from the op's "rows" field (list of free-form maps).
+     */
+    protected List<Row> getRowsFromOp(ParsedOp op, long l) {
+        List<Map<String, Object>> rowMapList = getFreeFormListFromOp(op, l, "rows", true);
+        return rowMapList.stream().map(rowMap -> {
+            Row row = Row.create();
+            rowMap.forEach(row::add);
+            return row;
+        }).toList();
+    }
+
+    /**
+     * Builds a {@link TableDefinition} from the op's "table_definition" field.
+     * The map must have a "columns" sub-map and a "primary_key" key listing partition and optional clustering columns.
+     * Example YAML:
+     * <pre>
+     * table_definition:
+     *   columns:
+     *     id: uuid
+     *     name: text
+     *     age: int
+     *   primary_key:
+     *     partition_by: [id]
+     *     partition_sort:
+     *       age: asc
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    protected TableDefinition getTableDefinitionFromOp(ParsedOp op, long l) {
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "table_definition", true);
+        TableDefinition td = new TableDefinition();
+
+        Map<String, Object> columns = (Map<String, Object>) defMap.get("columns");
+        if (columns == null) {
+            throw new OpConfigError("table_definition must contain a 'columns' map");
+        }
+        for (Map.Entry<String, Object> col : columns.entrySet()) {
+            String colName = col.getKey();
+            String typeName = String.valueOf(col.getValue()).toUpperCase();
+            TableColumnTypes colType;
+            try {
+                colType = TableColumnTypes.valueOf(typeName);
+            } catch (IllegalArgumentException e) {
+                throw new OpConfigError("Unknown column type '" + col.getValue() + "' for column '" + colName + "'");
+            }
+            td.addColumn(colName, colType);
+        }
+
+        Map<String, Object> primaryKey = (Map<String, Object>) defMap.get("primary_key");
+        if (primaryKey != null) {
+            List<String> partitionBy = (List<String>) primaryKey.get("partition_by");
+            if (partitionBy != null && !partitionBy.isEmpty()) {
+                td.partitionKey(partitionBy.toArray(new String[0]));
+            }
+            Map<String, Object> partitionSort = (Map<String, Object>) primaryKey.get("partition_sort");
+            if (partitionSort != null) {
+                Sort[] sortArr = partitionSort.entrySet().stream().map(e -> {
+                    String field = e.getKey();
+                    String order = String.valueOf(e.getValue()).trim();
+                    if (order.equalsIgnoreCase("asc") || order.equalsIgnoreCase("ascending")) {
+                        return Sort.ascending(field);
+                    } else if (order.equalsIgnoreCase("desc") || order.equalsIgnoreCase("descending")) {
+                        return Sort.descending(field);
+                    } else {
+                        throw new OpConfigError("Invalid sort order '" + order + "' for clustering column '" + field + "'");
+                    }
+                }).toArray(Sort[]::new);
+                td.clusteringColumns(sortArr);
+            }
+        }
+
+        return td;
+    }
+
+    /**
+     * Builds a {@link CreateTableOptions} from the op's optional "if_not_exists" field.
+     */
+    protected CreateTableOptions getCreateTableOptionsFromOp(ParsedOp op, long l) {
+        CreateTableOptions options = new CreateTableOptions();
+        Optional<LongFunction<Boolean>> ineFunc = op.getAsOptionalFunction("if_not_exists", Boolean.class);
+        if (ineFunc.isPresent()) {
+            options = options.ifNotExists(ineFunc.get().apply(l));
+        }
+        return options;
+    }
+
+    /**
+     * Builds a {@link TableUpdateOperation} from the op's "update" field.
+     * The map is expected to contain "$set" and/or "$unset" sub-maps.
+     */
+    @SuppressWarnings("unchecked")
+    protected TableUpdateOperation getTableUpdateFromOp(ParsedOp op, long l) {
+        Map<String, Object> updateMap = getFreeFormFromOp(op, l, "update", true);
+        TableUpdateOperation update = new TableUpdateOperation();
+        Map<String, Object> setMap = (Map<String, Object>) updateMap.get("$set");
+        if (setMap != null) {
+            setMap.forEach(update::set);
+        }
+        Object unsetObj = updateMap.get("$unset");
+        if (unsetObj instanceof Map) {
+            ((Map<String, Object>) unsetObj).keySet().forEach(update::unset);
+        } else if (unsetObj instanceof List) {
+            ((List<String>) unsetObj).forEach(update::unset);
+        }
+        return update;
+    }
+
+    /**
+     * Builds a {@link TableUserDefinedTypeDefinition} from the op's "type_definition" field.
+     * Example YAML:
+     * <pre>
+     * type_definition:
+     *   fields:
+     *     street: text
+     *     zip: int
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    protected TableUserDefinedTypeDefinition getUdtDefinitionFromOp(ParsedOp op, long l) {
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "type_definition", true);
+        TableUserDefinedTypeDefinition def = new TableUserDefinedTypeDefinition();
+        Map<String, Object> fields = (Map<String, Object>) defMap.get("fields");
+        if (fields == null) {
+            throw new OpConfigError("type_definition must contain a 'fields' map");
+        }
+        for (Map.Entry<String, Object> field : fields.entrySet()) {
+            String typeName = String.valueOf(field.getValue()).toUpperCase();
+            try {
+                def.addField(field.getKey(), TableUserDefinedTypeFieldTypes.valueOf(typeName));
+            } catch (IllegalArgumentException e) {
+                throw new OpConfigError("Unknown UDT field type '" + field.getValue() + "' for field '" + field.getKey() + "'");
+            }
+        }
+        return def;
+    }
+
+    /**
+     * Builds a {@link CreateTypeOptions} from the op's optional "if_not_exists" field.
+     */
+    protected CreateTypeOptions getCreateTypeOptionsFromOp(ParsedOp op, long l) {
+        CreateTypeOptions options = new CreateTypeOptions();
+        Optional<LongFunction<Boolean>> ineFunc = op.getAsOptionalFunction("if_not_exists", Boolean.class);
+        if (ineFunc.isPresent()) {
+            options = options.ifNotExists(ineFunc.get().apply(l));
+        }
+        return options;
+    }
+
+    /**
+     * Builds a {@link DropTypeOptions} from the op's optional "if_exists" field.
+     */
+    protected DropTypeOptions getDropTypeOptionsFromOp(ParsedOp op, long l) {
+        DropTypeOptions options = new DropTypeOptions();
+        // DropTypeOptions has no if_exists in this SDK version, return as-is
+        return options;
+    }
+
+    /**
+     * Builds an {@link AlterTypeOperation} from the op's "alter_type_operation" field.
+     * Supports "add_fields" (map of fieldName->type) and "rename_fields" (map of oldName->newName).
+     * Example YAML:
+     * <pre>
+     * alter_type_operation:
+     *   add_fields:
+     *     new_col: text
+     * # or:
+     * alter_type_operation:
+     *   rename_fields:
+     *     old_name: new_name
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    protected AlterTypeOperation<?, ?> getAlterTypeOperationFromOp(ParsedOp op, long l) {
+        Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_type_operation", true);
+        if (opMap.containsKey("add_fields")) {
+            Map<String, Object> fields = (Map<String, Object>) opMap.get("add_fields");
+            AlterTypeAddFields addOp = new AlterTypeAddFields();
+            for (Map.Entry<String, Object> e : fields.entrySet()) {
+                String typeName = String.valueOf(e.getValue()).toUpperCase();
+                try {
+                    addOp.addField(e.getKey(), TableUserDefinedTypeFieldTypes.valueOf(typeName));
+                } catch (IllegalArgumentException ex) {
+                    throw new OpConfigError("Unknown UDT field type '" + e.getValue() + "' for field '" + e.getKey() + "'");
+                }
+            }
+            return addOp;
+        } else if (opMap.containsKey("rename_fields")) {
+            Map<String, Object> renames = (Map<String, Object>) opMap.get("rename_fields");
+            AlterTypeRenameFields renameOp = new AlterTypeRenameFields();
+            renames.forEach((oldName, newName) -> renameOp.addField(oldName, String.valueOf(newName)));
+            return renameOp;
+        }
+        throw new OpConfigError("alter_type_operation must contain either 'add_fields' or 'rename_fields'");
+    }
+
+    /**
+     * Builds a {@link TableRegularIndexDefinition} from the op's "index_definition" field.
+     * Example YAML:
+     * <pre>
+     * index_definition:
+     *   column: my_col
+     * # optional options:
+     *   ascii: true
+     *   normalize: true
+     *   case_sensitive: false
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    protected TableRegularIndexDefinition getRegularIndexDefinitionFromOp(ParsedOp op, long l) {
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "index_definition", true);
+        TableRegularIndexDefinition def = new TableRegularIndexDefinition();
+        String column = (String) defMap.get("column");
+        if (column == null) throw new OpConfigError("index_definition must contain 'column'");
+        def.column(column);
+        if (defMap.containsKey("ascii"))
+            def.ascii(Boolean.parseBoolean(String.valueOf(defMap.get("ascii"))));
+        if (defMap.containsKey("normalize"))
+            def.normalize(Boolean.parseBoolean(String.valueOf(defMap.get("normalize"))));
+        if (defMap.containsKey("case_sensitive"))
+            def.caseSensitive(Boolean.parseBoolean(String.valueOf(defMap.get("case_sensitive"))));
+        return def;
+    }
+
+    /**
+     * Builds a {@link TableTextIndexDefinition} from the op's "index_definition" field.
+     * Example YAML:
+     * <pre>
+     * index_definition:
+     *   column: my_text_col
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    protected TableTextIndexDefinition getTextIndexDefinitionFromOp(ParsedOp op, long l) {
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "index_definition", true);
+        TableTextIndexDefinition def = new TableTextIndexDefinition();
+        String column = (String) defMap.get("column");
+        if (column == null) throw new OpConfigError("index_definition must contain 'column'");
+        def.column(column);
+        return def;
+    }
+
+    /**
+     * Builds a {@link TableVectorIndexDefinition} from the op's "index_definition" field.
+     * Example YAML:
+     * <pre>
+     * index_definition:
+     *   column: my_vector_col
+     * # optional:
+     *   source_model: "ada002"
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    protected TableVectorIndexDefinition getVectorIndexDefinitionFromOp(ParsedOp op, long l) {
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "index_definition", true);
+        TableVectorIndexDefinition def = new TableVectorIndexDefinition();
+        String column = (String) defMap.get("column");
+        if (column == null) throw new OpConfigError("index_definition must contain 'column'");
+        def.column(column);
+        if (defMap.containsKey("source_model"))
+            def.sourceModel(String.valueOf(defMap.get("source_model")));
+        return def;
+    }
+
+    /**
+     * Builds a {@link DropTableIndexOptions} from the op's optional "if_exists" field.
+     */
+    protected DropTableIndexOptions getDropIndexOptionsFromOp(ParsedOp op, long l) {
+        DropTableIndexOptions options = new DropTableIndexOptions();
+        Optional<LongFunction<Boolean>> ieFunc = op.getAsOptionalFunction("if_exists", Boolean.class);
+        if (ieFunc.isPresent()) {
+            options = options.ifExists(ieFunc.get().apply(l));
+        }
+        return options;
     }
 
 }

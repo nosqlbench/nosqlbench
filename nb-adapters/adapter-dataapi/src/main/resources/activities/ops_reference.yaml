@@ -341,3 +341,156 @@ blocks:
         #   parameters:
         #     param1: value1
         #     param2: 999
+
+      # TABLE OPS -----------------------------------------------------------------------
+
+      # "db_create_table" - create a new table in the database:
+      crtbl:
+        db_create_table: "TEMPLATE(table)"
+        #### required table definition:
+        table_definition:
+          columns:
+            id: uuid
+            name: text
+            age: int
+          primary_key:
+            partition_by: [id]
+            #### optional clustering columns (partition_sort):
+            # partition_sort:
+            #   age: asc
+        #### optional if_not_exists flag (default false):
+        # if_not_exists: true
+
+      # "db_drop_table" - drop a table from the database:
+      drtbl:
+        db_drop_table: "TEMPLATE(table)"
+        #### optional if_exists flag (default false):
+        # if_exists: true
+
+      # "db_list_tables" - list all tables (returns full TableDescriptor list):
+      lstbls:
+        db_list_tables: "TEMPLATE(ignored)"
+
+      # "db_list_table_names" - list all table names (returns list of strings):
+      lstblnm:
+        db_list_table_names: "TEMPLATE(ignored)"
+
+      # "table_insert_one" - insert a single row into a table:
+      ti1:
+        table_insert_one: "TEMPLATE(table)"
+        #### required row (map of column name -> value):
+        row:
+          id: "{uuid}"
+          name: "{first_name}"
+          age: "{age}"
+
+      # "table_insert_many" - insert multiple rows into a table:
+      tim:
+        table_insert_many: "TEMPLATE(table)"
+        #### required rows (list of maps of column name -> value):
+        rows:
+          - id: "{uuid}"
+            name: "Alice"
+            age: 30
+          - id: "{uuid}"
+            name: "Bob"
+            age: 25
+        #### optional ordered flag (default false):
+        # ordered: false
+
+      # "table_find_one" - find a single row in a table:
+      tf1:
+        table_find_one: "TEMPLATE(table)"
+        #### optional filter (free-form):
+        # filter:
+        #   id:
+        #     $eq: "{the_id}"
+        #### optional sort (order matters):
+        # sort:
+        #   age: asc
+        #### optional projection (lists of fields):
+        # projection:
+        #   include:
+        #     - name
+        #     - age
+        #### optional includeSimilarity:
+        # include_similarity: false
+
+      # "table_find" - find multiple rows in a table:
+      tf:
+        table_find: "TEMPLATE(table)"
+        #### optional filter (free-form):
+        # filter:
+        #   age:
+        #     $gt: 20
+        #### optional sort (order matters):
+        # sort:
+        #   age: asc
+        #### optional limit:
+        # limit: 10
+        #### optional skip:
+        # skip: 5
+        #### optional projection (lists of fields):
+        # projection:
+        #   include:
+        #     - name
+        #     - age
+
+      # "table_update_one" - update a single row in a table:
+      tu1:
+        table_update_one: "TEMPLATE(table)"
+        #### required update (supports $set and $unset):
+        update:
+          $set:
+            name: "UpdatedName"
+            age: 99
+        #### optional filter (free-form):
+        # filter:
+        #   id:
+        #     $eq: "{the_id}"
+
+      # "table_delete_one" - delete a single row from a table:
+      td1:
+        table_delete_one: "TEMPLATE(table)"
+        #### optional filter (free-form):
+        # filter:
+        #   id:
+        #     $eq: "{the_id}"
+
+      # "table_delete_many" - delete multiple rows from a table:
+      tdm:
+        table_delete_many: "TEMPLATE(table)"
+        #### optional filter (free-form; omit to truncate the table):
+        # filter:
+        #   age:
+        #     $lt: 18
+
+      # "table_distinct" - get distinct values of a column across rows in a table:
+      td:
+        table_distinct: "TEMPLATE(table)"
+        #### required field name to get distinct values of:
+        field_name: "name"
+        #### optional filter (free-form):
+        # filter:
+        #   age:
+        #     $gt: 20
+        #### optional result_class (default java.lang.String):
+        # result_class: java.lang.Integer
+
+      # ---------------------------------------------------------------------------
+      # TABLE INDEX OPS
+      # ---------------------------------------------------------------------------
+
+      # "table_create_vector_index" - create a vector (ANN) index on a table vector column:
+      tcvi:
+        table_create_vector_index: "TEMPLATE(table)"
+        #### required: name of the index to create:
+        index_name: "my_vector_index"
+        #### required: name of the vector column to index:
+        column: "embedding"
+        #### optional vector index options:
+        # metric: cosine           # similarity metric: cosine | dot_product | euclidean
+        # source_model: "text-embedding-3-small"
+        #### optional: if_not_exists (default false):
+        # if_not_exists: true
+

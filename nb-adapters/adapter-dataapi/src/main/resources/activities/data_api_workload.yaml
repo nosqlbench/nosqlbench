@@ -44,6 +44,11 @@ description: |
 scenarios:
 
   data_api_scenario_base:
+    drop: >-
+      run driver=dataapi
+      tags==block:schema_drop
+      threads==1 cycles==UNDEF
+      errors=ignore
     schema: >-
       run driver=dataapi
       tags==block:schema_base
@@ -74,6 +79,13 @@ scenarios:
       errors=count
 
   data_api_scenario_vector:
+    # if you run data_api_scenario_base before running data_api_scenario_vector, you will get an error
+    # because the schemas don't match. Solved by dropping and recreating the table
+    drop: >-
+      run driver=dataapi
+      tags==block:schema_drop
+      threads==1 cycles==UNDEF
+      errors=ignore
     schema: >-
       run driver=dataapi
       tags==block:schema_vector
@@ -149,6 +161,11 @@ bindings:
   ins_vector_19: Add(219); HashedFloatVectors(TEMPLATE(dimension,1536));
 
 blocks:
+
+  schema_drop:
+    ops:
+      drop_collection_op:
+        db_delete_collection: "TEMPLATE(collection)"
 
   schema_base:
     ops:

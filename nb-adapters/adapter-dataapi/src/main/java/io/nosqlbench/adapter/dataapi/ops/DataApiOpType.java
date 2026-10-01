@@ -82,4 +82,22 @@ public enum DataApiOpType {
     collection_update_many,
     collection_estimated_document_count,
     collection_count_documents,
+
+    // TABLE OPS
+    // in-database (table management) ops:
+    db_create_table,
+    db_drop_table,
+    db_list_tables,
+    db_list_table_names,
+    // in-table ops:
+    table_insert_one,
+    table_insert_many,
+    table_find_one,
+    table_find,
+    table_distinct,
+    table_update_one,
+    table_delete_one,
+    table_delete_many,
+    // in-table (index) ops:
+    table_create_vector_index,
 }

@@ -78,7 +78,11 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     private void createClient() {
-        this.dataAPIClient = new DataAPIClient(astraToken);
+        // TODO: remove this - it's to log Data API requests and responses
+        DataAPIClientOptions options = new DataAPIClientOptions()
+            .logRequests();
+
+        this.dataAPIClient = new DataAPIClient(astraToken, options);
         if (namespace != null) {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint, namespace);
         } else {
