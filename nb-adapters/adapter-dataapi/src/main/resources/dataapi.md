@@ -88,7 +88,7 @@ A comprehensive table workload covering all ops is available at [`activities/tab
 ```bash
 $ java -jar nb5.jar \
   nb-adapters/adapter-dataapi/src/main/resources/activities/table_mega_test.yaml \
-  smoke_test \
+  megatest \
   astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
   astraToken=$ASTRA_DB_APPLICATION_TOKEN \
   namespace=default_keyspace \

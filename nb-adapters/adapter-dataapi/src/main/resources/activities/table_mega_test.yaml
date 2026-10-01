@@ -5,11 +5,13 @@
 #
 # Run the full sequential scenario:
 #
-#   nb table_mega_test.yaml smoke_test \
-#      astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
-#      astraToken=$ASTRA_DB_APPLICATION_TOKEN \
-#      namespace=<your_keyspace> \
-#      [table=TEMPLATE(table,nb_smoke_table)]
+#   java -jar nb5.jar \
+#     nb-adapters/adapter-dataapi/src/main/resources/activities/table_mega_test.yaml \
+#     megatest \
+#     astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+#     astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+#     namespace=default_keyspace \
+#     --log-level-override com.datastax.astra.client:DEBUG
 #
 # Or run individual phases, e.g.:
 #
@@ -24,7 +26,7 @@
 
 scenarios:
 
-  smoke_test:
+  megatest:
     drop: >-
       run driver=dataapi
       tags==block:drop
