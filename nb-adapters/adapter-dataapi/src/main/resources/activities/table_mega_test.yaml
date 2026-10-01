@@ -1,0 +1,257 @@
+# Table smoke-test workload
+# Exercises every table op type to verify the payload matches the intended op settings.
+# Enable request/response logging by adding this flag when running:
+#   --log-level-override com.datastax.astra.client:DEBUG
+#
+# Run the full sequential scenario:
+#
+#   nb table_mega_test.yaml smoke_test \
+#      astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+#      astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+#      namespace=<your_keyspace> \
+#      [table=TEMPLATE(table,nb_smoke_table)]
+#
+# Or run individual phases, e.g.:
+#
+#   nb table_mega_test.yaml drop    ... (drop table if exists)
+#   nb table_mega_test.yaml schema  ... (create table)
+#   nb table_mega_test.yaml ingest  ... (insert_one + insert_many)
+#   nb table_mega_test.yaml read    ... (find_one + find + distinct)
+#   nb table_mega_test.yaml mutate  ... (update_one)
+#   nb table_mega_test.yaml cleanup ... (delete_one + delete_many)
+#   nb table_mega_test.yaml list    ... (list_tables + list_table_names)
+#   nb table_mega_test.yaml teardown ... (drop table)
+
+scenarios:
+
+  smoke_test:
+    drop: >-
+      run driver=dataapi
+      tags==block:drop
+      threads==1 cycles==1 stride==1
+      errors=ignore
+    schema: >-
+      run driver=dataapi
+      tags==block:schema
+      threads==1 cycles==1 stride==1
+    ingest: >-
+      run driver=dataapi
+      tags==block:ingest
+      threads==1 cycles==2 stride==1
+    read: >-
+      run driver=dataapi
+      tags==block:read
+      threads==1 cycles==3 stride==1
+    mutate: >-
+      run driver=dataapi
+      tags==block:mutate
+      threads==1 cycles==1 stride==1
+    cleanup: >-
+      run driver=dataapi
+      tags==block:cleanup
+      threads==1 cycles==2 stride==1
+    list: >-
+      run driver=dataapi
+      tags==block:list
+      threads==1 cycles==2 stride==1
+    teardown: >-
+      run driver=dataapi
+      tags==block:teardown
+      threads==1 cycles==1 stride==1
+
+  drop:
+    drop: >-
+      run driver=dataapi tags==block:drop threads==1 cycles==1 stride==1 errors=ignore
+
+  schema:
+    schema: >-
+      run driver=dataapi tags==block:schema threads==1 cycles==1 stride==1
+
+  ingest:
+    ingest: >-
+      run driver=dataapi tags==block:ingest threads==1 cycles==2 stride==1
+
+  read:
+    read: >-
+      run driver=dataapi tags==block:read threads==1 cycles==3 stride==1
+
+  mutate:
+    mutate: >-
+      run driver=dataapi tags==block:mutate threads==1 cycles==1 stride==1
+
+  cleanup:
+    cleanup: >-
+      run driver=dataapi tags==block:cleanup threads==1 cycles==2 stride==1
+
+  list:
+    list: >-
+      run driver=dataapi tags==block:list threads==1 cycles==2 stride==1
+
+  teardown:
+    teardown: >-
+      run driver=dataapi tags==block:teardown threads==1 cycles==1 stride==1
+
+bindings:
+  # Static row IDs so we can reliably reference inserted rows later
+  row_id_1: Identity() -> long
+  row_id_2: Add(1000) -> long
+
+blocks:
+
+  # -------------------------------------------------------------------------
+  # PHASE: drop
+  # Op: db_drop_table
+  # Drops the table if it already exists so we start from a clean slate.
+  # -------------------------------------------------------------------------
+  drop:
+    ops:
+      drop_table:
+        db_drop_table: "TEMPLATE(table,nb_smoke_table)"
+        if_exists: true
+
+  # -------------------------------------------------------------------------
+  # PHASE: schema
+  # Op: db_create_table
+  # Creates a simple table (id, name, age).
+  # -------------------------------------------------------------------------
+  schema:
+    ops:
+      create_table:
+        db_create_table: "TEMPLATE(table,nb_smoke_table)"
+        table_definition:
+          columns:
+            id:   int
+            name: text
+            age:  int
+          primary_key:
+            partition_by: [id]
+        if_not_exists: true
+
+  # -------------------------------------------------------------------------
+  # PHASE: ingest
+  # Ops: table_insert_one, table_insert_many
+  # Inserts a handful of rows to give the read/mutate/cleanup phases data.
+  # -------------------------------------------------------------------------
+  ingest:
+    ops:
+      insert_one:
+        table_insert_one: "TEMPLATE(table,nb_smoke_table)"
+        row:
+          id:   1
+          name: "Alice"
+          age:  30
+
+      insert_many:
+        table_insert_many: "TEMPLATE(table,nb_smoke_table)"
+        rows:
+          - id: 2
+            name: "Bob"
+            age:  25
+          - id: 3
+            name: "Carol"
+            age:  35
+          - id: 4
+            name: "Dave"
+            age:  20
+          - id: 5
+            name: "Eve"
+            age:  28
+        ordered: false
+
+  # -------------------------------------------------------------------------
+  # PHASE: read
+  # Ops: table_find_one, table_find, table_distinct
+  # Verifies that rows can be retrieved and that filters/projections are sent.
+  # -------------------------------------------------------------------------
+  read:
+    ops:
+      find_one:
+        table_find_one: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $eq: 1
+        projection:
+          include:
+            - name
+            - age
+
+      find_with_filter_and_sort:
+        table_find: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $gt: 1
+        sort:
+          id: asc
+        limit: 10
+        projection:
+          include:
+            - id
+            - name
+            - age
+
+      distinct_names:
+        table_distinct: "TEMPLATE(table,nb_smoke_table)"
+        field_name: "name"
+        filter:
+          id:
+            $gt: 0
+
+  # -------------------------------------------------------------------------
+  # PHASE: mutate
+  # Op: table_update_one
+  # Updates a single row to confirm the $set payload is correct.
+  # -------------------------------------------------------------------------
+  mutate:
+    ops:
+      update_one:
+        table_update_one: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $eq: 1
+        update:
+          $set:
+            name: "Alice (updated)"
+            age:  31
+
+  # -------------------------------------------------------------------------
+  # PHASE: cleanup
+  # Ops: table_delete_one, table_delete_many
+  # Deletes a specific row and then a range of rows.
+  # -------------------------------------------------------------------------
+  cleanup:
+    ops:
+      delete_one:
+        table_delete_one: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $eq: 5
+
+      delete_many:
+        table_delete_many: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $in: [2, 3, 4]
+
+  # -------------------------------------------------------------------------
+  # PHASE: list
+  # Ops: db_list_tables, db_list_table_names
+  # Confirms the table appears in both listing variants.
+  # -------------------------------------------------------------------------
+  list:
+    ops:
+      list_tables:
+        db_list_tables: "ignored"
+
+      list_table_names:
+        db_list_table_names: "ignored"
+
+  # -------------------------------------------------------------------------
+  # PHASE: teardown
+  # Op: db_drop_table
+  # Drops the table after all checks are done.
+  # -------------------------------------------------------------------------
+  teardown:
+    ops:
+      drop_table_final:
+        db_drop_table: "TEMPLATE(table,nb_smoke_table)"
+        if_exists: true
