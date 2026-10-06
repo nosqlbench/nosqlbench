@@ -30,6 +30,9 @@ import com.datastax.astra.client.core.rerank.RerankServiceOptions;
 import com.datastax.astra.client.core.vector.DataAPIVector;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
+import com.datastax.astra.client.tables.commands.AlterTableAddColumns;
+import com.datastax.astra.client.tables.commands.AlterTableDropColumns;
+import com.datastax.astra.client.tables.commands.AlterTableOperation;
 import com.datastax.astra.client.tables.commands.AlterTypeAddFields;
 import com.datastax.astra.client.tables.commands.AlterTypeOperation;
 import com.datastax.astra.client.tables.commands.AlterTypeRenameFields;
@@ -1025,6 +1028,70 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             options = options.ifExists(ieFunc.get().apply(l));
         }
         return options;
+    }
+
+    /**
+     * Builds a {@link CreateIndexOptions} from the op's optional "if_not_exists" field.
+     */
+    protected CreateIndexOptions getCreateIndexOptionsFromOp(ParsedOp op, long l) {
+        CreateIndexOptions options = new CreateIndexOptions();
+        Optional<LongFunction<Boolean>> ineFunc = op.getAsOptionalFunction("if_not_exists", Boolean.class);
+        if (ineFunc.isPresent()) {
+            options = options.ifNotExists(ineFunc.get().apply(l));
+        }
+        return options;
+    }
+
+    /**
+     * Builds a {@link CreateTextIndexOptions} from the op's optional "if_not_exists" field.
+     */
+    protected CreateTextIndexOptions getCreateTextIndexOptionsFromOp(ParsedOp op, long l) {
+        CreateTextIndexOptions options = new CreateTextIndexOptions();
+        Optional<LongFunction<Boolean>> ineFunc = op.getAsOptionalFunction("if_not_exists", Boolean.class);
+        if (ineFunc.isPresent()) {
+            options = options.ifNotExists(ineFunc.get().apply(l));
+        }
+        return options;
+    }
+
+    /**
+     * Builds an {@link AlterTableOperation} from the op's "alter_table_operation" field.
+     * Supports two sub-keys:
+     * <ul>
+     *   <li>{@code add} — map of columnName -&gt; type string to add to the table</li>
+     *   <li>{@code drop} — list of column names to remove from the table</li>
+     * </ul>
+     * Example YAML:
+     * <pre>
+     * alter_table_operation:
+     *   add:
+     *     new_col: text
+     * # or:
+     * alter_table_operation:
+     *   drop:
+     *     - old_col
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    protected AlterTableOperation getAlterTableOperationFromOp(ParsedOp op, long l) {
+        Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_table_operation", true);
+        if (opMap.containsKey("add")) {
+            Map<String, Object> addCols = (Map<String, Object>) opMap.get("add");
+            AlterTableAddColumns addOp = new AlterTableAddColumns();
+            for (Map.Entry<String, Object> e : addCols.entrySet()) {
+                String typeName = String.valueOf(e.getValue()).toUpperCase();
+                try {
+                    addOp.addColumn(e.getKey(), TableColumnTypes.valueOf(typeName));
+                } catch (IllegalArgumentException ex) {
+                    throw new OpConfigError("Unknown column type '" + e.getValue() + "' for column '" + e.getKey() + "'");
+                }
+            }
+            return addOp;
+        } else if (opMap.containsKey("drop")) {
+            List<String> dropCols = (List<String>) opMap.get("drop");
+            return new AlterTableDropColumns(dropCols.toArray(new String[0]));
+        }
+        throw new OpConfigError("alter_table_operation must contain either 'add' or 'drop'");
     }
 
 }
