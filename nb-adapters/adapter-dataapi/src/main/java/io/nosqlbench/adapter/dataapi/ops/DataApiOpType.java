@@ -91,7 +91,7 @@ public enum DataApiOpType {
     db_drop_table,
     db_list_tables,
     db_list_table_names,
-    // in-database (type management) ops:
+    // UDT (user defined types) ops:
     db_create_type,
     db_alter_type,
     db_list_types,
