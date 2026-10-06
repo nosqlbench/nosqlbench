@@ -47,6 +47,12 @@
         <scope>compile</scope>
     </dependency>
     <dependency>
+        <groupId>io.nosqlbench</groupId>
+        <artifactId>nb-api</artifactId>
+        <version>${revision}</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
         <groupId>com.datastax.astra</groupId>
         <artifactId>astra-db-java</artifactId>
         <version>2.3.2</version>
