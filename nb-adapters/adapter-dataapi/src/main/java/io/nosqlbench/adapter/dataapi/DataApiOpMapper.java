@@ -69,18 +69,29 @@ import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyCreat
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyDeleteCollectionOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiListCollectionNamesOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiListCollectionsOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbAlterTableOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbAlterTypeOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbCreateTableOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbCreateTypeOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbDropTableOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbDropTypeOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTableNamesOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTablesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTypeNamesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTypesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateIndexOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateTextIndexOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateVectorIndexOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDeleteManyOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDeleteOneOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDistinctOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDropIndexOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableFindOneOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableFindOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableInsertManyOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableInsertOneOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateVectorIndexOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableListIndexesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableListIndexNamesOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableUpdateOneOpDispenser;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiOpType;
@@ -224,9 +235,16 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // NOTE: there are no 'legacy' ops for tables (only for collections)
             // in-database (table management) ops:
             case db_create_table -> new DataApiDbCreateTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_alter_table -> new DataApiDbAlterTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case db_drop_table -> new DataApiDbDropTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case db_list_tables -> new DataApiDbListTablesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case db_list_table_names -> new DataApiDbListTableNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            // in-database (type management) ops:
+            case db_create_type -> new DataApiDbCreateTypeOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_alter_type -> new DataApiDbAlterTypeOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_types -> new DataApiDbListTypesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_type_names -> new DataApiDbListTypeNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_drop_type -> new DataApiDbDropTypeOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-table ops:
             case table_insert_one -> new DataApiTableInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case table_insert_many -> new DataApiTableInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -238,6 +256,11 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case table_delete_many -> new DataApiTableDeleteManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-table (index management) ops:
             case table_create_vector_index -> new DataApiTableCreateVectorIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_create_index -> new DataApiTableCreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_create_text_index -> new DataApiTableCreateTextIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_list_indexes -> new DataApiTableListIndexesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_list_index_names -> new DataApiTableListIndexNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_drop_index -> new DataApiTableDropIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 
