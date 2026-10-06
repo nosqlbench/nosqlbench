@@ -373,6 +373,10 @@ blocks:
         #### optional if_not_exists flag (default false):
         # if_not_exists: true
 
+      # TODO: finish alterTable example
+      altbl:
+        db_alter_table:
+
       # "db_drop_table" - drop a table from the database:
       drtbl:
         db_drop_table: "TEMPLATE(table)"
@@ -387,6 +391,26 @@ blocks:
       lstblnm:
         db_list_table_names: "TEMPLATE(ignored)"
 
+      # TODO: finish createType example
+      crtype:
+        db_create_type:
+
+      # TODO: finish alterType example
+      altype:
+        db_alter_type:
+
+      # TODO: finish listTypes example
+      lstype:
+        db_list_types:
+
+      # TODO: finish listTypes example
+      lstypenm:
+        db_list_type_names:
+
+      # TODO: finish dropType example
+      drtype:
+        db_drop_type:
+  
       # "table_insert_one" - insert a single row into a table:
       ti1:
         table_insert_one: "TEMPLATE(table)"
@@ -505,4 +529,24 @@ blocks:
         # source_model: "text-embedding-3-small"
         #### optional: if_not_exists (default false):
         # if_not_exists: true
+    
+      # TODO: finish createIndex example
+      tci:
+        table_create_index:
+      
+      # TODO: finish createTextIndex example
+      tcti:
+        table_create_text_index:
+
+      # TODO: finish listIndex example
+      lsi:
+        table_list_indexes:
+
+      # TODO: finish listIndex example
+      lsinm:
+        table_list_index_names:
+      
+      # TODO: finish dropIndex example
+      tdri:
+        table_drop_index:
 
