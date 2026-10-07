@@ -20,24 +20,21 @@ import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.tables.Table;
 import com.datastax.astra.client.tables.commands.AlterTableOperation;
-import com.datastax.astra.client.tables.commands.options.AlterTableOptions;
 import com.datastax.astra.client.tables.definition.rows.Row;
 
 public class DataApiDbAlterTableOp extends DataApiBaseOp {
     private final Table<Row> table;
     private final AlterTableOperation operation;
-    private final AlterTableOptions options;
 
-    public DataApiDbAlterTableOp(Database db, Table<Row> table, AlterTableOperation operation, AlterTableOptions options) {
+    public DataApiDbAlterTableOp(Database db, Table<Row> table, AlterTableOperation operation) {
         super(db);
         this.table = table;
         this.operation = operation;
-        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        table.alter(operation, options);
+        table.alter(operation);
         return null;
     }
 }
