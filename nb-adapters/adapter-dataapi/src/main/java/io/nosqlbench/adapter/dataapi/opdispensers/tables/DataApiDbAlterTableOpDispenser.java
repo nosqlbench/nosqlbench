@@ -19,7 +19,6 @@ package io.nosqlbench.adapter.dataapi.opdispensers.tables;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.tables.Table;
 import com.datastax.astra.client.tables.commands.AlterTableOperation;
-import com.datastax.astra.client.tables.commands.options.AlterTableOptions;
 import com.datastax.astra.client.tables.definition.rows.Row;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
@@ -59,7 +58,7 @@ public class DataApiDbAlterTableOpDispenser extends DataApiOpDispenser {
             Database db = spaceFunction.apply(l).getDatabase();
             Table<Row> table = db.getTable(targetFunction.apply(l));
             AlterTableOperation operation = getAlterTableOperationFromOp(op, l);
-            return new DataApiDbAlterTableOp(db, table, operation, new AlterTableOptions());
+            return new DataApiDbAlterTableOp(db, table, operation);
         };
     }
 
