@@ -373,9 +373,17 @@ blocks:
         #### optional if_not_exists flag (default false):
         # if_not_exists: true
 
-      # TODO: finish alterTable example
+      # "db_alter_table" - alter a table's columns (add or drop):
       altbl:
-        db_alter_table:
+        db_alter_table: "TEMPLATE(table)"
+        #### required alter operation — one of 'add' (map of colName -> type) or 'drop' (list of col names):
+        alter_table_operation:
+          add:
+            new_col: text
+        #### alternative form (drop columns):
+        # alter_table_operation:
+        #   drop:
+        #     - old_col
 
       # "db_drop_table" - drop a table from the database:
       drtbl:
@@ -391,25 +399,47 @@ blocks:
       lstblnm:
         db_list_table_names: "TEMPLATE(ignored)"
 
-      # TODO: finish createType example
+      # "db_create_type" - create a user-defined type (UDT) in the database:
       crtype:
-        db_create_type:
+        db_create_type: "TEMPLATE(ignored)"
+        #### required name of the UDT to create:
+        type_name: "address_type"
+        #### required UDT field definitions (map of fieldName -> column type):
+        type_definition:
+          fields:
+            street: text
+            city: text
+            zip: int
+        #### optional if_not_exists flag (default false):
+        # if_not_exists: true
 
-      # TODO: finish alterType example
+      # "db_alter_type" - alter an existing UDT (add or rename fields):
       altype:
-        db_alter_type:
+        db_alter_type: "TEMPLATE(ignored)"
+        #### required name of the UDT to alter:
+        type_name: "address_type"
+        #### required alter operation — one of 'add_fields' (map of fieldName -> type) or 'rename_fields' (map of oldName -> newName):
+        alter_type_operation:
+          add_fields:
+            country: text
+        #### alternative form (rename fields):
+        # alter_type_operation:
+        #   rename_fields:
+        #     old_field_name: new_field_name
 
-      # TODO: finish listTypes example
+      # "db_list_types" - list all UDTs (returns full type descriptor list):
       lstype:
-        db_list_types:
+        db_list_types: "TEMPLATE(ignored)"
 
-      # TODO: finish listTypes example
+      # "db_list_type_names" - list all UDT names (returns list of strings):
       lstypenm:
-        db_list_type_names:
+        db_list_type_names: "TEMPLATE(ignored)"
 
-      # TODO: finish dropType example
+      # "db_drop_type" - drop a UDT from the database:
       drtype:
-        db_drop_type:
+        db_drop_type: "TEMPLATE(ignored)"
+        #### required name of the UDT to drop:
+        type_name: "address_type"
   
       # "table_insert_one" - insert a single row into a table:
       ti1:
@@ -522,31 +552,53 @@ blocks:
         table_create_vector_index: "TEMPLATE(table)"
         #### required: name of the index to create:
         index_name: "my_vector_index"
-        #### required: name of the vector column to index:
-        column: "embedding"
-        #### optional vector index options:
-        # metric: cosine           # similarity metric: cosine | dot_product | euclidean
-        # source_model: "text-embedding-3-small"
+        #### required index definition (column is required):
+        index_definition:
+          column: "embedding"
+          #### optional source model hint:
+          # source_model: "text-embedding-3-small"
         #### optional: if_not_exists (default false):
         # if_not_exists: true
-    
-      # TODO: finish createIndex example
+
+      # "table_create_index" - create a regular (non-vector, non-text) index on a table column:
       tci:
-        table_create_index:
-      
-      # TODO: finish createTextIndex example
+        table_create_index: "TEMPLATE(table)"
+        #### required: name of the index to create:
+        index_name: "my_index"
+        #### required index definition (column is required):
+        index_definition:
+          column: "name"
+          #### optional text options (for text columns):
+          # ascii: true
+          # normalize: true
+          # case_sensitive: false
+        #### optional: if_not_exists (default false):
+        # if_not_exists: true
+
+      # "table_create_text_index" - create a lexical (text search) index on a table text column:
       tcti:
-        table_create_text_index:
+        table_create_text_index: "TEMPLATE(table)"
+        #### required: name of the index to create:
+        index_name: "my_text_index"
+        #### required index definition (column is required):
+        index_definition:
+          column: "description"
+        #### optional: if_not_exists (default false):
+        # if_not_exists: true
 
-      # TODO: finish listIndex example
+      # "table_list_indexes" - list all indexes on a table (returns full index descriptor list):
       lsi:
-        table_list_indexes:
+        table_list_indexes: "TEMPLATE(table)"
 
-      # TODO: finish listIndex example
+      # "table_list_index_names" - list all index names on a table (returns list of strings):
       lsinm:
-        table_list_index_names:
-      
-      # TODO: finish dropIndex example
+        table_list_index_names: "TEMPLATE(table)"
+
+      # "table_drop_index" - drop an index from the database:
       tdri:
-        table_drop_index:
+        table_drop_index: "TEMPLATE(ignored)"
+        #### required: name of the index to drop:
+        index_name: "my_index"
+        #### optional: if_exists (default false):
+        # if_exists: true
 
