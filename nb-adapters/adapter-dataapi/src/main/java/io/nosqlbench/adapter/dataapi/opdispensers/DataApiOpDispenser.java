@@ -783,54 +783,6 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      * </pre>
      */
 
-    // TODO: This is probably not needed anywhere. Can delete this funciton
-    @SuppressWarnings("unchecked")
-    protected TableDefinition getTableDefinitionFromOp(ParsedOp op, long l) {
-        Map<String, Object> defMap = getFreeFormFromOp(op, l, "table_definition", true);
-        TableDefinition td = new TableDefinition();
-
-        Map<String, Object> columns = (Map<String, Object>) defMap.get("columns");
-        if (columns == null) {
-            throw new OpConfigError("table_definition must contain a 'columns' map");
-        }
-        for (Map.Entry<String, Object> col : columns.entrySet()) {
-            String colName = col.getKey();
-            String typeName = String.valueOf(col.getValue()).toUpperCase();
-            TableColumnTypes colType;
-            try {
-                colType = TableColumnTypes.valueOf(typeName);
-            } catch (IllegalArgumentException e) {
-                throw new OpConfigError("Unknown column type '" + col.getValue() + "' for column '" + colName + "'");
-            }
-            td.addColumn(colName, colType);
-        }
-
-        Map<String, Object> primaryKey = (Map<String, Object>) defMap.get("primary_key");
-        if (primaryKey != null) {
-            List<String> partitionBy = (List<String>) primaryKey.get("partition_by");
-            if (partitionBy != null && !partitionBy.isEmpty()) {
-                td.partitionKey(partitionBy.toArray(new String[0]));
-            }
-            Map<String, Object> partitionSort = (Map<String, Object>) primaryKey.get("partition_sort");
-            if (partitionSort != null) {
-                Sort[] sortArr = partitionSort.entrySet().stream().map(e -> {
-                    String field = e.getKey();
-                    String order = String.valueOf(e.getValue()).trim();
-                    if (order.equalsIgnoreCase("asc") || order.equalsIgnoreCase("ascending")) {
-                        return Sort.ascending(field);
-                    } else if (order.equalsIgnoreCase("desc") || order.equalsIgnoreCase("descending")) {
-                        return Sort.descending(field);
-                    } else {
-                        throw new OpConfigError("Invalid sort order '" + order + "' for clustering column '" + field + "'");
-                    }
-                }).toArray(Sort[]::new);
-                td.clusteringColumns(sortArr);
-            }
-        }
-
-        return td;
-    }
-
     /**
      * Builds a {@link CreateTableOptions} from the op's optional "if_not_exists" field.
      */
