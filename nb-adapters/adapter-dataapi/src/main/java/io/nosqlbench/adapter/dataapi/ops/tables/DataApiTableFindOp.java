@@ -15,13 +15,13 @@
  */
 
 package io.nosqlbench.adapter.dataapi.ops.tables;
-import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-
 import com.datastax.astra.client.core.query.Filter;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.tables.Table;
 import com.datastax.astra.client.tables.commands.options.TableFindOptions;
 import com.datastax.astra.client.tables.definition.rows.Row;
+
+import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 
 public class DataApiTableFindOp extends DataApiBaseOp {
     private final Table<Row> table;
@@ -37,6 +37,6 @@ public class DataApiTableFindOp extends DataApiBaseOp {
 
     @Override
     public Object apply(long value) {
-        return table.find(filter, options);
+        return table.find(filter, options).toList();
     }
 }
