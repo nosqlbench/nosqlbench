@@ -782,6 +782,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      *       age: asc
      * </pre>
      */
+
+    // TODO: This is probably not needed anywhere. Can delete this funciton
     @SuppressWarnings("unchecked")
     protected TableDefinition getTableDefinitionFromOp(ParsedOp op, long l) {
         Map<String, Object> defMap = getFreeFormFromOp(op, l, "table_definition", true);

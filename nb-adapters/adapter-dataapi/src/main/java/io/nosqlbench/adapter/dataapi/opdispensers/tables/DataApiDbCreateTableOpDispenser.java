@@ -16,7 +16,6 @@
 
 package io.nosqlbench.adapter.dataapi.opdispensers.tables;
 
-import com.datastax.astra.client.tables.definition.TableDefinition;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.tables.DataApiDbCreateTableOp;
@@ -25,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
+
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
 public class DataApiDbCreateTableOpDispenser extends DataApiOpDispenser {
@@ -38,12 +38,15 @@ public class DataApiDbCreateTableOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbCreateTableOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            TableDefinition tableDefinition = getTableDefinitionFromOp(op, l);
-            return new DataApiDbCreateTableOp(
-                spaceFunction.apply(l).getDatabase(),
-                targetFunction.apply(l),
-                tableDefinition
-            );
+            DataApiDbCreateTableOp dataApiDbCreateTableOp =
+                new DataApiDbCreateTableOp(
+                    spaceFunction.apply(l).getDatabase(),
+                    targetFunction.apply(l),
+                    this.getCollectionDefinitionFromOp(op, l)       // note: we can use getCollectionDefinitionFromOp()
+                                                                    // here becaues its return type is Map<String, Object>
+                );
+
+            return dataApiDbCreateTableOp;
         };
     }
 

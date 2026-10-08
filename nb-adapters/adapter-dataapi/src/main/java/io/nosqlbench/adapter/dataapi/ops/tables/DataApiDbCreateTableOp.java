@@ -15,28 +15,28 @@
  */
 
 package io.nosqlbench.adapter.dataapi.ops.tables;
-import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+import java.util.Map;
 
 import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.commands.Command;
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.tables.definition.TableDefinition;
 
+import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 public class DataApiDbCreateTableOp extends DataApiBaseOp {
     private final String tableName;
-    private final TableDefinition tableDefinition;
+    private final Map<String, Object> definition;
 
-    public DataApiDbCreateTableOp(Database db, String tableName, TableDefinition tableDefinition) {
+    public DataApiDbCreateTableOp(Database db, String tableName, Map<String, Object> definition) {
         super(db);
         this.tableName = tableName;
-        this.tableDefinition = tableDefinition;
+        this.definition = definition;
     }
 
     @Override
     public Object apply(long value) {
         Document payload = new Document();
         payload.append("name", tableName);
-        payload.append("definition", tableDefinition);
+        payload.append("definition", definition);
         Command command = new Command("createTable", payload);
         return db.runCommand(command);
     }
