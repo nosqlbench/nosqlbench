@@ -72,7 +72,6 @@ This release introduces partial support for **Data API Tables**. Tables are the 
 | `table_insert_many` | Insert multiple rows |
 | `table_find` | Find rows matching a filter |
 | `table_find_one` | Find the first row matching a filter |
-| `table_distinct` | Return distinct values for a column |
 | `table_update_one` | Update the first row matching a filter |
 | `table_delete_one` | Delete the first row matching a filter |
 | `table_delete_many` | Delete all rows matching a filter |

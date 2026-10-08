@@ -84,7 +84,6 @@ import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateTextI
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateVectorIndexOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDeleteManyOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDeleteOneOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDistinctOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDropIndexOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableFindOneOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableFindOpDispenser;
@@ -250,7 +249,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case table_insert_many -> new DataApiTableInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case table_find_one -> new DataApiTableFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case table_find -> new DataApiTableFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case table_distinct -> new DataApiTableDistinctOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case table_update_one -> new DataApiTableUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case table_delete_one -> new DataApiTableDeleteOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case table_delete_many -> new DataApiTableDeleteManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
