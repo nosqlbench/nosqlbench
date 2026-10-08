@@ -102,7 +102,6 @@ public enum DataApiOpType {
     table_insert_many,
     table_find_one,
     table_find,
-    table_distinct,
     table_update_one,
     table_delete_one,
     table_delete_many,

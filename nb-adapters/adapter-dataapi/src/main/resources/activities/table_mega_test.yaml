@@ -314,7 +314,7 @@ blocks:
 
   # -------------------------------------------------------------------------
   # PHASE: read
-  # Ops: table_find_one, table_find, table_distinct
+  # Ops: table_find_one, table_find
   # Verifies that rows can be retrieved and that filters/projections are sent.
   # -------------------------------------------------------------------------
   read:
@@ -352,13 +352,6 @@ blocks:
           age: asc
         skip: 1
         limit: 5
-
-      distinct_names:
-        table_distinct: "TEMPLATE(table,nb_smoke_table)"
-        field_name: "name"
-        filter:
-          id:
-            $gt: 0
 
   # -------------------------------------------------------------------------
   # PHASE: mutate

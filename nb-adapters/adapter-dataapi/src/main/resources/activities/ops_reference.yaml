@@ -531,18 +531,6 @@ blocks:
         #   age:
         #     $lt: 18
 
-      # "table_distinct" - get distinct values of a column across rows in a table:
-      td:
-        table_distinct: "TEMPLATE(table)"
-        #### required field name to get distinct values of:
-        field_name: "name"
-        #### optional filter (free-form):
-        # filter:
-        #   age:
-        #     $gt: 20
-        #### optional result_class (default java.lang.String):
-        # result_class: java.lang.Integer
-
       # ---------------------------------------------------------------------------
       # TABLE INDEX OPS
       # ---------------------------------------------------------------------------
