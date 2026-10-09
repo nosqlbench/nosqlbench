@@ -966,6 +966,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         String column = (String) defMap.get("column");
         if (column == null) throw new OpConfigError("index_definition must contain 'column'");
         TableVectorIndexDefinition def = (TableVectorIndexDefinition) new TableVectorIndexDefinition().column(column);
+        if (defMap.containsKey("metric"))
+            def = def.metric(SimilarityMetric.fromValue(String.valueOf(defMap.get("metric"))));
         if (defMap.containsKey("source_model"))
             def = (TableVectorIndexDefinition) def.sourceModel(String.valueOf(defMap.get("source_model")));
         return def;
@@ -1029,7 +1031,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     protected AlterTableOperation getAlterTableOperationFromOp(ParsedOp op, long l) {
         Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_table_operation", true);
         if (opMap.containsKey("add") && opMap.containsKey("drop")) {
-            throw new OpConfigError("alter_table_operation must contain only one of 'add' or 'drop', not both");
+            throw new OpConfigError("alter_table_operation can only contain 'add' or 'drop', not both");
         }
         if (opMap.containsKey("add")) {
             Map<String, Object> addCols = (Map<String, Object>) opMap.get("add");
