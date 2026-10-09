@@ -883,6 +883,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     @SuppressWarnings("unchecked")
     protected AlterTypeOperation<?, ?> getAlterTypeOperationFromOp(ParsedOp op, long l) {
         Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_type_operation", true);
+        if (opMap.containsKey("add_fields") && opMap.containsKey("rename_fields")) {
+            throw new OpConfigError("alter_type_operation must contain only one of 'add_fields' or 'rename_fields', not both");
+        }
         if (opMap.containsKey("add_fields")) {
             Map<String, Object> fields = (Map<String, Object>) opMap.get("add_fields");
             AlterTypeAddFields addOp = new AlterTypeAddFields();
@@ -1025,6 +1028,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     @SuppressWarnings("unchecked")
     protected AlterTableOperation getAlterTableOperationFromOp(ParsedOp op, long l) {
         Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_table_operation", true);
+        if (opMap.containsKey("add") && opMap.containsKey("drop")) {
+            throw new OpConfigError("alter_table_operation must contain only one of 'add' or 'drop', not both");
+        }
         if (opMap.containsKey("add")) {
             Map<String, Object> addCols = (Map<String, Object>) opMap.get("add");
             AlterTableAddColumns addOp = new AlterTableAddColumns();
