@@ -28,6 +28,7 @@ import com.datastax.astra.client.core.hybrid.Hybrid;
 import com.datastax.astra.client.core.query.Sort;
 import com.datastax.astra.client.core.rerank.RerankServiceOptions;
 import com.datastax.astra.client.core.vector.DataAPIVector;
+import com.datastax.astra.client.core.lexical.Analyzer;
 import com.datastax.astra.client.core.vector.SimilarityMetric;
 import com.datastax.astra.client.core.query.Projection;
 import com.datastax.astra.client.tables.commands.AlterTableAddColumns;
@@ -940,6 +941,12 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      * <pre>
      * index_definition:
      *   column: my_text_col
+     * # optional — simple named analyzer:
+     *   definition: "standard"
+     * # optional — full analyzer object:
+     *   definition:
+     *     tokenizer: {name: standard}
+     *     filters: [{name: lowercase}]
      * </pre>
      */
     @SuppressWarnings("unchecked")
@@ -947,7 +954,17 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Map<String, Object> defMap = getFreeFormFromOp(op, l, "index_definition", true);
         String column = (String) defMap.get("column");
         if (column == null) throw new OpConfigError("index_definition must contain 'column'");
-        return (TableTextIndexDefinition) new TableTextIndexDefinition().column(column);
+        TableTextIndexDefinition def = (TableTextIndexDefinition) new TableTextIndexDefinition().column(column);
+        if (defMap.containsKey("definition")) {
+            Object definition = defMap.get("definition");
+            if (definition instanceof String) {
+                def = def.analyzer(new Analyzer((String) definition));
+            } 
+            else if (definition instanceof Map) {
+                def = def.analyzer(new Analyzer());
+            }
+        }
+        return def;
     }
 
     /**
