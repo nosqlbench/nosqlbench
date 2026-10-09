@@ -1015,6 +1015,18 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
+     * Builds a {@link CreateVectorIndexOptions} from the op's optional "if_not_exists" field.
+     */
+    protected CreateVectorIndexOptions getCreateVectorIndexOptionsFromOp(ParsedOp op, long l) {
+        CreateVectorIndexOptions options = new CreateVectorIndexOptions();
+        Optional<LongFunction<Boolean>> ineFunc = op.getAsOptionalFunction("if_not_exists", Boolean.class);
+        if (ineFunc.isPresent()) {
+            options = options.ifNotExists(ineFunc.get().apply(l));
+        }
+        return options;
+    }
+
+    /**
      * Builds a {@link CreateTextIndexOptions} from the op's optional "if_not_exists" field.
      */
     protected CreateTextIndexOptions getCreateTextIndexOptionsFromOp(ParsedOp op, long l) {
