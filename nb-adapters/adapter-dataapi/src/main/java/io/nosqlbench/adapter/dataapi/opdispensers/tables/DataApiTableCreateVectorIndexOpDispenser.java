@@ -45,7 +45,8 @@ public class DataApiTableCreateVectorIndexOpDispenser extends DataApiOpDispenser
             Table<Row> table = db.getTable(targetFunction.apply(l));
             String indexName = op.getAsRequiredFunction("index_name", String.class).apply(l);
             TableVectorIndexDefinition def = getVectorIndexDefinitionFromOp(op, l);
-            return new DataApiTableCreateVectorIndexOp(db, table, indexName, def, new CreateVectorIndexOptions());
+            CreateVectorIndexOptions options = getCreateVectorIndexOptionsFromOp(op, l);
+            return new DataApiTableCreateVectorIndexOp(db, table, indexName, def, options);
         };
     }
 
