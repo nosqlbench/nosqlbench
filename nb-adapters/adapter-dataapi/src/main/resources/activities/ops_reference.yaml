@@ -34,16 +34,30 @@ blocks:
       # NEW "insertMany", fully documented:
       im:
         collection_insert_many: "TEMPLATE(collection)"
-        # required documents to insert, list of free-form objects:
-        documents:
-          - {"a": 1}
-          - a: 2
-            b: my_string
-            c:
-              c1: subitem1
-              c2: 1999
-          - a: 3
-            $vector: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+        #### Documents can be passed as explicit list or 'batched' (exactly one choice)
+        ####   Batched case for documents (required: 'batch_size', 'document_template'):
+        ####      in this case, the template is applied batch_size times consuming as many bindings.
+        ####      ('documents' cannot be used)
+        batched: true
+        batch_size: 5
+        document_template:
+          _id: "{my_id_binding}"
+          a: 1
+          nested:
+            value1: "{my_value1_binding}"
+          $vector: "{my_vector_binding}"
+        ####   Explicit-list case for documents
+        ####      'documents', free-form list of objects, required in this case
+        ####      ('document_template'/'batch_size' cannot be used)
+        # documents:
+        #   - {"a": 1}
+        #   - a: 2
+        #     b: my_string
+        #     c:
+        #       c1: subitem1
+        #       c2: 1999
+        #   - a: 3
+        #     $vector: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
         #### optional ordered flag, default=false (true = insert sequentially and fail fast; false = no order guarantees, proceed even if errors):
         # ordered: false
         #### optional for splitting the input list into separate requests (default 50):

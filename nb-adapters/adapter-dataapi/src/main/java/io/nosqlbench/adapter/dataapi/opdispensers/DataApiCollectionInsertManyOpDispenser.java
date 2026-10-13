@@ -22,14 +22,17 @@ import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiCollectionInsertManyOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import io.nosqlbench.nb.api.errors.OpConfigError;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 public class DataApiCollectionInsertManyOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiCollectionInsertManyOpDispenser.class);
@@ -41,6 +44,24 @@ public class DataApiCollectionInsertManyOpDispenser extends DataApiOpDispenser {
     }
 
     private LongFunction<DataApiCollectionInsertManyOp> createOpFunction(ParsedOp op) {
+        Boolean batched = getBatchedFromOp(op, false, false);
+        if (batched) {
+            ensureOpKeysAbsent(op, new String[]{"documents"});
+            ensureOpKeysPresent(op, new String[]{"batch_size", "document_template"});
+            Integer batchSize = getBatchSizeFromOp(op, true, null);
+            LongFunction<List<Document>> docsFunc = getTemplatedDocumentsFunctionFromOp(op, batchSize);
+            return (l) -> {
+                List<Document> documents = docsFunc.apply(l);
+                return new DataApiCollectionInsertManyOp(
+                    spaceFunction.apply(l).getDatabase(),
+                    targetFunction.apply(l),
+                    documents,
+                    getCollectionInsertManyOptions(op, l)
+                );
+            };
+        }
+        // regular explicit-document-list behaviour
+        ensureOpKeysAbsent(op, new String[]{"batch_size", "document_template"});
         return (l) -> {
             List<Document> documents = getDocumentsFromOp(op, l);
             return new DataApiCollectionInsertManyOp(

@@ -40,6 +40,7 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import java.util.*;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, DataApiSpace> {
@@ -51,6 +52,28 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         super(adapter, op, adapter.getSpaceFunc(op));
         this.targetFunction = targetFunction;
         this.spaceFunction = adapter.getSpaceFunc(op);
+    }
+
+    protected void ensureOpKeysPresent(ParsedOp op, String[] fieldNames) {
+        List<String> missing = Stream.of(fieldNames).filter(f -> !op.isDefined(f)).collect(Collectors.toList());
+        if (!missing.isEmpty()) {
+            String fieldWord = missing.size() == 1 ? "field" : "fields";
+            throw new OpConfigError(
+                "Required " + fieldWord + " " +
+                String.join(", ", missing) + " not found in op"
+            );
+        }
+    }
+
+    protected void ensureOpKeysAbsent(ParsedOp op, String[] fieldNames) {
+        List<String> present = Stream.of(fieldNames).filter(op::isDefined).collect(Collectors.toList());
+        if (!present.isEmpty()) {
+            String fieldWord = present.size() == 1 ? "field" : "fields";
+            throw new OpConfigError(
+                "Op has " + fieldWord + " it should not have: "
+                + String.join(", ", present) + "."
+            );
+        }
     }
 
     protected Sort[] getSortFromOp(ParsedOp op, long l) {
@@ -138,6 +161,25 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     protected List<Document> getDocumentsFromOp(ParsedOp op, long l) {
         List<Map<String, Object>> docMapList = getFreeFormListFromOp(op, l, "documents", true);
         return docMapList.stream().map((docMap) -> getDocumentFromRawMap(docMap)).toList();
+    }
+
+    /// Retrieve a document template for batched array of documents and, given the batch size,
+    /// returns a function (of `l`) yielding directly the unrolled list of documents.
+    @SuppressWarnings("unchecked")
+    protected LongFunction<List<Document>> getTemplatedDocumentsFunctionFromOp(ParsedOp op, Integer batchSize) {
+        // this is assumed to be a function returning map of <String, Object> i.e. raw material for a Document:
+        Optional<LongFunction<Map>> dtMapFunc = op.getAsOptionalFunction("document_template", Map.class);
+        if (!dtMapFunc.isPresent()) {
+            throw new OpConfigError("Required field 'document_template' not supplied.");
+        }
+        return (l) -> {
+            Long lBase = l * batchSize;
+            LongFunction<Map> mapper = dtMapFunc.get();
+            List<Document> documents = LongStream.range(0, batchSize)
+                .mapToObj(inIndex -> getDocumentFromRawMap(mapper.apply(lBase + inIndex)))
+                .collect(Collectors.toList());
+            return documents;
+        };
     }
 
     protected Update getUpdateFromOp(ParsedOp op, long l) {
@@ -233,6 +275,32 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             return of.apply(l);
         }
         return null;
+    }
+
+    protected Boolean getBatchedFromOp(ParsedOp op, Boolean required, Boolean defaultValue) {
+        Optional<Boolean> batched = op.getOptionalStaticValue("batched", Boolean.class);
+        if (batched.isPresent()) {
+            return batched.get();
+        }
+        if (required) {
+            throw new OpConfigError(
+                "Required field 'batched' not supplied."
+            );
+        }
+        return defaultValue;
+    }
+
+    protected Integer getBatchSizeFromOp(ParsedOp op, Boolean required, Integer defaultValue) {
+        Optional<Integer> batchSize = op.getOptionalStaticValue("batch_size", Integer.class);
+        if (batchSize.isPresent()) {
+            return batchSize.get();
+        }
+        if (required) {
+            throw new OpConfigError(
+                "Required field 'batch_size' not supplied."
+            );
+        }
+        return defaultValue;
     }
 
     protected ReturnDocument getReturnDocumentFromOp(ParsedOp op, long l) {
