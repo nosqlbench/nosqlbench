@@ -46,7 +46,6 @@ import com.datastax.astra.client.tables.commands.options.CreateTypeOptions;
 import com.datastax.astra.client.tables.commands.options.CreateVectorIndexOptions;
 import com.datastax.astra.client.tables.commands.options.DropTableIndexOptions;
 import com.datastax.astra.client.tables.commands.options.DropTypeOptions;
-import com.datastax.astra.client.tables.definition.TableDefinition;
 import com.datastax.astra.client.tables.definition.columns.TableColumnTypes;
 import com.datastax.astra.client.tables.definition.indexes.TableRegularIndexDefinition;
 import com.datastax.astra.client.tables.definition.indexes.TableTextIndexDefinition;
