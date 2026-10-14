@@ -33,8 +33,8 @@ import java.util.function.LongFunction;
  *
  * <p>Required YAML fields:
  * <ul>
- *   <li>{@code type_name} — name of the UDT to create</li>
- *   <li>{@code type_definition.fields} — map of fieldName -&gt; column type string</li>
+ *   <li>{@code name} — name of the UDT to create</li>
+ *   <li>{@code definition.fields} — map of fieldName -&gt; column type string</li>
  * </ul>
  * Optional: {@code if_not_exists} (boolean).
  */
@@ -49,12 +49,12 @@ public class DataApiDbCreateTypeOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbCreateTypeOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            String typeName = op.getAsRequiredFunction("type_name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("name", String.class).apply(l);
             TableUserDefinedTypeDefinition definition = getUdtDefinitionFromOp(op, l);
             CreateTypeOptions options = getCreateTypeOptionsFromOp(op, l);
             return new DataApiDbCreateTypeOp(
                 spaceFunction.apply(l).getDatabase(),
-                typeName,
+                name,
                 definition,
                 options
             );

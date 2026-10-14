@@ -19,20 +19,23 @@ import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.tables.commands.AlterTypeOperation;
+import com.datastax.astra.client.tables.commands.options.AlterTypeOptions;
 
 public class DataApiDbAlterTypeOp extends DataApiBaseOp {
     private final String typeName;
     private final AlterTypeOperation<?, ?> operation;
+    private final AlterTypeOptions options;
 
-    public DataApiDbAlterTypeOp(Database db, String typeName, AlterTypeOperation<?, ?> operation) {
+    public DataApiDbAlterTypeOp(Database db, String typeName, AlterTypeOperation<?, ?> operation, AlterTypeOptions options) {
         super(db);
         this.typeName = typeName;
         this.operation = operation;
+        this.options = options;
     }
 
     @Override
     public Object apply(long value) {
-        db.alterType(typeName, operation);
+        db.alterType(typeName, operation, options);
         return null;
     }
 }

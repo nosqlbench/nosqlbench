@@ -17,6 +17,7 @@
 package io.nosqlbench.adapter.dataapi.opdispensers.tables;
 
 import com.datastax.astra.client.tables.commands.AlterTypeOperation;
+import com.datastax.astra.client.tables.commands.options.AlterTypeOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
@@ -32,8 +33,8 @@ import java.util.function.LongFunction;
  *
  * <p>Required YAML fields:
  * <ul>
- *   <li>{@code type_name} — name of the UDT to alter</li>
- *   <li>{@code alter_type_operation} — map with one of:
+ *   <li>{@code name} — name of the UDT to alter</li>
+ *   <li>{@code operation} — map with one of:
  *     <ul>
  *       <li>{@code add_fields} — map of fieldName -&gt; type string to add</li>
  *       <li>{@code rename_fields} — map of oldName -&gt; newName</li>
@@ -52,12 +53,14 @@ public class DataApiDbAlterTypeOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbAlterTypeOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            String typeName = op.getAsRequiredFunction("type_name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("name", String.class).apply(l);
             AlterTypeOperation<?, ?> operation = getAlterTypeOperationFromOp(op, l);
+            AlterTypeOptions options = getAlterTypeOptionsFromOp(op, l);
             return new DataApiDbAlterTypeOp(
                 spaceFunction.apply(l).getDatabase(),
-                typeName,
-                operation
+                name,
+                operation,
+                options
             );
         };
     }

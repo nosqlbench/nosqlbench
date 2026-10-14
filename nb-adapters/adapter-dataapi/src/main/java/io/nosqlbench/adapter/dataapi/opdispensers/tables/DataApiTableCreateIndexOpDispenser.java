@@ -37,8 +37,8 @@ import java.util.function.LongFunction;
  * <p>Required YAML fields:
  * <ul>
  *   <li>{@code target} — table name</li>
- *   <li>{@code index_name} — name of the index to create</li>
- *   <li>{@code index_definition.column} — column to index</li>
+ *   <li>{@code name} — name of the index to create</li>
+ *   <li>{@code definition.column} — column to index</li>
  * </ul>
  * Optional index definition fields: {@code ascii}, {@code normalize}, {@code case_sensitive}.
  * Optional: {@code if_not_exists} (boolean).
@@ -56,10 +56,10 @@ public class DataApiTableCreateIndexOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Table<Row> table = db.getTable(targetFunction.apply(l));
-            String indexName = op.getAsRequiredFunction("index_name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("name", String.class).apply(l);
             TableRegularIndexDefinition definition = getRegularIndexDefinitionFromOp(op, l);
             CreateIndexOptions options = getCreateIndexOptionsFromOp(op, l);
-            return new DataApiTableCreateIndexOp(db, table, indexName, definition, options);
+            return new DataApiTableCreateIndexOp(db, table, name, definition, options);
         };
     }
 

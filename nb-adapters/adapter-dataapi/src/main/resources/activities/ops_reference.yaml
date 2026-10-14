@@ -360,7 +360,7 @@ blocks:
       crtbl:
         db_create_table: "TEMPLATE(table)"
         #### required table definition:
-        table_definition:
+        definition:
           columns:
             id: uuid
             name: text
@@ -377,11 +377,11 @@ blocks:
       altbl:
         db_alter_table: "TEMPLATE(table)"
         #### required alter operation — one of 'add' (map of colName -> type) or 'drop' (list of col names):
-        alter_table_operation:
+        operation:
           add:
             new_col: text
         #### alternative form (drop columns):
-        # alter_table_operation:
+        # operation:
         #   drop:
         #     - old_col
 
@@ -403,9 +403,9 @@ blocks:
       crtype:
         db_create_type: "TEMPLATE(ignored)"
         #### required name of the UDT to create:
-        type_name: "address_type"
+        name: "address_type"
         #### required UDT field definitions (map of fieldName -> column type):
-        type_definition:
+        definition:
           fields:
             street: text
             city: text
@@ -417,13 +417,13 @@ blocks:
       altype:
         db_alter_type: "TEMPLATE(ignored)"
         #### required name of the UDT to alter:
-        type_name: "address_type"
+        name: "address_type"
         #### required alter operation — one of 'add_fields' (map of fieldName -> type) or 'rename_fields' (map of oldName -> newName):
-        alter_type_operation:
+        operation:
           add_fields:
             country: text
         #### alternative form (rename fields):
-        # alter_type_operation:
+        # operation:
         #   rename_fields:
         #     old_field_name: new_field_name
 
@@ -439,7 +439,7 @@ blocks:
       drtype:
         db_drop_type: "TEMPLATE(ignored)"
         #### required name of the UDT to drop:
-        type_name: "address_type"
+        name: "address_type"
   
       # "table_insert_one" - insert a single row into a table:
       ti1:
@@ -539,9 +539,9 @@ blocks:
       tcvi:
         table_create_vector_index: "TEMPLATE(table)"
         #### required: name of the index to create:
-        index_name: "my_vector_index"
+        name: "my_vector_index"
         #### required index definition (column is required):
-        index_definition:
+        definition:
           column: "embedding"
           #### optional source model hint:
           # source_model: "text-embedding-3-small"
@@ -552,9 +552,9 @@ blocks:
       tci:
         table_create_index: "TEMPLATE(table)"
         #### required: name of the index to create:
-        index_name: "my_index"
+        name: "my_index"
         #### required index definition (column is required):
-        index_definition:
+        definition:
           column: "name"
           #### optional text options (for text columns):
           # ascii: true
@@ -567,9 +567,9 @@ blocks:
       tcti:
         table_create_text_index: "TEMPLATE(table)"
         #### required: name of the index to create:
-        index_name: "my_text_index"
+        name: "my_text_index"
         #### required index definition (column is required):
-        index_definition:
+        definition:
           column: "description"
         #### optional: if_not_exists (default false):
         # if_not_exists: true
@@ -586,7 +586,7 @@ blocks:
       tdri:
         table_drop_index: "TEMPLATE(ignored)"
         #### required: name of the index to drop:
-        index_name: "my_index"
+        name: "my_index"
         #### optional: if_exists (default false):
         # if_exists: true
 
