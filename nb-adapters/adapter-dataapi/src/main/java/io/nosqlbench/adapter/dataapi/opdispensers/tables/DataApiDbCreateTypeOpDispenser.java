@@ -49,7 +49,7 @@ public class DataApiDbCreateTypeOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbCreateTypeOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            String name = op.getAsRequiredFunction("name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("type_name", String.class).apply(l);
             TableUserDefinedTypeDefinition definition = getUdtDefinitionFromOp(op, l);
             CreateTypeOptions options = getCreateTypeOptionsFromOp(op, l);
             return new DataApiDbCreateTypeOp(

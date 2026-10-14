@@ -55,7 +55,7 @@ public class DataApiTableCreateTextIndexOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Table<Row> table = db.getTable(targetFunction.apply(l));
-            String name = op.getAsRequiredFunction("name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("index_name", String.class).apply(l);
             TableTextIndexDefinition definition = getTextIndexDefinitionFromOp(op, l);
             CreateTextIndexOptions options = getCreateTextIndexOptionsFromOp(op, l);
             return new DataApiTableCreateTextIndexOp(db, table, name, definition, options);

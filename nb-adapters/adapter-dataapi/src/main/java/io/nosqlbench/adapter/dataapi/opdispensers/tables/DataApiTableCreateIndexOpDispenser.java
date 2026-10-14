@@ -56,7 +56,7 @@ public class DataApiTableCreateIndexOpDispenser extends DataApiOpDispenser {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             Table<Row> table = db.getTable(targetFunction.apply(l));
-            String name = op.getAsRequiredFunction("name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("index_name", String.class).apply(l);
             TableRegularIndexDefinition definition = getRegularIndexDefinitionFromOp(op, l);
             CreateIndexOptions options = getCreateIndexOptionsFromOp(op, l);
             return new DataApiTableCreateIndexOp(db, table, name, definition, options);

@@ -53,7 +53,7 @@ public class DataApiDbAlterTypeOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbAlterTypeOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            String name = op.getAsRequiredFunction("name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("type_name", String.class).apply(l);
             AlterTypeOperation<?, ?> operation = getAlterTypeOperationFromOp(op, l);
             AlterTypeOptions options = getAlterTypeOptionsFromOp(op, l);
             return new DataApiDbAlterTypeOp(
