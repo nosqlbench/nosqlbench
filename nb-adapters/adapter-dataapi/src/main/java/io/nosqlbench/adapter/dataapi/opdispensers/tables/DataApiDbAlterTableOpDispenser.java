@@ -36,7 +36,7 @@ import java.util.function.LongFunction;
  * <p>Required YAML fields:
  * <ul>
  *   <li>{@code target} — table name</li>
- *   <li>{@code operation} — map with one of:
+ *   <li>{@code alter_op} — map with one of (note: cannot use "operation" as that is a reserved NB keyword):
  *     <ul>
  *       <li>{@code add} — map of columnName -&gt; type string to add</li>
  *       <li>{@code drop} — list of column names to remove</li>

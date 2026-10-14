@@ -770,7 +770,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
 
     /**
      * Builds a {@link TableDefinition} from the op's "definition" field.
-     * The map must have a "columns" sub-map and a "primary_key" key listing partition and optional clustering columns.
+     * The map must have a "columns" sub-map and a "primaryKey" key listing partition and optional clustering columns.
      * Example YAML:
      * <pre>
      * definition:
@@ -778,9 +778,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      *     id: uuid
      *     name: text
      *     age: int
-     *   primary_key:
-     *     partition_by: [id]
-     *     partition_sort:
+     *   primaryKey:
+     *     partitionBy: [id]
+     *     partitionSort:
      *       age: asc
      * </pre>
      */
@@ -878,22 +878,24 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds an {@link AlterTypeOperation} from the op's "operation" field.
+     * Builds an {@link AlterTypeOperation} from the op's "alter_op" field.
      * Supports "add_fields" (map of fieldName->type) and "rename_fields" (map of oldName->newName).
+     * Note: the field is named "alter_op" (not "operation") because "operation" is a reserved
+     * NB framework keyword that would be intercepted by the workload YAML parser.
      * Example YAML:
      * <pre>
-     * operation:
+     * alter_op:
      *   add_fields:
      *     new_col: text
      * # or:
-     * operation:
+     * alter_op:
      *   rename_fields:
      *     old_name: new_name
      * </pre>
      */
     @SuppressWarnings("unchecked")
     protected AlterTypeOperation<?, ?> getAlterTypeOperationFromOp(ParsedOp op, long l) {
-        Map<String, Object> opMap = getFreeFormFromOp(op, l, "operation", true);
+        Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_op", true);
         if (opMap.containsKey("add_fields") && opMap.containsKey("rename_fields")) {
             throw new OpConfigError("operation must contain only one of 'add_fields' or 'rename_fields', not both");
         }
@@ -1063,26 +1065,28 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds an {@link AlterTableOperation} from the op's "operation" field.
+     * Builds an {@link AlterTableOperation} from the op's "alter_op" field.
      * Supports two sub-keys:
      * <ul>
      *   <li>{@code add} — map of columnName -&gt; type string to add to the table</li>
      *   <li>{@code drop} — list of column names to remove from the table</li>
      * </ul>
+     * Note: the field is named "alter_op" (not "operation") because "operation" is a reserved
+     * NB framework keyword that would be intercepted by the workload YAML parser.
      * Example YAML:
      * <pre>
-     * operation:
+     * alter_op:
      *   add:
      *     new_col: text
      * # or:
-     * operation:
+     * alter_op:
      *   drop:
      *     - old_col
      * </pre>
      */
     @SuppressWarnings("unchecked")
     protected AlterTableOperation getAlterTableOperationFromOp(ParsedOp op, long l) {
-        Map<String, Object> opMap = getFreeFormFromOp(op, l, "operation", true);
+        Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_op", true);
         if (opMap.containsKey("add") && opMap.containsKey("drop")) {
             throw new OpConfigError("operation can only contain 'add' or 'drop', not both");
         }
