@@ -36,7 +36,7 @@ import java.util.function.LongFunction;
  * <p>Required YAML fields:
  * <ul>
  *   <li>{@code target} — table name</li>
- *   <li>{@code alter_table_operation} — map with one of:
+ *   <li>{@code operation} — map with one of:
  *     <ul>
  *       <li>{@code add} — map of columnName -&gt; type string to add</li>
  *       <li>{@code drop} — list of column names to remove</li>
