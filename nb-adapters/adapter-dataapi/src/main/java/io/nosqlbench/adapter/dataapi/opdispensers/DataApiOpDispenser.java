@@ -38,6 +38,7 @@ import com.datastax.astra.client.tables.commands.AlterTypeAddFields;
 import com.datastax.astra.client.tables.commands.AlterTypeOperation;
 import com.datastax.astra.client.tables.commands.AlterTypeRenameFields;
 import com.datastax.astra.client.tables.commands.TableUpdateOperation;
+import com.datastax.astra.client.tables.commands.options.AlterTypeOptions;
 import com.datastax.astra.client.tables.commands.options.CreateIndexOptions;
 import com.datastax.astra.client.tables.commands.options.CreateTableOptions;
 import com.datastax.astra.client.tables.commands.options.CreateTextIndexOptions;
@@ -768,11 +769,11 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds a {@link TableDefinition} from the op's "table_definition" field.
+     * Builds a {@link TableDefinition} from the op's "definition" field.
      * The map must have a "columns" sub-map and a "primary_key" key listing partition and optional clustering columns.
      * Example YAML:
      * <pre>
-     * table_definition:
+     * definition:
      *   columns:
      *     id: uuid
      *     name: text
@@ -818,10 +819,10 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds a {@link TableUserDefinedTypeDefinition} from the op's "type_definition" field.
+     * Builds a {@link TableUserDefinedTypeDefinition} from the op's "definition" field.
      * Example YAML:
      * <pre>
-     * type_definition:
+     * definition:
      *   fields:
      *     street: text
      *     zip: int
@@ -829,11 +830,11 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      */
     @SuppressWarnings("unchecked")
     protected TableUserDefinedTypeDefinition getUdtDefinitionFromOp(ParsedOp op, long l) {
-        Map<String, Object> defMap = getFreeFormFromOp(op, l, "type_definition", true);
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "definition", true);
         TableUserDefinedTypeDefinition def = new TableUserDefinedTypeDefinition();
         Map<String, Object> fields = (Map<String, Object>) defMap.get("fields");
         if (fields == null) {
-            throw new OpConfigError("type_definition must contain a 'fields' map");
+            throw new OpConfigError("definition must contain a 'fields' map");
         }
         for (Map.Entry<String, Object> field : fields.entrySet()) {
             String typeName = String.valueOf(field.getValue()).toUpperCase();
@@ -868,24 +869,33 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds an {@link AlterTypeOperation} from the op's "alter_type_operation" field.
+     * Builds an {@link AlterTypeOptions} for the db_alter_type op.
+     */
+    protected AlterTypeOptions getAlterTypeOptionsFromOp(ParsedOp op, long l) {
+        AlterTypeOptions options = new AlterTypeOptions();
+        // AlterTypeOptions has no type-specific options in this SDK version, return as-is
+        return options;
+    }
+
+    /**
+     * Builds an {@link AlterTypeOperation} from the op's "operation" field.
      * Supports "add_fields" (map of fieldName->type) and "rename_fields" (map of oldName->newName).
      * Example YAML:
      * <pre>
-     * alter_type_operation:
+     * operation:
      *   add_fields:
      *     new_col: text
      * # or:
-     * alter_type_operation:
+     * operation:
      *   rename_fields:
      *     old_name: new_name
      * </pre>
      */
     @SuppressWarnings("unchecked")
     protected AlterTypeOperation<?, ?> getAlterTypeOperationFromOp(ParsedOp op, long l) {
-        Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_type_operation", true);
+        Map<String, Object> opMap = getFreeFormFromOp(op, l, "operation", true);
         if (opMap.containsKey("add_fields") && opMap.containsKey("rename_fields")) {
-            throw new OpConfigError("alter_type_operation must contain only one of 'add_fields' or 'rename_fields', not both");
+            throw new OpConfigError("operation must contain only one of 'add_fields' or 'rename_fields', not both");
         }
         if (opMap.containsKey("add_fields")) {
             Map<String, Object> fields = (Map<String, Object>) opMap.get("add_fields");
@@ -905,14 +915,14 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             renames.forEach((oldName, newName) -> renameOp.addField(oldName, String.valueOf(newName)));
             return renameOp;
         }
-        throw new OpConfigError("alter_type_operation must contain either 'add_fields' or 'rename_fields'");
+        throw new OpConfigError("operation must contain either 'add_fields' or 'rename_fields'");
     }
 
     /**
-     * Builds a {@link TableRegularIndexDefinition} from the op's "index_definition" field.
+     * Builds a {@link TableRegularIndexDefinition} from the op's "definition" field.
      * Example YAML:
      * <pre>
-     * index_definition:
+     * definition:
      *   column: my_col
      * # optional options:
      *   ascii: true
@@ -922,9 +932,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      */
     @SuppressWarnings("unchecked")
     protected TableRegularIndexDefinition getRegularIndexDefinitionFromOp(ParsedOp op, long l) {
-        Map<String, Object> defMap = getFreeFormFromOp(op, l, "index_definition", true);
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "definition", true);
         String column = (String) defMap.get("column");
-        if (column == null) throw new OpConfigError("index_definition must contain 'column'");
+        if (column == null) throw new OpConfigError("definition must contain 'column'");
         TableRegularIndexDefinition def = (TableRegularIndexDefinition) new TableRegularIndexDefinition().column(column);
         if (defMap.containsKey("ascii"))
             def = (TableRegularIndexDefinition) def.ascii(Boolean.parseBoolean(String.valueOf(defMap.get("ascii"))));
@@ -936,42 +946,56 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds a {@link TableTextIndexDefinition} from the op's "index_definition" field.
+     * Builds a {@link TableTextIndexDefinition} from the op's "definition" field.
      * Example YAML:
      * <pre>
-     * index_definition:
+     * definition:
      *   column: my_text_col
      * # optional — simple named analyzer:
-     *   definition: "standard"
+     *   analyzer: "standard"
      * # optional — full analyzer object:
-     *   definition:
+     *   analyzer:
      *     tokenizer: {name: standard}
      *     filters: [{name: lowercase}]
      * </pre>
      */
     @SuppressWarnings("unchecked")
     protected TableTextIndexDefinition getTextIndexDefinitionFromOp(ParsedOp op, long l) {
-        Map<String, Object> defMap = getFreeFormFromOp(op, l, "index_definition", true);
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "definition", true);
         String column = (String) defMap.get("column");
-        if (column == null) throw new OpConfigError("index_definition must contain 'column'");
+        if (column == null) throw new OpConfigError("definition must contain 'column'");
         TableTextIndexDefinition def = (TableTextIndexDefinition) new TableTextIndexDefinition().column(column);
-        if (defMap.containsKey("definition")) {
-            Object definition = defMap.get("definition");
-            if (definition instanceof String) {
-                def = def.analyzer(new Analyzer((String) definition));
-            } 
-            else if (definition instanceof Map) {
-                def = def.analyzer(new Analyzer());
+        if (defMap.containsKey("analyzer")) {
+            Object analyzerVal = defMap.get("analyzer");
+            if (analyzerVal instanceof String) {
+                def = def.analyzer(new Analyzer((String) analyzerVal));
+            }
+            else if (analyzerVal instanceof Map) {
+                Map<String, Object> analyzerMap = (Map<String, Object>) analyzerVal;
+                Analyzer analyzer = new Analyzer();
+                if (analyzerMap.containsKey("tokenizer")) {
+                    Map<String, Object> tok = (Map<String, Object>) analyzerMap.get("tokenizer");
+                    analyzer.tokenizer(String.valueOf(tok.get("name")), (Map<String, String>) tok.get("args"));
+                }
+                if (analyzerMap.containsKey("filters")) {
+                    for (Map<String, Object> f : (List<Map<String, Object>>) analyzerMap.get("filters"))
+                        analyzer.addFilter(String.valueOf(f.get("name")), (Map<String, String>) f.get("args"));
+                }
+                if (analyzerMap.containsKey("charFilters")) {
+                    for (Map<String, Object> f : (List<Map<String, Object>>) analyzerMap.get("charFilters"))
+                        analyzer.addChartFilter(String.valueOf(f.get("name")), (Map<String, String>) f.get("args"));
+                }
+                def = def.analyzer(analyzer);
             }
         }
         return def;
     }
 
     /**
-     * Builds a {@link TableVectorIndexDefinition} from the op's "index_definition" field.
+     * Builds a {@link TableVectorIndexDefinition} from the op's "definition" field.
      * Example YAML:
      * <pre>
-     * index_definition:
+     * definition:
      *   column: my_vector_col
      * # optional:
      *   source_model: "ada002"
@@ -979,9 +1003,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      */
     @SuppressWarnings("unchecked")
     protected TableVectorIndexDefinition getVectorIndexDefinitionFromOp(ParsedOp op, long l) {
-        Map<String, Object> defMap = getFreeFormFromOp(op, l, "index_definition", true);
+        Map<String, Object> defMap = getFreeFormFromOp(op, l, "definition", true);
         String column = (String) defMap.get("column");
-        if (column == null) throw new OpConfigError("index_definition must contain 'column'");
+        if (column == null) throw new OpConfigError("definition must contain 'column'");
         TableVectorIndexDefinition def = (TableVectorIndexDefinition) new TableVectorIndexDefinition().column(column);
         if (defMap.containsKey("metric"))
             def = def.metric(SimilarityMetric.fromValue(String.valueOf(defMap.get("metric"))));
@@ -1039,7 +1063,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds an {@link AlterTableOperation} from the op's "alter_table_operation" field.
+     * Builds an {@link AlterTableOperation} from the op's "operation" field.
      * Supports two sub-keys:
      * <ul>
      *   <li>{@code add} — map of columnName -&gt; type string to add to the table</li>
@@ -1047,20 +1071,20 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      * </ul>
      * Example YAML:
      * <pre>
-     * alter_table_operation:
+     * operation:
      *   add:
      *     new_col: text
      * # or:
-     * alter_table_operation:
+     * operation:
      *   drop:
      *     - old_col
      * </pre>
      */
     @SuppressWarnings("unchecked")
     protected AlterTableOperation getAlterTableOperationFromOp(ParsedOp op, long l) {
-        Map<String, Object> opMap = getFreeFormFromOp(op, l, "alter_table_operation", true);
+        Map<String, Object> opMap = getFreeFormFromOp(op, l, "operation", true);
         if (opMap.containsKey("add") && opMap.containsKey("drop")) {
-            throw new OpConfigError("alter_table_operation can only contain 'add' or 'drop', not both");
+            throw new OpConfigError("operation can only contain 'add' or 'drop', not both");
         }
         if (opMap.containsKey("add")) {
             Map<String, Object> addCols = (Map<String, Object>) opMap.get("add");
@@ -1078,7 +1102,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             List<String> dropCols = (List<String>) opMap.get("drop");
             return new AlterTableDropColumns(dropCols.toArray(new String[0]));
         }
-        throw new OpConfigError("alter_table_operation must contain either 'add' or 'drop'");
+        throw new OpConfigError("operation must contain either 'add' or 'drop'");
     }
 
 }
