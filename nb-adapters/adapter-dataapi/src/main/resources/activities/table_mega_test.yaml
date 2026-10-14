@@ -154,8 +154,8 @@ blocks:
             name:        text
             age:         int
             description: text
-          primary_key:
-            partition_by: [id]
+          primaryKey:
+            partitionBy: [id]
         if_not_exists: true
 
   # -------------------------------------------------------------------------
@@ -168,13 +168,13 @@ blocks:
     ops:
       alter_table_add_column:
         db_alter_table: "TEMPLATE(table,nb_smoke_table)"
-        operation:
+        alter_op:
           add:
             score: int
 
       alter_table_drop_column:
         db_alter_table: "TEMPLATE(table,nb_smoke_table)"
-        operation:
+        alter_op:
           drop:
             - score
 
@@ -200,14 +200,14 @@ blocks:
       alter_type_add_field:
         db_alter_type: "ignored"
         name: "nb_smoke_address"
-        operation:
+        alter_op:
           add_fields:
             country: text
 
       alter_type_rename_field:
         db_alter_type: "ignored"
         name: "nb_smoke_address"
-        operation:
+        alter_op:
           rename_fields:
             zip: postal_code
 

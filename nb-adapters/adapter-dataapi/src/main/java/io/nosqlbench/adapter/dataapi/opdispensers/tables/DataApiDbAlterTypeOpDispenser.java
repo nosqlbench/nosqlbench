@@ -34,7 +34,7 @@ import java.util.function.LongFunction;
  * <p>Required YAML fields:
  * <ul>
  *   <li>{@code name} — name of the UDT to alter</li>
- *   <li>{@code operation} — map with one of:
+ *   <li>{@code alter_op} — map with one of (note: cannot use "operation" as that is a reserved NB keyword):
  *     <ul>
  *       <li>{@code add_fields} — map of fieldName -&gt; type string to add</li>
  *       <li>{@code rename_fields} — map of oldName -&gt; newName</li>
