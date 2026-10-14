@@ -43,7 +43,11 @@ public class DataApiDbCreateTableOpDispenser extends DataApiOpDispenser {
                     spaceFunction.apply(l).getDatabase(),
                     targetFunction.apply(l),
                     this.getCollectionDefinitionFromOp(op, l)       // note: we can use getCollectionDefinitionFromOp()
-                                                                    // here becaues its return type is Map<String, Object>
+                                                                    // here becaues its return type is Map<String, Object>.
+                                                                    // This function is table/collection agnostic.
+                                                                    // May want to rename
+                                                                    // getCollectionDefinitionFromOp() -> getDefinitionFromOp()
+                                                                    // to avoid confusion. 
                 );
 
             return dataApiDbCreateTableOp;
