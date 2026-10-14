@@ -189,7 +189,7 @@ blocks:
     ops:
       create_type:
         db_create_type: "ignored"
-        name: "nb_smoke_address"
+        type_name: "nb_smoke_address"
         definition:
           fields:
             street: text
@@ -199,14 +199,14 @@ blocks:
 
       alter_type_add_field:
         db_alter_type: "ignored"
-        name: "nb_smoke_address"
+        type_name: "nb_smoke_address"
         alter_op:
           add_fields:
             country: text
 
       alter_type_rename_field:
         db_alter_type: "ignored"
-        name: "nb_smoke_address"
+        type_name: "nb_smoke_address"
         alter_op:
           rename_fields:
             zip: postal_code
@@ -219,7 +219,7 @@ blocks:
 
       drop_type:
         db_drop_type: "ignored"
-        name: "nb_smoke_address"
+        type_name: "nb_smoke_address"
 
   # -------------------------------------------------------------------------
   # PHASE: indexes
@@ -236,21 +236,21 @@ blocks:
     ops:
       create_index_on_name:
         table_create_index: "TEMPLATE(table,nb_smoke_table)"
-        name: "nb_smoke_idx_name"
+        index_name: "nb_smoke_idx_name"
         definition:
           column: "name"
         if_not_exists: true
 
       create_text_index_on_description:
         table_create_text_index: "TEMPLATE(table,nb_smoke_table)"
-        name: "nb_smoke_tidx_description"
+        index_name: "nb_smoke_tidx_description"
         definition:
           column: "description"
         if_not_exists: true
 
       create_vector_index:
         table_create_vector_index: "TEMPLATE(table,nb_smoke_table)"
-        name: "nb_smoke_vidx_embedding"
+        index_name: "nb_smoke_vidx_embedding"
         definition:
           column: "embedding"
         if_not_exists: true
@@ -263,17 +263,17 @@ blocks:
 
       drop_index_name:
         table_drop_index: "ignored"
-        name: "nb_smoke_idx_name"
+        index_name: "nb_smoke_idx_name"
         if_exists: true
 
       drop_text_index:
         table_drop_index: "ignored"
-        name: "nb_smoke_tidx_description"
+        index_name: "nb_smoke_tidx_description"
         if_exists: true
 
       drop_vector_index:
         table_drop_index: "ignored"
-        name: "nb_smoke_vidx_embedding"
+        index_name: "nb_smoke_vidx_embedding"
         if_exists: true
 
   # -------------------------------------------------------------------------

@@ -377,11 +377,11 @@ blocks:
       altbl:
         db_alter_table: "TEMPLATE(table)"
         #### required alter operation — one of 'add' (map of colName -> type) or 'drop' (list of col names):
-        operation:
+        alter_op:
           add:
             new_col: text
         #### alternative form (drop columns):
-        # operation:
+        # alter_op:
         #   drop:
         #     - old_col
 
@@ -403,7 +403,7 @@ blocks:
       crtype:
         db_create_type: "TEMPLATE(ignored)"
         #### required name of the UDT to create:
-        name: "address_type"
+        type_name: "address_type"
         #### required UDT field definitions (map of fieldName -> column type):
         definition:
           fields:
@@ -417,13 +417,13 @@ blocks:
       altype:
         db_alter_type: "TEMPLATE(ignored)"
         #### required name of the UDT to alter:
-        name: "address_type"
+        type_name: "address_type"
         #### required alter operation — one of 'add_fields' (map of fieldName -> type) or 'rename_fields' (map of oldName -> newName):
-        operation:
+        alter_op:
           add_fields:
             country: text
         #### alternative form (rename fields):
-        # operation:
+        # alter_op:
         #   rename_fields:
         #     old_field_name: new_field_name
 
@@ -439,7 +439,7 @@ blocks:
       drtype:
         db_drop_type: "TEMPLATE(ignored)"
         #### required name of the UDT to drop:
-        name: "address_type"
+        type_name: "address_type"
   
       # "table_insert_one" - insert a single row into a table:
       ti1:
@@ -539,10 +539,12 @@ blocks:
       tcvi:
         table_create_vector_index: "TEMPLATE(table)"
         #### required: name of the index to create:
-        name: "my_vector_index"
+        index_name: "my_vector_index"
         #### required index definition (column is required):
         definition:
           column: "embedding"
+          #### optional similarity metric (cosine, euclidean, dot_product):
+          # metric: "cosine"
           #### optional source model hint:
           # source_model: "text-embedding-3-small"
         #### optional: if_not_exists (default false):
@@ -552,7 +554,7 @@ blocks:
       tci:
         table_create_index: "TEMPLATE(table)"
         #### required: name of the index to create:
-        name: "my_index"
+        index_name: "my_index"
         #### required index definition (column is required):
         definition:
           column: "name"
@@ -567,10 +569,19 @@ blocks:
       tcti:
         table_create_text_index: "TEMPLATE(table)"
         #### required: name of the index to create:
-        name: "my_text_index"
+        index_name: "my_text_index"
         #### required index definition (column is required):
         definition:
           column: "description"
+          #### optional analyzer — either a built-in analyzer name:
+          # analyzer: "english"
+          #### or a full analyzer object (tokenizer, filters, charFilters), passed through as-is:
+          # analyzer:
+          #   tokenizer: {name: standard}
+          #   filters:
+          #     - name: lowercase
+          #     - name: stop
+          #   charFilters: []
         #### optional: if_not_exists (default false):
         # if_not_exists: true
 
@@ -586,7 +597,7 @@ blocks:
       tdri:
         table_drop_index: "TEMPLATE(ignored)"
         #### required: name of the index to drop:
-        name: "my_index"
+        index_name: "my_index"
         #### optional: if_exists (default false):
         # if_exists: true
 

@@ -49,7 +49,7 @@ public class DataApiTableDropIndexOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiTableDropIndexOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            String name = op.getAsRequiredFunction("name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("index_name", String.class).apply(l);
             DropTableIndexOptions options = getDropIndexOptionsFromOp(op, l);
             return new DataApiTableDropIndexOp(db, name, options);
         };

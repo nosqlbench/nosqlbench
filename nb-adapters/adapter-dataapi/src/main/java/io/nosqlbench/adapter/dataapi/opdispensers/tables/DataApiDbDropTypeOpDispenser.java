@@ -46,7 +46,7 @@ public class DataApiDbDropTypeOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbDropTypeOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            String name = op.getAsRequiredFunction("name", String.class).apply(l);
+            String name = op.getAsRequiredFunction("type_name", String.class).apply(l);
             DropTypeOptions options = getDropTypeOptionsFromOp(op, l);
             return new DataApiDbDropTypeOp(
                 spaceFunction.apply(l).getDatabase(),
