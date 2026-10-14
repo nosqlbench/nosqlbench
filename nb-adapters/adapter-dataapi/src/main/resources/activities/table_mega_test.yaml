@@ -154,6 +154,7 @@ blocks:
             name:        text
             age:         int
             description: text
+          # camelCase is used here to avoid reserved keyword collisions
           primaryKey:
             partitionBy: [id]
         if_not_exists: true
