@@ -82,4 +82,34 @@ public enum DataApiOpType {
     collection_update_many,
     collection_estimated_document_count,
     collection_count_documents,
+
+    // TABLE OPS
+    // in-database (table management) ops:
+    // NOTE: there are no legacy table ops
+    db_create_table,
+    db_alter_table,
+    db_drop_table,
+    db_list_tables,
+    db_list_table_names,
+    // UDT (user defined types) ops:
+    db_create_type,
+    db_alter_type,
+    db_list_types,
+    db_list_type_names,
+    db_drop_type,
+    // in-table ops:
+    table_insert_one,
+    table_insert_many,
+    table_find_one,
+    table_find,
+    table_update_one,
+    table_delete_one,
+    table_delete_many,
+    // in-table (index) ops:
+    table_create_vector_index,
+    table_create_index,
+    table_create_text_index,
+    table_list_indexes,
+    table_list_index_names,
+    table_drop_index,
 }

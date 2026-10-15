@@ -34,16 +34,87 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 
 **Done:**
 
-- all collection DML ops;
-- create/delete collection DDL;
-- All known bugs in legacy operations are fixed.
+- All collection DML ops;
+- Create/delete collection DDL;
+- All known bugs in legacy operations are fixed;
+- Table support
 
 **Coming next:**
 
-- introduction of Table support;
 - Administrative functions (create keyspace and so on), currently left as they were before the overhaul;
 - Ability to target non-Astra and non-prod environments in full;
-- Ability to supply special Data API-related secrets (such as embedding provider API keys for $vectorize operations).
+- Ability to supply special Data API-related secrets (such as embedding provider API keys for `$vectorize` operations).
+
+## Table support
+
+This release introduces full support for **Data API Tables**. Tables are the schemaed counterpart to the schemaless collection.
+
+### New table DDL ops
+
+| Op name | Description |
+|---|---|
+| `db_create_table` | Create a table with a given schema |
+| `db_alter_table` | Add/drop columns to a table |
+| `db_drop_table` | Drop a table |
+| `db_list_tables` | List tables |
+| `db_list_table_names` | List table names only |
+
+### New user-defined type (UDT) ops
+
+| Op name | Description |
+|---|---|
+| `db_create_type` | Create a user-defined type (`type_name`, `definition.fields`) |
+| `db_alter_type` | Add (`add_fields`) or rename (`rename_fields`) fields of a type |
+| `db_list_types` | List user-defined types |
+| `db_list_type_names` | List user-defined type names only |
+| `db_drop_type` | Drop a user-defined type |
+
+### New table index ops
+
+| Op name | Description |
+|---|---|
+| `table_create_index` | Create a regular index on a table column |
+| `table_create_text_index` | Create a text index on a table column |
+| `table_create_vector_index` | Create a vector index on a table column  |
+| `table_list_indexes` | List the indexes of a table |
+| `table_list_index_names` | List the index names of a table |
+| `table_drop_index` | Drop an index by its `index_name` |
+
+
+### New table DML ops
+
+| Op name | Description |
+|---|---|
+| `table_insert_one` | Insert a single row |
+| `table_insert_many` | Insert multiple rows |
+| `table_find` | Find rows matching a filter |
+| `table_find_one` | Find the first row matching a filter |
+| `table_update_one` | Update the first row matching a filter |
+| `table_delete_one` | Delete the first row matching a filter |
+| `table_delete_many` | Delete all rows matching a filter |
+
+### Code organisation
+
+All table related op dispensers live under the `opdispensers/tables/` subdir and their corresponding op implementations under `ops/tables/`. Likewise, collection ops have been moved into the `opdispensers/collections/` and `ops/collections/` subdirs to keep the codebase cleaner.
+
+### Supported column value types (intentional limitation)
+
+Row values are limited to the types YAML can express natively: strings, numbers and booleans. 
+
+Dedicated support for the less common table data types (e.g. `inet`, `duration`, `blob`, `timestamp` and `uuid`) is **deliberately not provided**. Workloads that depend on those types will likely fail. 
+
+### Reference workload
+
+A comprehensive table workload covering all table ops is available at [`activities/table_mega_test.yaml`](activities/table_mega_test.yaml). You can run the whole workload with the following:
+
+```bash
+$ java -jar nb5.jar \
+  nb-adapters/adapter-dataapi/src/main/resources/activities/table_mega_test.yaml \
+  megatest \
+  astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+  astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+  namespace=default_keyspace \
+```
 
 ## Usage notes (new-style ops)
 
