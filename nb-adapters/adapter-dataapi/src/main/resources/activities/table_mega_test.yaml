@@ -124,6 +124,10 @@ bindings:
   # Static row IDs so we can reliably reference inserted rows later
   row_id_1: Identity() -> long
   row_id_2: Add(1000) -> long
+  # Bindings used by insert_many_batched row_template
+  seq_id:     Add(10); ToInt() -> int
+  first_name: FirstNames()
+  age:        Uniform(18,65); ToInt() -> int
 
 blocks:
 
@@ -311,6 +315,17 @@ blocks:
             name: "Eve"
             age:  28
             description: "Fifth row"
+        ordered: false
+
+      insert_many_batched:
+        table_insert_many: "TEMPLATE(table,nb_smoke_table)"
+        batched: true
+        batch_size: 5
+        row_template:
+          id: "{seq_id}"
+          name: "{first_name}"
+          age: "{age}"
+          description: "Batch-templated row"
         ordered: false
 
   # -------------------------------------------------------------------------

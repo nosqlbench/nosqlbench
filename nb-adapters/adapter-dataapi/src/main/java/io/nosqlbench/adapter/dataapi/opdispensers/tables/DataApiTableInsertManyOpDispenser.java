@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.LongFunction;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
@@ -42,23 +41,47 @@ public class DataApiTableInsertManyOpDispenser extends DataApiOpDispenser {
     }
 
     private LongFunction<DataApiTableInsertManyOp> createOpFunction(ParsedOp op) {
+        Boolean batched = getBatchedFromOp(op, false, false);
+        if (batched) {
+            ensureOpKeysAbsent(op, new String[]{"rows"});
+            ensureOpKeysPresent(op, new String[]{"batch_size", "row_template"});
+            Integer batchSize = getBatchSizeFromOp(op, true, null);
+            LongFunction<List<Row>> rowsFunc = getTemplatedRowsFunctionFromOp(op, batchSize);
+            return (l) -> {
+                List<Row> rows = rowsFunc.apply(l);
+                Database db = spaceFunction.apply(l).getDatabase();
+                Table<Row> table = db.getTable(targetFunction.apply(l));
+                return new DataApiTableInsertManyOp(
+                    db,
+                    table,
+                    rows,
+                    getTableInsertManyOptions(op, l)
+                );
+            };
+        }
+        // regular explicit-row-list behaviour
+        ensureOpKeysAbsent(op, new String[]{"batch_size", "row_template"});
         return (l) -> {
+            List<Row> rows = getRowsFromOp(op, l);
             Database db = spaceFunction.apply(l).getDatabase();
             Table<Row> table = db.getTable(targetFunction.apply(l));
-            List<Row> rows = getRowsFromOp(op, l);
-            TableInsertManyOptions options = new TableInsertManyOptions();
-            options = options.concurrency(1); // avoid client-side concurrency; let NB own this
-            Boolean ordered = getOrderedFromOp(op, l);
-            if (ordered != null) {
-                options = options.ordered(ordered);
-            }
             return new DataApiTableInsertManyOp(
                 db,
                 table,
                 rows,
-                options
+                getTableInsertManyOptions(op, l)
             );
         };
+    }
+
+    private TableInsertManyOptions getTableInsertManyOptions(ParsedOp op, long l) {
+        TableInsertManyOptions options = new TableInsertManyOptions();
+        options = options.concurrency(1); // hardcoded: avoid client concurrency, let NB use its own.
+        Boolean ordered = getOrderedFromOp(op, l);
+        if (ordered != null) {
+            options = options.ordered(ordered);
+        }
+        return options;
     }
 
     @Override
