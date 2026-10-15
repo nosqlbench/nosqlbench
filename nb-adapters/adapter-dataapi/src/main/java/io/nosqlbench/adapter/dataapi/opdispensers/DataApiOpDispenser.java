@@ -767,6 +767,28 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         }).toList();
     }
 
+    /// Retrieve a row template for batched array of rows and, given the batch size,
+    /// returns a function (of `l`) yielding directly the unrolled list of rows.
+    @SuppressWarnings("unchecked")
+    protected LongFunction<List<Row>> getTemplatedRowsFunctionFromOp(ParsedOp op, Integer batchSize) {
+        Optional<LongFunction<Map>> rtMapFunc = op.getAsOptionalFunction("row_template", Map.class);
+        if (!rtMapFunc.isPresent()) {
+            throw new OpConfigError("Required field 'row_template' not supplied.");
+        }
+        return (l) -> {
+            Long lBase = l * batchSize;
+            LongFunction<Map> mapper = rtMapFunc.get();
+            return LongStream.range(0, batchSize)
+                .mapToObj(inIndex -> {
+                    Map<String, Object> rowMap = mapper.apply(lBase + inIndex);
+                    Row row = Row.create();
+                    rowMap.forEach(row::add);
+                    return row;
+                })
+                .collect(Collectors.toList());
+        };
+    }
+
     /**
      * Builds a {@link TableDefinition} from the op's "definition" field.
      * The map must have a "columns" sub-map and a "primaryKey" key listing partition and optional clustering columns.

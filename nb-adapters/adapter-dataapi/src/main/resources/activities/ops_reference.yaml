@@ -453,14 +453,26 @@ blocks:
       # "table_insert_many" - insert multiple rows into a table:
       tim:
         table_insert_many: "TEMPLATE(table)"
-        #### required rows (list of maps of column name -> value):
-        rows:
-          - id: "{uuid}"
-            name: "Alice"
-            age: 30
-          - id: "{uuid}"
-            name: "Bob"
-            age: 25
+        #### Rows can be passed as explicit list or 'batched' (exactly one choice)
+        ####   Batched case for rows (required: 'batch_size', 'row_template'):
+        ####      in this case, the template is applied batch_size times consuming as many bindings.
+        ####      ('rows' cannot be used)
+        batched: true
+        batch_size: 5
+        row_template:
+          id: "{my_id_binding}"
+          name: "{my_name_binding}"
+          age: "{my_age_binding}"
+        ####   Explicit-list case for rows
+        ####      'rows', free-form list of maps, required in this case
+        ####      ('row_template'/'batch_size' cannot be used)
+        # rows:
+        #   - id: "{uuid}"
+        #     name: "Alice"
+        #     age: 30
+        #   - id: "{uuid}"
+        #     name: "Bob"
+        #     age: 25
         #### optional ordered flag (default false):
         # ordered: false
 
