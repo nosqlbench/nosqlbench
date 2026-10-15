@@ -78,6 +78,11 @@ public class DataApiTableInsertManyOpDispenser extends DataApiOpDispenser {
         TableInsertManyOptions options = new TableInsertManyOptions();
         options = options.concurrency(1); // hardcoded: avoid client concurrency, let NB use its own.
         Boolean ordered = getOrderedFromOp(op, l);
+        Integer chunkSize = getChunkSizeFromOp(op, l);
+        if (chunkSize != null) {
+            logger.warn(() -> "Setting insertion 'chunk_size'. This is discouraged, as it usually signals an intention to not have 1:1 between ops and HTTP requests.");
+            options = options.chunkSize(chunkSize);
+        }
         if (ordered != null) {
             options = options.ordered(ordered);
         }
