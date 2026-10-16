@@ -17,9 +17,11 @@
 package io.nosqlbench.adapter.dataapi;
 
 import com.datastax.astra.client.DataAPIClient;
+import com.datastax.astra.client.DataAPIDestination;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
 import com.datastax.astra.client.admin.DatabaseAdmin;
+import com.datastax.astra.client.core.options.DataAPIClientOptions;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
@@ -76,16 +78,37 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     private void createClient() {
-        this.dataAPIClient = new DataAPIClient(astraToken);
+
+	    /*
+            TODO: determine this value (hardcoded for now) based on command-line options
+            To be precise, add a command-line (data-api only) optional "astraDestination" (string)
+            if present, set destination to DataAPIDestination.valueOf(<that param>.toUpperCase())
+            if absent, leave default (on behalf of the client -> will be Astra prod)
+
+            TODO: alias namespace -> keyspace (does not seem to be hard)
+        */
+        boolean useHCDDestination = true;
+
+        DataAPIClientOptions clientOptions = new DataAPIClientOptions();
+        if (useHCDDestination) {
+            clientOptions = clientOptions.destination(DataAPIDestination.HCD);
+        }
+
+        this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
         if (namespace != null) {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint, namespace);
         } else {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint);
         }
-        if (superUserToken != null) {
-            this.admin = dataAPIClient.getAdmin(superUserToken);
+        // There's no notion of "admin" unless we're on Astra:
+        if (useHCDDestination) {
+            this.admin = null;
         } else {
-            this.admin = dataAPIClient.getAdmin();
+            if (superUserToken != null) {
+                this.admin = dataAPIClient.getAdmin(superUserToken);
+            } else {
+                this.admin = dataAPIClient.getAdmin();
+            }
         }
         this.namespaceAdmin = database.getDatabaseAdmin();
     }
@@ -114,6 +137,9 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     private void setNamespace() {
+        // TODO: use 'keyspace' or 'namespace' if present
+        // TODO: throw if both passed
+        // TODO issue a depre error if 'namespace' (but proceed)
         Optional<String> maybeNamespace = config.getOptional("namespace");
         maybeNamespace.ifPresent(s -> this.namespace = s);
     }
@@ -150,6 +176,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     public static NBConfigModel getConfigModel() {
+        // TODO add 'keyspace' and 'astraDestination' (both strings)
         return ConfigModel.of(DataApiSpace.class)
             .add(
                 Param.optional("astraTokenFile", String.class)
