@@ -43,6 +43,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private final NBConfiguration config;
     private String astraToken;
     private String astraApiEndpoint;
+    private String destinationString;
     private DataAPIClient dataAPIClient;
     private Database database;
     private String namespace;
@@ -58,6 +59,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         setSuperToken();
         setApiEndpoint();
         setNamespace();
+        setDestination();
         createClient();
     }
 
@@ -86,12 +88,16 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             if absent, leave default (on behalf of the client -> will be Astra prod)
 
             TODO: alias namespace -> keyspace (does not seem to be hard)
+            TODO: rename internal variable here to 'keyspace' (also look around for other instances to fix)
         */
-        boolean useHCDDestination = true;
+        DataAPIDestination destination = null;
+        if (destinationString != null && !destinationString.isEmpty()) {
+            destination = DataAPIDestination.valueOf(destinationString.toUpperCase());
+        }
 
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
-        if (useHCDDestination) {
-            clientOptions = clientOptions.destination(DataAPIDestination.HCD);
+        if (destination != null) {
+            clientOptions = clientOptions.destination(destination);
         }
 
         this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
@@ -101,7 +107,9 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint);
         }
         // There's no notion of "admin" unless we're on Astra:
-        if (useHCDDestination) {
+        if (destination != DataAPIDestination.ASTRA
+                && destination != DataAPIDestination.ASTRA_DEV
+                && destination != DataAPIDestination.ASTRA_TEST) {
             this.admin = null;
         } else {
             if (superUserToken != null) {
@@ -144,6 +152,11 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         maybeNamespace.ifPresent(s -> this.namespace = s);
     }
 
+    private void setDestination() {
+        Optional<String> maybeDestination = config.getOptional("astraDestination");
+        maybeDestination.ifPresent(s -> this.destinationString = s);
+    }
+
     private void setToken() {
         String tokenFileContents = null;
         Optional<String> tokenFilePath = config.getOptional("astraTokenFile");
@@ -176,7 +189,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     public static NBConfigModel getConfigModel() {
-        // TODO add 'keyspace' and 'astraDestination' (both strings)
+        // TODO add 'keyspace' (strings)
         return ConfigModel.of(DataApiSpace.class)
             .add(
                 Param.optional("astraTokenFile", String.class)
@@ -207,6 +220,12 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             .add(
                 Param.optional("superToken", String.class)
                     .setDescription("optional Astra token used to connect as Admin user")
+            )
+            .add(
+                Param.optional("astraDestination", String.class)
+                    .setDescription(
+                        "The 'destination' (ASTRA, ASTRA_DEV, ASTRA_TEST, HCD, DSE, CASSANDRA, OTHERS) of the target database"
+                    )
             )
             .asReadOnly();
     }
