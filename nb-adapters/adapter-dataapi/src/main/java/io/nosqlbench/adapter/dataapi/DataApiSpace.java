@@ -46,11 +46,13 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private DataAPIDestination astraDestination;
     private DataAPIClient dataAPIClient;
     private Database database;
-    private String namespace;
+    private String keyspace;
 
     private String superUserToken;
     private AstraDBAdmin admin;
-    private DatabaseAdmin namespaceAdmin;
+    private DatabaseAdmin databaseAdmin;
+
+    private final String DEFAULT_KEYSPACE = "default_keyspace";
 
     public DataApiSpace(DataApiDriverAdapter adapter, long name, NBConfiguration cfg) {
         super(adapter,name);
@@ -58,7 +60,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         setToken();
         setSuperToken();
         setApiEndpoint();
-        setNamespace();
+        setKeyspace();
         setDestination();
         createClient();
     }
@@ -75,15 +77,14 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         return admin;
     }
 
-    public DatabaseAdmin getNamespaceAdmin() {
-        return namespaceAdmin;
+    public DatabaseAdmin getDatabaseAdmin() {
+        return databaseAdmin;
     }
 
     private void createClient() {
 
 	    /*
-            TODO: alias namespace -> keyspace (does not seem to be hard)
-            TODO: rename internal variable here to 'keyspace' (also look around for other instances to fix)
+            TODO: deprecate op/dispensers and duplicate + test and document + ensure replication factor map is there
         */
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
         clientOptions = clientOptions.destination(astraDestination);
@@ -93,8 +94,8 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         // END OF DEBUG PART
 
         this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
-        if (namespace != null) {
-            this.database = dataAPIClient.getDatabase(astraApiEndpoint, namespace);
+        if (keyspace != null) {
+            this.database = dataAPIClient.getDatabase(astraApiEndpoint, keyspace);
         } else {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint);
         }
@@ -110,7 +111,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
                 this.admin = dataAPIClient.getAdmin();
             }
         }
-        this.namespaceAdmin = database.getDatabaseAdmin();
+        this.databaseAdmin = database.getDatabaseAdmin();
     }
 
     private void setApiEndpoint() {
@@ -136,12 +137,26 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         epConfig.ifPresent(ep -> this.astraApiEndpoint = ep);
     }
 
-    private void setNamespace() {
-        // TODO: use 'keyspace' or 'namespace' if present
-        // TODO: throw if both passed
-        // TODO issue a depre error if 'namespace' (but proceed)
+    private void setKeyspace() {
+        String finalKeyspace = DEFAULT_KEYSPACE;
+        Optional<String> maybeKeyspace = config.getOptional("keyspace");
         Optional<String> maybeNamespace = config.getOptional("namespace");
-        maybeNamespace.ifPresent(s -> this.namespace = s);
+        if (maybeKeyspace.isPresent()) {
+            if (maybeNamespace.isPresent()) {
+                throw new BasicError("You can only configure one of 'keyspace' or (the deprecated alias) 'namespace'");
+            } else {
+                finalKeyspace = maybeKeyspace.get();
+            }
+        } else {
+            // 'keyspace' not passed
+            if (maybeNamespace.isPresent()) {
+                logger.warn(() -> "Command-line parameter 'namespace' for Data API is deprecated. Please replace it with 'keyspace'.");
+                finalKeyspace = maybeNamespace.get();
+            }
+            // (else: keep default)
+        }
+
+        keyspace = finalKeyspace;
     }
 
     private void setDestination() {
@@ -185,7 +200,6 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     public static NBConfigModel getConfigModel() {
-        // TODO add 'keyspace' (strings)
         return ConfigModel.of(DataApiSpace.class)
             .add(
                 Param.optional("astraTokenFile", String.class)
@@ -203,11 +217,13 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
                 Param.optional("astraApiEndpointFile", String.class)
                     .setDescription("file to load the API endpoint for the Astra database")
             )
-
             .add(
-                Param.defaultTo("namespace", "default_keyspace")
-                    .setDescription("The Astra namespace to use")
-
+                Param.optional("keyspace", String.class)
+                    .setDescription("The Astra keyspace to use")
+            )
+            .add(
+                Param.optional("namespace", String.class)
+                    .setDescription("The Astra keyspace to use (deprecated alias for 'keyspace')")
             )
             .add(
                 Param.optional("superTokenFile", String.class)

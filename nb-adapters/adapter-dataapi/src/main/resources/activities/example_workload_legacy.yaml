@@ -7,6 +7,7 @@ scenarios:
 #       astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
 #       astraToken=$ASTRA_DB_APPLICATION_TOKEN \
 #       namespace=$ASTRA_DB_KEYSPACE
+# (note that 'namespace' is a deprecated alias for 'keyspace')
 
 bindings:
   query_vector: Add(37); HashedFloatVectors(TEMPLATE(dimensions,1024));

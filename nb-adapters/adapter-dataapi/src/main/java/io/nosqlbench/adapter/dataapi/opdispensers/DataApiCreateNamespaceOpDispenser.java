@@ -37,7 +37,7 @@ public class DataApiCreateNamespaceOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiCreateNamespaceOp> createOpFunction(ParsedOp op) {
         return (l) -> new DataApiCreateNamespaceOp(
             spaceFunction.apply(l).getDatabase(),
-            spaceFunction.apply(l).getNamespaceAdmin(),
+            spaceFunction.apply(l).getDatabaseAdmin(),
             targetFunction.apply(l)
         );
     }
