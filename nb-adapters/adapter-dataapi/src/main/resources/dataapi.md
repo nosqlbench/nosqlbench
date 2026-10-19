@@ -15,7 +15,7 @@ Connection to the Data API for an Astra DB instance requires an **API Endpoint**
 ```
 astraToken="..."                    # required
 astraApiEndpoint="https://..."      # required
-namespace="the_keyspace"            # optional
+keyspace="the_keyspace"             # optional ('namespace' is a deprecated alias)
 ```
 
 These values are used by the adapter to establish a `DataAPIClient`, from which all subsequent operations are spawned.
@@ -30,7 +30,7 @@ Example 1 - Astra DB Dev environment:
 ```
 ./nb [...] astraToken="AstraCS:..." \
     astraApiEndpoint="https://....apps.astra-dev.datastax.com" \
-    namespace="my_keyspace" \
+    keyspace="my_keyspace" \
     astraDestination="ASTRA_DEV"
 ```
 
@@ -39,7 +39,7 @@ Example 2 - locally-running HCD + Data API setup:
 ```
 ./nb [...] astraToken="Cassandra:Y2Fzc2FuZHJh:Y2Fzc2FuZHJh" \
     astraApiEndpoint="https://....apps.astra-dev.datastax.com" \
-    namespace="my_keyspace" \
+    keyspace="my_keyspace" \
     astraDestination="HCD"
 ```
 
