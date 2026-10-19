@@ -43,7 +43,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private final NBConfiguration config;
     private String astraToken;
     private String astraApiEndpoint;
-    private String destinationString;
+    private DataAPIDestination astraDestination;
     private DataAPIClient dataAPIClient;
     private Database database;
     private String namespace;
@@ -82,23 +82,15 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private void createClient() {
 
 	    /*
-            TODO: determine this value (hardcoded for now) based on command-line options
-            To be precise, add a command-line (data-api only) optional "astraDestination" (string)
-            if present, set destination to DataAPIDestination.valueOf(<that param>.toUpperCase())
-            if absent, leave default (on behalf of the client -> will be Astra prod)
-
             TODO: alias namespace -> keyspace (does not seem to be hard)
             TODO: rename internal variable here to 'keyspace' (also look around for other instances to fix)
         */
-        DataAPIDestination destination = null;
-        if (destinationString != null && !destinationString.isEmpty()) {
-            destination = DataAPIDestination.valueOf(destinationString.toUpperCase());
-        }
-
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
-        if (destination != null) {
-            clientOptions = clientOptions.destination(destination);
-        }
+        clientOptions = clientOptions.destination(astraDestination);
+
+        // DEBUG PART - TODO remove
+        clientOptions = clientOptions.logRequests();
+        // END OF DEBUG PART
 
         this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
         if (namespace != null) {
@@ -107,9 +99,9 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint);
         }
         // There's no notion of "admin" unless we're on Astra:
-        if (destination != DataAPIDestination.ASTRA
-                && destination != DataAPIDestination.ASTRA_DEV
-                && destination != DataAPIDestination.ASTRA_TEST) {
+        if (astraDestination != DataAPIDestination.ASTRA
+                && astraDestination != DataAPIDestination.ASTRA_DEV
+                && astraDestination != DataAPIDestination.ASTRA_TEST) {
             this.admin = null;
         } else {
             if (superUserToken != null) {
@@ -153,8 +145,12 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     }
 
     private void setDestination() {
-        Optional<String> maybeDestination = config.getOptional("astraDestination");
-        maybeDestination.ifPresent(s -> this.destinationString = s);
+        Optional<String> maybeDestinationString = config.getOptional("astraDestination");
+        if (maybeDestinationString.isPresent()) {
+            astraDestination = DataAPIDestination.valueOf(maybeDestinationString.get().toUpperCase());
+        } else {
+            astraDestination = DataAPIDestination.ASTRA;
+        }
     }
 
     private void setToken() {
@@ -209,7 +205,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             )
 
             .add(
-                Param.defaultTo("namespace", "default_namespace")
+                Param.defaultTo("namespace", "default_keyspace")
                     .setDescription("The Astra namespace to use")
 
             )
