@@ -24,10 +24,6 @@ public enum DataApiOpType {
     list_databases,
     drop_database,
     get_database_info,
-    // db-admin ops:
-    create_namespace,
-    list_namespaces,
-    drop_namespace,
     // in-database ops:
     list_collections,
     list_collection_names,
@@ -35,6 +31,9 @@ public enum DataApiOpType {
     // LEGACY OPS
     // admin ops:
     // db-admin ops:
+    create_namespace,
+    list_namespaces,
+    drop_namespace,
     // in-database ops:
     create_collection,
     create_collection_with_class,
@@ -64,6 +63,9 @@ public enum DataApiOpType {
     // NEW-STYLE OPS
     // admin ops:
     // db-admin ops:
+    dbadmin_create_keyspace,
+    dbadmin_list_keyspaces,
+    dbadmin_drop_keyspace,
     // in-database ops:
     db_create_collection,
     db_delete_collection,

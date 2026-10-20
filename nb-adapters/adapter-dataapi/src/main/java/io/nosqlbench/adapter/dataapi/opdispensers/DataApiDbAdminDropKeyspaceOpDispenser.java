@@ -18,26 +18,28 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiListNamespacesOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDbAdminCreateKeyspaceOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDbAdminDropKeyspaceOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiListNamespacesOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiListNamespacesOpDispenser.class);
-    private final LongFunction<DataApiListNamespacesOp> opFunction;
+public class DataApiDbAdminDropKeyspaceOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDbAdminDropKeyspaceOpDispenser.class);
+    private final LongFunction<DataApiDbAdminDropKeyspaceOp> opFunction;
 
-    public DataApiListNamespacesOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiDbAdminDropKeyspaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiListNamespacesOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiListNamespacesOp(
+    private LongFunction<DataApiDbAdminDropKeyspaceOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiDbAdminDropKeyspaceOp(
             spaceFunction.apply(l).getDatabase(),
-            spaceFunction.apply(l).getDatabaseAdmin()
+            spaceFunction.apply(l).getDatabaseAdmin(),
+            targetFunction.apply(l)
         );
     }
 
