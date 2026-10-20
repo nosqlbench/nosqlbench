@@ -5,31 +5,9 @@ blocks:
   my_block:
     ops:
 
-      # NEW "deleteCollection", fully documented:
-      delcoll:
-        db_delete_collection: "TEMPLATE(collection)"
-
-      # NEW "createCollection", fully documented:
-      crcoll:
-        db_create_collection: "TEMPLATE(collection)"
-        #### required collection definition (free-form, must be valid Data API syntax)
-        definition:
-          vector:
-            dimension: 1024
-            metric: "dot_product"
-            service:
-              provider: "voyageAI"
-              modelName: "voyage-2"
-              authentication:
-                providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
-              parameters:
-                autoTruncate: true
-          indexing:
-            allow:
-              - aField1
-              - aField2
-          defaultId:
-            type: objectId
+      ################################
+      # IN-COLLECTION OPERATIONS
+      ################################
 
       # NEW "insertMany", fully documented:
       im:
@@ -353,3 +331,55 @@ blocks:
         #   parameters:
         #     param1: value1
         #     param2: 999
+
+      ################################
+      # IN-DATABASE OPERATIONS
+      ################################
+
+      # NEW "createCollection", fully documented:
+      crcoll:
+        db_create_collection: "TEMPLATE(collection)"
+        #### required collection definition (free-form, must be valid Data API syntax)
+        definition:
+          vector:
+            dimension: 1024
+            metric: "dot_product"
+            service:
+              provider: "voyageAI"
+              modelName: "voyage-2"
+              authentication:
+                providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
+              parameters:
+                autoTruncate: true
+          indexing:
+            allow:
+              - aField1
+              - aField2
+          defaultId:
+            type: objectId
+
+      # NEW "deleteCollection", fully documented:
+      delcoll:
+        db_delete_collection: "TEMPLATE(collection)"
+
+      ################################
+      # DB-ADMIN OPERATIONS
+      ################################
+
+      # NEW "create keyspace", fully documented:
+      # Note: strictly speaking, this is a Data API operations only outside of Astra DB
+      cks:
+        create_keyspace: "new_keyspace"
+
+      # NEW "list keyspaces", fully documented:
+      # Note: strictly speaking, this is a Data API operations only outside of Astra DB
+      lks:
+        dbadmin_list_keyspaces: ""
+
+      # NEW "drop keyspace", fully documented:
+      # Note: strictly speaking, this is a Data API operations only outside of Astra DB
+      dks:
+        dbadmin_drop_keyspace: "my_keyspace"
+
+
+

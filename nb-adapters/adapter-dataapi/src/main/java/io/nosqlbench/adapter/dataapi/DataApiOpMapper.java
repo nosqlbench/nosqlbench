@@ -42,6 +42,9 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
         DEPRECATED_OP_TYPES.put(DataApiOpType.create_collection,            DataApiOpType.db_create_collection);
         DEPRECATED_OP_TYPES.put(DataApiOpType.delete_collection,            DataApiOpType.db_delete_collection);
         // db-admin ops:
+        DEPRECATED_OP_TYPES.put(DataApiOpType.create_namespace,             DataApiOpType.dbadmin_create_keyspace);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.list_namespaces,              DataApiOpType.dbadmin_list_keyspaces);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.drop_namespace,               DataApiOpType.dbadmin_drop_keyspace);
         // in-database ops:
         // in-collection ops:
         DEPRECATED_OP_TYPES.put(DataApiOpType.insert_one,                   DataApiOpType.collection_insert_one);
@@ -100,10 +103,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case list_databases -> new DataApiListDatabasesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_database -> new DataApiDropDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case get_database_info -> new DataApiGetDatabaseInfoOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            // db-admin ops:
-            case create_namespace -> new DataApiCreateNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case list_namespaces -> new DataApiListNamespacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case drop_namespace -> new DataApiDropNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
             case list_collections -> new DataApiListCollectionsOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_collection_names ->
@@ -112,6 +111,9 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // LEGACY OPS
             // admin ops:
             // db-admin ops:
+            case create_namespace -> new DataApiDbAdminLegacyCreateNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case list_namespaces -> new DataApiDbAdminListKeyspacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case drop_namespace -> new DataApiDbAdminDropKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
             case create_collection -> new DataApiLegacyCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case create_collection_with_class -> new DataApiLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -140,6 +142,10 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
                 new DataApiCollectionEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
             // NEW-STYLE OPS
+            // db-admin ops:
+            case dbadmin_create_keyspace -> new DataApiDbAdminLegacyCreateNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case dbadmin_list_keyspaces -> new DataApiDbAdminListKeyspacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case dbadmin_drop_keyspace -> new DataApiDbAdminDropKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
             case db_create_collection -> new DataApiDbCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case db_delete_collection -> new DataApiDbDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);

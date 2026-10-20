@@ -19,14 +19,17 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.DatabaseAdmin;
 
-public class DataApiListNamespacesOp extends DataApiDBAdminOp {
+public class DataApiDbAdminDropKeyspaceOp extends DataApiDBAdminOp {
+    private final String namespace;
 
-    public DataApiListNamespacesOp(Database db, DatabaseAdmin admin) {
+    public DataApiDbAdminDropKeyspaceOp(Database db, DatabaseAdmin admin, String namespace) {
         super(db, admin);
+        this.namespace = namespace;
     }
 
     @Override
     public Object apply(long value) {
-        return admin.listKeyspaceNames();
+        admin.dropKeyspace(namespace);
+        return true;
     }
 }
