@@ -89,10 +89,6 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
         clientOptions = clientOptions.destination(astraDestination);
 
-        // DEBUG PART - TODO remove
-        clientOptions = clientOptions.logRequests();
-        // END OF DEBUG PART
-
         this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
         if (keyspace != null) {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint, keyspace);

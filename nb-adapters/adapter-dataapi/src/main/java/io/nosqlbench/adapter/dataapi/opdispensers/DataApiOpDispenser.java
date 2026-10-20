@@ -500,7 +500,24 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         );
     }
 
-     /* LEGACY OP DISPENSER UTILS START HERE */
+    /*
+    Must support both 'integer' and 'map string->int':
+        replication: 3
+    and
+        replication:
+            dc1: 3
+            dc2: 2
+     */
+    protected Optional<Object> getReplicationFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<Object>> ref = op.getAsOptionalFunction("replication", Object.class);
+        if (ref.isPresent()) {
+            Object reValue = ref.get().apply(l);
+            return Optional.of(reValue);
+        }
+        return Optional.empty();
+    }
+
+    /* LEGACY OP DISPENSER UTILS START HERE */
 
     /*
     updates:

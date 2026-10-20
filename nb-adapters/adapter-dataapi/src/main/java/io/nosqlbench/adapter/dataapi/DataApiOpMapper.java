@@ -111,7 +111,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             // LEGACY OPS
             // admin ops:
             // db-admin ops:
-            case create_namespace -> new DataApiDbAdminLegacyCreateNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_namespace -> new DataApiDbAdminCreateKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case list_namespaces -> new DataApiDbAdminListKeyspacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_namespace -> new DataApiDbAdminDropKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
@@ -143,7 +143,7 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
 
             // NEW-STYLE OPS
             // db-admin ops:
-            case dbadmin_create_keyspace -> new DataApiDbAdminLegacyCreateNamespaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case dbadmin_create_keyspace -> new DataApiDbAdminCreateKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case dbadmin_list_keyspaces -> new DataApiDbAdminListKeyspacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case dbadmin_drop_keyspace -> new DataApiDbAdminDropKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
