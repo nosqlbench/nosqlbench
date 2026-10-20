@@ -58,13 +58,14 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 
 - all collection DML ops;
 - create/delete collection DDL;
+- keyspace CRUD;
+- ability to target destinations other than productin Astra (e.g. HCD, dev Astra, etc)
 - All known bugs in legacy operations are fixed.
 
 **Coming next:**
 
 - introduction of Table support;
-- Administrative functions (create keyspace and so on), currently left as they were before the overhaul;
-- Ability to target non-Astra and non-prod environments in full;
+- Administrative functions on databases (create DB and so on), currently left as they were before the overhaul;
 - Ability to supply special Data API-related secrets (such as embedding provider API keys for $vectorize operations).
 
 ## Usage notes (new-style ops)
