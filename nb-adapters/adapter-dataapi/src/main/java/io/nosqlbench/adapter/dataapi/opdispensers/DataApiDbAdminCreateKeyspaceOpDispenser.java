@@ -23,23 +23,28 @@ import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiDbAdminLegacyCreateNamespaceOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiDbAdminLegacyCreateNamespaceOpDispenser.class);
+public class DataApiDbAdminCreateKeyspaceOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDbAdminCreateKeyspaceOpDispenser.class);
     private final LongFunction<DataApiDbAdminCreateKeyspaceOp> opFunction;
 
-    public DataApiDbAdminLegacyCreateNamespaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiDbAdminCreateKeyspaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
     private LongFunction<DataApiDbAdminCreateKeyspaceOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiDbAdminCreateKeyspaceOp(
-            spaceFunction.apply(l).getDatabase(),
-            spaceFunction.apply(l).getDatabaseAdmin(),
-            targetFunction.apply(l)
-        );
+        return (l) -> {
+            Optional<Object> replication = getReplicationFromOp(op, l);
+            return new DataApiDbAdminCreateKeyspaceOp(
+                spaceFunction.apply(l).getDatabase(),
+                spaceFunction.apply(l).getDatabaseAdmin(),
+                targetFunction.apply(l),
+                replication
+            );
+        };
     }
 
     @Override

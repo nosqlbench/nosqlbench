@@ -370,6 +370,13 @@ blocks:
       # Note: strictly speaking, this is a Data API operations only outside of Astra DB
       cks:
         create_keyspace: "new_keyspace"
+        #### optional replication settings (applies to non-Astra only, e.g. HCD. Ignored on Astra):
+        ####    can be either a scalar integer:
+        # replication: 2
+        ####    ... or a map datacenter->repl.factor:
+        # replication:
+        #   datacenter1: 2
+        #   datacenter2: 3
 
       # NEW "list keyspaces", fully documented:
       # Note: strictly speaking, this is a Data API operations only outside of Astra DB

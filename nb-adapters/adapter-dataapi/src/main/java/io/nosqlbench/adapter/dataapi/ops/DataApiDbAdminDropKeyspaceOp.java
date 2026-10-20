@@ -20,16 +20,16 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.DatabaseAdmin;
 
 public class DataApiDbAdminDropKeyspaceOp extends DataApiDBAdminOp {
-    private final String namespace;
+    private final String keyspace;
 
-    public DataApiDbAdminDropKeyspaceOp(Database db, DatabaseAdmin admin, String namespace) {
+    public DataApiDbAdminDropKeyspaceOp(Database db, DatabaseAdmin admin, String keyspace) {
         super(db, admin);
-        this.namespace = namespace;
+        this.keyspace = keyspace;
     }
 
     @Override
     public Object apply(long value) {
-        admin.dropKeyspace(namespace);
+        admin.dropKeyspace(keyspace);
         return true;
     }
 }
