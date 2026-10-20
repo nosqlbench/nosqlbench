@@ -5,36 +5,9 @@ blocks:
   my_block:
     ops:
 
-      # LEGACY "deleteCollection", fully documented:
-      delcoll_legacy:
-        delete_collection: "TEMPLATE(collection)"
-
-      # LEGACY "createCollection", fully documented:
-      crcoll_legacy:
-        create_collection: "TEMPLATE(collection)"
-        ### optional vector dimensionality (if present, it's a vector collection. Note plural, 'dimensions'):
-        # dimensions: 1024
-        #### optional similarity function for vector (case-insensitive "COSINE"/"EUCLIDEAN"/"DOT_PRODUCT"):
-        # similarity: DOT_PRODUCT
-        #### optional (required for vectorize) service provider:
-        # serviceProvider: voyageAI
-        #### optional (required for vectorize) service model (note a typo, 'mode'):
-        # serviceMode: voyage-2
-        #### optional KMS secret name for vectorize API key:
-        # serviceSharedSecretKey: SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI
-        #### optional parameters map for vectorize service/model:
-        # serviceParameters:
-        #   autoTruncate: true
-        #### optional default ID type (case-sensitive "objectId"/"uuidv6"/"uuidv7"/"uuid"):
-        # collectionType: objectId
-        #### optional, allow-list for indexing (error if denyIndex present as well):
-        # allowIndex:
-        #   - aField1
-        #   - aField2
-        #### optional, deny-list for indexing (error if allowIndex present as well):
-        # denyIndex:
-        #   - aField1
-        #   - aField2
+      ################################
+      # IN-COLLECTION OPERATIONS
+      ################################
 
       # LEGACY "insertMany", fully documented:
       im_legacy:
@@ -405,3 +378,64 @@ blocks:
         # denyIndex:
         #   - aField1
         #   - aField2
+
+      ################################
+      # IN-DATABASE OPERATIONS
+      ################################
+
+      # LEGACY "createCollection", fully documented:
+      crcoll_legacy:
+        create_collection: "TEMPLATE(collection)"
+        ### optional vector dimensionality (if present, it's a vector collection. Note plural, 'dimensions'):
+        # dimensions: 1024
+        #### optional similarity function for vector (case-insensitive "COSINE"/"EUCLIDEAN"/"DOT_PRODUCT"):
+        # similarity: DOT_PRODUCT
+        #### optional (required for vectorize) service provider:
+        # serviceProvider: voyageAI
+        #### optional (required for vectorize) service model (note a typo, 'mode'):
+        # serviceMode: voyage-2
+        #### optional KMS secret name for vectorize API key:
+        # serviceSharedSecretKey: SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI
+        #### optional parameters map for vectorize service/model:
+        # serviceParameters:
+        #   autoTruncate: true
+        #### optional default ID type (case-sensitive "objectId"/"uuidv6"/"uuidv7"/"uuid"):
+        # collectionType: objectId
+        #### optional, allow-list for indexing (error if denyIndex present as well):
+        # allowIndex:
+        #   - aField1
+        #   - aField2
+        #### optional, deny-list for indexing (error if allowIndex present as well):
+        # denyIndex:
+        #   - aField1
+        #   - aField2
+
+      # LEGACY "deleteCollection", fully documented:
+      delcoll_legacy:
+        delete_collection: "TEMPLATE(collection)"
+
+      ################################
+      # DB-ADMIN OPERATIONS
+      ################################
+
+      # LEGACY "create namespace (=keyspace)", fully documented:
+      # Note: strictly speaking, this is a Data API operations only outside of Astra DB
+      cns_legacy:
+        create_namespace: "new_keyspace"
+        #### optional replication settings (applies to non-Astra only, e.g. HCD. Ignored on Astra):
+        ####    can be either a scalar integer:
+        # replication: 2
+        ####    ... or a map datacenter->repl.factor:
+        # replication:
+        #   datacenter1: 2
+        #   datacenter2: 3
+
+      # LEGACY "list namespaces (=keyspaces)", fully documented:
+      # Note: strictly speaking, this is a Data API operations only outside of Astra DB
+      lns_legacy:
+        list_namespaces: ""  # what is put in this string is irrelevant
+
+      # LEGACY "drop namespace (=keyspace)", fully documented:
+      # Note: strictly speaking, this is a Data API operations only outside of Astra DB
+      dns_legacy:
+        drop_namespace: "my_keyspace"

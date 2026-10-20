@@ -17,9 +17,11 @@
 package io.nosqlbench.adapter.dataapi;
 
 import com.datastax.astra.client.DataAPIClient;
+import com.datastax.astra.client.DataAPIDestination;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
 import com.datastax.astra.client.admin.DatabaseAdmin;
+import com.datastax.astra.client.core.options.DataAPIClientOptions;
 
 import io.nosqlbench.adapters.api.activityimpl.uniform.BaseSpace;
 import io.nosqlbench.nb.api.config.standard.ConfigModel;
@@ -41,13 +43,16 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private final NBConfiguration config;
     private String astraToken;
     private String astraApiEndpoint;
+    private DataAPIDestination astraDestination;
     private DataAPIClient dataAPIClient;
     private Database database;
-    private String namespace;
+    private String keyspace;
 
     private String superUserToken;
     private AstraDBAdmin admin;
-    private DatabaseAdmin namespaceAdmin;
+    private DatabaseAdmin databaseAdmin;
+
+    private final String DEFAULT_KEYSPACE = "default_keyspace";
 
     public DataApiSpace(DataApiDriverAdapter adapter, long name, NBConfiguration cfg) {
         super(adapter,name);
@@ -55,7 +60,8 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         setToken();
         setSuperToken();
         setApiEndpoint();
-        setNamespace();
+        setKeyspace();
+        setDestination();
         createClient();
     }
 
@@ -71,23 +77,37 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         return admin;
     }
 
-    public DatabaseAdmin getNamespaceAdmin() {
-        return namespaceAdmin;
+    public DatabaseAdmin getDatabaseAdmin() {
+        return databaseAdmin;
     }
 
     private void createClient() {
-        this.dataAPIClient = new DataAPIClient(astraToken);
-        if (namespace != null) {
-            this.database = dataAPIClient.getDatabase(astraApiEndpoint, namespace);
+
+	    /*
+            TODO: deprecate op/dispensers and duplicate + test and document + ensure replication factor map is there
+        */
+        DataAPIClientOptions clientOptions = new DataAPIClientOptions();
+        clientOptions = clientOptions.destination(astraDestination);
+
+        this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
+        if (keyspace != null) {
+            this.database = dataAPIClient.getDatabase(astraApiEndpoint, keyspace);
         } else {
             this.database = dataAPIClient.getDatabase(astraApiEndpoint);
         }
-        if (superUserToken != null) {
-            this.admin = dataAPIClient.getAdmin(superUserToken);
+        // There's no notion of "admin" unless we're on Astra:
+        if (astraDestination != DataAPIDestination.ASTRA
+                && astraDestination != DataAPIDestination.ASTRA_DEV
+                && astraDestination != DataAPIDestination.ASTRA_TEST) {
+            this.admin = null;
         } else {
-            this.admin = dataAPIClient.getAdmin();
+            if (superUserToken != null) {
+                this.admin = dataAPIClient.getAdmin(superUserToken);
+            } else {
+                this.admin = dataAPIClient.getAdmin();
+            }
         }
-        this.namespaceAdmin = database.getDatabaseAdmin();
+        this.databaseAdmin = database.getDatabaseAdmin();
     }
 
     private void setApiEndpoint() {
@@ -113,9 +133,35 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         epConfig.ifPresent(ep -> this.astraApiEndpoint = ep);
     }
 
-    private void setNamespace() {
+    private void setKeyspace() {
+        String finalKeyspace = DEFAULT_KEYSPACE;
+        Optional<String> maybeKeyspace = config.getOptional("keyspace");
         Optional<String> maybeNamespace = config.getOptional("namespace");
-        maybeNamespace.ifPresent(s -> this.namespace = s);
+        if (maybeKeyspace.isPresent()) {
+            if (maybeNamespace.isPresent()) {
+                throw new BasicError("You can only configure one of 'keyspace' or (the deprecated alias) 'namespace'");
+            } else {
+                finalKeyspace = maybeKeyspace.get();
+            }
+        } else {
+            // 'keyspace' not passed
+            if (maybeNamespace.isPresent()) {
+                logger.warn(() -> "Command-line parameter 'namespace' for Data API is deprecated. Please replace it with 'keyspace'.");
+                finalKeyspace = maybeNamespace.get();
+            }
+            // (else: keep default)
+        }
+
+        keyspace = finalKeyspace;
+    }
+
+    private void setDestination() {
+        Optional<String> maybeDestinationString = config.getOptional("astraDestination");
+        if (maybeDestinationString.isPresent()) {
+            astraDestination = DataAPIDestination.valueOf(maybeDestinationString.get().toUpperCase());
+        } else {
+            astraDestination = DataAPIDestination.ASTRA;
+        }
     }
 
     private void setToken() {
@@ -167,11 +213,13 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
                 Param.optional("astraApiEndpointFile", String.class)
                     .setDescription("file to load the API endpoint for the Astra database")
             )
-
             .add(
-                Param.defaultTo("namespace", "default_namespace")
-                    .setDescription("The Astra namespace to use")
-
+                Param.optional("keyspace", String.class)
+                    .setDescription("The Astra keyspace to use")
+            )
+            .add(
+                Param.optional("namespace", String.class)
+                    .setDescription("The Astra keyspace to use (deprecated alias for 'keyspace')")
             )
             .add(
                 Param.optional("superTokenFile", String.class)
@@ -180,6 +228,12 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             .add(
                 Param.optional("superToken", String.class)
                     .setDescription("optional Astra token used to connect as Admin user")
+            )
+            .add(
+                Param.optional("astraDestination", String.class)
+                    .setDescription(
+                        "The 'destination' (ASTRA, ASTRA_DEV, ASTRA_TEST, HCD, DSE, CASSANDRA, OTHERS) of the target database"
+                    )
             )
             .asReadOnly();
     }

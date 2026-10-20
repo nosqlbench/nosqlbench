@@ -6,7 +6,7 @@ scenarios:
 #    nb example_workload.yaml \
 #       astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
 #       astraToken=$ASTRA_DB_APPLICATION_TOKEN \
-#       namespace=$ASTRA_DB_KEYSPACE
+#       keyspace=$ASTRA_DB_KEYSPACE
 
 bindings:
   query_vector: Add(37); HashedFloatVectors(TEMPLATE(dimensions,1024));

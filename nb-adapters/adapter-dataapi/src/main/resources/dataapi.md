@@ -10,17 +10,39 @@ The adapter is built on top of the [Java client](https://github.com/datastax/ast
 
 ## Command-line parameters
 
-_Note: this release of the adapter is designed to connect to **DataStax Astra DB's Data API** specifically. All examples refer to this case. Subsequent releases will expand the scope to non-Astra-DB instances of Data API._
-
-Connection to the Data API requires an **API Endpoint** and an **Application Token**, plus specification of a **keyspace** to operate in. These are required parameters when launching a NB workload targeting the Data API:
+Connection to the Data API for an Astra DB instance requires an **API Endpoint** and an **Application Token**, plus optional specification of a **keyspace** to operate in. Endpoint and token are required parameters when launching a NB workload targeting the Data API:
 
 ```
-astraToken="..."
-astraApiEndpoint="https://..."
-namespace="the_keyspace"
+astraToken="..."                    # required
+astraApiEndpoint="https://..."      # required
+keyspace="the_keyspace"             # optional ('namespace' is a deprecated alias)
 ```
 
 These values are used by the adapter to establish a `DataAPIClient`, from which all subsequent operations are spawned.
+
+### Targeting other destinations
+
+The optional `astraDestination` parameter must be used when the target Data API is on a database other than (production) Astra DB.
+It accepts values in the Data API client's [DataAPIDestination](https://docs.datastax.com/en/astra-api-docs/_attachments/java-client/com/datastax/astra/client/DataAPIDestination.html) enum and must match the provided endpoint and the token. When omitted, it defaults to `DataAPIDestination.ASTRA` (i.e. production Astra DB).
+
+Example 1 - Astra DB Dev environment:
+
+```
+./nb [...] astraToken="AstraCS:..." \
+    astraApiEndpoint="https://....apps.astra-dev.datastax.com" \
+    keyspace="my_keyspace" \
+    astraDestination="ASTRA_DEV"
+```
+
+Example 2 - locally-running HCD + Data API setup:
+
+```
+./nb [...] astraToken="Cassandra:Y2Fzc2FuZHJh:Y2Fzc2FuZHJh" \
+    astraApiEndpoint="https://....apps.astra-dev.datastax.com" \
+    keyspace="my_keyspace" \
+    astraDestination="HCD"
+```
+
 
 ## Legacy vs. "new-style" operation
 
@@ -36,13 +58,14 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 
 - all collection DML ops;
 - create/delete collection DDL;
+- keyspace CRUD;
+- ability to target destinations other than productin Astra (e.g. HCD, dev Astra, etc)
 - All known bugs in legacy operations are fixed.
 
 **Coming next:**
 
 - introduction of Table support;
-- Administrative functions (create keyspace and so on), currently left as they were before the overhaul;
-- Ability to target non-Astra and non-prod environments in full;
+- Administrative functions on databases (create DB and so on), currently left as they were before the overhaul;
 - Ability to supply special Data API-related secrets (such as embedding provider API keys for $vectorize operations).
 
 ## Usage notes (new-style ops)

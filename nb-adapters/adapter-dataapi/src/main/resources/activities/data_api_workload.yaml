@@ -3,7 +3,7 @@
 #    nb data_api_workload.yaml <SCENARIO_NAME> \
 #       astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
 #       astraToken=$ASTRA_DB_APPLICATION_TOKEN \
-#       namespace=$ASTRA_DB_KEYSPACE \
+#       keyspace=$ASTRA_DB_KEYSPACE \
 #       [main-cycles=<e.g. 200>] \
 #       [rampup-insertmany-cycles=<e.g. 10, relevant if vector scenario which has an insert many>]
 #
