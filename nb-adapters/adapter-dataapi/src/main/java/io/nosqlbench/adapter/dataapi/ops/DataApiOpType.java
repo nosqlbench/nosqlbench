@@ -91,6 +91,7 @@ public enum DataApiOpType {
     db_drop_table,
     db_list_tables,
     db_list_table_names,
+    db_drop_table_index,        // note: dropping an index is a database level operation in the Data API
     // UDT (user defined types) ops:
     db_create_type,
     db_alter_type,
@@ -111,5 +112,4 @@ public enum DataApiOpType {
     table_create_text_index,
     table_list_indexes,
     table_list_index_names,
-    table_drop_index,
 }

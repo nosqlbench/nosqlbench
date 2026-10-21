@@ -58,6 +58,7 @@ This release introduces full support for **Data API Tables**. Tables are the sch
 | `db_drop_table` | Drop a table |
 | `db_list_tables` | List tables |
 | `db_list_table_names` | List table names only |
+| `db_drop_table_index` | Drop an index by its `index_name` (a database level operation in the Data API) |
 
 ### New user-defined type (UDT) ops
 
@@ -78,7 +79,6 @@ This release introduces full support for **Data API Tables**. Tables are the sch
 | `table_create_vector_index` | Create a vector index on a table column  |
 | `table_list_indexes` | List the indexes of a table |
 | `table_list_index_names` | List the index names of a table |
-| `table_drop_index` | Drop an index by its `index_name` |
 
 
 ### New table DML ops

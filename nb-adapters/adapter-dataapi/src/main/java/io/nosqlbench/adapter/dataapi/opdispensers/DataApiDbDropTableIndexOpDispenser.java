@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.opdispensers.tables;
+package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.tables.commands.options.DropTableIndexOptions;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
-import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.tables.DataApiTableDropIndexOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDbDropTableIndexOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.LongFunction;
 
 /**
- * Dispenser for the {@code table_drop_index} op type.
+ * Dispenser for the {@code db_drop_table_index} op type.
  *
  * <p>Required YAML fields:
  * <ul>
@@ -37,21 +36,21 @@ import java.util.function.LongFunction;
  * </ul>
  * Optional: {@code if_exists} (boolean).
  */
-public class DataApiTableDropIndexOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiTableDropIndexOpDispenser.class);
-    private final LongFunction<DataApiTableDropIndexOp> opFunction;
+public class DataApiDbDropTableIndexOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDbDropTableIndexOpDispenser.class);
+    private final LongFunction<DataApiDbDropTableIndexOp> opFunction;
 
-    public DataApiTableDropIndexOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiDbDropTableIndexOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiTableDropIndexOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiDbDropTableIndexOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
             String name = op.getAsRequiredFunction("index_name", String.class).apply(l);
             DropTableIndexOptions options = getDropIndexOptionsFromOp(op, l);
-            return new DataApiTableDropIndexOp(db, name, options);
+            return new DataApiDbDropTableIndexOp(db, name, options);
         };
     }
 

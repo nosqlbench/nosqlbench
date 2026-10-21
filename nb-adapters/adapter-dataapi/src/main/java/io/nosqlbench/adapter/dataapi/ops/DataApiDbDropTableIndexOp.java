@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.ops.tables;
-import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.tables.commands.options.DropTableIndexOptions;
 
-public class DataApiTableDropIndexOp extends DataApiBaseOp {
+public class DataApiDbDropTableIndexOp extends DataApiBaseOp {
     private final String indexName;
     private final DropTableIndexOptions options;
 
-    public DataApiTableDropIndexOp(Database db, String indexName, DropTableIndexOptions options) {
+    public DataApiDbDropTableIndexOp(Database db, String indexName, DropTableIndexOptions options) {
         super(db);
         this.indexName = indexName;
         this.options = options;

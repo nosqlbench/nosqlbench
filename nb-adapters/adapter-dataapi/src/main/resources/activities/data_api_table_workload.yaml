@@ -242,7 +242,7 @@ blocks:
   # -------------------------------------------------------------------------
   # PHASE: indexes
   # Ops: table_create_index, table_create_text_index,
-  #      table_list_indexes, table_list_index_names, table_drop_index
+  #      table_list_indexes, table_list_index_names, db_drop_table_index
   #
   # Note: table_create_vector_index is included but targets a hypothetical
   # 'embedding' vector column.  It is wrapped with errors=warn so that the
@@ -281,17 +281,17 @@ blocks:
         table_list_index_names: "TEMPLATE(table,nb_smoke_table)"
 
       drop_index_name:
-        table_drop_index: "ignored"
+        db_drop_table_index: "ignored"
         index_name: "nb_smoke_idx_name"
         if_exists: true
 
       drop_text_index:
-        table_drop_index: "ignored"
+        db_drop_table_index: "ignored"
         index_name: "nb_smoke_tidx_description"
         if_exists: true
 
       drop_vector_index:
-        table_drop_index: "ignored"
+        db_drop_table_index: "ignored"
         index_name: "nb_smoke_vidx_embedding"
         if_exists: true
 
