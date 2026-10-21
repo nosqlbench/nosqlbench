@@ -206,8 +206,7 @@ blocks:
   types:
     ops:
       create_type:
-        db_create_type: "ignored"
-        type_name: "nb_smoke_address"
+        db_create_type: "nb_smoke_address"
         definition:
           fields:
             street: text
@@ -216,15 +215,13 @@ blocks:
         if_not_exists: true
 
       alter_type_add_field:
-        db_alter_type: "ignored"
-        type_name: "nb_smoke_address"
+        db_alter_type: "nb_smoke_address"
         alter_op:
           add_fields:
             country: text
 
       alter_type_rename_field:
-        db_alter_type: "ignored"
-        type_name: "nb_smoke_address"
+        db_alter_type: "nb_smoke_address"
         alter_op:
           rename_fields:
             zip: postal_code
@@ -236,8 +233,7 @@ blocks:
         db_list_type_names: "ignored"
 
       drop_type:
-        db_drop_type: "ignored"
-        type_name: "nb_smoke_address"
+        db_drop_type: "nb_smoke_address"
 
   # -------------------------------------------------------------------------
   # PHASE: indexes
@@ -281,18 +277,15 @@ blocks:
         table_list_index_names: "TEMPLATE(table,nb_smoke_table)"
 
       drop_index_name:
-        db_drop_table_index: "ignored"
-        index_name: "nb_smoke_idx_name"
+        db_drop_table_index: "nb_smoke_idx_name"
         if_exists: true
 
       drop_text_index:
-        db_drop_table_index: "ignored"
-        index_name: "nb_smoke_tidx_description"
+        db_drop_table_index: "nb_smoke_tidx_description"
         if_exists: true
 
       drop_vector_index:
-        db_drop_table_index: "ignored"
-        index_name: "nb_smoke_vidx_embedding"
+        db_drop_table_index: "nb_smoke_vidx_embedding"
         if_exists: true
 
   # -------------------------------------------------------------------------

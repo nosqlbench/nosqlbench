@@ -33,7 +33,7 @@ import java.util.function.LongFunction;
  *
  * <p>Required YAML fields:
  * <ul>
- *   <li>{@code name} — name of the UDT to alter</li>
+ *   <li>the op value ({@code db_alter_type: "name"}) — name of the UDT to alter</li>
  *   <li>{@code alter_op} — map with one of (note: cannot use "operation" as that is a reserved NB keyword):
  *     <ul>
  *       <li>{@code add_fields} — map of fieldName -&gt; type string to add</li>
@@ -53,7 +53,7 @@ public class DataApiDbAlterTypeOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbAlterTypeOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            String name = op.getAsRequiredFunction("type_name", String.class).apply(l);
+            String name = targetFunction.apply(l);
             AlterTypeOperation<?, ?> operation = getAlterTypeOperationFromOp(op, l);
             AlterTypeOptions options = getAlterTypeOptionsFromOp(op, l);
             return new DataApiDbAlterTypeOp(

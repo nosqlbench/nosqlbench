@@ -393,25 +393,23 @@ blocks:
 
       # "db_list_tables" - list all tables (returns full TableDescriptor list):
       lstbls:
-        db_list_tables: "TEMPLATE(ignored)"
+        db_list_tables: ""
 
       # "db_list_table_names" - list all table names (returns list of strings):
       lstblnm:
-        db_list_table_names: "TEMPLATE(ignored)"
+        db_list_table_names: ""
 
-      # "db_drop_table_index" - drop a table index (a database-level op in the Data API):
+      # "db_drop_table_index" - drop a table index (a database-level op in the Data API),
+      # the op value is the name of the index to drop:
       drtblidx:
-        db_drop_table_index: "TEMPLATE(ignored)"
-        #### required: name of the index to drop:
-        index_name: "my_index"
+        db_drop_table_index: "my_index"
         #### optional: if_exists (default false):
         # if_exists: true
 
-      # "db_create_type" - create a user-defined type (UDT) in the database:
+      # "db_create_type" - create a user-defined type (UDT) in the database,
+      # the op value is the name of the UDT to create:
       crtype:
-        db_create_type: "TEMPLATE(ignored)"
-        #### required name of the UDT to create:
-        type_name: "address_type"
+        db_create_type: "address_type"
         #### required UDT field definitions (map of fieldName -> column type):
         definition:
           fields:
@@ -421,11 +419,10 @@ blocks:
         #### optional if_not_exists flag (default false):
         # if_not_exists: true
 
-      # "db_alter_type" - alter an existing UDT (add or rename fields):
+      # "db_alter_type" - alter an existing UDT (add or rename fields),
+      # the op value is the name of the UDT to alter:
       altype:
-        db_alter_type: "TEMPLATE(ignored)"
-        #### required name of the UDT to alter:
-        type_name: "address_type"
+        db_alter_type: "address_type"
         #### required alter operation — one of 'add_fields' (map of fieldName -> type) or 'rename_fields' (map of oldName -> newName):
         alter_op:
           add_fields:
@@ -437,17 +434,16 @@ blocks:
 
       # "db_list_types" - list all UDTs (returns full type descriptor list):
       lstype:
-        db_list_types: "TEMPLATE(ignored)"
+        db_list_types: ""
 
       # "db_list_type_names" - list all UDT names (returns list of strings):
       lstypenm:
-        db_list_type_names: "TEMPLATE(ignored)"
+        db_list_type_names: ""
 
-      # "db_drop_type" - drop a UDT from the database:
+      # "db_drop_type" - drop a UDT from the database,
+      # the op value is the name of the UDT to drop:
       drtype:
-        db_drop_type: "TEMPLATE(ignored)"
-        #### required name of the UDT to drop:
-        type_name: "address_type"
+        db_drop_type: "address_type"
   
       # "table_insert_one" - insert a single row into a table:
       ti1:

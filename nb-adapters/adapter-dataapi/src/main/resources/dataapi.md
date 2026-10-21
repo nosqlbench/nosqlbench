@@ -58,14 +58,14 @@ This release introduces full support for **Data API Tables**. Tables are the sch
 | `db_drop_table` | Drop a table |
 | `db_list_tables` | List tables |
 | `db_list_table_names` | List table names only |
-| `db_drop_table_index` | Drop an index by its `index_name` (a database level operation in the Data API) |
+| `db_drop_table_index` | Drop a table index (a database level operation in the Data API) |
 
 ### New user-defined type (UDT) ops
 
 | Op name | Description |
 |---|---|
-| `db_create_type` | Create a user-defined type (`type_name`, `definition.fields`) |
-| `db_alter_type` | Add (`add_fields`) or rename (`rename_fields`) fields of a type |
+| `db_create_type` | Create a user-defined type |
+| `db_alter_type` | Add or rename fields of a user-defined type |
 | `db_list_types` | List user-defined types |
 | `db_list_type_names` | List user-defined type names only |
 | `db_drop_type` | Drop a user-defined type |

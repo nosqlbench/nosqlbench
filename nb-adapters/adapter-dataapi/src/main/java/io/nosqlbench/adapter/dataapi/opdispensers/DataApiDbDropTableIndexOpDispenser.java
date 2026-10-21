@@ -32,7 +32,7 @@ import java.util.function.LongFunction;
  *
  * <p>Required YAML fields:
  * <ul>
- *   <li>{@code name} — name of the index to drop</li>
+ *   <li>the op value ({@code db_drop_table_index: "name"}) — name of the index to drop</li>
  * </ul>
  * Optional: {@code if_exists} (boolean).
  */
@@ -48,7 +48,7 @@ public class DataApiDbDropTableIndexOpDispenser extends DataApiOpDispenser {
     private LongFunction<DataApiDbDropTableIndexOp> createOpFunction(ParsedOp op) {
         return (l) -> {
             Database db = spaceFunction.apply(l).getDatabase();
-            String name = op.getAsRequiredFunction("index_name", String.class).apply(l);
+            String name = targetFunction.apply(l);
             DropTableIndexOptions options = getDropIndexOptionsFromOp(op, l);
             return new DataApiDbDropTableIndexOp(db, name, options);
         };

@@ -32,7 +32,7 @@ import java.util.function.LongFunction;
  *
  * <p>Required YAML fields:
  * <ul>
- *   <li>{@code name} — name of the UDT to drop</li>
+ *   <li>the op value ({@code db_drop_type: "name"}) — name of the UDT to drop</li>
  * </ul>
  */
 public class DataApiDbDropTypeOpDispenser extends DataApiOpDispenser {
@@ -46,7 +46,7 @@ public class DataApiDbDropTypeOpDispenser extends DataApiOpDispenser {
 
     private LongFunction<DataApiDbDropTypeOp> createOpFunction(ParsedOp op) {
         return (l) -> {
-            String name = op.getAsRequiredFunction("type_name", String.class).apply(l);
+            String name = targetFunction.apply(l);
             DropTypeOptions options = getDropTypeOptionsFromOp(op, l);
             return new DataApiDbDropTypeOp(
                 spaceFunction.apply(l).getDatabase(),
