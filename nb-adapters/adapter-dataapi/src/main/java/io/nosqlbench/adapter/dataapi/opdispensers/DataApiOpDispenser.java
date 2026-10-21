@@ -205,7 +205,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         };
     }
 
-    protected Update getUpdateFromOp(ParsedOp op, long l) {
+    protected Update getCollectionUpdateFromOp(ParsedOp op, long l) {
         Map<String, Object> updateMap = getFreeFormFromOp(op, l, "update", true);
         return new Update(updateMap);
     }
