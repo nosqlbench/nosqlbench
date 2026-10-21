@@ -81,7 +81,7 @@ scenarios:
 
   data_api_scenario_vector:
     # if you run data_api_scenario_base before running data_api_scenario_vector, you will get an error
-    # because the schemas don't match. Solved by dropping and recreating the table
+    # because the schemas don't match. Solved by dropping and recreating the collection
     drop: >-
       run driver=dataapi
       tags==block:schema_drop
