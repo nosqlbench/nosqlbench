@@ -210,7 +210,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return new Update(updateMap);
     }
 
-    protected Map<String, Object> getCollectionDefinitionFromOp(ParsedOp op, long l) {
+    protected Map<String, Object> getTableOrCollectionDefinitionFromOp(ParsedOp op, long l) {
         Map<String, Object> definition = getFreeFormFromOp(op, l, "definition", true);
         return definition;
     }
