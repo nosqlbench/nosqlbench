@@ -4,7 +4,7 @@
 # Run the full sequential scenario:
 #
 #   java -jar nb5.jar \
-#     nb-adapters/adapter-dataapi/src/main/resources/activities/table_mega_test.yaml \
+#     nb-adapters/adapter-dataapi/src/main/resources/activities/data_api_table_workload.yaml \
 #     megatest \
 #     astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
 #     astraToken=$ASTRA_DB_APPLICATION_TOKEN \
@@ -12,17 +12,17 @@
 #
 # Or run individual phases, e.g.:
 #
-#   nb table_mega_test.yaml drop      ... (drop table if exists)
-#   nb table_mega_test.yaml schema    ... (create table)
-#   nb table_mega_test.yaml alter     ... (alter table: add/drop column)
-#   nb table_mega_test.yaml types     ... (UDT lifecycle: create/alter/list/drop)
-#   nb table_mega_test.yaml indexes   ... (index lifecycle: create/list/drop)
-#   nb table_mega_test.yaml ingest    ... (insert_one + insert_many)
-#   nb table_mega_test.yaml read      ... (find_one + find + distinct)
-#   nb table_mega_test.yaml mutate    ... (update_one)
-#   nb table_mega_test.yaml cleanup   ... (delete_one + delete_many)
-#   nb table_mega_test.yaml list      ... (list_tables + list_table_names)
-#   nb table_mega_test.yaml teardown  ... (drop table)
+#   nb data_api_table_workload.yaml drop      ... (drop table if exists)
+#   nb data_api_table_workload.yaml schema    ... (create table)
+#   nb data_api_table_workload.yaml alter     ... (alter table: add/drop column)
+#   nb data_api_table_workload.yaml types     ... (UDT lifecycle: create/alter/list/drop)
+#   nb data_api_table_workload.yaml indexes   ... (index lifecycle: create/list/drop)
+#   nb data_api_table_workload.yaml ingest    ... (insert_one + insert_many)
+#   nb data_api_table_workload.yaml read      ... (find_one + find + distinct)
+#   nb data_api_table_workload.yaml mutate    ... (update_one)
+#   nb data_api_table_workload.yaml cleanup   ... (delete_one + delete_many)
+#   nb data_api_table_workload.yaml list      ... (list_tables + list_table_names)
+#   nb data_api_table_workload.yaml teardown  ... (drop table)
 
 min_version: "5.17.3"
 description: |

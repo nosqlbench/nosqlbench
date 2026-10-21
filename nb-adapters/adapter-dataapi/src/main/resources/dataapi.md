@@ -105,11 +105,11 @@ Dedicated support for the less common table data types (e.g. `inet`, `duration`,
 
 ### Reference workload
 
-A comprehensive table workload covering all table ops is available at [`activities/table_mega_test.yaml`](activities/table_mega_test.yaml). You can run the whole workload with the following:
+A comprehensive table workload covering all table ops is available at [`activities/data_api_table_workload.yaml`](activities/data_api_table_workload.yaml). You can run the whole workload with the following:
 
 ```bash
 $ java -jar nb5.jar \
-  nb-adapters/adapter-dataapi/src/main/resources/activities/table_mega_test.yaml \
+  nb-adapters/adapter-dataapi/src/main/resources/activities/data_api_table_workload.yaml \
   megatest \
   astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
   astraToken=$ASTRA_DB_APPLICATION_TOKEN \
@@ -152,6 +152,6 @@ Consult the self-documenting YAML examples here:
 
 - a simple [minimal running workload](activities/example_workload.yaml);
     - (a simple [legacy minimal running workload](activities/example_workload_legacy.yaml));
-- a realistic, [ready-to-run workload](activities/data_api_workload.yaml) demonstrating several ops
+- a realistic, [ready-to-run workload](activities/data_api_collection_workload.yaml) demonstrating several ops
 - [new-style ops full reference](activities/ops_reference.yaml);
     - ([legacy ops full reference](activities/legacy_ops_reference.yaml)).
