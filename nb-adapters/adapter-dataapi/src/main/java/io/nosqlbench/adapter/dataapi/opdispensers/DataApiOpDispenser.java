@@ -790,23 +790,6 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     }
 
     /**
-     * Builds a {@link TableDefinition} from the op's "definition" field.
-     * The map must have a "columns" sub-map and a "primaryKey" key listing partition and optional clustering columns.
-     * Example YAML:
-     * <pre>
-     * definition:
-     *   columns:
-     *     id: uuid
-     *     name: text
-     *     age: int
-     *   primaryKey:
-     *     partitionBy: [id]
-     *     partitionSort:
-     *       age: asc
-     * </pre>
-     */
-
-    /**
      * Builds a {@link CreateTableOptions} from the op's optional "if_not_exists" field.
      */
     protected CreateTableOptions getCreateTableOptionsFromOp(ParsedOp op, long l) {
