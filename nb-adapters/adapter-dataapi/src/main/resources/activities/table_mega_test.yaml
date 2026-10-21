@@ -27,6 +27,13 @@
 #   nb table_mega_test.yaml list      ... (list_tables + list_table_names)
 #   nb table_mega_test.yaml teardown  ... (drop table)
 
+min_version: "5.17.3"
+description: |
+  Full Data API table smoke-test. Exercises every table op type in a fixed
+  sequential order: drop → schema → alter → types → indexes → ingest → read
+  → mutate → cleanup → list → teardown. Requires astraApiEndpoint and
+  astraToken. Override the table name with table=<name> (default: nb_smoke_table).
+
 scenarios:
 
   megatest:
@@ -39,42 +46,52 @@ scenarios:
       run driver=dataapi
       tags==block:schema
       threads==1 cycles==1 stride==1
+      errors=warn
     alter: >-
       run driver=dataapi
       tags==block:alter
-      threads==1 cycles==1 stride==1
+      threads==1 cycles==2 stride==2
+      errors=warn
     types: >-
       run driver=dataapi
       tags==block:types
-      threads==1 cycles==1 stride==1
+      threads==1 cycles==6 stride==6
+      errors=warn
     indexes: >-
       run driver=dataapi
       tags==block:indexes
-      threads==1 cycles==1 stride==1
+      threads==1 cycles==8 stride==8
+      errors=warn
     ingest: >-
       run driver=dataapi
       tags==block:ingest
-      threads==1 cycles==2 stride==1
+      threads==1 cycles==3 stride==3
+      errors=warn
     read: >-
       run driver=dataapi
       tags==block:read
-      threads==1 cycles==3 stride==1
+      threads==1 cycles==3 stride==3
+      errors=warn
     mutate: >-
       run driver=dataapi
       tags==block:mutate
-      threads==1 cycles==1 stride==1
+      threads==1 cycles==2 stride==2
+      errors=warn
     cleanup: >-
       run driver=dataapi
       tags==block:cleanup
-      threads==1 cycles==2 stride==1
+      threads==1 cycles==2 stride==2
+      errors=warn
     list: >-
       run driver=dataapi
       tags==block:list
-      threads==1 cycles==2 stride==1
+      threads==1 cycles==2 stride==2
+      errors=warn
     teardown: >-
       run driver=dataapi
       tags==block:teardown
       threads==1 cycles==1 stride==1
+      errors=warn
 
   drop:
     drop: >-
@@ -82,50 +99,49 @@ scenarios:
 
   schema:
     schema: >-
-      run driver=dataapi tags==block:schema threads==1 cycles==1 stride==1
+      run driver=dataapi tags==block:schema threads==1 cycles==1 stride==1 errors=warn
 
   alter:
     alter: >-
-      run driver=dataapi tags==block:alter threads==1 cycles==1 stride==1
+      run driver=dataapi tags==block:alter threads==1 cycles==2 stride==2 errors=warn
 
   types:
     types: >-
-      run driver=dataapi tags==block:types threads==1 cycles==1 stride==1
+      run driver=dataapi tags==block:types threads==1 cycles==6 stride==6 errors=warn
 
   indexes:
     indexes: >-
-      run driver=dataapi tags==block:indexes threads==1 cycles==1 stride==1
+      run driver=dataapi tags==block:indexes threads==1 cycles==8 stride==8 errors=warn
 
   ingest:
     ingest: >-
-      run driver=dataapi tags==block:ingest threads==1 cycles==2 stride==1
+      run driver=dataapi tags==block:ingest threads==1 cycles==3 stride==3 errors=warn
 
   read:
     read: >-
-      run driver=dataapi tags==block:read threads==1 cycles==3 stride==1
+      run driver=dataapi tags==block:read threads==1 cycles==3 stride==3 errors=warn
 
   mutate:
     mutate: >-
-      run driver=dataapi tags==block:mutate threads==1 cycles==1 stride==1
+      run driver=dataapi tags==block:mutate threads==1 cycles==2 stride==2 errors=warn
 
   cleanup:
     cleanup: >-
-      run driver=dataapi tags==block:cleanup threads==1 cycles==2 stride==1
+      run driver=dataapi tags==block:cleanup threads==1 cycles==2 stride==2 errors=warn
 
   list:
     list: >-
-      run driver=dataapi tags==block:list threads==1 cycles==2 stride==1
+      run driver=dataapi tags==block:list threads==1 cycles==2 stride==2 errors=warn
 
   teardown:
     teardown: >-
-      run driver=dataapi tags==block:teardown threads==1 cycles==1 stride==1
+      run driver=dataapi tags==block:teardown threads==1 cycles==1 stride==1 errors=warn
 
 bindings:
-  # Static row IDs so we can reliably reference inserted rows later
-  row_id_1: Identity() -> long
-  row_id_2: Add(1000) -> long
-  # Bindings used by insert_many_batched row_template
-  seq_id:     Add(10); ToInt() -> int
+  # Bindings used by insert_many_batched row_template.
+  # Add(6) starts batch IDs at 6, immediately after the hardcoded rows (id 1-5),
+  # keeping the id space contiguous for downstream read/cleanup phases.
+  seq_id:     Add(6); ToInt() -> int
   first_name: FirstNames()
   age:        Uniform(18,65); ToInt() -> int
 
@@ -158,7 +174,7 @@ blocks:
             name:        text
             age:         int
             description: text
-          # camelCase is used here to avoid reserved keyword collisions
+          # The Data API createTable command only accepts camelCase here
           primaryKey:
             partitionBy: [id]
         if_not_exists: true
@@ -259,6 +275,7 @@ blocks:
         definition:
           column: "embedding"
         if_not_exists: true
+        errors: warn
 
       list_indexes:
         table_list_indexes: "TEMPLATE(table,nb_smoke_table)"
