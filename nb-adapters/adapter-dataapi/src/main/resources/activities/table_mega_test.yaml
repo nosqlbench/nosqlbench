@@ -1,7 +1,5 @@
 # Table mega-test workload
 # Exercises every Data API table op type to verify the payload matches the intended op settings.
-# Enable request/response logging by adding this flag when running:
-#   --log-level-override com.datastax.astra.client:DEBUG
 #
 # Run the full sequential scenario:
 #
@@ -10,8 +8,7 @@
 #     megatest \
 #     astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
 #     astraToken=$ASTRA_DB_APPLICATION_TOKEN \
-#     namespace=default_keyspace \
-#     --log-level-override com.datastax.astra.client:DEBUG
+#     namespace=default_keyspace 
 #
 # Or run individual phases, e.g.:
 #
