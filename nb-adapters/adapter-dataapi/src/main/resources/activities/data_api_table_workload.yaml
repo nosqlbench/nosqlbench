@@ -227,10 +227,10 @@ blocks:
             zip: postal_code
 
       list_types:
-        db_list_types: "ignored"
+        db_list_types: ""
 
       list_type_names:
-        db_list_type_names: "ignored"
+        db_list_type_names: ""
 
       drop_type:
         db_drop_type: "nb_smoke_address"
@@ -430,10 +430,10 @@ blocks:
   list:
     ops:
       list_tables:
-        db_list_tables: "ignored"
+        db_list_tables: ""
 
       list_table_names:
-        db_list_table_names: "ignored"
+        db_list_table_names: ""
 
   # -------------------------------------------------------------------------
   # PHASE: teardown
