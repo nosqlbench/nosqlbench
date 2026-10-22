@@ -346,7 +346,7 @@ blocks:
         #### optional rerank override for this one call:
         #### (Note: may not have effects until fix to https://github.com/datastax/astra-db-java/issues/109 released)
         # rerank:
-        #   provider: theProvider"
+        #   provider: "theProvider"
         #   modelName: "theModelName"
         #   authentication:
         #     providerKey: "bla"
@@ -470,11 +470,14 @@ blocks:
         ####   Explicit-list case for rows
         ####      'rows', free-form list of maps, required in this case
         ####      ('row_template'/'batch_size' cannot be used)
+        ####      NOTE: use distinct binding names per row (e.g. uuid_1, uuid_2).
+        ####      Reusing the same binding name causes a write collision because uuid
+        ####      is generated deterministically. 
         # rows:
-        #   - id: "{uuid}"
+        #   - id: "{uuid_1}"
         #     name: "Alice"
         #     age: 30
-        #   - id: "{uuid}"
+        #   - id: "{uuid_2}"
         #     name: "Bob"
         #     age: 25
         #### optional ordered flag (default false):
