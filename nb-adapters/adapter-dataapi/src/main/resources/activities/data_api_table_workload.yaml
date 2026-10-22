@@ -24,7 +24,7 @@
 #   nb data_api_table_workload.yaml list      ... (list_tables + list_table_names)
 #   nb data_api_table_workload.yaml teardown  ... (drop table)
 
-min_version: "5.17.3"
+min_version: "5.25.19"
 description: |
   Full Data API table smoke-test. Exercises every table op type in a fixed
   sequential order: drop → schema → alter → types → indexes → ingest → read
@@ -136,8 +136,6 @@ scenarios:
 
 bindings:
   # Bindings used by insert_many_batched row_template.
-  # Add(6) starts batch IDs at 6, immediately after the hardcoded rows (id 1-5),
-  # keeping the id space contiguous for downstream read/cleanup phases.
   seq_id:     Add(6); ToInt() -> int
   first_name: FirstNames()
   age:        Uniform(18,65); ToInt() -> int
@@ -276,7 +274,7 @@ blocks:
       list_index_names:
         table_list_index_names: "TEMPLATE(table,nb_smoke_table)"
 
-      drop_index_name:
+      drop_index:
         db_drop_table_index: "nb_smoke_idx_name"
         if_exists: true
 
