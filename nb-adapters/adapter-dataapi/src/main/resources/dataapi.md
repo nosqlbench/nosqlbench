@@ -6,7 +6,7 @@ source: nb-adapters/adapter-dataapi/src/main/resources/dataapi.md
 
 This is a NB adapter for the [Data API](https://github.com/stargate/data-api), an HTTP API that can run on top of Cassandra and DataStax Astra DB.
 
-The adapter is built on top of the [Java client](https://github.com/datastax/astra-db-java) for the Data API and exposes the same primitives as the Data API, in a 1:1 relation between ops and Data API commands wherever possible and exposing all of the command options when it makes sense to do so.
+The adapter is built on top of the [Java client](https://github.com/datastax/astra-db-java) for the Data API and exposes the same primitives as the Data API for both schemaless **Collections** and schemaed **Tables** (including User-Defined Types and indexes), in a 1:1 relation between ops and Data API commands wherever possible.
 
 ## Command-line parameters
 
@@ -37,7 +37,7 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 - All collection DML ops;
 - Create/delete collection DDL;
 - All known bugs in legacy operations are fixed;
-- Table support
+- Table support (DML + DDL)
 
 **Coming next:**
 
@@ -45,76 +45,80 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 - Ability to target non-Astra and non-prod environments in full;
 - Ability to supply special Data API-related secrets (such as embedding provider API keys for `$vectorize` operations).
 
-## Table support
+## Supported operations
 
-This release introduces full support for **Data API Tables**. Tables are the schemaed counterpart to the schemaless collection.
-
-### New table DDL ops
+### Collection ops
 
 | Op name | Description |
 |---|---|
-| `db_create_table` | Create a table with a given schema |
-| `db_alter_table` | Add/drop columns to a table |
-| `db_drop_table` | Drop a table |
-| `db_list_tables` | List tables |
-| `db_list_table_names` | List table names only |
-| `db_drop_table_index` | Drop a table index (a database level operation in the Data API) |
+| `db_create_collection` | Create collection |
+| `db_delete_collection` | Drop collection |
+| `list_collections` | List collections' metadata |
+| `list_collection_names` | List collection names |
+| `collection_insert_one` | Insert a document |
+| `collection_insert_many` | Insert documents |
+| `collection_find` | Find documents |
+| `collection_find_one` | Find first document |
+| `collection_find_and_rerank` | Hybrid search with reranking |
+| `collection_find_one_and_update` | Find and update document |
+| `collection_find_one_and_replace` | Find and replace document |
+| `collection_find_one_and_delete` | Find and delete document |
+| `collection_update_one` | Update first document |
+| `collection_update_many` | Update documents |
+| `collection_delete_one` | Delete first document |
+| `collection_delete_many` | Delete documents |
+| `collection_count_documents` | Count documents |
+| `collection_estimated_document_count` | Estimated document count |
 
-### New user-defined type (UDT) ops
-
-| Op name | Description |
-|---|---|
-| `db_create_type` | Create a user-defined type |
-| `db_alter_type` | Add or rename fields of a user-defined type |
-| `db_list_types` | List user-defined types |
-| `db_list_type_names` | List user-defined type names only |
-| `db_drop_type` | Drop a user-defined type |
-
-### New table index ops
-
-| Op name | Description |
-|---|---|
-| `table_create_index` | Create a regular index on a table column |
-| `table_create_text_index` | Create a text index on a table column |
-| `table_create_vector_index` | Create a vector index on a table column  |
-| `table_list_indexes` | List the indexes of a table |
-| `table_list_index_names` | List the index names of a table |
-
-
-### New table DML ops
+### Table CRUD ops
 
 | Op name | Description |
 |---|---|
-| `table_insert_one` | Insert a single row |
-| `table_insert_many` | Insert multiple rows |
-| `table_find` | Find rows matching a filter |
-| `table_find_one` | Find the first row matching a filter |
-| `table_update_one` | Update the first row matching a filter |
-| `table_delete_one` | Delete the first row matching a filter |
-| `table_delete_many` | Delete all rows matching a filter |
+| `db_create_table` | Create table |
+| `db_alter_table` | Alter table schema |
+| `db_drop_table` | Drop table |
+| `db_list_tables` | List tables' metadata |
+| `db_list_table_names` | List table names |
+| `table_insert_one` | Insert a row |
+| `table_insert_many` | Insert rows |
+| `table_find` | Find rows |
+| `table_find_one` | Find first row |
+| `table_update_one` | Update first row |
+| `table_delete_one` | Delete first row |
+| `table_delete_many` | Delete rows |
 
-### Code organisation
+### Table index ops
 
-All table related op dispensers live under the `opdispensers/tables/` subdir and their corresponding op implementations under `ops/tables/`. Likewise, collection ops have been moved into the `opdispensers/collections/` and `ops/collections/` subdirs to keep the codebase cleaner.
+| Op name | Description |
+|---|---|
+| `table_create_index` | Create index |
+| `table_create_text_index` | Create text index |
+| `table_create_vector_index` | Create vector index |
+| `table_list_indexes` | List indexes |
+| `table_list_index_names` | List index names |
+| `db_drop_table_index` | Drop index (this is a database-level operation)|
 
-### Supported column value types (intentional limitation)
+### Type (UDT) ops
 
-Row values are limited to the types YAML can express natively: strings, numbers and booleans. 
+| Op name | Description |
+|---|---|
+| `db_create_type` | Create type |
+| `db_alter_type` | Alter type |
+| `db_drop_type` | Drop type |
+| `db_list_types` | List types |
+| `db_list_type_names` | List type names |
 
-Dedicated support for the less common table data types (e.g. `inet`, `duration`, `blob`, `timestamp` and `uuid`) is **deliberately not provided**. Workloads that depend on those types will likely fail. 
+### Admin ops
 
-### Reference workload
-
-A comprehensive table workload covering all table ops is available at [`activities/data_api_table_workload.yaml`](activities/data_api_table_workload.yaml). You can run the whole workload with the following:
-
-```bash
-$ java -jar nb5.jar \
-  nb-adapters/adapter-dataapi/src/main/resources/activities/data_api_table_workload.yaml \
-  megatest \
-  astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
-  astraToken=$ASTRA_DB_APPLICATION_TOKEN \
-  namespace=default_keyspace \
-```
+| Op name | Description |
+|---|---|
+| `create_database` | Create database |
+| `drop_database` | Drop database |
+| `list_databases` | List databases |
+| `get_database_info` | Get database info |
+| `create_namespace` | Create namespace |
+| `drop_namespace` | Drop namespace |
+| `list_namespaces` | List namespaces |
 
 ## Usage notes (new-style ops)
 
@@ -132,9 +136,15 @@ Many commands allow to supply **vectors**: these can be expressed in the YAML:
 
 In any case, whenever the API Client is equipped to do so, vectors are transmitted in the bandwidth-optimized binary-encoded form regardless of how they are given. One _should not_ manually construct the binary-encoding syntax (e.g. as part of an insertee document for a `collection_insert_one` op).
 
-### Batched collection insert many
+### Batched insert many
 
-The `collection_insert_many` op allows two types of specification for the documents to insert: explicit list and batched. The latter means that a batch size and a "document template" is supplied, and the op resolves them into a list of `batch_size` documents, obtained by cycling through the bindings (hence consuming as many values for each binding). In other words, the pace at which these binding get consumed is increased `batch_size`-fold. See the full reference linked below for the syntax. _It is suggested to reserve such bindings for usage by a batched insert-many only to avoid possible overlapping binding evaluations._
+The `collection_insert_many` and `table_insert_many` ops allow two types of specification for the documents to insert: explicit list and batched. The latter means that a batch size and a "document template" is supplied, and the op resolves them into a list of `batch_size` documents, obtained by cycling through the bindings (hence consuming as many values for each binding). In other words, the pace at which these binding get consumed is increased `batch_size`-fold. See the full reference linked below for the syntax. _It is suggested to reserve such bindings for usage by a batched insert-many only to avoid possible overlapping binding evaluations._
+
+### Supported table column types (intentional limitation)
+
+Row values are limited to the types YAML can express natively: strings, numbers and booleans.
+
+Dedicated support for the less common table data types (e.g. `inet`, `duration`, `blob`, `timestamp` and `uuid`) is **deliberately not provided**. Workloads that depend on those types cannot be generally constructed.
 
 ## Client vs. 'raw Data API payloads'
 
@@ -146,12 +156,17 @@ For this reason, the adapter strives to avoid patterns that would trigger such "
 
 It is, however, an ultimate responsibility of the Data API-savvy NB user to ensure full compliance with this tenet, for example never packing more than a pageful of items into a `collection_insert_many` operation's `documents` property.
 
+## Code organisation
+
+All table-related op dispensers live under the `opdispensers/tables/` subdir and their corresponding op implementations under `ops/tables/`. Likewise, collection ops live in the `opdispensers/collections/` and `ops/collections/` subdirs to keep the codebase clean and modular.
+
 ## Examples
 
 Consult the self-documenting YAML examples here:
 
 - a simple [minimal running workload](activities/example_workload.yaml);
     - (a simple [legacy minimal running workload](activities/example_workload_legacy.yaml));
-- a realistic, [ready-to-run workload](activities/data_api_collection_workload.yaml) demonstrating several ops
+- a realistic, [ready-to-run workload](activities/data_api_collection_workload.yaml) demonstrating several ops;
+- a comprehensive [table workload](activities/data_api_table_workload.yaml) covering all table ops;
 - [new-style ops full reference](activities/ops_reference.yaml);
     - ([legacy ops full reference](activities/legacy_ops_reference.yaml)).
