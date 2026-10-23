@@ -365,6 +365,20 @@ blocks:
             id: uuid
             name: text
             age: int
+            #### vector column (sub-object syntax, dimension required):
+            embeddings:
+              type: vector
+              dimension: 3
+            #### optional vectorize column (commented out; uses an embedding service to auto-populate):
+            # description:
+            #   type: vector
+            #   service:
+            #     provider: "voyageAI"
+            #     modelName: "voyage-2"
+            #     authentication:
+            #       providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
+            #     parameters:
+            #       autoTruncate: true
           primary_key:
             partition_by: [id]
             #### optional clustering columns (partition_sort):
@@ -482,6 +496,11 @@ blocks:
         #     age: 25
         #### optional ordered flag (default false):
         # ordered: false
+        #### optional for splitting the input list into separate requests (default 50):
+        ####      NOTE: in a typical NoSQLBench workload, this should not count and not be used, meaning the amount of documents
+        ####      submitted should be <= chunk size. This is because NB supposedly works in unit of requests to the server,
+        ####      not mediated by manipulations from the Data API client.
+        # chunk_size: 20
 
       # "table_find_one" - find a single row in a table:
       tf1:
@@ -490,16 +509,27 @@ blocks:
         # filter:
         #   id:
         #     $eq: "{the_id}"
-        #### optional sort (order matters):
+        #### optional sort - all sort types go inside this map (asc/desc, ANN vector, vectorize):
+        ####   regular column sort:
         # sort:
         #   age: asc
+        #   name: desc
+        ####   ANN vector search (float list as value on the named vector column):
+        # sort:
+        #   my_vector_col: [0.1,0.2,0.3,0.4,0.5]
+        ####   vectorize search (non-directional string as value on the named vectorize column):
+        # sort:
+        #   my_vectorize_col: "query string"
+        #### NOTE: top-level 'vector:' and 'vectorize:' are NOT supported for tables;
+        ####       use the sort map above with the actual column name as the key
         #### optional projection (lists of fields):
         # projection:
         #   include:
         #     - name
         #     - age
-        #### optional includeSimilarity:
+        #### optional includeSimilarity (only with vector sort, not vectorize):
         # include_similarity: false
+        #### note: includeSortVector is not yet activated in TableFindOneOptions (commented-out in astra-db-java 2.3.2)
 
       # "table_find" - find multiple rows in a table:
       tf:
@@ -508,9 +538,19 @@ blocks:
         # filter:
         #   age:
         #     $gt: 20
-        #### optional sort (order matters):
+        #### optional sort - all sort types go inside this map (asc/desc, ANN vector, vectorize):
+        ####   regular column sort:
         # sort:
         #   age: asc
+        #   name: desc
+        ####   ANN vector search (float list as value on the named vector column):
+        # sort:
+        #   my_vector_col: [0.1,0.2,0.3,0.4,0.5]
+        ####   vectorize search (non-directional string as value on the named vectorize column):
+        # sort:
+        #   my_vectorize_col: "query string"
+        #### NOTE: top-level 'vector:' and 'vectorize:' are NOT supported for tables;
+        ####       use the sort map above with the actual column name as the key
         #### optional limit:
         # limit: 10
         #### optional skip:
@@ -520,6 +560,10 @@ blocks:
         #   include:
         #     - name
         #     - age
+        #### optional includeSimilarity (default true for nb):
+        # include_similarity: false
+        #### optional includeSortVector (default false):
+        # include_sort_vector: true
 
       # "table_update_one" - update a single row in a table:
       tu1:
@@ -529,6 +573,9 @@ blocks:
           $set:
             name: "UpdatedName"
             age: 99
+          #### optional $unset (list of column names to reset to null):
+          # $unset:
+          #   - description
         #### optional filter (free-form):
         # filter:
         #   id:
@@ -565,7 +612,7 @@ blocks:
           #### optional similarity metric (cosine, euclidean, dot_product):
           # metric: "cosine"
           #### optional source model hint:
-          # source_model: "text-embedding-3-small"
+          # source_model: "openai-v3-small"
         #### optional: if_not_exists (default false):
         # if_not_exists: true
 

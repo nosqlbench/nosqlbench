@@ -20,16 +20,19 @@ import java.util.Map;
 import com.datastax.astra.client.collections.definition.documents.Document;
 import com.datastax.astra.client.core.commands.Command;
 import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.tables.commands.options.CreateTableOptions;
 
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 public class DataApiDbCreateTableOp extends DataApiBaseOp {
     private final String tableName;
     private final Map<String, Object> definition;
+    private final CreateTableOptions options;
 
-    public DataApiDbCreateTableOp(Database db, String tableName, Map<String, Object> definition) {
+    public DataApiDbCreateTableOp(Database db, String tableName, Map<String, Object> definition, CreateTableOptions options) {
         super(db);
         this.tableName = tableName;
         this.definition = definition;
+        this.options = options;
     }
 
     @Override
@@ -37,6 +40,10 @@ public class DataApiDbCreateTableOp extends DataApiBaseOp {
         Document payload = new Document();
         payload.append("name", tableName);
         payload.append("definition", definition);
+        if (options != null) {
+            // other methods, such as 'embeddingAuthProvider' and 'timeout()' not supported
+            payload.append("options", Map.of("ifNotExists", options.isIfNotExists()));
+        }
         Command command = new Command("createTable", payload);
         return db.runCommand(command);
     }

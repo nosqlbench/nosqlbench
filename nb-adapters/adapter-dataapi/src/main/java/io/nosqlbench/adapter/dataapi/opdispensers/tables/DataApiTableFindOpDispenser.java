@@ -49,7 +49,7 @@ public class DataApiTableFindOpDispenser extends DataApiOpDispenser {
             Table<Row> table = db.getTable(targetFunction.apply(l));
             Filter filter = getFilterFromOp(op, l);
             TableFindOptions options = new TableFindOptions();
-            Sort[] sorts = getSortFromOp(op, l);
+            Sort[] sorts = getTableSortFromOp(op, l);
             if (sorts != null) {
                 options = options.sort(sorts);
             }
@@ -64,6 +64,14 @@ public class DataApiTableFindOpDispenser extends DataApiOpDispenser {
             Optional<Integer> skip = getSkipFromOp(op, l);
             if (skip.isPresent()) {
                 options = options.skip(skip.get());
+            }
+            Optional<Boolean> includeSimilarity = getIncludeSimilarityFromOp(op, l);
+            if (includeSimilarity.isPresent()) {
+                options = options.includeSimilarity(includeSimilarity.get());
+            }
+            Optional<Boolean> includeSortVector = getIncludeSortVectorFromOp(op, l);
+            if (includeSortVector.isPresent()) {
+                options = options.includeSortVector(includeSortVector.get());
             }
             return new DataApiTableFindOp(
                 db,

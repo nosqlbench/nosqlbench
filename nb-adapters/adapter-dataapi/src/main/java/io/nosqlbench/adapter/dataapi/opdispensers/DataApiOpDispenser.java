@@ -99,7 +99,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         }
     }
 
-    protected Sort[] getSortFromOp(ParsedOp op, long l) {
+    protected Sort[] getCollectionSortFromOp(ParsedOp op, long l) {
         List<Sort> sorts = null;
 
         long sortKeyCount = Stream.of("sort", "vector", "vectorize").filter(op::isDefined).count();
@@ -153,6 +153,71 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         }
         return null;
     }
+
+    /**
+     * Build sort clauses for table find operations (find / findOne).
+     * <p>
+     * Unlike collections, vector columns in tables are user-named, so all sort
+     * variations are expressed inside the 'sort' map using the column name as the key:
+     * <ul>
+     *   <li>{@code my_vec_col: [0.1, 0.2, ...]} → {@code Sort.vector(column, float[])}</li>
+     *   <li>{@code my_vze_col: "some text"}      → {@code Sort.vectorize(column, text)}</li>
+     *   <li>{@code age: asc}                     → {@code Sort.ascending(column)}</li>
+     *   <li>{@code name: desc}                   → {@code Sort.descending(column)}</li>
+     * </ul>
+     * Top-level {@code vector} and {@code vectorize} op parameters are rejected because
+     * they imply the fixed {@code $vector}/{@code $vectorize} column names that do not
+     * exist in tables.
+     */
+    protected Sort[] getTableSortFromOp(ParsedOp op, long l) {
+        if (op.isDefined("vector") || op.isDefined("vectorize")) {
+            throw new OpConfigError(
+                "Top-level 'vector' and 'vectorize' parameters are not supported for table ops. " +
+                "For vector search on a table, put the vector column name in the 'sort' map: " +
+                "'sort: {my_vector_col: [0.1, 0.2, ...]}'."
+            );
+        }
+
+        Optional<LongFunction<Map>> sortFunction = op.getAsOptionalFunction("sort", Map.class);
+        if (sortFunction.isEmpty()) {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> sortFields = sortFunction.get().apply(l);
+
+        List<Sort> sorts = sortFields.entrySet().stream()
+            .map(e -> {
+                String field = e.getKey();
+                Object value = e.getValue();
+                if (value instanceof List || value instanceof float[]) {
+                    // List or float[] → ANN vector search on the named column
+                    return Sort.vector(field, getVectorValues(value));
+                } else if (value instanceof String s) {
+                    String trimmed = s.trim();
+                    if (trimmed.equalsIgnoreCase("asc") || trimmed.equalsIgnoreCase("ascending")) {
+                        return Sort.ascending(field);
+                    } else if (trimmed.equalsIgnoreCase("desc") || trimmed.equalsIgnoreCase("descending")) {
+                        return Sort.descending(field);
+                    } else {
+                        // Any other string → vectorize search on the named column
+                        return Sort.vectorize(field, trimmed);
+                    }
+                } else {
+                    throw new OpConfigError(
+                        "Unsupported sort value type for field '" + field + "': " +
+                        value.getClass().getSimpleName() + ". " +
+                        "Use 'asc'/'desc' for regular sort, a float list for vector search, " +
+                        "or a non-directional string for vectorize search."
+                    );
+                }
+            })
+            .collect(Collectors.toList());
+
+        return sorts.isEmpty() ? null : sorts.toArray(new Sort[0]);
+    }
+
+
 
     protected Filter getFilterFromOp(ParsedOp op, long l) {
         Map<String, Object> filterMap = getFreeFormFromOp(op, l, "filter", false);
@@ -793,7 +858,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      * Builds a {@link CreateTableOptions} from the op's optional "if_not_exists" field.
      */
     protected CreateTableOptions getCreateTableOptionsFromOp(ParsedOp op, long l) {
-        CreateTableOptions options = new CreateTableOptions();
+        // The driver defaults ifNotExists to true; the documented default for this op is false.
+        CreateTableOptions options = new CreateTableOptions().ifNotExists(false);
         Optional<LongFunction<Boolean>> ineFunc = op.getAsOptionalFunction("if_not_exists", Boolean.class);
         if (ineFunc.isPresent()) {
             options = options.ifNotExists(ineFunc.get().apply(l));

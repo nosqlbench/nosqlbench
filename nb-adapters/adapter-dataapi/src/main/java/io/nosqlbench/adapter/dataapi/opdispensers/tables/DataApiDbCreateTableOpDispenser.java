@@ -42,7 +42,8 @@ public class DataApiDbCreateTableOpDispenser extends DataApiOpDispenser {
                 new DataApiDbCreateTableOp(
                     spaceFunction.apply(l).getDatabase(),
                     targetFunction.apply(l),
-                    this.getTableOrCollectionDefinitionFromOp(op, l)       // This function is table/collection agnostic.
+                    this.getTableOrCollectionDefinitionFromOp(op, l),      // This function is table/collection agnostic.
+                    this.getCreateTableOptionsFromOp(op, l)
                 );
 
             return dataApiDbCreateTableOp;

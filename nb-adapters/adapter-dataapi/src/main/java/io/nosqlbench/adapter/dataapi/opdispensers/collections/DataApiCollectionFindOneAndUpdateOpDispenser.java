@@ -60,7 +60,7 @@ public class DataApiCollectionFindOneAndUpdateOpDispenser extends DataApiOpDispe
 
     private CollectionFindOneAndUpdateOptions getCollectionFindOneAndUpdateOptions(ParsedOp op, long l) {
         CollectionFindOneAndUpdateOptions options = new CollectionFindOneAndUpdateOptions();
-        Sort[] sorts = getSortFromOp(op, l);
+        Sort[] sorts = getCollectionSortFromOp(op, l);
         Boolean upsert = getUpsertFromOp(op, l);
         if (sorts != null) {
             options = options.sort(sorts);

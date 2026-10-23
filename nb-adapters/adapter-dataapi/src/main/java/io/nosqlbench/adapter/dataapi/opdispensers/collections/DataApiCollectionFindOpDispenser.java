@@ -56,7 +56,7 @@ public class DataApiCollectionFindOpDispenser extends DataApiOpDispenser {
 
     private CollectionFindOptions getCollectionFindOptions(ParsedOp op, long l) {
         CollectionFindOptions options = new CollectionFindOptions();
-        Sort[] sorts = getSortFromOp(op, l);
+        Sort[] sorts = getCollectionSortFromOp(op, l);
         if (sorts != null) {
             options = options.sort(sorts);
         }

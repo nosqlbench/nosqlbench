@@ -61,7 +61,7 @@ public class DataApiCollectionUpdateOneOpDispenser extends DataApiOpDispenser {
 
     private CollectionUpdateOneOptions getCollectionUpdateOneOptions(ParsedOp op, long l) {
         CollectionUpdateOneOptions options = new CollectionUpdateOneOptions();
-        Sort[] sorts = getSortFromOp(op, l);
+        Sort[] sorts = getCollectionSortFromOp(op, l);
         Boolean upsert = getUpsertFromOp(op, l);
         if (sorts != null) {
             options = options.sort(sorts);

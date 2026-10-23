@@ -49,7 +49,7 @@ public class DataApiTableFindOneOpDispenser extends DataApiOpDispenser {
             Table<Row> table = db.getTable(targetFunction.apply(l));
             Filter filter = getFilterFromOp(op, l);
             TableFindOneOptions options = new TableFindOneOptions();
-            Sort[] sorts = getSortFromOp(op, l);
+            Sort[] sorts = getTableSortFromOp(op, l);
             if (sorts != null) {
                 options = options.sort(sorts);
             }
