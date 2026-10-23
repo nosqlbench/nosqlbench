@@ -1,0 +1,445 @@
+# Table mega-test workload
+# Exercises every Data API table op type to verify the payload matches the intended op settings.
+#
+# Run the full sequential scenario:
+#
+#   java -jar nb5.jar \
+#     nb-adapters/adapter-dataapi/src/main/resources/activities/data_api_table_workload.yaml \
+#     megatest \
+#     astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+#     astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+#     namespace=default_keyspace 
+#
+# Or run individual phases, e.g.:
+#
+#   nb data_api_table_workload.yaml drop      ... (drop table if exists)
+#   nb data_api_table_workload.yaml schema    ... (create table)
+#   nb data_api_table_workload.yaml alter     ... (alter table: add/drop column)
+#   nb data_api_table_workload.yaml types     ... (UDT lifecycle: create/alter/list/drop)
+#   nb data_api_table_workload.yaml indexes   ... (index lifecycle: create/list/drop)
+#   nb data_api_table_workload.yaml ingest    ... (insert_one + insert_many)
+#   nb data_api_table_workload.yaml read      ... (find_one + find + distinct)
+#   nb data_api_table_workload.yaml mutate    ... (update_one)
+#   nb data_api_table_workload.yaml cleanup   ... (delete_one + delete_many)
+#   nb data_api_table_workload.yaml list      ... (list_tables + list_table_names)
+#   nb data_api_table_workload.yaml teardown  ... (drop table)
+
+min_version: "5.25.19"
+description: |
+  Full Data API table smoke-test. Exercises every table op type in a fixed
+  sequential order: drop → schema → alter → types → indexes → ingest → read
+  → mutate → cleanup → list → teardown. Requires astraApiEndpoint and
+  astraToken. Override the table name with table=<name> (default: nb_smoke_table).
+
+scenarios:
+
+  megatest:
+    drop: >-
+      run driver=dataapi
+      tags==block:drop
+      threads==1 cycles==1 stride==1
+      errors=ignore
+    schema: >-
+      run driver=dataapi
+      tags==block:schema
+      threads==1 cycles==1 stride==1
+      errors=warn
+    alter: >-
+      run driver=dataapi
+      tags==block:alter
+      threads==1 cycles==2 stride==2
+      errors=warn
+    types: >-
+      run driver=dataapi
+      tags==block:types
+      threads==1 cycles==6 stride==6
+      errors=warn
+    indexes: >-
+      run driver=dataapi
+      tags==block:indexes
+      threads==1 cycles==8 stride==8
+      errors=warn
+    ingest: >-
+      run driver=dataapi
+      tags==block:ingest
+      threads==1 cycles==3 stride==3
+      errors=warn
+    read: >-
+      run driver=dataapi
+      tags==block:read
+      threads==1 cycles==3 stride==3
+      errors=warn
+    mutate: >-
+      run driver=dataapi
+      tags==block:mutate
+      threads==1 cycles==2 stride==2
+      errors=warn
+    cleanup: >-
+      run driver=dataapi
+      tags==block:cleanup
+      threads==1 cycles==2 stride==2
+      errors=warn
+    list: >-
+      run driver=dataapi
+      tags==block:list
+      threads==1 cycles==2 stride==2
+      errors=warn
+    teardown: >-
+      run driver=dataapi
+      tags==block:teardown
+      threads==1 cycles==1 stride==1
+      errors=warn
+
+  drop:
+    drop: >-
+      run driver=dataapi tags==block:drop threads==1 cycles==1 stride==1 errors=ignore
+
+  schema:
+    schema: >-
+      run driver=dataapi tags==block:schema threads==1 cycles==1 stride==1 errors=warn
+
+  alter:
+    alter: >-
+      run driver=dataapi tags==block:alter threads==1 cycles==2 stride==2 errors=warn
+
+  types:
+    types: >-
+      run driver=dataapi tags==block:types threads==1 cycles==6 stride==6 errors=warn
+
+  indexes:
+    indexes: >-
+      run driver=dataapi tags==block:indexes threads==1 cycles==8 stride==8 errors=warn
+
+  ingest:
+    ingest: >-
+      run driver=dataapi tags==block:ingest threads==1 cycles==3 stride==3 errors=warn
+
+  read:
+    read: >-
+      run driver=dataapi tags==block:read threads==1 cycles==3 stride==3 errors=warn
+
+  mutate:
+    mutate: >-
+      run driver=dataapi tags==block:mutate threads==1 cycles==2 stride==2 errors=warn
+
+  cleanup:
+    cleanup: >-
+      run driver=dataapi tags==block:cleanup threads==1 cycles==2 stride==2 errors=warn
+
+  list:
+    list: >-
+      run driver=dataapi tags==block:list threads==1 cycles==2 stride==2 errors=warn
+
+  teardown:
+    teardown: >-
+      run driver=dataapi tags==block:teardown threads==1 cycles==1 stride==1 errors=warn
+
+bindings:
+  # Bindings used by insert_many_batched row_template.
+  seq_id:     Add(6); ToInt() -> int
+  first_name: FirstNames()
+  age:        Uniform(18,65); ToInt() -> int
+
+blocks:
+
+  # -------------------------------------------------------------------------
+  # PHASE: drop
+  # Op: db_drop_table
+  # Drops the table if it already exists so we start from a clean slate.
+  # -------------------------------------------------------------------------
+  drop:
+    ops:
+      drop_table:
+        db_drop_table: "TEMPLATE(table,nb_smoke_table)"
+        if_exists: true
+
+  # -------------------------------------------------------------------------
+  # PHASE: schema
+  # Op: db_create_table
+  # Creates a table with id, name, age, and a description column.
+  # The description column will be used for the text index in the indexes phase.
+  # -------------------------------------------------------------------------
+  schema:
+    ops:
+      create_table:
+        db_create_table: "TEMPLATE(table,nb_smoke_table)"
+        definition:
+          columns:
+            id:          int
+            name:        text
+            age:         int
+            description: text
+          # The Data API createTable command only accepts camelCase here
+          primaryKey:
+            partitionBy: [id]
+        if_not_exists: true
+
+  # -------------------------------------------------------------------------
+  # PHASE: alter
+  # Op: db_alter_table
+  # Exercises both the 'add' and 'drop' forms of db_alter_table.
+  # First adds a new column (score), then drops it again.
+  # -------------------------------------------------------------------------
+  alter:
+    ops:
+      alter_table_add_column:
+        db_alter_table: "TEMPLATE(table,nb_smoke_table)"
+        alter_op:
+          add:
+            score: int
+
+      alter_table_drop_column:
+        db_alter_table: "TEMPLATE(table,nb_smoke_table)"
+        alter_op:
+          drop:
+            - score
+
+  # -------------------------------------------------------------------------
+  # PHASE: types
+  # Ops: db_create_type, db_alter_type, db_list_types, db_list_type_names,
+  #      db_drop_type
+  # Full UDT (user-defined type) lifecycle: create → add field → rename field
+  # → list → list names → drop.
+  # -------------------------------------------------------------------------
+  types:
+    ops:
+      create_type:
+        db_create_type: "nb_smoke_address"
+        definition:
+          fields:
+            street: text
+            city:   text
+            zip:    int
+        if_not_exists: true
+
+      alter_type_add_field:
+        db_alter_type: "nb_smoke_address"
+        alter_op:
+          add_fields:
+            country: text
+
+      alter_type_rename_field:
+        db_alter_type: "nb_smoke_address"
+        alter_op:
+          rename_fields:
+            zip: postal_code
+
+      list_types:
+        db_list_types: ""
+
+      list_type_names:
+        db_list_type_names: ""
+
+      drop_type:
+        db_drop_type: "nb_smoke_address"
+
+  # -------------------------------------------------------------------------
+  # PHASE: indexes
+  # Ops: table_create_index, table_create_text_index,
+  #      table_list_indexes, table_list_index_names, db_drop_table_index
+  #
+  # Note: table_create_vector_index is included but targets a hypothetical
+  # 'embedding' vector column.  It is wrapped with errors=warn so that the
+  # phase does not fail when the column is absent on the smoke table.
+  # Remove the errors override and add an 'embedding' vector column to the
+  # schema block when running against a table that actually has one.
+  # -------------------------------------------------------------------------
+  indexes:
+    ops:
+      create_index_on_name:
+        table_create_index: "TEMPLATE(table,nb_smoke_table)"
+        index_name: "nb_smoke_idx_name"
+        definition:
+          column: "name"
+        if_not_exists: true
+
+      create_text_index_on_description:
+        table_create_text_index: "TEMPLATE(table,nb_smoke_table)"
+        index_name: "nb_smoke_tidx_description"
+        definition:
+          column: "description"
+        if_not_exists: true
+
+      create_vector_index:
+        table_create_vector_index: "TEMPLATE(table,nb_smoke_table)"
+        index_name: "nb_smoke_vidx_embedding"
+        definition:
+          column: "embedding"
+        if_not_exists: true
+        errors: warn
+
+      list_indexes:
+        table_list_indexes: "TEMPLATE(table,nb_smoke_table)"
+
+      list_index_names:
+        table_list_index_names: "TEMPLATE(table,nb_smoke_table)"
+
+      drop_index:
+        db_drop_table_index: "nb_smoke_idx_name"
+        if_exists: true
+
+      drop_text_index:
+        db_drop_table_index: "nb_smoke_tidx_description"
+        if_exists: true
+
+      drop_vector_index:
+        db_drop_table_index: "nb_smoke_vidx_embedding"
+        if_exists: true
+
+  # -------------------------------------------------------------------------
+  # PHASE: ingest
+  # Ops: table_insert_one, table_insert_many
+  # Inserts a handful of rows to give the read/mutate/cleanup phases data.
+  # -------------------------------------------------------------------------
+  ingest:
+    ops:
+      insert_one:
+        table_insert_one: "TEMPLATE(table,nb_smoke_table)"
+        row:
+          id:          1
+          name:        "Alice"
+          age:         30
+          description: "First inserted row"
+
+      insert_many:
+        table_insert_many: "TEMPLATE(table,nb_smoke_table)"
+        rows:
+          - id: 2
+            name: "Bob"
+            age:  25
+            description: "Second row"
+          - id: 3
+            name: "Carol"
+            age:  35
+            description: "Third row"
+          - id: 4
+            name: "Dave"
+            age:  20
+            description: "Fourth row"
+          - id: 5
+            name: "Eve"
+            age:  28
+            description: "Fifth row"
+        ordered: false
+
+      insert_many_batched:
+        table_insert_many: "TEMPLATE(table,nb_smoke_table)"
+        batched: true
+        batch_size: 5
+        row_template:
+          id: "{seq_id}"
+          name: "{first_name}"
+          age: "{age}"
+          description: "Batch-templated row"
+        ordered: false
+
+  # -------------------------------------------------------------------------
+  # PHASE: read
+  # Ops: table_find_one, table_find
+  # Verifies that rows can be retrieved and that filters/projections are sent.
+  # -------------------------------------------------------------------------
+  read:
+    ops:
+      find_one:
+        table_find_one: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $eq: 1
+        projection:
+          include:
+            - name
+            - age
+
+      find_with_filter_and_sort:
+        table_find: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $gt: 1
+        sort:
+          id: asc
+        limit: 10
+        projection:
+          include:
+            - id
+            - name
+            - age
+
+      find_with_skip:
+        table_find: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          age:
+            $gte: 20
+        sort:
+          age: asc
+        skip: 1
+        limit: 5
+
+  # -------------------------------------------------------------------------
+  # PHASE: mutate
+  # Op: table_update_one
+  # Updates a single row using both $set and $unset to confirm both update
+  # operators are exercised.
+  # -------------------------------------------------------------------------
+  mutate:
+    ops:
+      update_one_set:
+        table_update_one: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $eq: 1
+        update:
+          $set:
+            name: "Alice (updated)"
+            age:  31
+
+      update_one_unset:
+        table_update_one: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $eq: 2
+        update:
+          $unset:
+            description: ""
+
+  # -------------------------------------------------------------------------
+  # PHASE: cleanup
+  # Ops: table_delete_one, table_delete_many
+  # Deletes a specific row and then a range of rows.
+  # -------------------------------------------------------------------------
+  cleanup:
+    ops:
+      delete_one:
+        table_delete_one: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $eq: 5
+
+      delete_many:
+        table_delete_many: "TEMPLATE(table,nb_smoke_table)"
+        filter:
+          id:
+            $in: [2, 3, 4]
+
+  # -------------------------------------------------------------------------
+  # PHASE: list
+  # Ops: db_list_tables, db_list_table_names
+  # Confirms the table appears in both listing variants.
+  # -------------------------------------------------------------------------
+  list:
+    ops:
+      list_tables:
+        db_list_tables: ""
+
+      list_table_names:
+        db_list_table_names: ""
+
+  # -------------------------------------------------------------------------
+  # PHASE: teardown
+  # Op: db_drop_table
+  # Drops the table after all checks are done.
+  # -------------------------------------------------------------------------
+  teardown:
+    ops:
+      drop_table_final:
+        db_drop_table: "TEMPLATE(table,nb_smoke_table)"
+        if_exists: true

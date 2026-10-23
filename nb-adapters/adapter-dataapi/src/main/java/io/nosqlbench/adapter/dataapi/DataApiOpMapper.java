@@ -16,7 +16,82 @@
 
 package io.nosqlbench.adapter.dataapi;
 
-import io.nosqlbench.adapter.dataapi.opdispensers.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.LongFunction;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiCreateDatabaseOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiCreateNamespaceOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDropDatabaseOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDropNamespaceOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiGetDatabaseInfoOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiListDatabasesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiListNamespacesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionCountDocumentsOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionDeleteManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionDeleteOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionEstimatedDocumentCountOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionFindAndRerankOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionFindOneAndDeleteOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionFindOneAndReplaceOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionFindOneAndUpdateOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionFindOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionFindOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionInsertManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionInsertOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyCountDocumentsOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyDeleteAllOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyDeleteManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyDeleteOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindByIdOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindDistinctOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindOneAndDeleteOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindOneAndReplaceOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindOneAndUpdateOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindVectorFilterOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyFindVectorOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyInsertManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyInsertOneVectorOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyReplaceOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyUpdateManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionLegacyUpdateOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionUpdateManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionUpdateOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbCreateCollectionOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbDeleteCollectionOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyCreateCollectionOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyCreateCollectionWithClassOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyDeleteCollectionOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiListCollectionNamesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiListCollectionsOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDbDropTableIndexOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbAlterTableOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbAlterTypeOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbCreateTableOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbCreateTypeOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbDropTableOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbDropTypeOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTableNamesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTablesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTypeNamesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbListTypesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateIndexOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateTextIndexOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableCreateVectorIndexOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDeleteManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableDeleteOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableFindOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableFindOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableInsertManyOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableInsertOneOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableListIndexesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableListIndexNamesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiTableUpdateOneOpDispenser;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 import io.nosqlbench.adapter.dataapi.ops.DataApiOpType;
 import io.nosqlbench.adapters.api.activityimpl.OpDispenser;
@@ -24,11 +99,6 @@ import io.nosqlbench.adapters.api.activityimpl.OpMapper;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import io.nosqlbench.engine.api.templating.TypeAndTarget;
 import io.nosqlbench.nb.api.components.core.NBComponent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.LongFunction;
 
 public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
     private static final Logger logger = LogManager.getLogger(DataApiOpMapper.class);
@@ -159,6 +229,36 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case collection_estimated_document_count ->
                 new DataApiCollectionEstimatedDocumentCountOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case collection_count_documents -> new DataApiCollectionCountDocumentsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+
+            // TABLE OPS
+            // NOTE: there are no 'legacy' ops for tables (only for collections)
+            // in-database (table management) ops:
+            case db_create_table -> new DataApiDbCreateTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_alter_table -> new DataApiDbAlterTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_drop_table -> new DataApiDbDropTableOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_tables -> new DataApiDbListTablesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_table_names -> new DataApiDbListTableNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_drop_table_index -> new DataApiDbDropTableIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            // in-database (type management) ops:
+            case db_create_type -> new DataApiDbCreateTypeOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_alter_type -> new DataApiDbAlterTypeOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_types -> new DataApiDbListTypesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_type_names -> new DataApiDbListTypeNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_drop_type -> new DataApiDbDropTypeOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            // in-table ops:
+            case table_insert_one -> new DataApiTableInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_insert_many -> new DataApiTableInsertManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_find_one -> new DataApiTableFindOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_find -> new DataApiTableFindOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_update_one -> new DataApiTableUpdateOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_delete_one -> new DataApiTableDeleteOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_delete_many -> new DataApiTableDeleteManyOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            // in-table (index management) ops:
+            case table_create_vector_index -> new DataApiTableCreateVectorIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_create_index -> new DataApiTableCreateIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_create_text_index -> new DataApiTableCreateTextIndexOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_list_indexes -> new DataApiTableListIndexesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case table_list_index_names -> new DataApiTableListIndexNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
         };
     }
 

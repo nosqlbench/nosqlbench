@@ -346,10 +346,316 @@ blocks:
         #### optional rerank override for this one call:
         #### (Note: may not have effects until fix to https://github.com/datastax/astra-db-java/issues/109 released)
         # rerank:
-        #   provider: theProvider"
+        #   provider: "theProvider"
         #   modelName: "theModelName"
         #   authentication:
         #     providerKey: "bla"
         #   parameters:
         #     param1: value1
         #     param2: 999
+
+      # TABLE OPS -----------------------------------------------------------------------
+
+      # "db_create_table" - create a new table in the database:
+      crtbl:
+        db_create_table: "TEMPLATE(table)"
+        #### required table definition:
+        definition:
+          columns:
+            id: uuid
+            name: text
+            age: int
+            #### vector column (sub-object syntax, dimension required):
+            embeddings:
+              type: vector
+              dimension: 3
+            #### optional vectorize column (commented out; uses an embedding service to auto-populate):
+            # description:
+            #   type: vector
+            #   service:
+            #     provider: "voyageAI"
+            #     modelName: "voyage-2"
+            #     authentication:
+            #       providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
+            #     parameters:
+            #       autoTruncate: true
+          primary_key:
+            partition_by: [id]
+            #### optional clustering columns (partition_sort):
+            # partition_sort:
+            #   age: asc
+        #### optional if_not_exists flag (default false):
+        # if_not_exists: true
+
+      # "db_alter_table" - alter a table's columns (add or drop):
+      altbl:
+        db_alter_table: "TEMPLATE(table)"
+        #### required alter operation — one of 'add' (map of colName -> type) or 'drop' (list of col names):
+        alter_op:
+          add:
+            new_col: text
+        #### alternative form (drop columns):
+        # alter_op:
+        #   drop:
+        #     - old_col
+
+      # "db_drop_table" - drop a table from the database:
+      drtbl:
+        db_drop_table: "TEMPLATE(table)"
+        #### optional if_exists flag (default false):
+        # if_exists: true
+
+      # "db_list_tables" - list all tables (returns full TableDescriptor list):
+      lstbls:
+        db_list_tables: ""
+
+      # "db_list_table_names" - list all table names (returns list of strings):
+      lstblnm:
+        db_list_table_names: ""
+
+      # "db_drop_table_index" - drop a table index (a database-level op in the Data API),
+      # the op value is the name of the index to drop:
+      drtblidx:
+        db_drop_table_index: "my_index"
+        #### optional: if_exists (default false):
+        # if_exists: true
+
+      # "db_create_type" - create a user-defined type (UDT) in the database,
+      # the op value is the name of the UDT to create:
+      crtype:
+        db_create_type: "address_type"
+        #### required UDT field definitions (map of fieldName -> column type):
+        definition:
+          fields:
+            street: text
+            city: text
+            zip: int
+        #### optional if_not_exists flag (default false):
+        # if_not_exists: true
+
+      # "db_alter_type" - alter an existing UDT (add or rename fields),
+      # the op value is the name of the UDT to alter:
+      altype:
+        db_alter_type: "address_type"
+        #### required alter operation — one of 'add_fields' (map of fieldName -> type) or 'rename_fields' (map of oldName -> newName):
+        alter_op:
+          add_fields:
+            country: text
+        #### alternative form (rename fields):
+        # alter_op:
+        #   rename_fields:
+        #     old_field_name: new_field_name
+
+      # "db_list_types" - list all UDTs (returns full type descriptor list):
+      lstype:
+        db_list_types: ""
+
+      # "db_list_type_names" - list all UDT names (returns list of strings):
+      lstypenm:
+        db_list_type_names: ""
+
+      # "db_drop_type" - drop a UDT from the database,
+      # the op value is the name of the UDT to drop:
+      drtype:
+        db_drop_type: "address_type"
+  
+      # "table_insert_one" - insert a single row into a table:
+      ti1:
+        table_insert_one: "TEMPLATE(table)"
+        #### required row (map of column name -> value):
+        row:
+          id: "{uuid}"
+          name: "{first_name}"
+          age: "{age}"
+
+      # "table_insert_many" - insert multiple rows into a table:
+      tim:
+        table_insert_many: "TEMPLATE(table)"
+        #### Rows can be passed as explicit list or 'batched' (exactly one choice)
+        ####   Batched case for rows (required: 'batch_size', 'row_template'):
+        ####      in this case, the template is applied batch_size times consuming as many bindings.
+        ####      ('rows' cannot be used)
+        batched: true
+        batch_size: 5
+        row_template:
+          id: "{my_id_binding}"
+          name: "{my_name_binding}"
+          age: "{my_age_binding}"
+        ####   Explicit-list case for rows
+        ####      'rows', free-form list of maps, required in this case
+        ####      ('row_template'/'batch_size' cannot be used)
+        ####      NOTE: use distinct binding names per row (e.g. uuid_1, uuid_2).
+        ####      Reusing the same binding name causes a write collision because uuid
+        ####      is generated deterministically. 
+        # rows:
+        #   - id: "{uuid_1}"
+        #     name: "Alice"
+        #     age: 30
+        #   - id: "{uuid_2}"
+        #     name: "Bob"
+        #     age: 25
+        #### optional ordered flag (default false):
+        # ordered: false
+        #### optional for splitting the input list into separate requests (default 50):
+        ####      NOTE: in a typical NoSQLBench workload, this should not count and not be used, meaning the amount of documents
+        ####      submitted should be <= chunk size. This is because NB supposedly works in unit of requests to the server,
+        ####      not mediated by manipulations from the Data API client.
+        # chunk_size: 20
+
+      # "table_find_one" - find a single row in a table:
+      tf1:
+        table_find_one: "TEMPLATE(table)"
+        #### optional filter (free-form):
+        # filter:
+        #   id:
+        #     $eq: "{the_id}"
+        #### optional sort - all sort types go inside this map (asc/desc, ANN vector, vectorize):
+        ####   regular column sort:
+        # sort:
+        #   age: asc
+        #   name: desc
+        ####   ANN vector search (float list as value on the named vector column):
+        # sort:
+        #   my_vector_col: [0.1,0.2,0.3,0.4,0.5]
+        ####   vectorize search (non-directional string as value on the named vectorize column):
+        # sort:
+        #   my_vectorize_col: "query string"
+        #### NOTE: top-level 'vector:' and 'vectorize:' are NOT supported for tables;
+        ####       use the sort map above with the actual column name as the key
+        #### optional projection (lists of fields):
+        # projection:
+        #   include:
+        #     - name
+        #     - age
+        #### optional includeSimilarity (only with vector sort, not vectorize):
+        # include_similarity: false
+        #### note: includeSortVector is not yet activated in TableFindOneOptions (commented-out in astra-db-java 2.3.2)
+
+      # "table_find" - find multiple rows in a table:
+      tf:
+        table_find: "TEMPLATE(table)"
+        #### optional filter (free-form):
+        # filter:
+        #   age:
+        #     $gt: 20
+        #### optional sort - all sort types go inside this map (asc/desc, ANN vector, vectorize):
+        ####   regular column sort:
+        # sort:
+        #   age: asc
+        #   name: desc
+        ####   ANN vector search (float list as value on the named vector column):
+        # sort:
+        #   my_vector_col: [0.1,0.2,0.3,0.4,0.5]
+        ####   vectorize search (non-directional string as value on the named vectorize column):
+        # sort:
+        #   my_vectorize_col: "query string"
+        #### NOTE: top-level 'vector:' and 'vectorize:' are NOT supported for tables;
+        ####       use the sort map above with the actual column name as the key
+        #### optional limit:
+        # limit: 10
+        #### optional skip:
+        # skip: 5
+        #### optional projection (lists of fields):
+        # projection:
+        #   include:
+        #     - name
+        #     - age
+        #### optional includeSimilarity (default true for nb):
+        # include_similarity: false
+        #### optional includeSortVector (default false):
+        # include_sort_vector: true
+
+      # "table_update_one" - update a single row in a table:
+      tu1:
+        table_update_one: "TEMPLATE(table)"
+        #### required update (supports $set and $unset):
+        update:
+          $set:
+            name: "UpdatedName"
+            age: 99
+          #### optional $unset (list of column names to reset to null):
+          # $unset:
+          #   - description
+        #### optional filter (free-form):
+        # filter:
+        #   id:
+        #     $eq: "{the_id}"
+
+      # "table_delete_one" - delete a single row from a table:
+      td1:
+        table_delete_one: "TEMPLATE(table)"
+        #### optional filter (free-form):
+        # filter:
+        #   id:
+        #     $eq: "{the_id}"
+
+      # "table_delete_many" - delete multiple rows from a table:
+      tdm:
+        table_delete_many: "TEMPLATE(table)"
+        #### optional filter (free-form; omit to truncate the table):
+        # filter:
+        #   age:
+        #     $lt: 18
+
+      # ---------------------------------------------------------------------------
+      # TABLE INDEX OPS
+      # ---------------------------------------------------------------------------
+
+      # "table_create_vector_index" - create a vector (ANN) index on a table vector column:
+      tcvi:
+        table_create_vector_index: "TEMPLATE(table)"
+        #### required: name of the index to create:
+        index_name: "my_vector_index"
+        #### required index definition (column is required):
+        definition:
+          column: "embedding"
+          #### optional similarity metric (cosine, euclidean, dot_product):
+          # metric: "cosine"
+          #### optional source model hint:
+          # source_model: "openai-v3-small"
+        #### optional: if_not_exists (default false):
+        # if_not_exists: true
+
+      # "table_create_index" - create a regular (non-vector, non-text) index on a table column:
+      tci:
+        table_create_index: "TEMPLATE(table)"
+        #### required: name of the index to create:
+        index_name: "my_index"
+        #### required index definition (column is required):
+        definition:
+          column: "name"
+          #### optional text options (for text columns):
+          # ascii: true
+          # normalize: true
+          # case_sensitive: false
+        #### optional: if_not_exists (default false):
+        # if_not_exists: true
+
+      # "table_create_text_index" - create a lexical (text search) index on a table text column:
+      tcti:
+        table_create_text_index: "TEMPLATE(table)"
+        #### required: name of the index to create:
+        index_name: "my_text_index"
+        #### required index definition (column is required):
+        definition:
+          column: "description"
+          #### optional analyzer — either a built-in analyzer name:
+          # analyzer: "english"
+          #### or a full analyzer object (tokenizer, filters, charFilters), passed through as-is:
+          # analyzer:
+          #   tokenizer: {name: standard}
+          #   filters:
+          #     - name: lowercase
+          #     - name: stop
+          #   charFilters: []
+        #### optional: if_not_exists (default false):
+        # if_not_exists: true
+
+      # "table_list_indexes" - list all indexes on a table (returns full index descriptor list):
+      lsi:
+        table_list_indexes: "TEMPLATE(table)"
+
+      # "table_list_index_names" - list all index names on a table (returns list of strings):
+      lsinm:
+        table_list_index_names: "TEMPLATE(table)"
+
