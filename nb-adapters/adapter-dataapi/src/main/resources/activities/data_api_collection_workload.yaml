@@ -1,0 +1,257 @@
+# Run with e.g.:
+#
+#    nb data_api_collection_workload.yaml <SCENARIO_NAME> \
+#       astraApiEndpoint=$ASTRA_DB_API_ENDPOINT \
+#       astraToken=$ASTRA_DB_APPLICATION_TOKEN \
+#       namespace=$ASTRA_DB_KEYSPACE \
+#       [main-cycles=<e.g. 200>] \
+#       [rampup-insertmany-cycles=<e.g. 10, relevant if vector scenario which has an insert many>]
+#
+# where <SCENARIO_NAME> = data_api_scenario_base / data_api_scenario_vector
+
+description: |
+ A simple workload that uses the Data API Client to perform
+ writes, reads and vector reads similar to a realistic general-purpose application.
+ One scenario does not involve vectors, the other does.
+ The vector scenario also demonstrates batched bulk insert
+ (which, in itself, can be done regardless of vector or not).
+
+ data_api_scenario_base:
+    schema
+    rampup (single-document insertions)
+    find one by document _id
+    find one by another document field
+    find (many) with a inequality filter on a field
+ data_api_scenario_vector:
+    schema
+    rampup (single-document insertions)
+    rampup (fewer multi-document insert-many)
+    find one by document _id
+    find one by another document field
+    find (many) with a inequality filter on a field
+    vector ANN find
+    vector ANN find plus filter conditions on other fields
+
+ NOTE: 'rampup-threads' cannot exceed 'cardinality'
+
+ cardinality=TEMPLATE(cardinality,1000)
+ collection=TEMPLATE(collection,dataapi_collection)
+ dimension=TEMPLATE(dimension,1536)
+ similarity=TEMPLATE(similarity,cosine)
+ valuecount=TEMPLATE(valuecount,TEMPLATE(cardinality))
+ rampup-threads=TEMPLATE(rampup-threads,100)
+ rampup-insertmany-cycles=TEMPLATE(rampup-insertmany-cycles,5)
+
+scenarios:
+
+  data_api_scenario_base:
+    drop: >-
+      run driver=dataapi
+      tags==block:schema_drop
+      threads==1 cycles==UNDEF
+      errors=ignore
+    schema: >-
+      run driver=dataapi
+      tags==block:schema_base
+      threads==1 cycles==UNDEF
+    rampup:
+      run driver=dataapi
+      tags==block:rampup_base
+      cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    find_by_id:
+      run driver=dataapi
+      tags==block:find_by_id
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_value:
+      run driver=dataapi
+      tags==block:find_by_value
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_ineq:
+      run driver=dataapi
+      tags==block:find_by_ineq
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+
+  data_api_scenario_vector:
+    # if you run data_api_scenario_base before running data_api_scenario_vector, you will get an error
+    # because the schemas don't match. Solved by dropping and recreating the collection
+    drop: >-
+      run driver=dataapi
+      tags==block:schema_drop
+      threads==1 cycles==UNDEF
+      errors=ignore
+    schema: >-
+      run driver=dataapi
+      tags==block:schema_vector
+      threads==1 cycles==UNDEF
+    rampup:
+      run driver=dataapi
+      tags==block:rampup_vector
+      cycles===TEMPLATE(rampup-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    rampup_insertmany:
+      run driver=dataapi
+      tags==block:rampup_vector_insertmany
+      cycles===TEMPLATE(rampup-insertmany-cycles,TEMPLATE(cardinality))
+      threads=TEMPLATE(rampup-threads)
+      errors=count
+    find_by_id:
+      run driver=dataapi
+      tags==block:find_by_id
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_value:
+      run driver=dataapi
+      tags==block:find_by_value
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    find_by_ineq:
+      run driver=dataapi
+      tags==block:find_by_ineq
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    vector_find:
+      run driver=dataapi
+      tags==block:vector_find
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+    filtered_vector_find:
+      run driver=dataapi
+      tags==block:filtered_vector_find
+      cycles===TEMPLATE(main-cycles,1000)
+      threads=auto
+      errors=count
+
+bindings:
+  my_seq: Mod(TEMPLATE(cardinality))
+  my_value: Hash(); ToString() -> String
+  my_id: Mod(TEMPLATE(cardinality)); ToString() -> String
+  my_vector: Add(100); HashedFloatVectors(TEMPLATE(dimension,1536));
+  # vectors for batches of "insert_many":
+  ins_vector_batched: Add(200); HashedFloatVectors(TEMPLATE(dimension,1536));
+  my_seq_batched: Add(300)
+  my_value_batched: Hash(); ToString() -> String
+
+blocks:
+
+  schema_drop:
+    ops:
+      drop_collection_op:
+        db_delete_collection: "TEMPLATE(collection)"
+
+  schema_base:
+    ops:
+      create_collection_base_op:
+        db_create_collection: "TEMPLATE(collection)"
+        definition: {}
+
+  schema_vector:
+    ops:
+      create_collection_vector_op:
+        db_create_collection: "TEMPLATE(collection)"
+        definition:
+          vector:
+            dimension: TEMPLATE(dimension,1536)
+            metric: TEMPLATE(similarity,cosine)
+
+  rampup_base:
+    ops:
+      insert_one_base_op:
+        collection_insert_one: "TEMPLATE(collection)"
+        document:
+          _id: "{my_id}"
+          some_value: "{my_value}"
+          seq: "{my_seq}"
+
+  rampup_vector:
+    ops:
+      insert_one_vector_op:
+        collection_insert_one: "TEMPLATE(collection)"
+        document:
+          _id: "{my_id}"
+          some_value: "{my_value}"
+          seq: "{my_seq}"
+          $vector: "{my_vector}"
+
+  rampup_vector_insertmany:
+    ops:
+      insert_many_vector_op:
+        collection_insert_many: "TEMPLATE(collection)"
+        batched: true
+        batch_size: 20
+        document_template: {"from_insert_many": true, "some_value":"{my_value_batched}","seq":"{my_seq_batched}","$vector":"{ins_vector_batched}"}
+
+  find_by_id:
+    ops:
+      find_by_id_op:
+        collection_find_one: "TEMPLATE(collection)"
+        filter:
+          _id: "{my_id}"
+        projection:
+          include:
+            - "value"
+            - "seq"
+
+  find_by_value:
+    ops:
+      find_by_value_op:
+        collection_find_one: "TEMPLATE(collection)"
+        filter:
+          some_value: "{my_value}"
+        projection:
+          include:
+            - "*"
+        
+  find_by_ineq:
+    ops:
+      find_by_ineq_op:
+        collection_find: "TEMPLATE(collection)"
+        filter:
+          seq:
+            $lt: "{my_seq}"
+        limit: 10
+        sort:
+          seq: desc
+        projection:
+          include:
+            - "seq"
+
+  vector_find:
+    ops:
+      vector_find_op:
+        collection_find: "TEMPLATE(collection)"
+        limit: 10
+        vector: "{my_vector}"
+        include_similarity: true
+        projection:
+          include:
+            - "seq"
+
+  filtered_vector_find:
+    ops:
+      vector_find_op:
+        collection_find: "TEMPLATE(collection)"
+        limit: 10
+        vector: "{my_vector}"
+        filter:
+          seq:
+            $lt: "{my_seq}"
+          some_value:
+            $exists: true
+        projection:
+          include:
+            - "seq"
+          exclude:
+            - "_id"
