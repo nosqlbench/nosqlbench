@@ -83,9 +83,6 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
 
     private void createClient() {
 
-	    /*
-            TODO: deprecate op/dispensers and duplicate + test and document + ensure replication factor map is there
-        */
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
         clientOptions = clientOptions.destination(astraDestination);
 
