@@ -24,12 +24,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiCreateDatabaseOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.DataApiCreateNamespaceOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDbAdminCreateKeyspaceOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDbAdminDropKeyspaceOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDbAdminListKeyspacesOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDropDatabaseOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDropNamespaceOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiGetDatabaseInfoOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiListDatabasesOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.DataApiListNamespacesOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionCountDocumentsOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionDeleteManyOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionDeleteOneOpDispenser;
