@@ -35,6 +35,9 @@ blocks:
         ####   Explicit-list case for documents
         ####      'documents', free-form list of objects, required in this case
         ####      ('document_template'/'batch_size' cannot be used)
+        ####      NOTE: use distinct bindings for the documents' _id (e.g. doc_id_1, doc_id_2, ...).
+        ####      Reusing the same binding name causes a write collision since bindings are
+        ####      evaluated as a pure function of the cycle index (one and the same across these rows)
         # documents:
         #   - {"a": 1}
         #   - a: 2
@@ -361,9 +364,9 @@ blocks:
         ####   Explicit-list case for rows
         ####      'rows', free-form list of maps, required in this case
         ####      ('row_template'/'batch_size' cannot be used)
-        ####      NOTE: use distinct binding names per row (e.g. uuid_1, uuid_2).
-        ####      Reusing the same binding name causes a write collision because uuid
-        ####      is generated deterministically. 
+        ####      NOTE: use distinct bindings for the rows' id (e.g. uuid_1, uuid_2).
+        ####      Reusing the same binding name causes a write collision since bindings are
+        ####      evaluated as a pure function of the cycle index (one and the same across these rows)
         # rows:
         #   - id: "{uuid_1}"
         #     name: "Alice"
@@ -382,26 +385,27 @@ blocks:
       # "updateOne" - update a single row in a table:
       tu1:
         table_update_one: "TEMPLATE(table)"
+        #### required filter (free-form):
+        filter:
+          id:
+            $eq: "{the_id}"
         #### required update (supports $set and $unset):
         update:
+          #### optional $set (a map: column name -> value to set)
           $set:
             name: "UpdatedName"
             age: 99
           #### optional $unset (list of column names to reset to null):
           # $unset:
           #   - description
-        #### optional filter (free-form):
-        # filter:
-        #   id:
-        #     $eq: "{the_id}"
 
       # "deleteOne" - delete a single row from a table:
       td1:
         table_delete_one: "TEMPLATE(table)"
-        #### optional filter (free-form):
-        # filter:
-        #   id:
-        #     $eq: "{the_id}"
+        #### required filter (free-form):
+        filter:
+          id:
+            $eq: "{the_id}"
 
       # "deleteMany" - delete multiple rows from a table:
       tdm:
@@ -486,7 +490,7 @@ blocks:
           # ascii: true
           # normalize: true
           # case_sensitive: false
-        #### optional: if_not_exists (default false):
+        #### optional: if_not_exists (uses client default if omitted):
         # if_not_exists: true
 
       # "createVectorIndex" - create a vector (ANN) index on a table vector column:
@@ -501,7 +505,7 @@ blocks:
           # metric: "cosine"
           #### optional source model hint:
           # source_model: "openai-v3-small"
-        #### optional: if_not_exists (default false):
+        #### optional: if_not_exists (uses client default if omitted):
         # if_not_exists: true
 
       # "createTextIndex" - create a lexical (text search) index on a table text column:
@@ -521,7 +525,7 @@ blocks:
           #     - name: lowercase
           #     - name: stop
           #   charFilters: []
-        #### optional: if_not_exists (default false):
+        #### optional: if_not_exists (uses client default if omitted):
         # if_not_exists: true
 
       # "listIndexes" - list all indexes on a table (returns full index descriptor list):
@@ -617,7 +621,7 @@ blocks:
             #### optional clustering columns (partitionSort; 1 = ascending, -1 = descending):
             # partitionSort:
             #   age: 1
-        #### optional if_not_exists flag (default false):
+        #### optional if_not_exists flag (uses client default if omitted):
         # if_not_exists: true
 
       # "alterTable" - alter a table's columns (add or drop):
@@ -635,7 +639,7 @@ blocks:
       # "dropTable" - drop a table from the database:
       drtbl:
         db_drop_table: "TEMPLATE(table)"
-        #### optional if_exists flag (default false):
+        #### optional if_exists flag (uses client default if omitted):
         # if_exists: true
 
       # "listTables" - list all tables (returns full TableDescriptor list):
@@ -650,7 +654,7 @@ blocks:
       # the op value is the name of the index to drop:
       drtblidx:
         db_drop_table_index: "my_index"
-        #### optional: if_exists (default false):
+        #### optional: if_exists (uses client default if omitted):
         # if_exists: true
 
       # "createType" - create a user-defined type (UDT) in the database,
@@ -663,7 +667,7 @@ blocks:
             street: text
             city: text
             zip: int
-        #### optional if_not_exists flag (default false):
+        #### optional if_not_exists flag (uses client default if omitted):
         # if_not_exists: true
 
       # "alterType" - alter an existing UDT (add or rename fields),
@@ -691,6 +695,6 @@ blocks:
       # the op value is the name of the UDT to drop:
       drtype:
         db_drop_type: "address_type"
-        #### optional: if_exists (default false):
+        #### optional: if_exists (uses client default if omitted):
         # if_exists: true
   
