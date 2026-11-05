@@ -149,15 +149,15 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             // (else: keep default)
         }
 
-        keyspace = finalKeyspace;
+        this.keyspace = finalKeyspace;
     }
 
     private void setDestination() {
         Optional<String> maybeDestinationString = config.getOptional("astraDestination");
         if (maybeDestinationString.isPresent()) {
-            astraDestination = DataAPIDestination.valueOf(maybeDestinationString.get().toUpperCase());
+            this.astraDestination = DataAPIDestination.valueOf(maybeDestinationString.get().toUpperCase());
         } else {
-            astraDestination = DataAPIDestination.ASTRA;
+            this.astraDestination = DataAPIDestination.ASTRA;
         }
     }
 

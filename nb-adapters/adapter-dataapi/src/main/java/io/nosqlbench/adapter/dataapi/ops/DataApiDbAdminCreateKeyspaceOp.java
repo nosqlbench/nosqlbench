@@ -43,8 +43,12 @@ public class DataApiDbAdminCreateKeyspaceOp extends DataApiDBAdminOp {
             Object replValue = replication.get();
             if (replValue instanceof Integer factor) {
                 definition = definition.simpleStrategy(factor);
-            } else if (replValue instanceof Map<?, ?> map) {
-                definition = definition.networkTopologyStrategy((Map<String, Integer>) replValue);
+            } else if (replValue instanceof Map<?, ?> replMap) {
+                if (!replMap.keySet().stream().allMatch(String.class::isInstance)
+                    || !replMap.values().stream().allMatch(Integer.class::isInstance)) {
+                    throw new RuntimeException("Invalid 'replication' map: expected Map<String, Integer> but got " + replMap);
+                }
+                definition = definition.networkTopologyStrategy((Map<String, Integer>) replMap);
             } else {
                 throw new RuntimeException("Invalid value type for 'replication'");
             }

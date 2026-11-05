@@ -62,7 +62,7 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 - All collection DML ops;
 - Table support (DML + DDL);
 - Create/delete collection DDL;
-- Keyspace CRUD;
+- Keyspace management;
 - Ability to target destinations other than production Astra (e.g. HCD, dev Astra, etc)
 - All known bugs in legacy operations are fixed.
 
@@ -77,7 +77,7 @@ _Note: items marked as "legacy" must still undergo the in-progress dataapi adapt
 
 ### Collection-related ops
 
-#### Collection CRUD ops
+#### Collection CRD ops
 
 | Op name | Description |
 |---|---|
