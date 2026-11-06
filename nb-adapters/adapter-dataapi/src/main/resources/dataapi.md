@@ -10,17 +10,42 @@ The adapter is built on top of the [Java client](https://github.com/datastax/ast
 
 ## Command-line parameters
 
-_Note: this release of the adapter is designed to connect to **DataStax Astra DB's Data API** specifically. All examples refer to this case. Subsequent releases will expand the scope to non-Astra-DB instances of Data API._
-
-Connection to the Data API requires an **API Endpoint** and an **Application Token**, plus specification of a **keyspace** to operate in. These are required parameters when launching a NB workload targeting the Data API:
+Connection to the Data API for an Astra DB instance requires an **API Endpoint** and an **Application Token**, plus optional specification of a **keyspace** to operate in. Endpoint and token are required parameters when launching a NB workload targeting the Data API:
 
 ```
-astraToken="..."
-astraApiEndpoint="https://..."
-namespace="the_keyspace"
+./nb [...] \
+    astraToken="..." \                  # required
+    astraApiEndpoint="https://..." \    # required
+    keyspace="the_keyspace"             # optional ('namespace' is a deprecated alias)
 ```
 
 These values are used by the adapter to establish a `DataAPIClient`, from which all subsequent operations are spawned.
+
+### Targeting other destinations
+
+The optional `astraDestination` parameter must be used when the target Data API is on a database other than (production) Astra DB.
+It accepts values in the Data API client's [DataAPIDestination](https://docs.datastax.com/en/astra-api-docs/_attachments/java-client/com/datastax/astra/client/DataAPIDestination.html) enum and must match the provided endpoint and the token. When omitted, it defaults to `DataAPIDestination.ASTRA` (i.e. production Astra DB).
+
+Example 1 - Astra DB Dev environment:
+
+```
+./nb [...] \
+    astraToken="AstraCS:..." \
+    astraApiEndpoint="https://....apps.astra-dev.datastax.com" \
+    keyspace="my_keyspace" \
+    astraDestination="ASTRA_DEV"
+```
+
+Example 2 - locally-running HCD + Data API setup:
+
+```
+./nb [...] \
+    astraToken="Cassandra:Y2Fzc2FuZHJh:Y2Fzc2FuZHJh" \
+    astraApiEndpoint="http://localhost:8181" \
+    keyspace="my_keyspace" \
+    astraDestination="HCD"
+```
+
 
 ## Legacy vs. "new-style" operation
 
@@ -35,26 +60,36 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 **Done:**
 
 - All collection DML ops;
+- Table support (DML + DDL);
 - Create/delete collection DDL;
-- All known bugs in legacy operations are fixed;
-- Table support (DML + DDL)
+- Keyspace management;
+- Ability to target destinations other than production Astra (e.g. HCD, dev Astra, etc)
+- All known bugs in legacy operations are fixed.
 
 **Coming next:**
 
-- Administrative functions (create keyspace and so on), currently left as they were before the overhaul;
-- Ability to target non-Astra and non-prod environments in full;
+- Administrative functions on databases (create DB and so on), currently left as they were before the overhaul;
 - Ability to supply special Data API-related secrets (such as embedding provider API keys for `$vectorize` operations).
 
 ## Supported operations
 
-### Collection ops
+_Note: items marked as "legacy" must still undergo the in-progress dataapi adapter overhaul. Legacy items with a modern replacement, instead, are not mentioned in the following inventory._
+
+### Collection-related ops
+
+#### Collection CRD ops
 
 | Op name | Description |
 |---|---|
 | `db_create_collection` | Create collection |
 | `db_delete_collection` | Drop collection |
-| `list_collections` | List collections' metadata |
-| `list_collection_names` | List collection names |
+| `list_collections` | List collections' metadata (legacy) |
+| `list_collection_names` | List collection names (legacy) |
+
+#### Collection DML ops
+
+| Op name | Description |
+|---|---|
 | `collection_insert_one` | Insert a document |
 | `collection_insert_many` | Insert documents |
 | `collection_find` | Find documents |
@@ -70,7 +105,9 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 | `collection_count_documents` | Count documents |
 | `collection_estimated_document_count` | Estimated document count |
 
-### Table CRUD ops
+### Table-related ops
+
+#### Table CRUD ops
 
 | Op name | Description |
 |---|---|
@@ -79,6 +116,11 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 | `db_drop_table` | Drop table |
 | `db_list_tables` | List tables' metadata |
 | `db_list_table_names` | List table names |
+
+#### Table DML ops
+
+| Op name | Description |
+|---|---|
 | `table_insert_one` | Insert a row |
 | `table_insert_many` | Insert rows |
 | `table_find` | Find rows |
@@ -87,7 +129,7 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 | `table_delete_one` | Delete first row |
 | `table_delete_many` | Delete rows |
 
-### Table index ops
+#### Table index ops
 
 | Op name | Description |
 |---|---|
@@ -96,9 +138,9 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 | `table_create_vector_index` | Create vector index |
 | `table_list_indexes` | List indexes |
 | `table_list_index_names` | List index names |
-| `db_drop_table_index` | Drop index (this is a database-level operation)|
+| `db_drop_table_index` | Drop index (a database-level operation)|
 
-### Type (UDT) ops
+#### User-Defined Type (UDT) ops
 
 | Op name | Description |
 |---|---|
@@ -108,17 +150,17 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 | `db_list_types` | List types |
 | `db_list_type_names` | List type names |
 
-### Admin ops
+### Admin/DatabaseAdmin ops
 
 | Op name | Description |
 |---|---|
-| `create_database` | Create database |
-| `drop_database` | Drop database |
-| `list_databases` | List databases |
-| `get_database_info` | Get database info |
-| `create_namespace` | Create namespace |
-| `drop_namespace` | Drop namespace |
-| `list_namespaces` | List namespaces |
+| `dbadmin_create_keyspace` | Create keyspace |
+| `dbadmin_list_keyspaces` | List keyspaces |
+| `dbadmin_drop_keyspace` | Drop keyspace |
+| `create_database` | Create database (legacy) |
+| `drop_database` | Drop database (legacy) |
+| `list_databases` | List databases (legacy) |
+| `get_database_info` | Get database info (legacy) |
 
 ## Usage notes (new-style ops)
 
@@ -138,7 +180,7 @@ In any case, whenever the API Client is equipped to do so, vectors are transmitt
 
 ### Batched insert many
 
-The `collection_insert_many` and `table_insert_many` ops allow two types of specification for the documents to insert: explicit list and batched. The latter means that a batch size and a "document template" is supplied, and the op resolves them into a list of `batch_size` documents, obtained by cycling through the bindings (hence consuming as many values for each binding). In other words, the pace at which these binding get consumed is increased `batch_size`-fold. See the full reference linked below for the syntax. _It is suggested to reserve such bindings for usage by a batched insert-many only to avoid possible overlapping binding evaluations._
+The `collection_insert_many` and `table_insert_many` ops allow two types of specification for the documents to insert: explicit list and batched. The latter means that a batch size and a "document template" is supplied, and the op resolves them into a list of `batch_size` documents, obtained by cycling through the bindings (hence consuming as many values for each binding). In other words, the pace at which these binding get consumed is increased `batch_size`-fold. See the full reference linked below for the syntax. _It is suggested to reserve such bindings for usage by a batched insert-many only, to avoid possible overlapping binding evaluations._
 
 ### Supported table column types (intentional limitation)
 
@@ -164,9 +206,9 @@ All table-related op dispensers live under the `opdispensers/tables/` subdir and
 
 Consult the self-documenting YAML examples here:
 
-- a simple [minimal running workload](activities/example_workload.yaml);
-    - (a simple [legacy minimal running workload](activities/example_workload_legacy.yaml));
-- a realistic, [ready-to-run workload](activities/data_api_collection_workload.yaml) demonstrating several ops;
-- a comprehensive [table workload](activities/data_api_table_workload.yaml) covering all table ops;
 - [new-style ops full reference](activities/ops_reference.yaml);
     - ([legacy ops full reference](activities/legacy_ops_reference.yaml)).
+- a simple [minimal running workload](activities/example_workload.yaml);
+    - (a simple [legacy minimal running workload](activities/example_workload_legacy.yaml));
+- a realistic, [ready-to-run collection workload](activities/data_api_collection_workload.yaml) demonstrating several ops;
+- a comprehensive [ready-to-run table workload](activities/data_api_table_workload.yaml) covering all table ops;

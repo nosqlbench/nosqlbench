@@ -18,27 +18,33 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiListNamespacesOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiDbAdminCreateKeyspaceOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.function.LongFunction;
 
-public class DataApiListNamespacesOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiListNamespacesOpDispenser.class);
-    private final LongFunction<DataApiListNamespacesOp> opFunction;
+public class DataApiDbAdminCreateKeyspaceOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDbAdminCreateKeyspaceOpDispenser.class);
+    private final LongFunction<DataApiDbAdminCreateKeyspaceOp> opFunction;
 
-    public DataApiListNamespacesOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiDbAdminCreateKeyspaceOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiListNamespacesOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiListNamespacesOp(
-            spaceFunction.apply(l).getDatabase(),
-            spaceFunction.apply(l).getNamespaceAdmin()
-        );
+    private LongFunction<DataApiDbAdminCreateKeyspaceOp> createOpFunction(ParsedOp op) {
+        return (l) -> {
+            Optional<Object> replication = getReplicationFromOp(op, l);
+            return new DataApiDbAdminCreateKeyspaceOp(
+                spaceFunction.apply(l).getDatabase(),
+                spaceFunction.apply(l).getDatabaseAdmin(),
+                targetFunction.apply(l),
+                replication
+            );
+        };
     }
 
     @Override

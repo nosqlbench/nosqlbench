@@ -5,34 +5,20 @@ blocks:
   my_block:
     ops:
 
-      # NEW "deleteCollection", fully documented:
-      delcoll:
-        db_delete_collection: "TEMPLATE(collection)"
+      ################################
+      # IN-COLLECTION OPERATIONS
+      ################################
 
-      # NEW "createCollection", fully documented:
-      crcoll:
-        db_create_collection: "TEMPLATE(collection)"
-        #### required collection definition (free-form, must be valid Data API syntax)
-        definition:
-          vector:
-            dimension: 1024
-            metric: "dot_product"
-            service:
-              provider: "voyageAI"
-              modelName: "voyage-2"
-              authentication:
-                providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
-              parameters:
-                autoTruncate: true
-          indexing:
-            allow:
-              - aField1
-              - aField2
-          defaultId:
-            type: objectId
+      # "insertOne" on a collection:
+      ci1:
+        collection_insert_one: "TEMPLATE(collection)"
+        #### required document to insert, free-form (_id can be omitted; note alternate forms for optional $vector):
+        document:
+          newv2: true
+          # $vector: [1,2,3,4,5,6,7,8,9,0]
 
-      # NEW "insertMany", fully documented:
-      im:
+      # "insertMany" on a collection:
+      cim:
         collection_insert_many: "TEMPLATE(collection)"
         #### Documents can be passed as explicit list or 'batched' (exactly one choice)
         ####   Batched case for documents (required: 'batch_size', 'document_template'):
@@ -49,6 +35,9 @@ blocks:
         ####   Explicit-list case for documents
         ####      'documents', free-form list of objects, required in this case
         ####      ('document_template'/'batch_size' cannot be used)
+        ####      NOTE: use distinct bindings for the documents' _id (e.g. doc_id_1, doc_id_2, ...).
+        ####      Reusing the same binding name causes a write collision since bindings are
+        ####      evaluated as a pure function of the cycle index (one and the same across these rows)
         # documents:
         #   - {"a": 1}
         #   - a: 2
@@ -66,86 +55,8 @@ blocks:
         ####      not mediated by manipulations from the Data API client.
         # chunk_size: 20
 
-      # NEW "insertOne", fully documented:
-      i1:
-        collection_insert_one: "TEMPLATE(collection)"
-        #### required document to insert, free-form (_id can be omitted; note alternate forms for optional $vector):
-        document:
-          newv2: true
-          # $vector: [1,2,3,4,5,6,7,8,9,0]
-
-      # NEW "updateMany", fully documented:
-      um:
-        collection_update_many: "TEMPLATE(collection)"
-        #### (Note: may fail to update more than first page until fix to https://github.com/datastax/astra-db-java/issues/106 is released)
-        #### required update (free-form):
-        update:
-          $set:
-            updated: "yes!"
-        #### optional filter (free-form):
-        # filter:
-        #   $and:
-        #     - marker_field: present
-        #     - not_a_field:
-        #         $exists: false
-        #### optional upsert:
-        # upsert: true
-
-      # NEW "findOneAndReplace". Fully documented:
-      f1repl:
-        collection_find_one_and_replace: "TEMPLATE(collection)"
-        #### required replacement document in its entirety, free-form (_id can be omitted):
-        replacement:
-          new: true
-        #### optional filter (free-form):
-        # filter:
-        #   $and:
-        #     - _id:
-        #         $ne: abcd0123
-        #     - not_a_field:
-        #         $exists: false
-        #### optional upsert:
-        # upsert: true
-        #### optional 'return_document' (values: 'after'/'before')
-        # return_document: after
-        #### optional sort (order matters; can't use if 'vector/ize'):
-        # sort:
-        #   block: asc
-        #   idx: desc
-        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: [1,2,3,4,5,6,7,8,9,0]
-        #### optional vectorize (not if 'sort/vector'):
-        # vectorize: "query string"
-        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
-        # projection:
-        #   exclude:
-        #     - "idx"
-
-      # NEW "findOneAndDelete". Fully documented:
-      f1del:
-        collection_find_one_and_delete: "TEMPLATE(collection)"
-        #### optional filter (free-form):
-        # filter:
-        #   $and:
-        #     - idx:
-        #         $gte: 21
-        #     - not_a_field:
-        #         $exists: false
-        #### optional sort (order matters; can't use if 'vector/ize'):
-        # sort:
-        #   block: asc
-        #   idx: desc
-        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: [1,2,3,4,5,6,7,8,9,0]
-        #### optional vectorize (not if 'sort/vector'):
-        # vectorize: "query string"
-        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
-        # projection:
-        #   exclude:
-        #     - "idx"
-
-      # NEW "updateOne". Fully documented:
-      u1:
+      # "updateOne" on a collection:
+      cu1:
         collection_update_one: "TEMPLATE(collection)"
         #### required update (free-form):
         update:
@@ -168,30 +79,25 @@ blocks:
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
-      # NEW "countDocuments". Fully documented:
-      cd:
-        collection_count_documents: "TEMPLATE(collection)"
+      # "updateMany" on a collection:
+      cupdm:
+        collection_update_many: "TEMPLATE(collection)"
+        #### (Note: may fail to update more than first page until fix to https://github.com/datastax/astra-db-java/issues/106 is released)
+        #### required update (free-form):
+        update:
+          $set:
+            updated: "yes!"
         #### optional filter (free-form):
         # filter:
-        #   fake_field:
-        #     $exists: false
-        #### optional upper bound (a client-side notion. *If provided*, error thrown when exceeded)
-        # upper_bound: 100
+        #   $and:
+        #     - marker_field: present
+        #     - not_a_field:
+        #         $exists: false
+        #### optional upsert:
+        # upsert: true
 
-      # NEW "estimatedDocumentCount". Fully documented:
-      edc:
-        collection_estimated_document_count: "TEMPLATE(collection)"
-
-      # NEW "deleteMany". Fully documented:
-      dm:
-        collection_delete_many: "TEMPLATE(collection)"
-        #### required filter (free-form. truncate with 'filter: {}')
-        filter:
-          idx:
-            $gt: 40
-
-      # NEW "deleteOne". Fully documented:
-      d1:
+      # "deleteOne" on a collection:
+      cd1:
         collection_delete_one: "TEMPLATE(collection)"
         #### required filter (free-form):
         filter:
@@ -209,8 +115,41 @@ blocks:
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
-      # NEW "find". Fully documented:
-      f:
+      # "deleteMany" on a collection:
+      cdm:
+        collection_delete_many: "TEMPLATE(collection)"
+        #### required filter (free-form. truncate with 'filter: {}')
+        filter:
+          idx:
+            $gt: 40
+
+      # "findOne" on a collection:
+      cf1:
+        collection_find_one: "TEMPLATE(collection)"
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - field1: "value1"
+        #     - field2:
+        #         $eq: 123
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: [1,2,3,4,5,6,7,8,9,0]
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   include:
+        #     - "field1"
+        #     - "field2"
+        #### optional includeSimilarity:
+        # include_similarity: false
+
+      # "find" on a collection:
+      cf:
         collection_find: "TEMPLATE(collection)"
         #### optional filter (free-form):
         # filter:
@@ -241,60 +180,8 @@ blocks:
         #### optional includeSortVector (default false):
         # include_sort_vector: true
 
-      # NEW "findOne". Fully documented:
-      f1:
-        collection_find_one: "TEMPLATE(collection)"
-        #### optional filter (free-form):
-        # filter:
-        #   $and:
-        #     - field1: "value1"
-        #     - field2:
-        #         $eq: 123
-        #### optional sort (order matters; can't use if 'vector/ize'):
-        # sort:
-        #   block: asc
-        #   idx: desc
-        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: [1,2,3,4,5,6,7,8,9,0]
-        #### optional vectorize (not if 'sort/vector'):
-        # vectorize: "query string"
-        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
-        # projection:
-        #   include:
-        #     - "field1"
-        #     - "field2"
-        #### optional includeSimilarity:
-        # include_similarity: false
-
-      # NEW "findOneAndUpdate". Fully documented:
-      f1upd:
-        collection_find_one_and_update: "TEMPLATE(collection)"
-        #### required update (free-form):
-        update:
-          $set:
-            myfield2: "new_val"
-          $inc:
-            myfield: 200
-            myfield1: 20
-        #### optional sort (order matters; can't use if 'vector/ize'):
-        # sort:
-        #   block: asc
-        #   idx: desc
-        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
-        # vector: [1,2,3,4,5,6,7,8,9,0]
-        #### optional vectorize (not if 'sort/vector'):
-        # vectorize: "query string"
-        #### optional filter (free-form):
-        # filter:
-        #   $and:
-        #     - field1: "value1"
-        #     - field2:
-        #         $eq: 123
-        #### optional upsert:
-        # upsert: true
-
-      # NEW "findAndRerank", fully documented:
-      farr:
+      # "findAndRerank" on a collection:
+      cfarr:
         collection_find_and_rerank: "TEMPLATE(collection)"
         #### required sort clause. Must have '$hybrid' key, with one of the various forms accepted (also depending on collection settings):
         sort:
@@ -354,115 +241,105 @@ blocks:
         #     param1: value1
         #     param2: 999
 
-      # TABLE OPS -----------------------------------------------------------------------
+      # "findOneAndUpdate" on a collection:
+      cf1upd:
+        collection_find_one_and_update: "TEMPLATE(collection)"
+        #### required update (free-form):
+        update:
+          $set:
+            myfield2: "new_val"
+          $inc:
+            myfield: 200
+            myfield1: 20
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: [1,2,3,4,5,6,7,8,9,0]
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - field1: "value1"
+        #     - field2:
+        #         $eq: 123
+        #### optional upsert:
+        # upsert: true
 
-      # "db_create_table" - create a new table in the database:
-      crtbl:
-        db_create_table: "TEMPLATE(table)"
-        #### required table definition:
-        definition:
-          columns:
-            id: uuid
-            name: text
-            age: int
-            #### vector column (sub-object syntax, dimension required):
-            embeddings:
-              type: vector
-              dimension: 3
-            #### optional vectorize column (commented out; uses an embedding service to auto-populate):
-            # description:
-            #   type: vector
-            #   service:
-            #     provider: "voyageAI"
-            #     modelName: "voyage-2"
-            #     authentication:
-            #       providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
-            #     parameters:
-            #       autoTruncate: true
-          #### NOTE: the Data API createTable command only accepts camelCase here
-          primaryKey:
-            partitionBy: [id]
-            #### optional clustering columns (partitionSort; 1 = ascending, -1 = descending):
-            # partitionSort:
-            #   age: 1
-        #### optional if_not_exists flag (default false):
-        # if_not_exists: true
+      # "findOneAndReplace" on a collection:
+      cf1repl:
+        collection_find_one_and_replace: "TEMPLATE(collection)"
+        #### required replacement document in its entirety, free-form (_id can be omitted):
+        replacement:
+          new: true
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - _id:
+        #         $ne: abcd0123
+        #     - not_a_field:
+        #         $exists: false
+        #### optional upsert:
+        # upsert: true
+        #### optional 'return_document' (values: 'after'/'before')
+        # return_document: after
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: [1,2,3,4,5,6,7,8,9,0]
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   exclude:
+        #     - "idx"
 
-      # "db_alter_table" - alter a table's columns (add or drop):
-      altbl:
-        db_alter_table: "TEMPLATE(table)"
-        #### required alter operation — one of 'add' (map of colName -> type) or 'drop' (list of col names):
-        alter_op:
-          add:
-            new_col: text
-        #### alternative form (drop columns):
-        # alter_op:
-        #   drop:
-        #     - old_col
+      # "findOneAndDelete" on a collection:
+      cf1del:
+        collection_find_one_and_delete: "TEMPLATE(collection)"
+        #### optional filter (free-form):
+        # filter:
+        #   $and:
+        #     - idx:
+        #         $gte: 21
+        #     - not_a_field:
+        #         $exists: false
+        #### optional sort (order matters; can't use if 'vector/ize'):
+        # sort:
+        #   block: asc
+        #   idx: desc
+        #### optional vector (not if 'sort/vectorize'; float list/string repr with commas):
+        # vector: [1,2,3,4,5,6,7,8,9,0]
+        #### optional vectorize (not if 'sort/vector'):
+        # vectorize: "query string"
+        #### optional projection (lists of fields; include and exclude can coexist only for special fields):
+        # projection:
+        #   exclude:
+        #     - "idx"
 
-      # "db_drop_table" - drop a table from the database:
-      drtbl:
-        db_drop_table: "TEMPLATE(table)"
-        #### optional if_exists flag (default false):
-        # if_exists: true
+      # "countDocuments" on a collection:
+      ccd:
+        collection_count_documents: "TEMPLATE(collection)"
+        #### optional filter (free-form):
+        # filter:
+        #   fake_field:
+        #     $exists: false
+        #### optional upper bound (a client-side notion. *If provided*, error thrown when exceeded)
+        # upper_bound: 100
 
-      # "db_list_tables" - list all tables (returns full TableDescriptor list):
-      lstbls:
-        db_list_tables: ""
+      # "estimatedDocumentCount" on a collection:
+      cedc:
+        collection_estimated_document_count: "TEMPLATE(collection)"
 
-      # "db_list_table_names" - list all table names (returns list of strings):
-      lstblnm:
-        db_list_table_names: ""
+      ################################
+      # IN-TABLE OPERATIONS
+      ################################
 
-      # "db_drop_table_index" - drop a table index (a database-level op in the Data API),
-      # the op value is the name of the index to drop:
-      drtblidx:
-        db_drop_table_index: "my_index"
-        #### optional: if_exists (default false):
-        # if_exists: true
-
-      # "db_create_type" - create a user-defined type (UDT) in the database,
-      # the op value is the name of the UDT to create:
-      crtype:
-        db_create_type: "address_type"
-        #### required UDT field definitions (map of fieldName -> column type):
-        definition:
-          fields:
-            street: text
-            city: text
-            zip: int
-        #### optional if_not_exists flag (default false):
-        # if_not_exists: true
-
-      # "db_alter_type" - alter an existing UDT (add or rename fields),
-      # the op value is the name of the UDT to alter:
-      altype:
-        db_alter_type: "address_type"
-        #### required alter operation — one of 'add_fields' (map of fieldName -> type) or 'rename_fields' (map of oldName -> newName):
-        alter_op:
-          add_fields:
-            country: text
-        #### alternative form (rename fields):
-        # alter_op:
-        #   rename_fields:
-        #     old_field_name: new_field_name
-
-      # "db_list_types" - list all UDTs (returns full type descriptor list):
-      lstype:
-        db_list_types: ""
-
-      # "db_list_type_names" - list all UDT names (returns list of strings):
-      lstypenm:
-        db_list_type_names: ""
-
-      # "db_drop_type" - drop a UDT from the database,
-      # the op value is the name of the UDT to drop:
-      drtype:
-        db_drop_type: "address_type"
-        #### optional: if_exists (default false):
-        # if_exists: true
-  
-      # "table_insert_one" - insert a single row into a table:
+      # "insertOne" - insert a single row into a table:
       ti1:
         table_insert_one: "TEMPLATE(table)"
         #### required row (map of column name -> value):
@@ -471,7 +348,7 @@ blocks:
           name: "{first_name}"
           age: "{age}"
 
-      # "table_insert_many" - insert multiple rows into a table:
+      # "insertMany" - insert multiple rows into a table:
       tim:
         table_insert_many: "TEMPLATE(table)"
         #### Rows can be passed as explicit list or 'batched' (exactly one choice)
@@ -487,9 +364,9 @@ blocks:
         ####   Explicit-list case for rows
         ####      'rows', free-form list of maps, required in this case
         ####      ('row_template'/'batch_size' cannot be used)
-        ####      NOTE: use distinct binding names per row (e.g. uuid_1, uuid_2).
-        ####      Reusing the same binding name causes a write collision because uuid
-        ####      is generated deterministically. 
+        ####      NOTE: use distinct bindings for the rows' id (e.g. uuid_1, uuid_2).
+        ####      Reusing the same binding name causes a write collision since bindings are
+        ####      evaluated as a pure function of the cycle index (one and the same across these rows)
         # rows:
         #   - id: "{uuid_1}"
         #     name: "Alice"
@@ -505,7 +382,40 @@ blocks:
         ####      not mediated by manipulations from the Data API client.
         # chunk_size: 20
 
-      # "table_find_one" - find a single row in a table:
+      # "updateOne" - update a single row in a table:
+      tu1:
+        table_update_one: "TEMPLATE(table)"
+        #### required filter (free-form):
+        filter:
+          id:
+            $eq: "{the_id}"
+        #### required update (supports $set and $unset):
+        update:
+          #### optional $set (a map: column name -> value to set)
+          $set:
+            name: "UpdatedName"
+            age: 99
+          #### optional $unset (list of column names to reset to null):
+          # $unset:
+          #   - description
+
+      # "deleteOne" - delete a single row from a table:
+      td1:
+        table_delete_one: "TEMPLATE(table)"
+        #### required filter (free-form):
+        filter:
+          id:
+            $eq: "{the_id}"
+
+      # "deleteMany" - delete multiple rows from a table:
+      tdm:
+        table_delete_many: "TEMPLATE(table)"
+        #### optional filter (free-form; omit to truncate the table):
+        # filter:
+        #   age:
+        #     $lt: 18
+
+      # "findOne" - find a single row in a table:
       tf1:
         table_find_one: "TEMPLATE(table)"
         #### optional filter (free-form):
@@ -534,7 +444,7 @@ blocks:
         # include_similarity: false
         #### note: includeSortVector is not yet activated in TableFindOneOptions (commented-out in astra-db-java 2.3.2)
 
-      # "table_find" - find multiple rows in a table:
+      # "find" - find multiple rows in a table:
       tf:
         table_find: "TEMPLATE(table)"
         #### optional filter (free-form):
@@ -568,58 +478,7 @@ blocks:
         #### optional includeSortVector (default false):
         # include_sort_vector: true
 
-      # "table_update_one" - update a single row in a table:
-      tu1:
-        table_update_one: "TEMPLATE(table)"
-        #### required update (supports $set and $unset):
-        update:
-          $set:
-            name: "UpdatedName"
-            age: 99
-          #### optional $unset (list of column names to reset to null):
-          # $unset:
-          #   - description
-        #### optional filter (free-form):
-        # filter:
-        #   id:
-        #     $eq: "{the_id}"
-
-      # "table_delete_one" - delete a single row from a table:
-      td1:
-        table_delete_one: "TEMPLATE(table)"
-        #### optional filter (free-form):
-        # filter:
-        #   id:
-        #     $eq: "{the_id}"
-
-      # "table_delete_many" - delete multiple rows from a table:
-      tdm:
-        table_delete_many: "TEMPLATE(table)"
-        #### optional filter (free-form; omit to truncate the table):
-        # filter:
-        #   age:
-        #     $lt: 18
-
-      # ---------------------------------------------------------------------------
-      # TABLE INDEX OPS
-      # ---------------------------------------------------------------------------
-
-      # "table_create_vector_index" - create a vector (ANN) index on a table vector column:
-      tcvi:
-        table_create_vector_index: "TEMPLATE(table)"
-        #### required: name of the index to create:
-        index_name: "my_vector_index"
-        #### required index definition (column is required):
-        definition:
-          column: "embedding"
-          #### optional similarity metric (cosine, euclidean, dot_product):
-          # metric: "cosine"
-          #### optional source model hint:
-          # source_model: "openai-v3-small"
-        #### optional: if_not_exists (default false):
-        # if_not_exists: true
-
-      # "table_create_index" - create a regular (non-vector, non-text) index on a table column:
+      # "createIndex" - create a regular (non-vector, non-text) index on a table column:
       tci:
         table_create_index: "TEMPLATE(table)"
         #### required: name of the index to create:
@@ -631,10 +490,25 @@ blocks:
           # ascii: true
           # normalize: true
           # case_sensitive: false
-        #### optional: if_not_exists (default false):
+        #### optional: if_not_exists (uses client default if omitted):
         # if_not_exists: true
 
-      # "table_create_text_index" - create a lexical (text search) index on a table text column:
+      # "createVectorIndex" - create a vector (ANN) index on a table vector column:
+      tcvi:
+        table_create_vector_index: "TEMPLATE(table)"
+        #### required: name of the index to create:
+        index_name: "my_vector_index"
+        #### required index definition (column is required):
+        definition:
+          column: "embedding"
+          #### optional similarity metric (cosine, euclidean, dot_product):
+          # metric: "cosine"
+          #### optional source model hint:
+          # source_model: "openai-v3-small"
+        #### optional: if_not_exists (uses client default if omitted):
+        # if_not_exists: true
+
+      # "createTextIndex" - create a lexical (text search) index on a table text column:
       tcti:
         table_create_text_index: "TEMPLATE(table)"
         #### required: name of the index to create:
@@ -651,14 +525,176 @@ blocks:
           #     - name: lowercase
           #     - name: stop
           #   charFilters: []
-        #### optional: if_not_exists (default false):
+        #### optional: if_not_exists (uses client default if omitted):
         # if_not_exists: true
 
-      # "table_list_indexes" - list all indexes on a table (returns full index descriptor list):
+      # "listIndexes" - list all indexes on a table (returns full index descriptor list):
       lsi:
         table_list_indexes: "TEMPLATE(table)"
 
-      # "table_list_index_names" - list all index names on a table (returns list of strings):
+      # "list index names" - list all index names on a table (returns list of strings):
       lsinm:
         table_list_index_names: "TEMPLATE(table)"
 
+      ################################
+      # DB-ADMIN OPERATIONS
+      ################################
+
+      # "create keyspace":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      cks:
+        dbadmin_create_keyspace: "new_keyspace"
+        #### optional replication settings (applies to non-Astra only, e.g. HCD. Ignored on Astra):
+        ####    can be either a scalar integer:
+        # replication: 2
+        ####    ... or a map, datacenter => repl.factor:
+        # replication:
+        #   datacenter1: 2
+        #   datacenter2: 3
+
+      # "list keyspaces":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      lks:
+        dbadmin_list_keyspaces: ""
+
+      # "drop keyspace":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      dks:
+        dbadmin_drop_keyspace: "my_keyspace"
+
+      ################################
+      # IN-DATABASE OPERATIONS
+      ################################
+
+      # "createCollection":
+      crcoll:
+        db_create_collection: "TEMPLATE(collection)"
+        #### required collection definition (free-form, must be valid Data API syntax)
+        definition:
+          vector:
+            dimension: 1024
+            metric: "dot_product"
+            service:
+              provider: "voyageAI"
+              modelName: "voyage-2"
+              authentication:
+                providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
+              parameters:
+                autoTruncate: true
+          indexing:
+            allow:
+              - aField1
+              - aField2
+          defaultId:
+            type: objectId
+
+      # "deleteCollection":
+      delcoll:
+        db_delete_collection: "TEMPLATE(collection)"
+
+      # "createTable" - create a new table in the database:
+      crtbl:
+        db_create_table: "TEMPLATE(table)"
+        #### required table definition:
+        definition:
+          columns:
+            id: uuid
+            name: text
+            age: int
+            #### vector column (sub-object syntax, dimension required):
+            embeddings:
+              type: vector
+              dimension: 3
+            #### optional vectorize column (commented out; uses an embedding service to auto-populate):
+            # description:
+            #   type: vector
+            #   service:
+            #     provider: "voyageAI"
+            #     modelName: "voyage-2"
+            #     authentication:
+            #       providerKey: "SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI"
+            #     parameters:
+            #       autoTruncate: true
+          #### NOTE: the Data API createTable command only accepts camelCase here
+          primaryKey:
+            partitionBy: [id]
+            #### optional clustering columns (partitionSort; 1 = ascending, -1 = descending):
+            # partitionSort:
+            #   age: 1
+        #### optional if_not_exists flag (uses client default if omitted):
+        # if_not_exists: true
+
+      # "alterTable" - alter a table's columns (add or drop):
+      altbl:
+        db_alter_table: "TEMPLATE(table)"
+        #### required alter operation — one of 'add' (map of colName -> type) or 'drop' (list of col names):
+        alter_op:
+          add:
+            new_col: text
+        #### alternative form (drop columns):
+        # alter_op:
+        #   drop:
+        #     - old_col
+
+      # "dropTable" - drop a table from the database:
+      drtbl:
+        db_drop_table: "TEMPLATE(table)"
+        #### optional if_exists flag (uses client default if omitted):
+        # if_exists: true
+
+      # "listTables" - list all tables (returns full TableDescriptor list):
+      lstbls:
+        db_list_tables: ""
+
+      # "list table names" - list all table names (returns list of strings):
+      lstblnm:
+        db_list_table_names: ""
+
+      # "dropTableIndex" - drop a table index (a database-level op in the Data API),
+      # the op value is the name of the index to drop:
+      drtblidx:
+        db_drop_table_index: "my_index"
+        #### optional: if_exists (uses client default if omitted):
+        # if_exists: true
+
+      # "createType" - create a user-defined type (UDT) in the database,
+      # the op value is the name of the UDT to create:
+      crtype:
+        db_create_type: "address_type"
+        #### required UDT field definitions (map of fieldName -> column type):
+        definition:
+          fields:
+            street: text
+            city: text
+            zip: int
+        #### optional if_not_exists flag (uses client default if omitted):
+        # if_not_exists: true
+
+      # "alterType" - alter an existing UDT (add or rename fields),
+      # the op value is the name of the UDT to alter:
+      altype:
+        db_alter_type: "address_type"
+        #### required alter operation — one of 'add_fields' (map of fieldName -> type) or 'rename_fields' (map of oldName -> newName):
+        alter_op:
+          add_fields:
+            country: text
+        #### alternative form (rename fields):
+        # alter_op:
+        #   rename_fields:
+        #     old_field_name: new_field_name
+
+      # "listTypes" - list all UDTs (returns full type descriptor list):
+      lstype:
+        db_list_types: ""
+
+      # "list type names" - list all UDT names (returns list of strings):
+      lstypenm:
+        db_list_type_names: ""
+
+      # "dropType" - drop a UDT from the database,
+      # the op value is the name of the UDT to drop:
+      drtype:
+        db_drop_type: "address_type"
+        #### optional: if_exists (uses client default if omitted):
+        # if_exists: true
+  

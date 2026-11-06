@@ -1,42 +1,16 @@
 # NOTE: this file only lists the (legacy) operations and their syntax in a self-documenting comment-rich form.
 #       It is not a full NB workload file. Refer to the full examples for the overall format.
+# NOTE: these are legacy operations. If designing a new workload, refer to 'ops_reference.yaml' exclusively.
 
 blocks:
   my_block:
     ops:
 
-      # LEGACY "deleteCollection", fully documented:
-      delcoll_legacy:
-        delete_collection: "TEMPLATE(collection)"
+      ################################
+      # IN-COLLECTION OPERATIONS
+      ################################
 
-      # LEGACY "createCollection", fully documented:
-      crcoll_legacy:
-        create_collection: "TEMPLATE(collection)"
-        ### optional vector dimensionality (if present, it's a vector collection. Note plural, 'dimensions'):
-        # dimensions: 1024
-        #### optional similarity function for vector (case-insensitive "COSINE"/"EUCLIDEAN"/"DOT_PRODUCT"):
-        # similarity: DOT_PRODUCT
-        #### optional (required for vectorize) service provider:
-        # serviceProvider: voyageAI
-        #### optional (required for vectorize) service model (note a typo, 'mode'):
-        # serviceMode: voyage-2
-        #### optional KMS secret name for vectorize API key:
-        # serviceSharedSecretKey: SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI
-        #### optional parameters map for vectorize service/model:
-        # serviceParameters:
-        #   autoTruncate: true
-        #### optional default ID type (case-sensitive "objectId"/"uuidv6"/"uuidv7"/"uuid"):
-        # collectionType: objectId
-        #### optional, allow-list for indexing (error if denyIndex present as well):
-        # allowIndex:
-        #   - aField1
-        #   - aField2
-        #### optional, deny-list for indexing (error if allowIndex present as well):
-        # denyIndex:
-        #   - aField1
-        #   - aField2
-
-      # LEGACY "insertMany", fully documented:
+      # "insertMany":
       im_legacy:
         insert_many: "TEMPLATE(collection)"
         # required documents to insert (a list of strings, each a serialized JSON):
@@ -55,7 +29,7 @@ blocks:
         #   # timeout for each individual chunk insertion (milliseconds):
         #   timeout: "5000"
 
-      # LEGACY "insertOne", fully documented (note: identical to new-style op except in the op name):
+      # "insertOne" (note: identical to new-style op except in the op name):
       i1_legacy:
         insert_one: "TEMPLATE(collection)"
         #### required document to insert, free-form (_id can be omitted; note alternate forms for optional $vector):
@@ -65,7 +39,7 @@ blocks:
           # $vector:
           #   $binary: "P4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAD+AAAA/gAAAP4AAAA=="
 
-      # LEGACY "insertOne" with explicit vector, fully documented:
+      # "insertOne" with explicit vector:
       i1vec_legacy:
         insert_one_vector: "TEMPLATE(collection)"
         #### required document to insert, free-form (_id can be omitted, $vector is ignored):
@@ -86,7 +60,7 @@ blocks:
         #   - 1.0
         #   - 1.0
 
-      # LEGACY "updateMany", fully documented:
+      # "updateMany":
       um_legacy:
         update_many: "TEMPLATE(collection)"
         #### required update, free-form:
@@ -102,7 +76,7 @@ blocks:
         #### optional upsert:
         # upsert: true
 
-      # LEGACY replace_one, fully documented:
+      # replace_one:
       repl1_legacy:
         replace_one: "TEMPLATE(collection)"
         #### required replacement document in its entirety, free-form (_id can be omitted):
@@ -131,7 +105,7 @@ blocks:
         #### optional 'returnDocument' (values: 'after'/'before')
         # returnDocument: after
 
-      # LEGACY "findOneAndReplace". Fully documented:
+      # "findOneAndReplace":
       f1repl_legacy:
         find_one_and_replace: "TEMPLATE(collection)"
         #### required replacement document in its entirety, free-form (_id can be omitted):
@@ -160,7 +134,7 @@ blocks:
         #### optional 'returnDocument' (values: 'after'/'before')
         # returnDocument: after
 
-      # LEGACY "findOneAndDelete". Fully documented:
+      # "findOneAndDelete":
       f1del_legacy:
         find_one_and_delete: "TEMPLATE(collection)"
         #### optional filter (either all 'and' or all 'or'):
@@ -182,7 +156,7 @@ blocks:
         #   exclude:
         #     - "idx"
 
-      # LEGACY "updateOne". Fully documented:
+      # "updateOne":
       u1_legacy:
         update_one: "TEMPLATE(collection)"
         #### required update (free-form):
@@ -206,7 +180,7 @@ blocks:
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
-      # LEGACY countDocuments. Fully documented:
+      # countDocuments:
       cd_legacy:
         count_documents: "TEMPLATE(collection)"
         #### required upper bound (a client-side notion. Error thrown if result exceeds it):
@@ -218,15 +192,15 @@ blocks:
         #     field: "idx"
         #     value: 100
 
-      # LEGACY estimatedDocumentCount (only the op name differs from 'new'). Fully documented:
+      # estimatedDocumentCount (only the op name differs from 'new'):
       edc_legacy:
         estimated_document_count: "TEMPLATE(collection)"
 
-      # LEGACY delete-all, i.e. "deleteMany" with no filters (truncate). Fully documented:
+      # delete-all, i.e. "deleteMany" with no filters (truncate):
       da_legacy:
         delete_all: "TEMPLATE(collection_to_truncate)"
 
-      # LEGACY "deleteMany". Fully documented:
+      # "deleteMany":
       dm_legacy:
         delete_many: "TEMPLATE(collection)"
         #### required filter (either all 'and' or all 'or', cannot be empty):
@@ -236,7 +210,7 @@ blocks:
             field: "idx"
             value: 52
 
-      # LEGACY "deleteOne". Fully documented:
+      # "deleteOne":
       d1_legacy:
         delete_one: "TEMPLATE(collection)"
         #### required filter (either all 'and' or all 'or', cannot be empty):
@@ -254,7 +228,7 @@ blocks:
         #### optional vectorize (not if 'sort/vector'):
         # vectorize: "query string"
 
-      # LEGACY "find (no vectors)". Fully documented:
+      # "find (no vectors)":
       find_legacy:
         find: "TEMPLATE(collection)"
         #### optional filter (either all 'and' or all 'or'):
@@ -284,7 +258,7 @@ blocks:
         #### optional pageState to start the find from:
         # pageState: "LQAAAAEBAAAAJDc1NDgyNzk5LTQwN2ItNGEyOC04ODI3LTk5NDA3YmFhMjg4YQDwf///zQA="
 
-      # LEGACY "find with vector". Fully documented:
+      # "find with vector":
       find_vector_legacy:
         find_vector: "TEMPLATE(collection)"
         #### required sort vector (float list/string repr with commas):
@@ -292,7 +266,7 @@ blocks:
         #### optional, limit (defaults to 100):
         # limit: 3
 
-      # LEGACY "find with vector and a filter". Fully documented:
+      # "find with vector and a filter":
       find_vector_filter_legacy:
         find_vector_filter: "TEMPLATE(collection)"
         #### required sort vector (float list/string repr with commas):
@@ -306,13 +280,13 @@ blocks:
         #### optional, limit (defaults to 100):
         # limit: 3
 
-      # LEGACY "findOne (by ID)". Fully documented:
+      # "findOne (by ID)":
       find_by_id_legacy:
         find_by_id: "TEMPLATE(collection)"
         #### required id of the target document:
         id: "zzz"
 
-      # LEGACY "findOne". Fully documented:
+      # "findOne":
       f1_legacy:
         find_one: "TEMPLATE(collection)"
         #### optional filter (either all 'and' or all 'or'):
@@ -337,7 +311,7 @@ blocks:
         #### optional includeSimilarity (default to true in this op):
         # include_similarity: false
 
-      # LEGACY "findOneAndUpdate". Fully documented:
+      # "findOneAndUpdate":
       f1upd_legacy:
         find_one_and_update: "TEMPLATE(collection)"
         #### required update (can only 1 update op, legacy op limitation):
@@ -363,7 +337,7 @@ blocks:
         #### optional upsert:
         # upsert: true
 
-      # LEGACY find-distinct (client-side operation). Fully documented:
+      # find-distinct (client-side operation):
       find_distinct_op_legacy:
         find_distinct: "TEMPLATE(collection)"
         #### required field to read:
@@ -377,7 +351,7 @@ blocks:
         #### optional class for the result (default: java.lang.String)
         # resultClass: "java.lang.Double"
 
-      # LEGACY create collection 'with class' (the 'with class' is a client-side operation only). Fully documented:
+      # create collection 'with class' (the 'with class' is a client-side operation only):
       create_collection_with_class_legacy:
         create_collection_with_class: "TEMPLATE(collection_to_create)"
         #### required class name for the collection instance returned (default is shown):
@@ -405,3 +379,64 @@ blocks:
         # denyIndex:
         #   - aField1
         #   - aField2
+
+      ################################
+      # IN-DATABASE OPERATIONS
+      ################################
+
+      # "createCollection":
+      crcoll_legacy:
+        create_collection: "TEMPLATE(collection)"
+        ### optional vector dimensionality (if present, it's a vector collection. Note plural, 'dimensions'):
+        # dimensions: 1024
+        #### optional similarity function for vector (case-insensitive "COSINE"/"EUCLIDEAN"/"DOT_PRODUCT"):
+        # similarity: DOT_PRODUCT
+        #### optional (required for vectorize) service provider:
+        # serviceProvider: voyageAI
+        #### optional (required for vectorize) service model (note a typo, 'mode'):
+        # serviceMode: voyage-2
+        #### optional KMS secret name for vectorize API key:
+        # serviceSharedSecretKey: SHARED_SECRET_EMBEDDING_API_KEY_VOYAGEAI
+        #### optional parameters map for vectorize service/model:
+        # serviceParameters:
+        #   autoTruncate: true
+        #### optional default ID type (case-sensitive "objectId"/"uuidv6"/"uuidv7"/"uuid"):
+        # collectionType: objectId
+        #### optional, allow-list for indexing (error if denyIndex present as well):
+        # allowIndex:
+        #   - aField1
+        #   - aField2
+        #### optional, deny-list for indexing (error if allowIndex present as well):
+        # denyIndex:
+        #   - aField1
+        #   - aField2
+
+      # "deleteCollection":
+      delcoll_legacy:
+        delete_collection: "TEMPLATE(collection)"
+
+      ################################
+      # DB-ADMIN OPERATIONS
+      ################################
+
+      # "create namespace (=keyspace)":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      cns_legacy:
+        create_namespace: "new_keyspace"
+        #### optional replication settings (applies to non-Astra only, e.g. HCD. Ignored on Astra):
+        ####    can be either a scalar integer:
+        # replication: 2
+        ####    ... or a map datacenter->repl.factor:
+        # replication:
+        #   datacenter1: 2
+        #   datacenter2: 3
+
+      # "list namespaces (=keyspaces)":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      lns_legacy:
+        list_namespaces: ""  # what is put in this string is irrelevant
+
+      # "drop namespace (=keyspace)":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      dns_legacy:
+        drop_namespace: "my_keyspace"
