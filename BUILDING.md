@@ -1,5 +1,14 @@
 # Building NoSQLBench
 
+## versioning
+
+NoSQLBench follows a specific versioning convention.
+A version such as `5.25.18` means:
+
+- the `5` marks a major release (changing only with major, backward-incompatible modifications in the overall NB API);
+- the `25` is locked with the JDK version used to build it;
+- the `18` (called _minor_ in this context) is an incremental number marking releases, which effectively retain backward-compatibility (save for exceptional circumstances, bug fixes and such)
+
 ## requirements
 
 You need Java 25 or newer to build NoSQLBench.
