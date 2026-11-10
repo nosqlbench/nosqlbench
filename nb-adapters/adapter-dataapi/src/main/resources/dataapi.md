@@ -172,11 +172,11 @@ In other cases, when it was deemed more convenient, the syntax is more constrain
 
 Many commands allow to supply **vectors**: these can be expressed in the YAML:
 
-- literally, as lists of floating point numbers: `[0.1,-3.2,1.9]`;
-- literally, as a string containing comma separated floating points: `"0.1,-3.2,1.9"`;
-- via an appropriate binding, e.g. `"{my_vector_binding}"`: see the `cim` op in `ops_reference.yaml` for an example.
+- literally, as lists of (floating-point) numbers: `[0.1,-3.2,1.9]`;
+- literally, as a string containing comma-separated floating points: `"0.1,-3.2,1.9"`;
+- via an appropriate binding, e.g. `"{the_vector_binding}"`.
 
-In any case, whenever the API Client is equipped to do so, vectors are transmitted in the bandwidth optimized binary encoded form regardless of how they are given. You should avoid constructing binary-encoded syntax manually. 
+In any case, whenever the API Client is equipped to do so, vectors are transmitted in the bandwidth-optimized binary-encoded form regardless of how they are given. One _should not_ manually construct the binary-encoding syntax (e.g. as part of an insertee document for a `collection_insert_one` op).
 
 For collections, the reserved `$vector` field of a document is binary encoded automatically. Tables have no reserved vector column, so the `table_insert_one` and `table_insert_many` ops take an explicit, optional
 `vector_columns` list naming the columns whose values are to be sent as binary encoded vectors. See `ops_reference.yaml` in the example section below.
