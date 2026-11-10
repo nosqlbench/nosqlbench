@@ -16,8 +16,6 @@ blocks:
         document:
           newv2: true
           # $vector: [1,2,3,4,5,6,7,8,9,0]
-          # $vector: {"$binary": "PaPXCr8euFI+x64U"}   # Base64-encoded vector
-          # exampleBinary: {"$binary": "PaPXCr8euFI+x64U"}   # generic binary field
 
       # "insertMany" on a collection:
       cim:
@@ -349,7 +347,7 @@ blocks:
           id: "{uuid}"
           name: "{first_name}"
           age: "{age}"
-          # my_vec: [0.1, 0.2, 0.3]
+          # my_vec1: [0.1, 0.2, 0.3]
         #### optional list of column(s) whose values are sent as binary-encoded vectors; 
         #### if not specified, then the value is NOT encoded by default:
         # vector_columns:
@@ -387,7 +385,7 @@ blocks:
         ####      (applies to both the 'rows' and 'row_template' cases):
         # vector_columns:
         #   - my_vec1
-        #   = my_vec2
+        #   - my_vec2
         #### optional ordered flag (default false):
         # ordered: false
         #### optional for splitting the input list into separate requests (default 50):

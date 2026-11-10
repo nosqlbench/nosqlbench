@@ -60,8 +60,6 @@ import io.nosqlbench.adapters.api.activityimpl.BaseOpDispenser;
 import io.nosqlbench.adapters.api.activityimpl.uniform.DriverAdapter;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
@@ -300,30 +298,12 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             }
         } else if (rawVectorValues instanceof List) {
             return getVectorValuesList(rawVectorValues);
-        } else if (rawVectorValues instanceof Map<?, ?> m && m.containsKey("$binary")) {
-            return unpackBinaryVector(String.valueOf(m.get("$binary")));
         } else if (rawVectorValues == null) {
             throw new RuntimeException("Invalid specification for values (null)");
         } else {
             throw new RuntimeException("Invalid type specified for values (type: " + rawVectorValues.getClass().getSimpleName() + "), values: " + rawVectorValues.toString());
         }
         return floatValues;
-    }
-
-    /// Decodes a Base64 `$binary` vector payload (big-endian packed 32-bit floats) into float values.
-    protected float[] unpackBinaryVector(String base64) {
-        byte[] bytes;
-        try {
-            bytes = Base64.getDecoder().decode(base64);
-        } catch (IllegalArgumentException e) {
-            throw new OpConfigError("Invalid Base64 in '$binary' vector value: " + e.getMessage());
-        }
-        if ((bytes.length & 3) != 0) {
-            throw new OpConfigError("Invalid '$binary' vector value: length (" + bytes.length + " bytes) is not a multiple of 4");
-        }
-        float[] floats = new float[bytes.length >> 2];
-        ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).asFloatBuffer().get(floats);
-        return floats;
     }
 
     protected float[] getVectorValuesList(Object rawVectorValues) {

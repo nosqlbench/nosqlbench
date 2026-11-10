@@ -170,22 +170,16 @@ In other cases, when it was deemed more convenient, the syntax is more constrain
 
 ### Vectors
 
-The insert_one/many() commands allow you to supply **vectors**: these can be expressed in your `.yaml` workload:
+Many commands allow to supply **vectors**: these can be expressed in the YAML:
 
-- as lists of floating point numbers: `[0.1,-3.2,1.9]`;
-- as a string containing comma seperated floating points: `"0.1,-3.2,1.9"`;
-- as a Base64 `$binary` object (big endian packed 32-bit floats), e.g. `{"$binary": "PaPXCr8euFI+x64U"}`.
+- literally, as lists of floating point numbers: `[0.1,-3.2,1.9]`;
+- literally, as a string containing comma separated floating points: `"0.1,-3.2,1.9"`;
+- via an appropriate binding, e.g. `"{my_vector_binding}"`: see the `cim` op in `ops_reference.yaml` for an example.
 
-The binary-encoded objects are more performant. 
+In any case, whenever the API Client is equipped to do so, vectors are transmitted in the bandwidth optimized binary encoded form regardless of how they are given. You should avoid constructing binary-encoded syntax manually. 
 
-### Binary (`$binary`) values
-
-The `collection_insert_one` and `collection_insert_many` ops accept `{"$binary": "<base64>"}` values.
-For the reserved `$vector` field of a document, the value is decoded and handled (on your behalf) as any other vector.
-For any other field (e.g. `exampleBinary: {"$binary": "PaPXCr8euFI+x64U"}`) the object is passed through to the Data API as is.
-
-Tables have no reserved vector column, so the `table_insert_one` and `table_insert_many` ops take an explicit, optional
-`vector_columns` list naming the columns whose values are to be sent as binary encoded vectors. See `ops_reference.yaml` in the example section below. 
+For collections, the reserved `$vector` field of a document is binary encoded automatically. Tables have no reserved vector column, so the `table_insert_one` and `table_insert_many` ops take an explicit, optional
+`vector_columns` list naming the columns whose values are to be sent as binary encoded vectors. See `ops_reference.yaml` in the example section below.
 
 Float lists in columns _not_ listed in `vector_columns` are sent as plain JSON arrays.
 
