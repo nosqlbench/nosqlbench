@@ -870,6 +870,7 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         Row row = Row.create();
         rowMap.forEach((column, value) -> {
             if (vectorColumns.contains(column) && value != null) {
+                // DataAPIVector() automatically base64 encodes
                 row.add(column, new DataAPIVector(getVectorValues(value)));
             } else {
                 row.add(column, value);
