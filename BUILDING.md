@@ -76,7 +76,7 @@ _This section describes the steps for a full end-to-end release. Write access to
   - corresponds to the "latest" release on Github (`5.25.10` indeed)
   - contains `5.25.10-SNAPSHOT` in its `mvn-defaults/pom.xml`
 - the latest commit on `main` is `011` and has no tags
-  - in it, the `mvn-defaults/pom.xml` already states `5.25.11-SNAPSHOT` (this happened right after releasing 5.25.10 in some `010-b` commit)
+  - in it, the `mvn-defaults/pom.xml` already states `5.25.11-SNAPSHOT` (this happened right after releasing `5.25.10` in some `010-b` commit)
 
 Desired **end state**:
 
