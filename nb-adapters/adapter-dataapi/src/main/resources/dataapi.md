@@ -176,7 +176,11 @@ Many commands allow to supply **vectors**: these can be expressed in the YAML:
 - literally, as a string containing comma-separated floating points: `"0.1,-3.2,1.9"`;
 - via an appropriate binding, e.g. `"{the_vector_binding}"`.
 
-In any case, whenever the API Client is equipped to do so, vectors are transmitted in the bandwidth-optimized binary-encoded form regardless of how they are given. One _should not_ manually construct the binary-encoding syntax (e.g. as part of an insertee document for a `collection_insert_one` op).
+For some operations, the API Client can encode vectors in binary form when sending payloads to the API, which optimizes the bandwidth. This is not to be done manually in the documents/rows appearing in the YAML.
+
+For collections, the reserved `$vector` field of documents to insert (plus a few other cases) is binary-encoded automatically.
+
+Tables have no designated vector column names, therefore for the `table_insert_one` and `table_insert_many` operations, one should explicitly name the columns that must be binary-encoded, using the vector_columns list parameter. Other columns in the rows to insert, even if they are lists of floats, will be transmitted as they are. See ops_reference.yaml for comprehensive examples.
 
 ### Batched insert many
 

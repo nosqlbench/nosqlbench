@@ -828,13 +828,43 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
     /* TABLE OP DISPENSER UTILS START HERE */
 
     /**
+     * Reads the optional "vector_columns" op field: names of the row columns whose values
+     * are to be wrapped as {@link DataAPIVector} (hence sent in binary-encoded form).
+     * Unlike collections (which have the reserved '$vector'), tables need these to be explicit.
+     */
+    @SuppressWarnings("unchecked")
+    protected Set<String> getVectorColumnsFromOp(ParsedOp op, long l) {
+        Optional<LongFunction<List>> vcFunc = op.getAsOptionalFunction("vector_columns", List.class);
+        if (vcFunc.isEmpty()) {
+            return Set.of();
+        }
+        List<Object> names = vcFunc.get().apply(l);
+        return names.stream().map(String::valueOf).collect(Collectors.toSet());
+    }
+
+    /**
+     * Builds a {@link Row} from a free-form column->value map, wrapping the values of
+     * the given vector columns as {@link DataAPIVector}.
+     */
+    protected Row getRowFromRawMap(Map<String, Object> rowMap, Set<String> vectorColumns) {
+        Row row = Row.create();
+        rowMap.forEach((column, value) -> {
+            if (vectorColumns.contains(column) && value != null) {
+                // DataAPIVector() automatically base64 encodes
+                row.add(column, new DataAPIVector(getVectorValues(value)));
+            } else {
+                row.add(column, value);
+            }
+        });
+        return row;
+    }
+
+    /**
      * Builds a {@link Row} from the op's "row" field, which is expected to be a free-form map of column->value.
      */
     protected Row getRowFromOp(ParsedOp op, long l) {
         Map<String, Object> rowMap = getFreeFormFromOp(op, l, "row", true);
-        Row row = Row.create();
-        rowMap.forEach(row::add);
-        return row;
+        return getRowFromRawMap(rowMap, getVectorColumnsFromOp(op, l));
     }
 
     /**
@@ -842,11 +872,8 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
      */
     protected List<Row> getRowsFromOp(ParsedOp op, long l) {
         List<Map<String, Object>> rowMapList = getFreeFormListFromOp(op, l, "rows", true);
-        return rowMapList.stream().map(rowMap -> {
-            Row row = Row.create();
-            rowMap.forEach(row::add);
-            return row;
-        }).toList();
+        Set<String> vectorColumns = getVectorColumnsFromOp(op, l);
+        return rowMapList.stream().map(rowMap -> getRowFromRawMap(rowMap, vectorColumns)).toList();
     }
 
     /// Retrieve a row template for batched array of rows and, given the batch size,
@@ -860,13 +887,9 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
         return (l) -> {
             Long lBase = l * batchSize;
             LongFunction<Map> mapper = rtMapFunc.get();
+            Set<String> vectorColumns = getVectorColumnsFromOp(op, l);
             return LongStream.range(0, batchSize)
-                .mapToObj(inIndex -> {
-                    Map<String, Object> rowMap = mapper.apply(lBase + inIndex);
-                    Row row = Row.create();
-                    rowMap.forEach(row::add);
-                    return row;
-                })
+                .mapToObj(inIndex -> getRowFromRawMap(mapper.apply(lBase + inIndex), vectorColumns))
                 .collect(Collectors.toList());
         };
     }

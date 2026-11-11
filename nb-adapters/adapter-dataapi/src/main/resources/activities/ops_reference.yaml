@@ -347,6 +347,12 @@ blocks:
           id: "{uuid}"
           name: "{first_name}"
           age: "{age}"
+          # my_vec1: [0.1, 0.2, 0.3]
+        #### optional list of column(s) whose values are sent as binary-encoded vectors; 
+        #### if not specified, then the value is NOT encoded by default:
+        # vector_columns:
+        #   - my_vec1
+        #   - my_vec2
 
       # "insertMany" - insert multiple rows into a table:
       tim:
@@ -374,6 +380,12 @@ blocks:
         #   - id: "{uuid_2}"
         #     name: "Bob"
         #     age: 25
+        #### optional list of columns whose values are sent as binary-encoded vectors
+        #### if not specified, then the value is NOT encoded by default:
+        ####      (applies to both the 'rows' and 'row_template' cases):
+        # vector_columns:
+        #   - my_vec1
+        #   - my_vec2
         #### optional ordered flag (default false):
         # ordered: false
         #### optional for splitting the input list into separate requests (default 50):
