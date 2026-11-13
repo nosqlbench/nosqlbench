@@ -18,24 +18,24 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.dtsx.astra.sdk.db.domain.CloudProviderType;
 
-import java.util.UUID;
-import java.util.regex.Pattern;
+public class DataApiAdminCreateDatabaseOp extends DataApiAdminOp {
+    private final String name;
+    private final CloudProviderType cloud;
+    private final String cloudRegion;
+    private final boolean waitForDb;
 
-public class DataApiDropDatabaseOp extends DataApiAdminOp {
-    private static final Pattern UUID_PATTERN = Pattern.compile(
-        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
-    private final String nameOrUUID;
-    private final boolean isUUID;
-
-    public DataApiDropDatabaseOp(Database db, AstraDBAdmin admin, String nameOrUUID) {
+    public DataApiAdminCreateDatabaseOp(Database db, AstraDBAdmin admin, String name, CloudProviderType cloud, String cloudRegion, boolean waitForDb) {
         super(db, admin);
-        this.nameOrUUID = nameOrUUID;
-        this.isUUID = UUID_PATTERN.matcher(nameOrUUID).matches();
+        this.name = name;
+        this.cloud = cloud;
+        this.cloudRegion = cloudRegion;
+        this.waitForDb = waitForDb;
     }
 
     @Override
     public Object apply(long value) {
-        return isUUID ? admin.dropDatabase(UUID.fromString(nameOrUUID)) : admin.dropDatabase(nameOrUUID);
+        return admin.createDatabase(name, cloud, cloudRegion, waitForDb);
     }
 }

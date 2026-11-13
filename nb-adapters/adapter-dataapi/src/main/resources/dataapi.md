@@ -46,35 +46,30 @@ Example 2 - locally-running HCD + Data API setup:
     astraDestination="HCD"
 ```
 
+## Modern and legacy ops
 
-## Legacy vs. "new-style" operation
+A major rework of the adapter ops has been done in the second half of 2026. A full, enriched and consistent set of new ops (with new names) has been introduced.
 
-In September 2026, a major rework of the ops has been initiated, essentially marking all operations existing so far as "legacy" and introducing a whole new set of ops, coming with more extensible naming conventions (e.g. the legacy `find` op has become `collection_find`). The overhaul has reached its first milestone (collection CRUD and all collection operations).
+All pre-existing operations are now marked 'legacy' (but still received fixes for all identified bugs and some obvious additive behaviour extensions when it made sense). No workload will break. However, the user is encouraged to refrain from using the legacy ops for a new workload. (Legacy ops are documented in a separate file, see below.)
 
-The legacy operations received bug fixes (plus obvious additive extensions to their behaviour when it made sense to). So, no pre-existing workload will break. However, the user is encouraged to build new workload exclusively using the new-style operations.
+### Current status of the adapter
 
-For a detailed catalog of the legacy and the new-style operations, with their syntax, consult the "Examples" section below.
-
-### Current status of the overhaul
-
-**Done:**
+**Features:**
 
 - All collection DML ops;
 - Table support (DML + DDL);
 - Create/delete collection DDL;
 - Keyspace management;
+- Administrative functions on databases (create/drpo DB, list DBs, get DB info);
 - Ability to target destinations other than production Astra (e.g. HCD, dev Astra, etc)
-- All known bugs in legacy operations are fixed.
+- Bugfixes to all known bugs found including 'legacy' operations.
 
 **Coming next:**
 
-- Administrative functions on databases (create DB and so on), currently left as they were before the overhaul;
-- Ability to supply special Data API-related secrets (such as embedding provider API keys for `$vectorize` operations).
+- Ability to supply special Data API-related secrets as headers (such as embedding provider API keys for `$vectorize` operations).
 - Global options to the Data API client, esp. configurable timeout for requests.
 
 ## Supported operations
-
-_Note: items marked as "legacy" must still undergo the in-progress dataapi adapter overhaul. Legacy items with a modern replacement, instead, are not mentioned in the following inventory._
 
 ### Collection-related ops
 
@@ -155,13 +150,13 @@ _Note: items marked as "legacy" must still undergo the in-progress dataapi adapt
 
 | Op name | Description |
 |---|---|
+| `admin_create_database` | Create database |
+| `admin_list_databases` | List databases |
+| `admin_get_database_info` | Get database info |
+| `admin_drop_database` | Drop database |
 | `dbadmin_create_keyspace` | Create keyspace |
 | `dbadmin_list_keyspaces` | List keyspaces |
 | `dbadmin_drop_keyspace` | Drop keyspace |
-| `create_database` | Create database (legacy) |
-| `drop_database` | Drop database (legacy) |
-| `list_databases` | List databases (legacy) |
-| `get_database_info` | Get database info (legacy) |
 
 ## Usage notes (new-style ops)
 

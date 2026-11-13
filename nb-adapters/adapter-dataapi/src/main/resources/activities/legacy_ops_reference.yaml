@@ -448,3 +448,30 @@ blocks:
       # Note: strictly speaking, only outside of Astra DB is this a Data API operation
       dns_legacy:
         drop_namespace: "my_keyspace"
+
+      ################################
+      # ADMIN OPERATIONS
+      ################################
+
+      # Create a database (Astra-only; this is a DevOps API operation)
+      crdb_legacy:
+        create_database: "name_of_the_new_db"
+        #### optional cloud provider  ('GCP' = default, 'AWS', 'AZURE')
+        # cloudProvider: "GCP"
+        #### optional region (default = 'us-east1'; choice depends on the cloud provider)
+        # region: "us-east1"
+        #### optional wait-until-active flag (default "true"; if false, creation is async)
+        ####    must be a *string*: anything other than "true" evaluates to false
+        # waitUntilActive: "false"
+
+      # List databases (Astra-only; this is a DevOps API operation)
+      ldbs_legacy:
+        list_databases: ""
+
+      # Get info on a database by its UUID (Astra-only; this is a DevOps API operation)
+      dbinfo_legacy:
+        get_database_info: "00000000-aaaa-1111-bbbb-222222222222"
+
+      # Drop a database (Astra-only; this is a DevOps API operation. USE WITH CAUTION)
+      drdb_legacy:
+        drop_database: "name_od_UUID_of_the_DB_to_drop"

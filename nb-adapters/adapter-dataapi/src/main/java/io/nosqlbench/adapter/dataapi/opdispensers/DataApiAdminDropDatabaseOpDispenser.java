@@ -18,28 +18,26 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiGetDatabaseInfoOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiAdminDropDatabaseOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.UUID;
 import java.util.function.LongFunction;
 
-public class DataApiGetDatabaseInfoOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiGetDatabaseInfoOpDispenser.class);
-    private final LongFunction<DataApiGetDatabaseInfoOp> opFunction;
-
-    public DataApiGetDatabaseInfoOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiAdminDropDatabaseOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiAdminDropDatabaseOpDispenser.class);
+    private final LongFunction<DataApiAdminDropDatabaseOp> opFunction;
+    public DataApiAdminDropDatabaseOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiGetDatabaseInfoOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiGetDatabaseInfoOp(
+    private LongFunction<DataApiAdminDropDatabaseOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiAdminDropDatabaseOp(
             spaceFunction.apply(l).getDatabase(),
             spaceFunction.apply(l).getAdmin(),
-            UUID.fromString(targetFunction.apply(l))
+            targetFunction.apply(l)
         );
     }
 

@@ -17,21 +17,16 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.admin.AstraDBAdmin;
+import com.datastax.astra.client.admin.DatabaseAdmin;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.UUID;
-import java.util.regex.Pattern;
+public abstract class DataApiDbAdminOp extends DataApiBaseOp {
+    protected static final Logger logger = LogManager.getLogger(DataApiDbAdminOp.class);
+    protected final DatabaseAdmin admin;
 
-public class DataApiGetDatabaseInfoOp extends DataApiAdminOp {
-    private final UUID uuid;
-
-    public DataApiGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
-        super(db, admin);
-        this.uuid = uuid;
-    }
-
-    @Override
-    public Object apply(long value) {
-        return admin.getDatabaseInfo(uuid);
+    public DataApiDbAdminOp(Database db, DatabaseAdmin admin) {
+        super(db);
+        this.admin = admin;
     }
 }

@@ -18,11 +18,10 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
-import com.dtsx.astra.sdk.db.domain.CloudProviderType;
 
-public class DataApiListDatabasesOp extends DataApiAdminOp {
+public class DataApiAdminListDatabasesOp extends DataApiAdminOp {
 
-    public DataApiListDatabasesOp(Database db, AstraDBAdmin admin) {
+    public DataApiAdminListDatabasesOp(Database db, AstraDBAdmin admin) {
         super(db, admin);
     }
 

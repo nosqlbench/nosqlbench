@@ -18,24 +18,20 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
-import com.dtsx.astra.sdk.db.domain.CloudProviderType;
 
-public class DataApiCreateDatabaseOp extends DataApiAdminOp {
-    private final String name;
-    private final CloudProviderType cloud;
-    private final String cloudRegion;
-    private final boolean waitForDb;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
-    public DataApiCreateDatabaseOp(Database db, AstraDBAdmin admin, String name, CloudProviderType cloud, String cloudRegion, boolean waitForDb) {
+public class DataApiAdminGetDatabaseInfoOp extends DataApiAdminOp {
+    private final UUID uuid;
+
+    public DataApiAdminGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
         super(db, admin);
-        this.name = name;
-        this.cloud = cloud;
-        this.cloudRegion = cloudRegion;
-        this.waitForDb = waitForDb;
+        this.uuid = uuid;
     }
 
     @Override
     public Object apply(long value) {
-        return admin.createDatabase(name, cloud, cloudRegion, waitForDb);
+        return admin.getDatabaseInfo(uuid);
     }
 }
