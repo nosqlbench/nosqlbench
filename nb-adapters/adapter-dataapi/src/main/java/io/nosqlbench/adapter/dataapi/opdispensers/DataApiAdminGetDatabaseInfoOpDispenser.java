@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,33 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.opdispensers.collections;
+package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.collections.DataApiListCollectionsOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiAdminGetDatabaseInfoOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.UUID;
 import java.util.function.LongFunction;
-import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
-public class DataApiListCollectionsOpDispenser extends DataApiOpDispenser {
-    private final LongFunction<DataApiListCollectionsOp> opFunction;
-    public DataApiListCollectionsOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiAdminGetDatabaseInfoOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiAdminGetDatabaseInfoOpDispenser.class);
+    private final LongFunction<DataApiAdminGetDatabaseInfoOp> opFunction;
+
+    public DataApiAdminGetDatabaseInfoOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiListCollectionsOp> createOpFunction(ParsedOp op) {
-        return l -> {
-            DataApiListCollectionsOp dataApiListCollectionsOp =
-                new DataApiListCollectionsOp(
-                    spaceFunction.apply(l).getDatabase());
-            return dataApiListCollectionsOp;
-        };
+    private LongFunction<DataApiAdminGetDatabaseInfoOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiAdminGetDatabaseInfoOp(
+            spaceFunction.apply(l).getDatabase(),
+            spaceFunction.apply(l).getAdmin(),
+            UUID.fromString(targetFunction.apply(l))
+        );
     }
 
     @Override

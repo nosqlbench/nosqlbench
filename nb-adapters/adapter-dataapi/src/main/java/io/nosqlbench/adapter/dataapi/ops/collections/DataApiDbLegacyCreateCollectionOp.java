@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,20 @@ package io.nosqlbench.adapter.dataapi.ops.collections;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 
 import com.datastax.astra.client.databases.Database;
+import com.datastax.astra.client.collections.definition.CollectionDefinition;
 
-import java.util.List;
+public class DataApiDbLegacyCreateCollectionOp extends DataApiBaseOp {
+    private final String collectionName;
+    private final CollectionDefinition definition;
 
-public class DataApiListCollectionNamesOp extends DataApiBaseOp {
-
-    public DataApiListCollectionNamesOp(Database db) {
+    public DataApiDbLegacyCreateCollectionOp(Database db, String collectionName, CollectionDefinition definition) {
         super(db);
+        this.collectionName = collectionName;
+        this.definition = definition;
     }
 
     @Override
     public Object apply(long value) {
-        List<String> response;
-        response = db.listCollectionNames();
-        return response;
+        return db.createCollection(collectionName, definition);
     }
 }

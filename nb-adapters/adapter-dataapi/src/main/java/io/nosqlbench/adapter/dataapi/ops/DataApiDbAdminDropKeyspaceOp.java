@@ -19,7 +19,7 @@ package io.nosqlbench.adapter.dataapi.ops;
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.DatabaseAdmin;
 
-public class DataApiDbAdminDropKeyspaceOp extends DataApiDBAdminOp {
+public class DataApiDbAdminDropKeyspaceOp extends DataApiDbAdminOp {
     private final String keyspace;
 
     public DataApiDbAdminDropKeyspaceOp(Database db, DatabaseAdmin admin, String keyspace) {

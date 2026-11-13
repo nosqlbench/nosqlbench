@@ -22,13 +22,13 @@ import com.datastax.astra.client.admin.AstraDBAdmin;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class DataApiDropDatabaseOp extends DataApiAdminOp {
+public class DataApiAdminDropDatabaseOp extends DataApiAdminOp {
     private static final Pattern UUID_PATTERN = Pattern.compile(
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     private final String nameOrUUID;
     private final boolean isUUID;
 
-    public DataApiDropDatabaseOp(Database db, AstraDBAdmin admin, String nameOrUUID) {
+    public DataApiAdminDropDatabaseOp(Database db, AstraDBAdmin admin, String nameOrUUID) {
         super(db, admin);
         this.nameOrUUID = nameOrUUID;
         this.isUUID = UUID_PATTERN.matcher(nameOrUUID).matches();

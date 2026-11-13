@@ -17,19 +17,12 @@
 package io.nosqlbench.adapter.dataapi.ops;
 
 public enum DataApiOpType {
-
-    // TO-DO OPS
+    // LEGACY OPS
     // admin ops:
     create_database,
     list_databases,
-    drop_database,
     get_database_info,
-    // in-database ops:
-    list_collections,
-    list_collection_names,
-    
-    // LEGACY OPS
-    // admin ops:
+    drop_database,
     // db-admin ops:
     create_namespace,
     list_namespaces,
@@ -37,6 +30,8 @@ public enum DataApiOpType {
     // in-database ops:
     create_collection,
     create_collection_with_class,
+    list_collections,
+    list_collection_names,
     delete_collection,
     // in-collection ops:
     insert_one,
@@ -62,12 +57,18 @@ public enum DataApiOpType {
 
     // NEW-STYLE OPS
     // admin ops:
+    admin_create_database,
+    admin_list_databases,
+    admin_get_database_info,
+    admin_drop_database,
     // db-admin ops:
     dbadmin_create_keyspace,
     dbadmin_list_keyspaces,
     dbadmin_drop_keyspace,
     // in-database ops:
     db_create_collection,
+    db_list_collections,
+    db_list_collection_names,
     db_delete_collection,
     // in-collection ops:
     collection_insert_one,
@@ -86,8 +87,8 @@ public enum DataApiOpType {
     collection_count_documents,
 
     // TABLE OPS
-    // in-database (table management) ops:
     // NOTE: there are no legacy table ops
+    // in-database (table management) ops:
     db_create_table,
     db_alter_table,
     db_drop_table,

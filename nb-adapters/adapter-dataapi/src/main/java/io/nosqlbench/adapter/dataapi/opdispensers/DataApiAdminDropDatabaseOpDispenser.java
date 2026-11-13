@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.opdispensers.collections;
+package io.nosqlbench.adapter.dataapi.opdispensers;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.collections.DataApiLegacyDeleteCollectionOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiAdminDropDatabaseOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
-import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
-public class DataApiLegacyDeleteCollectionOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiLegacyDeleteCollectionOpDispenser.class);
-    private final LongFunction<DataApiLegacyDeleteCollectionOp> opFunction;
-    public DataApiLegacyDeleteCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiAdminDropDatabaseOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiAdminDropDatabaseOpDispenser.class);
+    private final LongFunction<DataApiAdminDropDatabaseOp> opFunction;
+    public DataApiAdminDropDatabaseOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiLegacyDeleteCollectionOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiLegacyDeleteCollectionOp(
+    private LongFunction<DataApiAdminDropDatabaseOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiAdminDropDatabaseOp(
             spaceFunction.apply(l).getDatabase(),
+            spaceFunction.apply(l).getAdmin(),
             targetFunction.apply(l)
         );
     }

@@ -20,13 +20,13 @@ import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
 import com.dtsx.astra.sdk.db.domain.CloudProviderType;
 
-public class DataApiCreateDatabaseOp extends DataApiAdminOp {
+public class DataApiAdminCreateDatabaseOp extends DataApiAdminOp {
     private final String name;
     private final CloudProviderType cloud;
     private final String cloudRegion;
     private final boolean waitForDb;
 
-    public DataApiCreateDatabaseOp(Database db, AstraDBAdmin admin, String name, CloudProviderType cloud, String cloudRegion, boolean waitForDb) {
+    public DataApiAdminCreateDatabaseOp(Database db, AstraDBAdmin admin, String name, CloudProviderType cloud, String cloudRegion, boolean waitForDb) {
         super(db, admin);
         this.name = name;
         this.cloud = cloud;

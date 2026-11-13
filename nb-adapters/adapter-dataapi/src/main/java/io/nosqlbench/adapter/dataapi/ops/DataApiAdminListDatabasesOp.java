@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.ops.collections;
-import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
+package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.CollectionDefinition;
+import com.datastax.astra.client.admin.AstraDBAdmin;
 
-public class DataApiLegacyCreateCollectionOp extends DataApiBaseOp {
-    private final String collectionName;
-    private final CollectionDefinition definition;
+public class DataApiAdminListDatabasesOp extends DataApiAdminOp {
 
-    public DataApiLegacyCreateCollectionOp(Database db, String collectionName, CollectionDefinition definition) {
-        super(db);
-        this.collectionName = collectionName;
-        this.definition = definition;
+    public DataApiAdminListDatabasesOp(Database db, AstraDBAdmin admin) {
+        super(db, admin);
     }
 
     @Override
     public Object apply(long value) {
-        return db.createCollection(collectionName, definition);
+        return admin.listDatabases();
     }
 }

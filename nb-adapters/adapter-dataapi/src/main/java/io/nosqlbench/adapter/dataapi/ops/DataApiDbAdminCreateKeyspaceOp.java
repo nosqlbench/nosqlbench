@@ -25,7 +25,7 @@ import java.util.Optional;
 
 import com.datastax.astra.client.admin.DatabaseAdmin;
 
-public class DataApiDbAdminCreateKeyspaceOp extends DataApiDBAdminOp {
+public class DataApiDbAdminCreateKeyspaceOp extends DataApiDbAdminOp {
     private final String keyspace;
     private final Optional<Object> replication;
 

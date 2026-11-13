@@ -19,45 +19,30 @@ package io.nosqlbench.adapter.dataapi.opdispensers;
 import com.dtsx.astra.sdk.db.domain.CloudProviderType;
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiCreateDatabaseOp;
+import io.nosqlbench.adapter.dataapi.ops.DataApiAdminCreateDatabaseOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
 
-public class DataApiCreateDatabaseOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiCreateDatabaseOpDispenser.class);
-    private final LongFunction<DataApiCreateDatabaseOp> opFunction;
-    public DataApiCreateDatabaseOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiAdminCreateDatabaseOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiAdminCreateDatabaseOpDispenser.class);
+    private final LongFunction<DataApiAdminCreateDatabaseOp> opFunction;
+    public DataApiAdminCreateDatabaseOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiCreateDatabaseOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiCreateDatabaseOp(
+    private LongFunction<DataApiAdminCreateDatabaseOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiAdminCreateDatabaseOp(
             spaceFunction.apply(l).getDatabase(),
             spaceFunction.apply(l).getAdmin(),
             targetFunction.apply(l),
-            getCloudProvider(op, l),
-            getRegion(op, l),
-            getWaitUntilActive(op, l)
+            getCloudProviderFromOp(op, l),
+            getRegionFromOp(op, l),
+            true
         );
-    }
-
-    /*
-     * These default to the same values used in the API if only the name is provided.
-     */
-    private CloudProviderType getCloudProvider(ParsedOp op, long l) {
-        return CloudProviderType.valueOf(op.getAsFunctionOr("cloudProvider", "GCP").apply(l));
-    }
-
-    private String getRegion(ParsedOp op, long l) {
-        return op.getAsFunctionOr("region", "us-east1").apply(l);
-    }
-
-    private boolean getWaitUntilActive(ParsedOp op, long l) {
-        return op.getAsFunctionOr("waitUntilActive", "true").apply(l).equals("true");
     }
 
     @Override

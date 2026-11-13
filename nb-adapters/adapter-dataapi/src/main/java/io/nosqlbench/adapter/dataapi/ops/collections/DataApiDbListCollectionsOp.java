@@ -1,5 +1,5 @@
 /*
- * Copyright (c) nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.ops;
+package io.nosqlbench.adapter.dataapi.ops.collections;
+import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.admin.DatabaseAdmin;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public abstract class DataApiDBAdminOp extends DataApiBaseOp {
-    protected static final Logger logger = LogManager.getLogger(DataApiDBAdminOp.class);
-    protected final DatabaseAdmin admin;
+public class DataApiDbListCollectionsOp extends DataApiBaseOp {
 
-    public DataApiDBAdminOp(Database db, DatabaseAdmin admin) {
+    public DataApiDbListCollectionsOp(Database db) {
         super(db);
-        this.admin = admin;
+    }
+
+    @Override
+    public Object apply(long value) {
+        return db.listCollections();
     }
 }

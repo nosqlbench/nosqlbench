@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.dataapi.opdispensers.collections;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.collections.DataApiLegacyCreateCollectionWithClassOp;
+import io.nosqlbench.adapter.dataapi.ops.collections.DataApiDbLegacyCreateCollectionWithClassOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,17 +26,17 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.LongFunction;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
-public class DataApiLegacyCreateCollectionWithClassOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiLegacyCreateCollectionWithClassOpDispenser.class);
-    private final LongFunction<DataApiLegacyCreateCollectionWithClassOp> opFunction;
+public class DataApiDbLegacyCreateCollectionWithClassOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDbLegacyCreateCollectionWithClassOpDispenser.class);
+    private final LongFunction<DataApiDbLegacyCreateCollectionWithClassOp> opFunction;
 
-    public DataApiLegacyCreateCollectionWithClassOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+    public DataApiDbLegacyCreateCollectionWithClassOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiLegacyCreateCollectionWithClassOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiLegacyCreateCollectionWithClassOp(
+    private LongFunction<DataApiDbLegacyCreateCollectionWithClassOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiDbLegacyCreateCollectionWithClassOp(
             spaceFunction.apply(l).getDatabase(),
             targetFunction.apply(l),
             this.legacyGetCollectionDefinitionFromOp(op, l),
