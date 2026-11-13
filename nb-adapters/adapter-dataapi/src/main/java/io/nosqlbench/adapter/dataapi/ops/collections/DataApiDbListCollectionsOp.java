@@ -19,9 +19,9 @@ import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 
 import com.datastax.astra.client.databases.Database;
 
-public class DataApiListCollectionsOp extends DataApiBaseOp {
+public class DataApiDbListCollectionsOp extends DataApiBaseOp {
 
-    public DataApiListCollectionsOp(Database db) {
+    public DataApiDbListCollectionsOp(Database db) {
         super(db);
     }
 

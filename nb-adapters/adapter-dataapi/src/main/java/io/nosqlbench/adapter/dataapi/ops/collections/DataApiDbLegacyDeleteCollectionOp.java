@@ -18,20 +18,17 @@ package io.nosqlbench.adapter.dataapi.ops.collections;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 
 import com.datastax.astra.client.databases.Database;
-import com.datastax.astra.client.collections.definition.CollectionDefinition;
 
-public class DataApiLegacyCreateCollectionOp extends DataApiBaseOp {
+public class DataApiDbLegacyDeleteCollectionOp extends DataApiBaseOp {
     private final String collectionName;
-    private final CollectionDefinition definition;
-
-    public DataApiLegacyCreateCollectionOp(Database db, String collectionName, CollectionDefinition definition) {
+    public DataApiDbLegacyDeleteCollectionOp(Database db, String collectionName) {
         super(db);
         this.collectionName = collectionName;
-        this.definition = definition;
     }
 
     @Override
     public Object apply(long value) {
-        return db.createCollection(collectionName, definition);
+        db.dropCollection(collectionName);
+        return null;
     }
 }

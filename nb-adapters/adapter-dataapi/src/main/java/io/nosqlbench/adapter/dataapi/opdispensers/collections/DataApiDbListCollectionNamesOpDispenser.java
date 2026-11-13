@@ -18,25 +18,22 @@ package io.nosqlbench.adapter.dataapi.opdispensers.collections;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.collections.DataApiListCollectionsOp;
+import io.nosqlbench.adapter.dataapi.ops.collections.DataApiDbListCollectionNamesOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 
 import java.util.function.LongFunction;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
-public class DataApiListCollectionsOpDispenser extends DataApiOpDispenser {
-    private final LongFunction<DataApiListCollectionsOp> opFunction;
-    public DataApiListCollectionsOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiDbListCollectionNamesOpDispenser extends DataApiOpDispenser {
+    private final LongFunction<DataApiDbListCollectionNamesOp> opFunction;
+    public DataApiDbListCollectionNamesOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiListCollectionsOp> createOpFunction(ParsedOp op) {
+    private LongFunction<DataApiDbListCollectionNamesOp> createOpFunction(ParsedOp op) {
         return l -> {
-            DataApiListCollectionsOp dataApiListCollectionsOp =
-                new DataApiListCollectionsOp(
-                    spaceFunction.apply(l).getDatabase());
-            return dataApiListCollectionsOp;
+            return new DataApiDbListCollectionNamesOp(spaceFunction.apply(l).getDatabase());
         };
     }
 

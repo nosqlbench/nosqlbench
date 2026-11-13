@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.dataapi.opdispensers.collections;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.collections.DataApiLegacyCreateCollectionOp;
+import io.nosqlbench.adapter.dataapi.ops.collections.DataApiDbLegacyDeleteCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,32 +26,23 @@ import org.apache.logging.log4j.Logger;
 import java.util.function.LongFunction;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
-public class DataApiLegacyCreateCollectionOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiLegacyCreateCollectionOpDispenser.class);
-    private final LongFunction<DataApiLegacyCreateCollectionOp> opFunction;
-
-    public DataApiLegacyCreateCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiDbLegacyDeleteCollectionOpDispenser extends DataApiOpDispenser {
+    private static final Logger logger = LogManager.getLogger(DataApiDbLegacyDeleteCollectionOpDispenser.class);
+    private final LongFunction<DataApiDbLegacyDeleteCollectionOp> opFunction;
+    public DataApiDbLegacyDeleteCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiLegacyCreateCollectionOp> createOpFunction(ParsedOp op) {
-        return (l) -> {
-            DataApiLegacyCreateCollectionOp dataApiCreateCollectionOp =
-                new DataApiLegacyCreateCollectionOp(
-                    spaceFunction.apply(l).getDatabase(),
-                    targetFunction.apply(l),
-                    this.legacyGetCollectionDefinitionFromOp(op, l)
-                );
-
-            return dataApiCreateCollectionOp;
-        };
+    private LongFunction<DataApiDbLegacyDeleteCollectionOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiDbLegacyDeleteCollectionOp(
+            spaceFunction.apply(l).getDatabase(),
+            targetFunction.apply(l)
+        );
     }
 
     @Override
     public DataApiBaseOp getOp(long cycle) {
         return opFunction.apply(cycle);
     }
-
-
 }

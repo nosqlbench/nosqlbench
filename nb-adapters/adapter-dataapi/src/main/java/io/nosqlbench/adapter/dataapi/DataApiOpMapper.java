@@ -64,11 +64,11 @@ import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionU
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiCollectionUpdateOneOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbCreateCollectionOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbDeleteCollectionOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyCreateCollectionOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyCreateCollectionWithClassOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiLegacyDeleteCollectionOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiListCollectionNamesOpDispenser;
-import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiListCollectionsOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbLegacyCreateCollectionOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbLegacyCreateCollectionWithClassOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbLegacyDeleteCollectionOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbListCollectionNamesOpDispenser;
+import io.nosqlbench.adapter.dataapi.opdispensers.collections.DataApiDbListCollectionsOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.DataApiDbDropTableIndexOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbAlterTableOpDispenser;
 import io.nosqlbench.adapter.dataapi.opdispensers.tables.DataApiDbAlterTypeOpDispenser;
@@ -116,6 +116,8 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
         DEPRECATED_OP_TYPES.put(DataApiOpType.list_namespaces,              DataApiOpType.dbadmin_list_keyspaces);
         DEPRECATED_OP_TYPES.put(DataApiOpType.drop_namespace,               DataApiOpType.dbadmin_drop_keyspace);
         // in-database ops:
+        DEPRECATED_OP_TYPES.put(DataApiOpType.list_collections,             DataApiOpType.db_list_collections);
+        DEPRECATED_OP_TYPES.put(DataApiOpType.list_collection_names,        DataApiOpType.db_list_collection_names);
         // in-collection ops:
         DEPRECATED_OP_TYPES.put(DataApiOpType.insert_one,                   DataApiOpType.collection_insert_one);
         DEPRECATED_OP_TYPES.put(DataApiOpType.insert_one_vector,            DataApiOpType.collection_insert_one);
@@ -173,10 +175,6 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case list_databases -> new DataApiListDatabasesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_database -> new DataApiDropDatabaseOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case get_database_info -> new DataApiGetDatabaseInfoOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            // in-database ops:
-            case list_collections -> new DataApiListCollectionsOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case list_collection_names ->
-                new DataApiListCollectionNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
 
             // LEGACY OPS
             // admin ops:
@@ -185,9 +183,12 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case list_namespaces -> new DataApiDbAdminListKeyspacesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case drop_namespace -> new DataApiDbAdminDropKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
-            case create_collection -> new DataApiLegacyCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case create_collection_with_class -> new DataApiLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
-            case delete_collection -> new DataApiLegacyDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_collection -> new DataApiDbLegacyCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case create_collection_with_class -> new DataApiDbLegacyCreateCollectionWithClassOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case list_collections -> new DataApiDbListCollectionsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case list_collection_names ->
+                new DataApiDbListCollectionNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case delete_collection -> new DataApiDbLegacyDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case insert_one_vector -> new DataApiCollectionLegacyInsertOneVectorOpDispenser(adapter, op, typeAndTarget.targetFunction);
@@ -218,6 +219,9 @@ public class DataApiOpMapper implements OpMapper<DataApiBaseOp,DataApiSpace> {
             case dbadmin_drop_keyspace -> new DataApiDbAdminDropKeyspaceOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-database ops:
             case db_create_collection -> new DataApiDbCreateCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_collections -> new DataApiDbListCollectionsOpDispenser(adapter, op, typeAndTarget.targetFunction);
+            case db_list_collection_names ->
+                new DataApiDbListCollectionNamesOpDispenser(adapter, op, typeAndTarget.targetFunction);
             case db_delete_collection -> new DataApiDbDeleteCollectionOpDispenser(adapter, op, typeAndTarget.targetFunction);
             // in-collection ops:
             case collection_insert_one -> new DataApiCollectionInsertOneOpDispenser(adapter, op, typeAndTarget.targetFunction);

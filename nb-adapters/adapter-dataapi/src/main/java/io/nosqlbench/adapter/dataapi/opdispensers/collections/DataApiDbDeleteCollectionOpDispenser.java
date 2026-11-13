@@ -18,7 +18,7 @@ package io.nosqlbench.adapter.dataapi.opdispensers.collections;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.collections.DataApiLegacyDeleteCollectionOp;
+import io.nosqlbench.adapter.dataapi.ops.collections.DataApiDbLegacyDeleteCollectionOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,14 +28,14 @@ import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
 public class DataApiDbDeleteCollectionOpDispenser extends DataApiOpDispenser {
     private static final Logger logger = LogManager.getLogger(DataApiDbDeleteCollectionOpDispenser.class);
-    private final LongFunction<DataApiLegacyDeleteCollectionOp> opFunction;
+    private final LongFunction<DataApiDbLegacyDeleteCollectionOp> opFunction;
     public DataApiDbDeleteCollectionOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiLegacyDeleteCollectionOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiLegacyDeleteCollectionOp(
+    private LongFunction<DataApiDbLegacyDeleteCollectionOp> createOpFunction(ParsedOp op) {
+        return (l) -> new DataApiDbLegacyDeleteCollectionOp(
             spaceFunction.apply(l).getDatabase(),
             targetFunction.apply(l)
         );

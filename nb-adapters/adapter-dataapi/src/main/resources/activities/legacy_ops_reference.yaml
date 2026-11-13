@@ -411,6 +411,14 @@ blocks:
         #   - aField1
         #   - aField2
 
+      # "findCollections" with explain=false (i.e. list collection names)
+      lcolln:
+        list_collection_names: ""
+
+      # "findCollections" with explain=true (i.e. list collection metadata)
+      lcolls:
+        list_collections: ""
+
       # "deleteCollection":
       delcoll_legacy:
         delete_collection: "TEMPLATE(collection)"

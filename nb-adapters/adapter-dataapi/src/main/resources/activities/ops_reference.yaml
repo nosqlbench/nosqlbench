@@ -600,6 +600,14 @@ blocks:
           defaultId:
             type: objectId
 
+      # "findCollections" with explain=false (i.e. list collection names)
+      lcolln:
+        db_list_collection_names: ""
+
+      # "findCollections" with explain=true (i.e. list collection metadata)
+      lcolls:
+        db_list_collections: ""
+
       # "deleteCollection":
       delcoll:
         db_delete_collection: "TEMPLATE(collection)"

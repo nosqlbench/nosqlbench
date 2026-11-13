@@ -70,6 +70,7 @@ For a detailed catalog of the legacy and the new-style operations, with their sy
 
 - Administrative functions on databases (create DB and so on), currently left as they were before the overhaul;
 - Ability to supply special Data API-related secrets (such as embedding provider API keys for `$vectorize` operations).
+- Global options to the Data API client, esp. configurable timeout for requests.
 
 ## Supported operations
 
@@ -82,9 +83,9 @@ _Note: items marked as "legacy" must still undergo the in-progress dataapi adapt
 | Op name | Description |
 |---|---|
 | `db_create_collection` | Create collection |
+| `db_list_collections` | List collections' metadata |
+| `db_list_collection_names` | List collection names |
 | `db_delete_collection` | Drop collection |
-| `list_collections` | List collections' metadata (legacy) |
-| `list_collection_names` | List collection names (legacy) |
 
 #### Collection DML ops
 
