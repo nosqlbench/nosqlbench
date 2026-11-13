@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.1.0-jre</version>
+            <version>33.7.1-jre</version>
             <!-- If Trying to match https://github.com/qdrant/java-client/blob/v1.9.1/build.gradle#L93, use below -->
             <!-- <version>30.1-jre</version> -->
         </dependency>
