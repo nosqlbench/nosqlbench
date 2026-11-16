@@ -21,6 +21,10 @@ Connection to the Data API for an Astra DB instance requires an **API Endpoint**
 
 These values are used by the adapter to establish a `DataAPIClient`, from which all subsequent operations are spawned.
 
+As an alternative to passing the token and endpoint directly in the command invocation, the parameters
+`astraTokenFile` and `astraApiEndpointFile` can be passed, with value the path to a text file whose
+first line is the desired token/API Endpoint.
+
 ### Targeting other destinations
 
 The optional `astraDestination` parameter must be used when the target Data API is on a database other than (production) Astra DB.
@@ -46,6 +50,23 @@ Example 2 - locally-running HCD + Data API setup:
     astraDestination="HCD"
 ```
 
+### Header-based service authentication
+
+API Keys for embedding and reranking services, when needed, can be supplied to the Data API via header
+rather than via secrets stored in the Astra KMS. This is especially useful, for example, when running
+on a test database whose provisioning is automated as part of a test. Adding the following command-line
+parameters results in the appropriate headers being sent with each Data API request:
+
+```
+./nb [...] \
+    astraEmbeddingApiKey="my_e_api_key" \
+    astraRerankingApiKey="my_r_api_key" \
+    ...
+```
+
+As an alternative to the secrets in cleartext on the command line, parameters `astraEmbeddingApiKeyFile`
+and `astraRerankingApiKeyFile` can be supplied, whose value is the path to a text file whose first line holds the desired secret.
+
 ## Modern and legacy ops
 
 A major rework of the adapter ops has been done in the second half of 2026. A full, enriched and consistent set of new ops (with new names) has been introduced.
@@ -60,13 +81,13 @@ All pre-existing operations are now marked 'legacy' (but still received fixes fo
 - Table support (DML + DDL);
 - Create/delete collection DDL;
 - Keyspace management;
-- Administrative functions on databases (create/drpo DB, list DBs, get DB info);
+- Administrative functions on databases (create/drop DB, list DBs, get DB info);
 - Ability to target destinations other than production Astra (e.g. HCD, dev Astra, etc)
+- Ability to supply special Data API-related secrets as headers (such as embedding provider API keys for `$vectorize` operations).
 - Bugfixes to all known bugs found including 'legacy' operations.
 
 **Coming next:**
 
-- Ability to supply special Data API-related secrets as headers (such as embedding provider API keys for `$vectorize` operations).
 - Global options to the Data API client, esp. configurable timeout for requests.
 
 ## Supported operations
