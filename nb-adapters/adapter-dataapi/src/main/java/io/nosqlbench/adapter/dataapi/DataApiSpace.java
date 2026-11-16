@@ -42,6 +42,8 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private final static Logger logger = LogManager.getLogger(DataApiSpace.class);
     private final NBConfiguration config;
     private String astraToken;
+    private Optional<String> embeddingApiKey;
+    private Optional<String> rerankingApiKey;
     private String astraApiEndpoint;
     private DataAPIDestination astraDestination;
     private DataAPIClient dataAPIClient;
@@ -58,6 +60,8 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         super(adapter,name);
         this.config = cfg;
         setToken();
+        setEmbeddingApiKey();
+        setRerankingApiKey();
         setSuperToken();
         setApiEndpoint();
         setKeyspace();
@@ -85,6 +89,15 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
 
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
         clientOptions = clientOptions.destination(astraDestination);
+        if (this.embeddingApiKey.isPresent()) {
+            clientOptions = clientOptions.embeddingAPIKey(embeddingApiKey.get());
+        }
+        if (this.rerankingApiKey.isPresent()) {
+            // Note: this client method is called just 'rerankAPIKey'
+            //          will have effect only after a new build with a client where this
+            //          (or equivalent) is merged: https://github.com/datastax/astra-db-java/pull/119
+            clientOptions = clientOptions.rerankAPIKey(rerankingApiKey.get());
+        }
 
         this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
         if (keyspace != null) {
@@ -165,12 +178,31 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         String tokenFileContents = null;
         Optional<String> tokenFilePath = config.getOptional("astraTokenFile");
         if (tokenFilePath.isPresent()) {
-            tokenFileContents = getTokenFileContents(tokenFilePath.get());
+            tokenFileContents = getSecretFileContents(tokenFilePath.get());
         }
         this.astraToken = (tokenFileContents != null) ? tokenFileContents : config.get("astraToken");
     }
 
-    private String getTokenFileContents(String filePath) {
+    private void setEmbeddingApiKey() {
+        String eakFileContents = null;
+        Optional<String> eakFilePath = config.getOptional("astraEmbeddingApiKeyFile");
+        if (eakFilePath.isPresent()) {
+            eakFileContents = getSecretFileContents(eakFilePath.get());
+        }
+        this.embeddingApiKey = (eakFileContents != null) ? Optional.of(eakFileContents) : config.getOptional("astraEmbeddingApiKey");
+
+    }
+
+    private void setRerankingApiKey() {
+        String rakFileContents = null;
+        Optional<String> rakFilePath = config.getOptional("astraRerankingApiKeyFile");
+        if (rakFilePath.isPresent()) {
+            rakFileContents = getSecretFileContents(rakFilePath.get());
+        }
+        this.rerankingApiKey = (rakFileContents != null) ? Optional.of(rakFileContents) : config.getOptional("astraRerankingApiKey");
+    }
+
+    private String getSecretFileContents(String filePath) {
         Path path = Paths.get(filePath);
         try {
             return Files.readAllLines(path).getFirst();
@@ -185,7 +217,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         String superTokenFileContents = null;
         Optional<String> superTokenFilePath = config.getOptional("superTokenFile");
         if (superTokenFilePath.isPresent()) {
-            superTokenFileContents = getTokenFileContents(superTokenFilePath.get());
+            superTokenFileContents = getSecretFileContents(superTokenFilePath.get());
         }
         Optional<String> maybeSuperToken = config.getOptional("superToken");
         // It's fine if this is null
@@ -231,6 +263,22 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
                     .setDescription(
                         "The 'destination' (ASTRA, ASTRA_DEV, ASTRA_TEST, HCD, DSE, CASSANDRA, OTHERS) of the target database"
                     )
+            )
+            .add(
+                Param.optional("astraEmbeddingApiKeyFile", String.class)
+                    .setDescription("file to load the Embedding API Key from, if needed")
+            )
+            .add(
+                Param.optional("astraEmbeddingApiKey", String.class)
+                    .setDescription("An Embedding API Key for all vectorize-related Data API calls, if needed")
+            )
+            .add(
+                Param.optional("astraRerankingApiKeyFile", String.class)
+                    .setDescription("file to load the Reranking API Key from, if needed")
+            )
+            .add(
+                Param.optional("astraRerankingApiKey", String.class)
+                    .setDescription("A Reranking API Key for reranking-related Data API calls, if needed")
             )
             .asReadOnly();
     }
