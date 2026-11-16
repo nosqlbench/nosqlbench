@@ -61,11 +61,20 @@ parameters results in the appropriate headers being sent with each Data API requ
 ./nb [...] \
     astraEmbeddingApiKey="my_e_api_key" \
     astraRerankingApiKey="my_r_api_key" \
-    ...
 ```
 
 As an alternative to the secrets in cleartext on the command line, parameters `astraEmbeddingApiKeyFile`
 and `astraRerankingApiKeyFile` can be supplied, whose value is the path to a text file whose first line holds the desired secret.
+
+### Data API request debug
+
+To have the Data API client log its requests, add the following command-line options:
+
+```
+./nb [...] \
+    dataApiLogRequests=true \
+    --log-level-override com.datastax.astra.client:DEBUG
+```
 
 ## Modern and legacy ops
 

@@ -46,6 +46,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private Optional<String> rerankingApiKey;
     private String astraApiEndpoint;
     private DataAPIDestination astraDestination;
+    private boolean dataApiLogRequests;
     private DataAPIClient dataAPIClient;
     private Database database;
     private String keyspace;
@@ -62,6 +63,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         setToken();
         setEmbeddingApiKey();
         setRerankingApiKey();
+        setDataApiLogRequests();
         setSuperToken();
         setApiEndpoint();
         setKeyspace();
@@ -89,6 +91,9 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
 
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
         clientOptions = clientOptions.destination(astraDestination);
+        if (this.dataApiLogRequests) {
+            clientOptions = clientOptions.logRequests();
+        }
         if (this.embeddingApiKey.isPresent()) {
             clientOptions = clientOptions.embeddingAPIKey(embeddingApiKey.get());
         }
@@ -202,6 +207,10 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         this.rerankingApiKey = (rakFileContents != null) ? Optional.of(rakFileContents) : config.getOptional("astraRerankingApiKey");
     }
 
+    private void setDataApiLogRequests() {
+        this.dataApiLogRequests = config.get("dataApiLogRequests", boolean.class);
+    }
+
     private String getSecretFileContents(String filePath) {
         Path path = Paths.get(filePath);
         try {
@@ -279,6 +288,9 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
             .add(
                 Param.optional("astraRerankingApiKey", String.class)
                     .setDescription("A Reranking API Key for reranking-related Data API calls, if needed")
+            )
+            .add(
+                Param.defaultTo("dataApiLogRequests", false, "Log Data API requests (debug HTTP channel)")
             )
             .asReadOnly();
     }
