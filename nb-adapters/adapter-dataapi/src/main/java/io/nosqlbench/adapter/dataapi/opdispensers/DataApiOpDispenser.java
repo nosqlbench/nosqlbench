@@ -53,6 +53,8 @@ import com.datastax.astra.client.tables.definition.indexes.TableVectorIndexDefin
 import com.datastax.astra.client.tables.definition.rows.Row;
 import com.datastax.astra.client.tables.definition.types.TableUserDefinedTypeDefinition;
 import com.datastax.astra.client.tables.definition.types.TableUserDefinedTypeFieldTypes;
+import com.dtsx.astra.sdk.db.domain.CloudProviderType;
+
 import io.nosqlbench.adapter.dataapi.DataApiSpace;
 import io.nosqlbench.nb.api.errors.OpConfigError;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
@@ -603,6 +605,19 @@ public abstract class DataApiOpDispenser extends BaseOpDispenser<DataApiBaseOp, 
             return Optional.of(reValue);
         }
         return Optional.empty();
+    }
+
+    protected CloudProviderType getCloudProviderFromOp(ParsedOp op, long l) {
+        ensureOpKeysPresent(op, new String[]{"cloud_provider"});
+        LongFunction<String> cpFunction = op.getAsRequiredFunction("cloud_provider", String.class);
+        String cpString = cpFunction.apply(l);
+        return CloudProviderType.valueOf(cpString.toUpperCase());
+    }
+
+    protected String getRegionFromOp(ParsedOp op, long l) {
+        ensureOpKeysPresent(op, new String[]{"region"});
+        LongFunction<String> rgFunction = op.getAsRequiredFunction("region", String.class);
+        return rgFunction.apply(l);
     }
 
     /* LEGACY OP DISPENSER UTILS START HERE */

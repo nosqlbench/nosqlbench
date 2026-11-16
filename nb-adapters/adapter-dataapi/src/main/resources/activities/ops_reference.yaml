@@ -549,32 +549,6 @@ blocks:
         table_list_index_names: "TEMPLATE(table)"
 
       ################################
-      # DB-ADMIN OPERATIONS
-      ################################
-
-      # "create keyspace":
-      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
-      cks:
-        dbadmin_create_keyspace: "new_keyspace"
-        #### optional replication settings (applies to non-Astra only, e.g. HCD. Ignored on Astra):
-        ####    can be either a scalar integer:
-        # replication: 2
-        ####    ... or a map, datacenter => repl.factor:
-        # replication:
-        #   datacenter1: 2
-        #   datacenter2: 3
-
-      # "list keyspaces":
-      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
-      lks:
-        dbadmin_list_keyspaces: ""
-
-      # "drop keyspace":
-      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
-      dks:
-        dbadmin_drop_keyspace: "my_keyspace"
-
-      ################################
       # IN-DATABASE OPERATIONS
       ################################
 
@@ -599,6 +573,14 @@ blocks:
               - aField2
           defaultId:
             type: objectId
+
+      # "findCollections" with explain=false (i.e. list collection names)
+      lcolln:
+        db_list_collection_names: ""
+
+      # "findCollections" with explain=true (i.e. list collection metadata)
+      lcolls:
+        db_list_collections: ""
 
       # "deleteCollection":
       delcoll:
@@ -709,4 +691,53 @@ blocks:
         db_drop_type: "address_type"
         #### optional: if_exists (uses client default if omitted):
         # if_exists: true
-  
+
+      ################################
+      # DB-ADMIN OPERATIONS
+      ################################
+
+      # "create keyspace":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      cks:
+        dbadmin_create_keyspace: "new_keyspace"
+        #### optional replication settings (applies to non-Astra only, e.g. HCD. Ignored on Astra):
+        ####    can be either a scalar integer:
+        # replication: 2
+        ####    ... or a map, datacenter => repl.factor:
+        # replication:
+        #   datacenter1: 2
+        #   datacenter2: 3
+
+      # "list keyspaces":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      lks:
+        dbadmin_list_keyspaces: ""
+
+      # "drop keyspace":
+      # Note: strictly speaking, only outside of Astra DB is this a Data API operation
+      dks:
+        dbadmin_drop_keyspace: "my_keyspace"
+
+      ################################
+      # ADMIN OPERATIONS
+      ################################
+
+      # Create a database (Astra-only; this is a DevOps API operation)
+      crdb:
+        admin_create_database: "name_of_the_new_db"
+        # required cloud ('GCP', 'AWS', 'AZURE')
+        cloud_provider: "GCP"
+        # required region (choice depends on the cloud provider)
+        region: "us-east1"
+
+      # List databases (Astra-only; this is a DevOps API operation)
+      ldbs:
+        admin_list_databases: ""
+
+      # Get info on a database by its UUID (Astra-only; this is a DevOps API operation)
+      dbinfo:
+        admin_get_database_info: "00000000-aaaa-1111-bbbb-222222222222"
+
+      # Drop a database (Astra-only; this is a DevOps API operation. USE WITH CAUTION)
+      drdb:
+        admin_drop_database: "name_od_UUID_of_the_DB_to_drop"

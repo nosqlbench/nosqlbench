@@ -1,5 +1,5 @@
 /*
- * Copyright (c) nosqlbench
+ * Copyright (c) 2020-2024 nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package io.nosqlbench.adapter.dataapi.opdispensers;
+package io.nosqlbench.adapter.dataapi.opdispensers.collections;
 
 import io.nosqlbench.adapter.dataapi.DataApiDriverAdapter;
 import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
-import io.nosqlbench.adapter.dataapi.ops.DataApiListDatabasesOp;
+import io.nosqlbench.adapter.dataapi.ops.collections.DataApiDbListCollectionNamesOp;
 import io.nosqlbench.adapters.api.templating.ParsedOp;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.function.LongFunction;
+import io.nosqlbench.adapter.dataapi.opdispensers.DataApiOpDispenser;
 
-public class DataApiListDatabasesOpDispenser extends DataApiOpDispenser {
-    private static final Logger logger = LogManager.getLogger(DataApiListDatabasesOpDispenser.class);
-    private final LongFunction<DataApiListDatabasesOp> opFunction;
-    public DataApiListDatabasesOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
+public class DataApiDbListCollectionNamesOpDispenser extends DataApiOpDispenser {
+    private final LongFunction<DataApiDbListCollectionNamesOp> opFunction;
+    public DataApiDbListCollectionNamesOpDispenser(DataApiDriverAdapter adapter, ParsedOp op, LongFunction<String> targetFunction) {
         super(adapter, op, targetFunction);
         this.opFunction = createOpFunction(op);
     }
 
-    private LongFunction<DataApiListDatabasesOp> createOpFunction(ParsedOp op) {
-        return (l) -> new DataApiListDatabasesOp(
-            spaceFunction.apply(l).getDatabase(),
-            spaceFunction.apply(l).getAdmin()
-        );
+    private LongFunction<DataApiDbListCollectionNamesOp> createOpFunction(ParsedOp op) {
+        return l -> {
+            return new DataApiDbListCollectionNamesOp(spaceFunction.apply(l).getDatabase());
+        };
     }
 
     @Override

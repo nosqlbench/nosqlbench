@@ -18,16 +18,20 @@ package io.nosqlbench.adapter.dataapi.ops;
 
 import com.datastax.astra.client.databases.Database;
 import com.datastax.astra.client.admin.AstraDBAdmin;
-import com.dtsx.astra.sdk.db.domain.CloudProviderType;
 
-public class DataApiListDatabasesOp extends DataApiAdminOp {
+import java.util.UUID;
+import java.util.regex.Pattern;
 
-    public DataApiListDatabasesOp(Database db, AstraDBAdmin admin) {
+public class DataApiAdminGetDatabaseInfoOp extends DataApiAdminOp {
+    private final UUID uuid;
+
+    public DataApiAdminGetDatabaseInfoOp(Database db, AstraDBAdmin admin, UUID uuid) {
         super(db, admin);
+        this.uuid = uuid;
     }
 
     @Override
     public Object apply(long value) {
-        return admin.listDatabases();
+        return admin.getDatabaseInfo(uuid);
     }
 }

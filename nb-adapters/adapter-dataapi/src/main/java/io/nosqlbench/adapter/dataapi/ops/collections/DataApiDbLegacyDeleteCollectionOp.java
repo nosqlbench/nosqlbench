@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2024 nosqlbench
+ * Copyright (c) nosqlbench
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,16 @@ import io.nosqlbench.adapter.dataapi.ops.DataApiBaseOp;
 
 import com.datastax.astra.client.databases.Database;
 
-public class DataApiListCollectionsOp extends DataApiBaseOp {
-
-    public DataApiListCollectionsOp(Database db) {
+public class DataApiDbLegacyDeleteCollectionOp extends DataApiBaseOp {
+    private final String collectionName;
+    public DataApiDbLegacyDeleteCollectionOp(Database db, String collectionName) {
         super(db);
+        this.collectionName = collectionName;
     }
 
     @Override
     public Object apply(long value) {
-        return db.listCollections();
+        db.dropCollection(collectionName);
+        return null;
     }
 }
