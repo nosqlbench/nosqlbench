@@ -182,15 +182,35 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private void setToken() {
         String tokenFileContents = null;
         Optional<String> tokenFilePath = config.getOptional("astraTokenFile");
+        if (tokenFilePath.isPresent() && config.getOptional("astraToken").isPresent()) {
+            throw new BasicError("You can only configure one of astraToken or astraTokenFile");
+        }
         if (tokenFilePath.isPresent()) {
             tokenFileContents = getSecretFileContents(tokenFilePath.get());
         }
         this.astraToken = (tokenFileContents != null) ? tokenFileContents : config.get("astraToken");
     }
 
+    private void setSuperToken() {
+        String superTokenFileContents = null;
+        Optional<String> superTokenFilePath = config.getOptional("superTokenFile");
+        Optional<String> maybeSuperToken = config.getOptional("superToken");
+        if (superTokenFilePath.isPresent() && maybeSuperToken.isPresent()) {
+            throw new BasicError("You can only configure one of superToken or superTokenFile");
+        }
+        if (superTokenFilePath.isPresent()) {
+            superTokenFileContents = getSecretFileContents(superTokenFilePath.get());
+        }
+        // It's fine if this is null
+        this.superUserToken = (superTokenFileContents != null) ? superTokenFileContents : maybeSuperToken.orElse(null);
+    }
+
     private void setEmbeddingApiKey() {
         String eakFileContents = null;
         Optional<String> eakFilePath = config.getOptional("astraEmbeddingApiKeyFile");
+        if (eakFilePath.isPresent() && config.getOptional("astraEmbeddingApiKey").isPresent()) {
+            throw new BasicError("You can only configure one of astraEmbeddingApiKey or astraEmbeddingApiKeyFile");
+        }
         if (eakFilePath.isPresent()) {
             eakFileContents = getSecretFileContents(eakFilePath.get());
         }
@@ -201,6 +221,9 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private void setRerankingApiKey() {
         String rakFileContents = null;
         Optional<String> rakFilePath = config.getOptional("astraRerankingApiKeyFile");
+        if (rakFilePath.isPresent() && config.getOptional("astraRerankingApiKey").isPresent()) {
+            throw new BasicError("You can only configure one of astraRerankingApiKey or astraRerankingApiKeyFile");
+        }
         if (rakFilePath.isPresent()) {
             rakFileContents = getSecretFileContents(rakFilePath.get());
         }
@@ -222,34 +245,31 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         }
     }
 
-    private void setSuperToken() {
-        String superTokenFileContents = null;
-        Optional<String> superTokenFilePath = config.getOptional("superTokenFile");
-        if (superTokenFilePath.isPresent()) {
-            superTokenFileContents = getSecretFileContents(superTokenFilePath.get());
-        }
-        Optional<String> maybeSuperToken = config.getOptional("superToken");
-        // It's fine if this is null
-        this.superUserToken = maybeSuperToken.orElse(superTokenFileContents);
-    }
-
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(DataApiSpace.class)
             .add(
-                Param.optional("astraTokenFile", String.class)
-                    .setDescription("file to load the Astra token from")
-            )
-            .add(
-                Param.optional("astraToken", String.class)
-                    .setDescription("the Astra token used to connect to the database")
-            )
-            .add(
                 Param.optional("astraApiEndpoint", String.class)
-                    .setDescription("the API endpoint for the Astra database")
+                    .setDescription("The API endpoint for the Astra database")
             )
             .add(
                 Param.optional("astraApiEndpointFile", String.class)
-                    .setDescription("file to load the API endpoint for the Astra database")
+                    .setDescription("File to load the API endpoint for the Astra database")
+            )
+            .add(
+                Param.optional("astraToken", String.class)
+                    .setDescription("The Astra token used to connect to the database")
+            )
+            .add(
+                Param.optional("astraTokenFile", String.class)
+                    .setDescription("File to load the Astra token from")
+            )
+            .add(
+                Param.optional("superToken", String.class)
+                .setDescription("Optional Astra token used to connect as Admin user")
+            )
+            .add(
+                Param.optional("superTokenFile", String.class)
+                    .setDescription("Optional file to load Astra admin user token from")
             )
             .add(
                 Param.optional("keyspace", String.class)
@@ -260,34 +280,26 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
                     .setDescription("The Astra keyspace to use (deprecated alias for 'keyspace')")
             )
             .add(
-                Param.optional("superTokenFile", String.class)
-                    .setDescription("optional file to load Astra admin user token from")
-            )
-            .add(
-                Param.optional("superToken", String.class)
-                    .setDescription("optional Astra token used to connect as Admin user")
-            )
-            .add(
                 Param.optional("astraDestination", String.class)
                     .setDescription(
                         "The 'destination' (ASTRA, ASTRA_DEV, ASTRA_TEST, HCD, DSE, CASSANDRA, OTHERS) of the target database"
                     )
             )
             .add(
-                Param.optional("astraEmbeddingApiKeyFile", String.class)
-                    .setDescription("file to load the Embedding API Key from, if needed")
-            )
-            .add(
                 Param.optional("astraEmbeddingApiKey", String.class)
                     .setDescription("An Embedding API Key for all vectorize-related Data API calls, if needed")
             )
             .add(
-                Param.optional("astraRerankingApiKeyFile", String.class)
-                    .setDescription("file to load the Reranking API Key from, if needed")
+                Param.optional("astraEmbeddingApiKeyFile", String.class)
+                    .setDescription("File to load the Embedding API Key from, if provided")
             )
             .add(
                 Param.optional("astraRerankingApiKey", String.class)
                     .setDescription("A Reranking API Key for reranking-related Data API calls, if needed")
+            )
+            .add(
+                Param.optional("astraRerankingApiKeyFile", String.class)
+                    .setDescription("File to load the Reranking API Key from, if provided")
             )
             .add(
                 Param.defaultTo("dataApiLogRequests", false, "Log Data API requests (debug HTTP channel)")

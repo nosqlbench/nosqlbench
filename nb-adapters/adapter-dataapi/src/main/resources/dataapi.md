@@ -60,7 +60,7 @@ parameters results in the appropriate headers being sent with each Data API requ
 ```
 ./nb [...] \
     astraEmbeddingApiKey="my_e_api_key" \
-    astraRerankingApiKey="my_r_api_key" \
+    astraRerankingApiKey="my_r_api_key"
 ```
 
 As an alternative to the secrets in cleartext on the command line, parameters `astraEmbeddingApiKeyFile`
