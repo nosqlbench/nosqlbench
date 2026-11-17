@@ -42,8 +42,11 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private final static Logger logger = LogManager.getLogger(DataApiSpace.class);
     private final NBConfiguration config;
     private String astraToken;
+    private Optional<String> embeddingApiKey;
+    private Optional<String> rerankingApiKey;
     private String astraApiEndpoint;
     private DataAPIDestination astraDestination;
+    private boolean logDataApiRequests;
     private DataAPIClient dataAPIClient;
     private Database database;
     private String keyspace;
@@ -58,6 +61,9 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         super(adapter,name);
         this.config = cfg;
         setToken();
+        setEmbeddingApiKey();
+        setRerankingApiKey();
+        setLogDataApiRequests();
         setSuperToken();
         setApiEndpoint();
         setKeyspace();
@@ -85,6 +91,18 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
 
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
         clientOptions = clientOptions.destination(astraDestination);
+        if (this.logDataApiRequests) {
+            clientOptions = clientOptions.logRequests();
+        }
+        if (this.embeddingApiKey.isPresent()) {
+            clientOptions = clientOptions.embeddingAPIKey(embeddingApiKey.get());
+        }
+        if (this.rerankingApiKey.isPresent()) {
+            // Note: this client method is called just 'rerankAPIKey'
+            //          will have effect only after a new build with a client where this
+            //          (or equivalent) is merged: https://github.com/datastax/astra-db-java/pull/119
+            clientOptions = clientOptions.rerankAPIKey(rerankingApiKey.get());
+        }
 
         this.dataAPIClient = new DataAPIClient(astraToken, clientOptions);
         if (keyspace != null) {
@@ -111,7 +129,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         Optional<String> epConfig = config.getOptional("astraApiEndpoint");
         Optional<String> epFileConfig = config.getOptional("astraApiEndpointFile");
         if (epConfig.isPresent() && epFileConfig.isPresent()) {
-            throw new BasicError("You can only configure one of astraApiEndpoint or astraApiEndpointFile");
+            logger.warn(() -> "Both parameters 'astraApiEndpoint' and 'astraApiEndpointFile' provided: the latter will take precedence");
         }
         if (epConfig.isEmpty() && epFileConfig.isEmpty()) {
             throw new BasicError("You must configure one of astraApiEndpoint or astraApiEndpointFile");
@@ -164,13 +182,59 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private void setToken() {
         String tokenFileContents = null;
         Optional<String> tokenFilePath = config.getOptional("astraTokenFile");
+        if (tokenFilePath.isPresent() && config.getOptional("astraToken").isPresent()) {
+            logger.warn(() -> "Both parameters 'astraToken' and 'astraTokenFile' provided: the latter will take precedence");
+        }
         if (tokenFilePath.isPresent()) {
-            tokenFileContents = getTokenFileContents(tokenFilePath.get());
+            tokenFileContents = getSecretFileContents(tokenFilePath.get());
         }
         this.astraToken = (tokenFileContents != null) ? tokenFileContents : config.get("astraToken");
     }
 
-    private String getTokenFileContents(String filePath) {
+    private void setSuperToken() {
+        String superTokenFileContents = null;
+        Optional<String> superTokenFilePath = config.getOptional("superTokenFile");
+        Optional<String> maybeSuperToken = config.getOptional("superToken");
+        if (superTokenFilePath.isPresent() && maybeSuperToken.isPresent()) {
+            logger.warn(() -> "Both parameters 'superToken' and 'superTokenFile' provided: the latter will take precedence");
+        }
+        if (superTokenFilePath.isPresent()) {
+            superTokenFileContents = getSecretFileContents(superTokenFilePath.get());
+        }
+        // It's fine if this is null
+        this.superUserToken = (superTokenFileContents != null) ? superTokenFileContents : maybeSuperToken.orElse(null);
+    }
+
+    private void setEmbeddingApiKey() {
+        String eakFileContents = null;
+        Optional<String> eakFilePath = config.getOptional("astraEmbeddingApiKeyFile");
+        if (eakFilePath.isPresent() && config.getOptional("astraEmbeddingApiKey").isPresent()) {
+            logger.warn(() -> "Both parameters 'astraEmbeddingApiKey' and 'astraEmbeddingApiKeyFile' provided: the latter will take precedence");
+        }
+        if (eakFilePath.isPresent()) {
+            eakFileContents = getSecretFileContents(eakFilePath.get());
+        }
+        this.embeddingApiKey = (eakFileContents != null) ? Optional.of(eakFileContents) : config.getOptional("astraEmbeddingApiKey");
+
+    }
+
+    private void setRerankingApiKey() {
+        String rakFileContents = null;
+        Optional<String> rakFilePath = config.getOptional("astraRerankingApiKeyFile");
+        if (rakFilePath.isPresent() && config.getOptional("astraRerankingApiKey").isPresent()) {
+            logger.warn(() -> "Both parameters 'astraRerankingApiKey' and 'astraRerankingApiKeyFile' provided: the latter will take precedence");
+        }
+        if (rakFilePath.isPresent()) {
+            rakFileContents = getSecretFileContents(rakFilePath.get());
+        }
+        this.rerankingApiKey = (rakFileContents != null) ? Optional.of(rakFileContents) : config.getOptional("astraRerankingApiKey");
+    }
+
+    private void setLogDataApiRequests() {
+        this.logDataApiRequests = config.get("logDataApiRequests", boolean.class);
+    }
+
+    private String getSecretFileContents(String filePath) {
         Path path = Paths.get(filePath);
         try {
             return Files.readAllLines(path).getFirst();
@@ -181,34 +245,31 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         }
     }
 
-    private void setSuperToken() {
-        String superTokenFileContents = null;
-        Optional<String> superTokenFilePath = config.getOptional("superTokenFile");
-        if (superTokenFilePath.isPresent()) {
-            superTokenFileContents = getTokenFileContents(superTokenFilePath.get());
-        }
-        Optional<String> maybeSuperToken = config.getOptional("superToken");
-        // It's fine if this is null
-        this.superUserToken = maybeSuperToken.orElse(superTokenFileContents);
-    }
-
     public static NBConfigModel getConfigModel() {
         return ConfigModel.of(DataApiSpace.class)
             .add(
-                Param.optional("astraTokenFile", String.class)
-                    .setDescription("file to load the Astra token from")
-            )
-            .add(
-                Param.optional("astraToken", String.class)
-                    .setDescription("the Astra token used to connect to the database")
-            )
-            .add(
                 Param.optional("astraApiEndpoint", String.class)
-                    .setDescription("the API endpoint for the Astra database")
+                    .setDescription("The API endpoint for the Astra database")
             )
             .add(
                 Param.optional("astraApiEndpointFile", String.class)
-                    .setDescription("file to load the API endpoint for the Astra database")
+                    .setDescription("File to load the API endpoint for the Astra database (takes precedence over 'astraApiEndpoint' if supplied)")
+            )
+            .add(
+                Param.optional("astraToken", String.class)
+                    .setDescription("The Astra token used to connect to the database")
+            )
+            .add(
+                Param.optional("astraTokenFile", String.class)
+                    .setDescription("File to load the Astra token from (takes precedence over 'astraToken' if supplied)")
+            )
+            .add(
+                Param.optional("superToken", String.class)
+                .setDescription("Optional Astra token used to connect as Admin user")
+            )
+            .add(
+                Param.optional("superTokenFile", String.class)
+                    .setDescription("Optional file to load Astra admin user token from (takes precedence over 'superToken' if supplied)")
             )
             .add(
                 Param.optional("keyspace", String.class)
@@ -219,18 +280,29 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
                     .setDescription("The Astra keyspace to use (deprecated alias for 'keyspace')")
             )
             .add(
-                Param.optional("superTokenFile", String.class)
-                    .setDescription("optional file to load Astra admin user token from")
-            )
-            .add(
-                Param.optional("superToken", String.class)
-                    .setDescription("optional Astra token used to connect as Admin user")
-            )
-            .add(
                 Param.optional("astraDestination", String.class)
                     .setDescription(
                         "The 'destination' (ASTRA, ASTRA_DEV, ASTRA_TEST, HCD, DSE, CASSANDRA, OTHERS) of the target database"
                     )
+            )
+            .add(
+                Param.optional("astraEmbeddingApiKey", String.class)
+                    .setDescription("An Embedding API Key for all vectorize-related Data API calls, if needed")
+            )
+            .add(
+                Param.optional("astraEmbeddingApiKeyFile", String.class)
+                    .setDescription("File to load the Embedding API Key from, if provided (takes precedence over 'astraEmbeddingApiKey' if supplied)")
+            )
+            .add(
+                Param.optional("astraRerankingApiKey", String.class)
+                    .setDescription("A Reranking API Key for reranking-related Data API calls, if needed")
+            )
+            .add(
+                Param.optional("astraRerankingApiKeyFile", String.class)
+                    .setDescription("File to load the Reranking API Key from, if provided (takes precedence over 'astraRerankingApiKey' if supplied)")
+            )
+            .add(
+                Param.defaultTo("logDataApiRequests", false, "Log Data API requests (debug HTTP channel)")
             )
             .asReadOnly();
     }

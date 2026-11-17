@@ -101,13 +101,6 @@ public class DataApiCollectionFindAndRerankOpDispenser extends DataApiOpDispense
         if (rerankService.isPresent()) {
             options = options.rerankService(rerankService.get());
         }
-        // TEMP
-        RerankServiceOptions rop = new RerankServiceOptions();
-        rop.provider("providerZ");
-        rop.modelName("modelNameZ");
-        options = options.rerankService(rop);
-        // END TEMP
-
         return options;
     }
 
