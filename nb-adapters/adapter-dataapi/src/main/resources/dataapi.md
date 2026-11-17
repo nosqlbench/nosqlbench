@@ -72,7 +72,7 @@ To have the Data API client log its requests, add the following command-line opt
 
 ```
 ./nb [...] \
-    dataApiLogRequests=true \
+    logDataApiRequests=true \
     --log-level-override com.datastax.astra.client:DEBUG
 ```
 

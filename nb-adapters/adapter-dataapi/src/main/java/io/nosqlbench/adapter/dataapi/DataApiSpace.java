@@ -46,7 +46,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
     private Optional<String> rerankingApiKey;
     private String astraApiEndpoint;
     private DataAPIDestination astraDestination;
-    private boolean dataApiLogRequests;
+    private boolean logDataApiRequests;
     private DataAPIClient dataAPIClient;
     private Database database;
     private String keyspace;
@@ -63,7 +63,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         setToken();
         setEmbeddingApiKey();
         setRerankingApiKey();
-        setDataApiLogRequests();
+        setLogDataApiRequests();
         setSuperToken();
         setApiEndpoint();
         setKeyspace();
@@ -91,7 +91,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
 
         DataAPIClientOptions clientOptions = new DataAPIClientOptions();
         clientOptions = clientOptions.destination(astraDestination);
-        if (this.dataApiLogRequests) {
+        if (this.logDataApiRequests) {
             clientOptions = clientOptions.logRequests();
         }
         if (this.embeddingApiKey.isPresent()) {
@@ -230,8 +230,8 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
         this.rerankingApiKey = (rakFileContents != null) ? Optional.of(rakFileContents) : config.getOptional("astraRerankingApiKey");
     }
 
-    private void setDataApiLogRequests() {
-        this.dataApiLogRequests = config.get("dataApiLogRequests", boolean.class);
+    private void setLogDataApiRequests() {
+        this.logDataApiRequests = config.get("logDataApiRequests", boolean.class);
     }
 
     private String getSecretFileContents(String filePath) {
@@ -302,7 +302,7 @@ public class DataApiSpace extends BaseSpace<DataApiSpace> {
                     .setDescription("File to load the Reranking API Key from, if provided")
             )
             .add(
-                Param.defaultTo("dataApiLogRequests", false, "Log Data API requests (debug HTTP channel)")
+                Param.defaultTo("logDataApiRequests", false, "Log Data API requests (debug HTTP channel)")
             )
             .asReadOnly();
     }
